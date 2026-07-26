@@ -15,7 +15,7 @@ export async function addIncome(formData: {
 }) {
   const parsed = incomeSchema.safeParse(formData);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    return { error: parsed.error.issues[0].message };
   }
 
   const supabase = await createClient();
@@ -43,7 +43,7 @@ export async function editIncome(id: string, formData: {
 }) {
   const parsed = incomeSchema.safeParse(formData);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    return { error: parsed.error.issues[0].message };
   }
 
   const supabase = await createClient();

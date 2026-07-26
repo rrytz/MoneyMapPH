@@ -115,7 +115,7 @@ export function ExpensesPageClient({
             className="pl-9"
           />
         </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+        <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val || "all")}>
           <SelectTrigger className="w-full sm:w-[200px]">
             <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
             <SelectValue placeholder="All Categories" />

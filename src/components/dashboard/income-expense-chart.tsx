@@ -34,7 +34,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
                 borderColor: "hsl(var(--border))",
                 borderRadius: "8px",
               }}
-              formatter={(value: number) => formatCurrency(value)}
+              formatter={(value: any) => formatCurrency(Number(value) || 0)}
             />
             <Legend />
             <Bar dataKey="income" name="Income" fill="oklch(0.627 0.194 163.223)" radius={[4, 4, 0, 0]} />

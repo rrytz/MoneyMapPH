@@ -64,7 +64,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
                 borderColor: "hsl(var(--border))",
                 borderRadius: "8px",
               }}
-              formatter={(value: number) => formatCurrency(value)}
+              formatter={(value: any) => formatCurrency(Number(value) || 0)}
             />
           </PieChart>
         </ResponsiveContainer>

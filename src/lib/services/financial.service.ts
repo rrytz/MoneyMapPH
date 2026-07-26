@@ -105,10 +105,10 @@ export async function getBudgetStatuses(
     spendingByCategory[e.category_id] = (spendingByCategory[e.category_id] || 0) + Number(e.amount);
   });
 
-  return (budget.budget_categories as Array<{
+  return (budget.budget_categories as unknown as Array<{
     category_id: string;
     amount: number;
-    category: { id: string; name: string; icon: string | null; color: string | null };
+    category: { id: string; name: string; icon: string | null; color: string | null } | null;
   }>).map((bc) => {
     const spent = spendingByCategory[bc.category_id] || 0;
     const budgeted = Number(bc.amount);

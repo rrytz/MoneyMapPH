@@ -46,10 +46,8 @@ export function Topbar({ profile }: TopbarProps) {
 
       <div className="flex items-center gap-2">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <ThemeIcon className="h-4 w-4" />
-            </Button>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9 cursor-pointer">
+            <ThemeIcon className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setTheme("light")}>
@@ -65,15 +63,13 @@ export function Topbar({ profile }: TopbarProps) {
         </DropdownMenu>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-9 w-9 rounded-full p-0">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={profile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-full h-9 w-9 p-0 hover:bg-accent cursor-pointer">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <div className="px-2 py-1.5">

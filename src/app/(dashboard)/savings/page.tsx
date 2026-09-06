@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getSavingsGoals } from "@/lib/services/goal.service";
 import { getExpenseCategories } from "@/lib/services/category.service";
 import { calculateEmergencyFundStatus } from "@/lib/services/forecast.service";
@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function SavingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) {
     redirect("/login");
   }

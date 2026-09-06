@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getMonthlySummary } from "@/lib/services/financial.service";
 import { getSnapshots } from "@/lib/services/snapshot.service";
 import { getExpenseCategories } from "@/lib/services/category.service";
@@ -19,7 +19,7 @@ import { formatCompactAmount } from "@/lib/utils/currency";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return null;
 
   const { month, year } = getCurrentMonthYear();

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getUnifiedTransactions } from "@/lib/services/transaction.service";
 import { getExpenseCategories, getIncomeSources } from "@/lib/services/category.service";
 import { getMonthlySummary, getBudgetStatuses } from "@/lib/services/financial.service";
@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 
 export default async function TransactionsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/login");

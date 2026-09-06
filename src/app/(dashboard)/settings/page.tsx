@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/services/profile.service";
 import { getExpenseCategories, getIncomeSources } from "@/lib/services/category.service";
 import { SettingsClient } from "./settings-client";
@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/login");

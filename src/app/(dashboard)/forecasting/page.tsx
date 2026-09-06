@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { generateSavingsForecast } from "@/lib/services/forecast.service";
 import { getSavingsGoals } from "@/lib/services/goal.service";
 import { ForecastingClient } from "./forecasting-client";
@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function ForecastingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) {
     redirect("/login");
   }

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getExpenses } from "@/lib/services/expense.service";
 import { getExpenseCategories } from "@/lib/services/category.service";
 import { getCurrentMonthYear } from "@/lib/utils/date";
@@ -6,7 +6,7 @@ import { ExpensesPageClient } from "./expenses-page-client";
 
 export default async function ExpensesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return null;
 
   const { month, year } = getCurrentMonthYear();

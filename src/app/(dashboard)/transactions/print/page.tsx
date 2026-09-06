@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getUnifiedTransactions } from "@/lib/services/transaction.service";
 import { redirect } from "next/navigation";
 import { TriggerPrint } from "./trigger-print";
@@ -16,7 +16,7 @@ export default async function PrintTransactionsPage(props: {
 }) {
   const searchParams = await props.searchParams;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) {
     redirect("/login");

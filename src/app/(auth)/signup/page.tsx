@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { Logo } from "@/components/shared/logo";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -55,9 +54,9 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle>Check your email</CardTitle>
+      <Card className="w-full shadow-sm">
+        <CardHeader className="text-center space-y-2 pt-8 pb-2">
+          <CardTitle className="text-2xl font-bold tracking-tight">Check your email</CardTitle>
           <CardDescription>
             We sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
           </CardDescription>
@@ -72,12 +71,10 @@ export default function SignupPage() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="text-center space-y-3">
-        <div className="flex justify-center pb-1">
-          <Logo size="lg" showTagline />
-        </div>
-        <CardDescription>Start managing your finances effortlessly</CardDescription>
+    <Card className="w-full shadow-sm">
+      <CardHeader className="text-center space-y-2 pt-8 pb-2">
+        <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
+        <CardDescription>Start mapping your money in minutes — it&apos;s free</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSignup} className="space-y-4">
@@ -123,7 +120,7 @@ value={email}
               minLength={6}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full h-10 text-sm" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create account
           </Button>
@@ -135,19 +132,6 @@ value={email}
           <Link href="/login" className="text-primary hover:underline font-medium">
             Sign in
           </Link>
-        </p>
-      </CardFooter>
-      <CardFooter className="justify-center">
-        <p className="text-xs text-muted-foreground">
-          By continuing you agree to our{" "}
-          <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
-            Terms
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
-            Privacy Policy
-          </Link>
-          .
         </p>
       </CardFooter>
     </Card>

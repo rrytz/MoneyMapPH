@@ -6,6 +6,7 @@ interface LogoProps {
   iconOnly?: boolean;
   size?: "sm" | "md" | "lg" | "xl";
   showTagline?: boolean;
+  tone?: "default" | "light";
 }
 
 export function LogoIcon({ className = "h-8 w-8" }: { className?: string }) {
@@ -86,6 +87,7 @@ export function Logo({
   iconOnly = false,
   size = "md",
   showTagline = false,
+  tone = "default",
 }: LogoProps) {
   const iconSizeMap = {
     sm: "h-6 w-6",
@@ -101,6 +103,19 @@ export function Logo({
     xl: "text-4xl",
   };
 
+  const wordmarkBase =
+    tone === "light"
+      ? "text-emerald-50"
+      : "text-foreground";
+  const accentBase =
+    tone === "light"
+      ? "text-emerald-300"
+      : "text-emerald-500 dark:text-emerald-400";
+  const taglineBase =
+    tone === "light"
+      ? "text-emerald-100/70"
+      : "text-muted-foreground";
+
   return (
     <div className={cn("inline-flex items-center gap-2.5 select-none", className)}>
       <LogoIcon className={iconSizeMap[size]} />
@@ -108,15 +123,15 @@ export function Logo({
       {!iconOnly && (
         <div className="flex flex-col">
           <div className={cn("font-extrabold tracking-tight flex items-baseline leading-none", titleSizeMap[size])}>
-            <span className="text-foreground">Money</span>
-            <span className="text-emerald-500 dark:text-emerald-400">Map</span>
-            <span className="ml-0.5 text-[0.55em] font-extrabold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest align-super">
+            <span className={wordmarkBase}>Money</span>
+            <span className={accentBase}>Map</span>
+            <span className={cn("ml-0.5 text-[0.55em] font-extrabold uppercase tracking-widest align-super", accentBase)}>
               PH
             </span>
           </div>
 
           {showTagline && (
-            <span className="text-[9px] font-bold text-muted-foreground tracking-widest uppercase mt-1">
+            <span className={cn("text-[9px] font-bold tracking-widest uppercase mt-1", taglineBase)}>
               Plan • Track • Grow
             </span>
           )}

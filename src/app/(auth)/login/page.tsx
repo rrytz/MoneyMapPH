@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import { Logo } from "@/components/shared/logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -56,12 +55,10 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="text-center space-y-3">
-        <div className="flex justify-center pb-1">
-          <Logo size="lg" showTagline />
-        </div>
-        <CardDescription>Sign in to manage your finances</CardDescription>
+    <Card className="w-full shadow-sm">
+      <CardHeader className="text-center space-y-2 pt-8 pb-2">
+        <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+        <CardDescription>Sign in to see where your money stands today</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleEmailLogin} className="space-y-4">
@@ -75,7 +72,7 @@ export default function LoginPage() {
             <Input
               id="email"
               type="email"
-value={email}
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
@@ -94,7 +91,7 @@ value={email}
               minLength={6}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full h-10 text-sm" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Sign in
           </Button>
@@ -109,7 +106,7 @@ value={email}
 
         <Button
           variant="outline"
-          className="w-full"
+          className="w-full h-10 text-sm"
           onClick={handleGoogleLogin}
           disabled={googleLoading}
         >
@@ -144,19 +141,6 @@ value={email}
           <Link href="/signup" className="text-primary hover:underline font-medium">
             Sign up
           </Link>
-        </p>
-      </CardFooter>
-      <CardFooter className="justify-center">
-        <p className="text-xs text-muted-foreground">
-          By continuing you agree to our{" "}
-          <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
-            Terms
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
-            Privacy Policy
-          </Link>
-          .
         </p>
       </CardFooter>
     </Card>

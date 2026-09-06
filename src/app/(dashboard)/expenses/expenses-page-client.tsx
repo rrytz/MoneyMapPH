@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, TrendingDown, Search, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingDown, Search, Filter, PieChart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
@@ -68,55 +68,86 @@ export function ExpensesPageClient({
     return matchesSearch && matchesCategory;
   });
 
+  // Calculate largest category
+  const categoryTotals: Record<string, { name: string; amount: number }> = {};
+  initialEntries.forEach((e) => {
+    const cName = e.category?.name || "Uncategorized";
+    if (!categoryTotals[cName]) categoryTotals[cName] = { name: cName, amount: 0 };
+    categoryTotals[cName].amount += Number(e.amount);
+  });
+  const sortedCategories = Object.values(categoryTotals).sort((a, b) => b.amount - a.amount);
+  const topCategory = sortedCategories[0] || { name: "None", amount: 0 };
+
   return (
-    <>
-      <PageHeader title="Expenses" description="Track your spending and category details">
-        <Button onClick={handleAdd}>
-          <Plus className="mr-2 h-4 w-4" /> Add Expense
+    <div className="space-y-6">
+      <PageHeader title="Spending Intelligence" description="Monitor expenses, category allocations, and daily outflow">
+        <Button onClick={handleAdd} className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
+          <Plus className="mr-1.5 h-4 w-4" /> Add Expense
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Expenses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CurrencyDisplay amount={totalThisMonth} className="text-2xl font-bold text-danger" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold tabular-nums">{initialCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Categories Active</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold tabular-nums">
-              {new Set(initialEntries.map((e) => e.category_id)).size}
-            </p>
-          </CardContent>
-        </Card>
+      {/* Top KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <FintechCard>
+          <FintechCardContent className="p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="p-2.5 rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
+                <TrendingDown className="h-5 w-5" />
+              </div>
+              <Badge variant="expense">Total Outflow</Badge>
+            </div>
+            <div>
+              <span className="text-xs font-medium text-muted-foreground block">Monthly Spend</span>
+              <CurrencyDisplay amount={totalThisMonth} className="text-3xl sm:text-4xl font-bold tracking-tight text-rose-600 dark:text-rose-400" />
+            </div>
+          </FintechCardContent>
+        </FintechCard>
+
+        <FintechCard>
+          <FintechCardContent className="p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="p-2.5 rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                <PieChart className="h-5 w-5" />
+              </div>
+              <span className="text-[11px] font-semibold text-slate-500">Highest Spend</span>
+            </div>
+            <div>
+              <span className="text-xs font-medium text-muted-foreground block">Top Category</span>
+              <p className="text-xl font-bold tracking-tight text-foreground truncate">{topCategory.name}</p>
+              <p className="text-xs text-muted-foreground tabular-nums">₱{topCategory.amount.toLocaleString()}</p>
+            </div>
+          </FintechCardContent>
+        </FintechCard>
+
+        <FintechCard>
+          <FintechCardContent className="p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <span className="text-[11px] font-semibold text-slate-500">Logged Items</span>
+            </div>
+            <div>
+              <span className="text-xs font-medium text-muted-foreground block">Total Expenses</span>
+              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{initialCount}</p>
+            </div>
+          </FintechCardContent>
+        </FintechCard>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      {/* Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search expenses..."
+            placeholder="Search expense titles..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9.5 h-10 rounded-xl bg-card border-border text-xs"
           />
         </div>
         <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val || "all")}>
-          <SelectTrigger className="w-full sm:w-[200px]">
+          <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-xl bg-card border-border text-xs">
             <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
@@ -131,51 +162,54 @@ export function ExpensesPageClient({
         </Select>
       </div>
 
+      {/* Expense List Section */}
       {filteredEntries.length === 0 ? (
         <EmptyState
-          icon={TrendingDown}
+          icon={<TrendingDown className="h-6 w-6" />}
           title="No expenses found"
-          description={search || selectedCategory !== "all" ? "Try adjusting your search or category filter." : "Start tracking your expenses by adding your first item."}
+          description={search || selectedCategory !== "all" ? "Try adjusting your search query or category filter." : "Start tracking your spending by adding your first expense."}
           actionLabel={search || selectedCategory !== "all" ? undefined : "Add Expense"}
           onAction={handleAdd}
         />
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="divide-y divide-border">
-              {filteredEntries.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{entry.title}</span>
-                      <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                        {entry.category?.icon && <span>{entry.category.icon}</span>}
-                        {entry.category?.name || "Uncategorized"}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(entry.date, "MMM d")}
-                      </span>
-                    </div>
-                    {entry.notes && (
-                      <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
-                    )}
+        <FintechCard className="p-0 overflow-hidden">
+          <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+            <h3 className="font-semibold text-base text-foreground">Expense Log</h3>
+            <span className="text-xs text-muted-foreground">{filteredEntries.length} items</span>
+          </div>
+          <div className="divide-y divide-border">
+            {filteredEntries.map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                <div className="flex-1 min-w-0 pr-4">
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <span className="font-semibold text-sm text-foreground">{entry.title}</span>
+                    <Badge variant="expense" className="text-[10px] flex items-center gap-1">
+                      {entry.category?.icon && <span>{entry.category.icon}</span>}
+                      {entry.category?.name || "Uncategorized"}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(entry.date, "MMM d, yyyy")}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <CurrencyDisplay amount={Number(entry.amount)} className="text-sm font-semibold text-danger" />
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(entry)}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(entry.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                  {entry.notes && (
+                    <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <CurrencyDisplay amount={Number(entry.amount)} className="text-sm font-bold text-rose-600 dark:text-rose-400" />
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-foreground" onClick={() => handleEdit(entry)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 hover:text-rose-600" onClick={() => setDeleteId(entry.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            ))}
+          </div>
+        </FintechCard>
       )}
 
       <ExpenseForm
@@ -193,6 +227,6 @@ export function ExpensesPageClient({
         description="This will permanently delete this expense item. This action cannot be undone."
         loading={deleting}
       />
-    </>
+    </div>
   );
 }

@@ -25,9 +25,11 @@ export async function addBudget(formData: {
     await generateSnapshot(supabase, user.id, parsed.data.month, parsed.data.year);
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
+    revalidatePath("/transactions");
     return { success: true };
-  } catch (e) {
-    return { error: "Failed to create budget" };
+  } catch (err) {
+    console.error("Failed to create budget:", err);
+    return { success: false, error: "Unable to save budget. Please try again." };
   }
 }
 
@@ -37,13 +39,15 @@ export async function updateBudgetCategoryLimit(budgetCategoryId: string, amount
   if (!user) return { error: "Unauthorized" };
 
   try {
-    await updateBudgetCategory(supabase, budgetCategoryId, amount);
+    await updateBudgetCategory(supabase, user.id, budgetCategoryId, amount);
     await generateSnapshot(supabase, user.id, month, year);
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
+    revalidatePath("/transactions");
     return { success: true };
-  } catch (e) {
-    return { error: "Failed to update category budget" };
+  } catch (err) {
+    console.error("Failed to update category budget:", err);
+    return { success: false, error: "Unable to update category budget allocation. Please try again." };
   }
 }
 
@@ -58,8 +62,10 @@ export async function copyPreviousMonthBudget(targetMonth: number, targetYear: n
     await generateSnapshot(supabase, user.id, targetMonth, targetYear);
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
+    revalidatePath("/transactions");
     return { success: true };
-  } catch (e) {
-    return { error: "Failed to copy previous budget" };
+  } catch (err) {
+    console.error("Failed to copy previous budget:", err);
+    return { success: false, error: "Unable to copy previous month's budget. Please try again." };
   }
 }

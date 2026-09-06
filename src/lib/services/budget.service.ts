@@ -61,9 +61,19 @@ export async function createBudget(
 
 export async function updateBudgetCategory(
   supabase: SupabaseClient,
+  userId: string,
   budgetCategoryId: string,
   amount: number
 ): Promise<void> {
+  const { data: cat } = await supabase
+    .from("budget_categories")
+    .select("id, budget:budgets!inner(user_id)")
+    .eq("id", budgetCategoryId)
+    .eq("budget.user_id", userId)
+    .maybeSingle();
+
+  if (!cat) throw new Error("Unauthorized: budget category not found or access denied.");
+
   const { error } = await supabase
     .from("budget_categories")
     .update({ amount })

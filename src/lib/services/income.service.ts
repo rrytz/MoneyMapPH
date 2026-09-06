@@ -68,6 +68,7 @@ export async function createIncomeEntry(
 
 export async function updateIncomeEntry(
   supabase: SupabaseClient,
+  userId: string,
   entryId: string,
   entry: {
     amount?: number;
@@ -81,6 +82,7 @@ export async function updateIncomeEntry(
     .from("income_entries")
     .update(entry)
     .eq("id", entryId)
+    .eq("user_id", userId)
     .select("*, source:income_sources(*)")
     .single();
 
@@ -90,12 +92,14 @@ export async function updateIncomeEntry(
 
 export async function deleteIncomeEntry(
   supabase: SupabaseClient,
+  userId: string,
   entryId: string
 ): Promise<void> {
   const { error } = await supabase
     .from("income_entries")
     .delete()
-    .eq("id", entryId);
+    .eq("id", entryId)
+    .eq("user_id", userId);
 
   if (error) throw error;
 }

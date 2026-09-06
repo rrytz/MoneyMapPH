@@ -77,12 +77,14 @@ export async function createPaycheck(
 
 export async function deletePaycheck(
   supabase: SupabaseClient,
+  userId: string,
   paycheckId: string
 ): Promise<void> {
   const { error } = await supabase
     .from("paychecks")
     .delete()
-    .eq("id", paycheckId);
+    .eq("id", paycheckId)
+    .eq("user_id", userId);
 
   if (error) throw error;
 }

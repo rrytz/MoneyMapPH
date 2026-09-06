@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { addPaycheck } from "@/app/(dashboard)/paychecks/actions";
+import { addPaycheck } from "@/app/(dashboard)/income/actions";
 import { AllocationEditor, type AllocationItem } from "./allocation-editor";
 import type { ExpenseCategory } from "@/lib/types";
 import { toISODateString } from "@/lib/utils/date";

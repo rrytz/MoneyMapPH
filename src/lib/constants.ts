@@ -20,5 +20,8 @@ export const NAV_ITEMS = [
   { label: "Income", href: "/income", icon: "TrendingUp" },
   { label: "Expenses", href: "/expenses", icon: "TrendingDown" },
   { label: "Budgets", href: "/budgets", icon: "PieChart" },
-  { label: "Paychecks", href: "/paychecks", icon: "Wallet" },
+  { label: "Savings Goals", href: "/savings", icon: "PiggyBank" },
+  { label: "Transactions", href: "/transactions", icon: "History" },
+  { label: "Forecasting", href: "/forecasting", icon: "LineChart" },
+  { label: "Settings", href: "/settings", icon: "Settings" },
 ] as const;

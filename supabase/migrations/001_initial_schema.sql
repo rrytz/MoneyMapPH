@@ -132,8 +132,20 @@ CREATE TABLE public.income_entries (
 CREATE INDEX idx_income_entries_user_date ON public.income_entries(user_id, date);
 ALTER TABLE public.income_entries ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own income" ON public.income_entries FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own income" ON public.income_entries FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own income" ON public.income_entries FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own income" ON public.income_entries;
+CREATE POLICY "Users can insert own income" ON public.income_entries FOR INSERT WITH CHECK (
+  auth.uid() = user_id
+  AND (source_id IS NULL OR EXISTS (SELECT 1 FROM public.income_sources isrc WHERE isrc.id = source_id AND isrc.user_id = auth.uid()))
+  AND (paycheck_id IS NULL OR EXISTS (SELECT 1 FROM public.paychecks pck WHERE pck.id = paycheck_id AND pck.user_id = auth.uid()))
+);
+DROP POLICY IF EXISTS "Users can update own income" ON public.income_entries;
+CREATE POLICY "Users can update own income" ON public.income_entries FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (
+    auth.uid() = user_id
+    AND (source_id IS NULL OR EXISTS (SELECT 1 FROM public.income_sources isrc WHERE isrc.id = source_id AND isrc.user_id = auth.uid()))
+    AND (paycheck_id IS NULL OR EXISTS (SELECT 1 FROM public.paychecks pck WHERE pck.id = paycheck_id AND pck.user_id = auth.uid()))
+  );
 CREATE POLICY "Users can delete own income" ON public.income_entries FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
@@ -156,8 +168,20 @@ CREATE INDEX idx_expenses_user_date ON public.expenses(user_id, date);
 CREATE INDEX idx_expenses_category ON public.expenses(category_id);
 ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own expenses" ON public.expenses FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own expenses" ON public.expenses FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own expenses" ON public.expenses FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own expenses" ON public.expenses;
+CREATE POLICY "Users can insert own expenses" ON public.expenses FOR INSERT WITH CHECK (
+  auth.uid() = user_id
+  AND (category_id IS NULL OR EXISTS (SELECT 1 FROM public.expense_categories ec WHERE ec.id = category_id AND ec.user_id = auth.uid()))
+  AND (paycheck_id IS NULL OR EXISTS (SELECT 1 FROM public.paychecks pck WHERE pck.id = paycheck_id AND pck.user_id = auth.uid()))
+);
+DROP POLICY IF EXISTS "Users can update own expenses" ON public.expenses;
+CREATE POLICY "Users can update own expenses" ON public.expenses FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (
+    auth.uid() = user_id
+    AND (category_id IS NULL OR EXISTS (SELECT 1 FROM public.expense_categories ec WHERE ec.id = category_id AND ec.user_id = auth.uid()))
+    AND (paycheck_id IS NULL OR EXISTS (SELECT 1 FROM public.paychecks pck WHERE pck.id = paycheck_id AND pck.user_id = auth.uid()))
+  );
 CREATE POLICY "Users can delete own expenses" ON public.expenses FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
@@ -307,7 +331,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users

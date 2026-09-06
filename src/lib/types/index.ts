@@ -191,3 +191,98 @@ export type PaycheckFormData = {
     amount: number;
   }>;
 };
+
+export interface SavingsGoal {
+  id: string;
+  user_id: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  target_date: string | null;
+  notes: string | null;
+  is_emergency_fund: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SavingsGoalFormData = {
+  name: string;
+  target_amount: number;
+  target_date?: string;
+  notes?: string;
+  is_emergency_fund?: boolean;
+};
+
+export interface ForecastProjection {
+  month: number;
+  year: number;
+  estimatedBalance: number;
+}
+
+export interface ForecastDataPoint {
+  date: string;
+  forecasted: number;
+  historical?: number;
+}
+
+export interface SimulatedPurchase {
+  id: string;
+  user_id: string;
+  name: string;
+  amount: number;
+  target_date: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SimulatedPurchaseFormData = {
+  name: string;
+  amount: number;
+  target_date?: string;
+  notes?: string;
+};
+
+export interface FinancialHealthReport {
+  score: number;
+  grade: "Excellent" | "Good" | "Fair" | "Critical";
+  breakdown: {
+    savingsRateScore: number;
+    emergencyFundScore: number;
+    budgetAdherenceScore: number;
+    paycheckAllocationScore: number;
+  };
+  recommendations: string[];
+}
+
+export interface Reminder {
+  id: string;
+  user_id: string;
+  title: string;
+  due_date: string;
+  completed: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UnifiedTransaction {
+  id: string;
+  type: "income" | "expense";
+  title: string;
+  amount: number;
+  date: string;
+  categoryName: string;
+  categoryIcon: string | null;
+  categoryColor: string | null;
+  notes: string | null;
+}
+
+export type ActionResponse<T = void> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+};
+
+
+

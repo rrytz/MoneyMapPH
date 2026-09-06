@@ -7,10 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, TrendingUp } from "lucide-react";
-import { APP_NAME } from "@/lib/constants";
+import { Loader2 } from "lucide-react";
+import { Logo } from "@/components/shared/logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -57,13 +57,10 @@ export default function LoginPage() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="rounded-lg bg-primary p-2">
-            <TrendingUp className="h-6 w-6 text-primary-foreground" />
-          </div>
+      <CardHeader className="text-center space-y-3">
+        <div className="flex justify-center pb-1">
+          <Logo size="lg" showTagline />
         </div>
-        <CardTitle className="text-2xl font-bold">{APP_NAME}</CardTitle>
         <CardDescription>Sign in to manage your finances</CardDescription>
       </CardHeader>
       <CardContent>

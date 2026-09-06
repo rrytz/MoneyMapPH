@@ -30,21 +30,36 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
+  const isAuthCallback = path.startsWith("/auth/callback");
   const isAuthRoute = path.startsWith("/login") || path.startsWith("/signup");
-  const isDashboardRoute = !isAuthRoute && path !== "/";
+  const isPublicRoute = isAuthRoute || isAuthCallback || path === "/";
+  const isDashboardRoute = !isPublicRoute;
 
   // Unauthenticated user trying to access dashboard
   if (!user && isDashboardRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+    if (path !== "/" && path !== "/login") {
+      url.searchParams.set("next", path);
+    }
+    const redirectResponse = NextResponse.redirect(url);
+    // Forward all cookies updated during session refresh to prevent auth loops
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+    });
+    return redirectResponse;
   }
 
   // Authenticated user on auth pages
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    url.search = "";
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+    });
+    return redirectResponse;
   }
 
   return supabaseResponse;

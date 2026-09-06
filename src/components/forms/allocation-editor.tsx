@@ -3,7 +3,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import type { ExpenseCategory } from "@/lib/types";
@@ -43,7 +42,7 @@ export function AllocationEditor({
     onChange(allocations.filter((a) => a.id !== id));
   }
 
-  function handleUpdate(id: string, field: keyof AllocationItem, value: any) {
+  function handleUpdate(id: string, field: keyof AllocationItem, value: string | number | undefined) {
     onChange(
       allocations.map((a) => (a.id === id ? { ...a, [field]: value } : a))
     );
@@ -87,7 +86,7 @@ export function AllocationEditor({
             />
             <Select
               value={item.category_id || "none"}
-              onValueChange={(val) => handleUpdate(item.id, "category_id", val === "none" ? undefined : val)}
+              onValueChange={(val) => handleUpdate(item.id, "category_id", (val === "none" || !val) ? undefined : val)}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Category" />

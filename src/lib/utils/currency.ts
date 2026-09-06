@@ -18,3 +18,13 @@ export function parseCurrencyInput(value: string): number {
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? 0 : Math.round(parsed * 100) / 100;
 }
+
+export function formatCompactAmount(val: number, symbol: string = "₱"): string {
+  if (val >= 1000000) {
+    return `${symbol}${(val / 1000000).toFixed(1)}M`;
+  }
+  if (val >= 1000) {
+    return `${symbol}${(val / 1000).toFixed(0)}k`;
+  }
+  return `${symbol}${val.toLocaleString()}`;
+}

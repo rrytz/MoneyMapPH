@@ -30,9 +30,12 @@ export async function addExpense(formData: {
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     revalidatePath("/budgets");
+    revalidatePath("/transactions");
+    revalidatePath("/forecasting");
     return { success: true };
-  } catch (e) {
-    return { error: "Failed to add expense" };
+  } catch (err) {
+    console.error("Failed to add expense:", err);
+    return { success: false, error: "Unable to record expense. Please verify your inputs and try again." };
   }
 }
 
@@ -54,15 +57,18 @@ export async function editExpense(id: string, formData: {
   if (!user) return { error: "Unauthorized" };
 
   try {
-    await updateExpense(supabase, id, parsed.data);
+    await updateExpense(supabase, user.id, id, parsed.data);
     const date = new Date(parsed.data.date);
     await generateSnapshot(supabase, user.id, date.getMonth() + 1, date.getFullYear());
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     revalidatePath("/budgets");
+    revalidatePath("/transactions");
+    revalidatePath("/forecasting");
     return { success: true };
-  } catch (e) {
-    return { error: "Failed to update expense" };
+  } catch (err) {
+    console.error("Failed to update expense:", err);
+    return { success: false, error: "Unable to update expense. Please try again." };
   }
 }
 
@@ -76,9 +82,10 @@ export async function removeExpense(id: string) {
       .from("expenses")
       .select("date")
       .eq("id", id)
-      .single();
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-    await deleteExpense(supabase, id);
+    await deleteExpense(supabase, user.id, id);
 
     if (entry) {
       const date = new Date(entry.date);
@@ -88,8 +95,11 @@ export async function removeExpense(id: string) {
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     revalidatePath("/budgets");
+    revalidatePath("/transactions");
+    revalidatePath("/forecasting");
     return { success: true };
-  } catch (e) {
-    return { error: "Failed to delete expense" };
+  } catch (err) {
+    console.error("Failed to delete expense:", err);
+    return { success: false, error: "Unable to remove expense. Please try again." };
   }
 }

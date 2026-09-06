@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored / tooling directories outside the app source:
+    ".kilo/**",
+    ".agents/**",
+    "superpowers-main/**",
+    "obsidian-skills-main/**",
+    "docs/**",
   ]),
 ]);
 

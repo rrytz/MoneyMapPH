@@ -138,6 +138,19 @@ export default function SignupPage() {
           </Link>
         </p>
       </CardFooter>
+      <CardFooter className="justify-center">
+        <p className="text-xs text-muted-foreground">
+          By continuing you agree to our{" "}
+          <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+      </CardFooter>
     </Card>
   );
 }

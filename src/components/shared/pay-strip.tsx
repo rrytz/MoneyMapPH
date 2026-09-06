@@ -52,7 +52,7 @@ export function PayStrip() {
           const isLatest = i === MONTHS.length - 1;
           const isLean = i === 2;
           return (
-            <div key={m.label} className="group relative flex-1 cursor-pointer">
+            <div key={m.label} className="group relative flex h-full flex-1 cursor-pointer items-end">
               <div
                 className={`pointer-events-none absolute -top-8 left-1/2 z-20 -translate-x-1/2 rounded-md border border-border bg-popover px-2 py-1 text-[11px] font-semibold tabular-nums text-popover-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 ${
                   visible ? "" : "hidden"

@@ -111,7 +111,7 @@ export function AuthForm() {
   }
 
   return (
-    <div className="w-full">
+    <div key={mode} className="auth-animate-fade w-full">
       <div className="mb-7">
         <div
           className="mb-7 inline-flex rounded-xl border border-border bg-muted p-1"
@@ -143,7 +143,7 @@ export function AuthForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4" key={mode}>
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div
             role="alert"

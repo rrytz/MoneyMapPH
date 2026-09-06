@@ -139,7 +139,8 @@
   .auth-animate-rise,
   .auth-animate-fade,
   .auth-bar,
-  .auth-glow {
+  .auth-glow,
+  .auth-barbeat {
     animation: none !important;
   }
 }
@@ -156,6 +157,9 @@
 }
 .auth-glow {
   animation: auth-glow 9s ease-in-out infinite;
+}
+.auth-barbeat {
+  animation: auth-barbeat 4.5s ease-in-out 2.4s infinite;
 }
 
 @keyframes auth-rise {
@@ -196,5 +200,15 @@
   50% {
     opacity: 0.85;
     transform: scale(1.07);
+  }
+}
+
+@keyframes auth-barbeat {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.4;
   }
 }

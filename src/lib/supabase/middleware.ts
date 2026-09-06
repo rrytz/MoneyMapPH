@@ -32,7 +32,9 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isAuthCallback = path.startsWith("/auth/callback");
   const isAuthRoute = path.startsWith("/login") || path.startsWith("/signup");
-  const isPublicRoute = isAuthRoute || isAuthCallback || path === "/";
+  const isPublicRoute =
+    isAuthRoute || isAuthCallback || path === "/" ||
+    path.startsWith("/privacy") || path.startsWith("/terms");
   const isDashboardRoute = !isPublicRoute;
 
   // Unauthenticated user trying to access dashboard

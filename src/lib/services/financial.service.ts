@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import type { MonthlySummary, BudgetStatus } from "@/lib/types";
-import { BUDGET_THRESHOLDS } from "@/lib/constants";
+import { computeBudgetStatus } from "@/lib/utils/budget-status";
 import { getMonthDateRange } from "@/lib/utils/date";
 
 export async function getMonthlySummary(
@@ -116,17 +116,7 @@ export async function getBudgetStatuses(
   }>).map((bc) => {
     const spent = spendingByCategory[bc.category_id] || 0;
     const budgeted = Number(bc.amount);
-    const remaining = budgeted - spent;
-    const percentage = budgeted > 0 ? (spent / budgeted) * 100 : 0;
-
-    let status: "under" | "near" | "over";
-    if (percentage > BUDGET_THRESHOLDS.NEAR) {
-      status = "over";
-    } else if (percentage >= BUDGET_THRESHOLDS.UNDER) {
-      status = "near";
-    } else {
-      status = "under";
-    }
+    const { percentage, status } = computeBudgetStatus(budgeted, spent);
 
     return {
       categoryId: bc.category_id,
@@ -135,8 +125,8 @@ export async function getBudgetStatuses(
       categoryColor: bc.category?.color || null,
       budgeted,
       spent,
-      remaining,
-      percentage: Math.round(percentage * 100) / 100,
+      remaining: budgeted - spent,
+      percentage,
       status,
     };
   });

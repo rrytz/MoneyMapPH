@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useOptimistic, useTransition } from "react";
 import Link from "next/link";
 import { Plus, Copy, PieChart, Wallet, Target, AlertTriangle, Calculator } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -12,7 +12,11 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MonthYearPicker } from "@/components/shared/month-year-picker";
 import { BudgetForm } from "@/components/forms/budget-form";
+import { BudgetExpenseForm } from "./budget-expense-form";
 import { copyPreviousMonthBudget } from "./actions";
+import { addExpense } from "../expenses/actions";
+import { getCurrentMonthYear, getMonthName, toISODateString } from "@/lib/utils/date";
+import { computeBudgetStatus } from "@/lib/utils/budget-status";
 import { toast } from "sonner";
 import type { BudgetStatus, ExpenseCategory } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -34,10 +38,52 @@ export function BudgetsPageClient({
   const [year, setYear] = useState(initialYear);
   const [formOpen, setFormOpen] = useState(false);
   const [copying, setCopying] = useState(false);
+  const [expenseForm, setExpenseForm] = useState<BudgetStatus | null>(null);
+  const [, startTransition] = useTransition();
 
-  const totalBudgeted = statuses.reduce((sum, s) => sum + s.budgeted, 0);
-  const totalSpent = statuses.reduce((sum, s) => sum + s.spent, 0);
+  const { month: realMonth, year: realYear } = getCurrentMonthYear();
+  const isCurrentMonth = month === realMonth && year === realYear;
+  const viewedMonthLabel = `${getMonthName(month)} ${year}`;
+  const defaultExpenseDate = isCurrentMonth
+    ? toISODateString(new Date())
+    : `${year}-${String(month).padStart(2, "0")}-01`;
+
+  const [optimisticStatuses, addSpend] = useOptimistic(
+    statuses,
+    (state: BudgetStatus[], op: { categoryId: string; amount: number }) =>
+      state.map((s) => {
+        if (s.categoryId !== op.categoryId) return s;
+        const { percentage, status } = computeBudgetStatus(s.budgeted, s.spent + op.amount);
+        return {
+          ...s,
+          spent: s.spent + op.amount,
+          remaining: s.budgeted - (s.spent + op.amount),
+          percentage,
+          status,
+        };
+      })
+  );
+
+  const totalBudgeted = optimisticStatuses.reduce((sum, s) => sum + s.budgeted, 0);
+  const totalSpent = optimisticStatuses.reduce((sum, s) => sum + s.spent, 0);
   const totalRemaining = totalBudgeted - totalSpent;
+
+  function handleAddExpense(data: { title: string; amount: number; category_id: string; date: string; notes?: string }) {
+    startTransition(async () => {
+      addSpend({ categoryId: data.category_id, amount: data.amount });
+      try {
+        const result = await addExpense(data);
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success("Expense added");
+        }
+      } catch {
+        toast.error("Unable to add expense. Please try again.");
+      }
+    });
+    setExpenseForm(null);
+  }
 
   async function handleCopy() {
     setCopying(true);
@@ -139,7 +185,7 @@ export function BudgetsPageClient({
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {statuses.map((status) => {
+          {optimisticStatuses.map((status) => {
             const isOver = status.status === "over";
             const isNear = status.status === "near";
             const statusLabel = isOver ? "Over Budget" : isNear ? "Watch" : "On Track";
@@ -185,6 +231,13 @@ export function BudgetsPageClient({
                       Target: <CurrencyDisplay amount={status.budgeted} className="font-bold text-foreground" />
                     </span>
                   </div>
+
+                  <Button
+                    onClick={() => setExpenseForm(status)}
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white h-9 text-xs w-full cursor-pointer"
+                  >
+                    <Plus className="mr-1.5 h-4 w-4" /> Add Expense
+                  </Button>
                 </FintechCardContent>
               </FintechCard>
             );
@@ -223,6 +276,15 @@ export function BudgetsPageClient({
         categories={categories}
         month={month}
         year={year}
+      />
+
+      <BudgetExpenseForm
+        open={!!expenseForm}
+        onOpenChange={(open) => !open && setExpenseForm(null)}
+        category={expenseForm ? { id: expenseForm.categoryId, name: expenseForm.categoryName, icon: expenseForm.categoryIcon } : null}
+        viewedMonthLabel={viewedMonthLabel}
+        defaultDate={defaultExpenseDate}
+        onAdd={handleAddExpense}
       />
     </div>
   );

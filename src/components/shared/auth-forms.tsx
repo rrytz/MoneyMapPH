@@ -14,7 +14,10 @@ type Mode = "signin" | "signup";
 export function AuthForm() {
   const router = useRouter();
   const pathname = usePathname();
-  const mode: Mode = pathname === "/signup" ? "signup" : "signin";
+  const [display, setDisplay] = useState<Mode>(() =>
+    pathname === "/signup" ? "signup" : "signin",
+  );
+  const mode = display;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,8 +64,9 @@ export function AuthForm() {
   }, []);
 
   function switchMode(next: Mode) {
+    setDisplay(next);
     setPendingDir(next === "signup" ? "down" : "up");
-    router.push(next === "signin" ? "/login" : "/signup");
+    window.history.replaceState(null, "", next === "signin" ? "/login" : "/signup");
     setError("");
     setSuccess(false);
   }

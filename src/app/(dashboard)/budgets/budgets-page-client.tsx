@@ -216,10 +216,10 @@ export function BudgetsPageClient({
                     className={cn(
                       "h-2 rounded-full",
                       isOver
-                        ? "[&>div]:bg-rose-500"
+                        ? "[&>div>div]:bg-rose-500"
                         : isNear
-                          ? "[&>div]:bg-amber-500"
-                          : "[&>div]:bg-emerald-500"
+                          ? "[&>div>div]:bg-amber-500"
+                          : "[&>div>div]:bg-emerald-500"
                     )}
                   />
 

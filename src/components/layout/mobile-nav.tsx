@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -13,6 +13,17 @@ const PRIMARY_MOBILE_HREFS = ["/dashboard", "/income", "/expenses", "/budgets"];
 export function MobileNav() {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [pending, setPending] = useState<string | null>(null);
+  const pendingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const select = (href: string) => {
+    if (pendingTimer.current) clearTimeout(pendingTimer.current);
+    setPending(href);
+    pendingTimer.current = setTimeout(() => {
+      setPending((p) => (p === href ? null : p));
+    }, 6000);
+    setMoreOpen(false);
+  };
 
   const primaryItems = NAV_ITEMS.filter((item) => PRIMARY_MOBILE_HREFS.includes(item.href));
   const secondaryItems = NAV_ITEMS.filter((item) => !PRIMARY_MOBILE_HREFS.includes(item.href));
@@ -21,18 +32,22 @@ export function MobileNav() {
   const MoreIcon = NAV_ICON_MAP.MoreHorizontal;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md">
+    <nav className="vt-mobile-nav fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md">
       <div className="flex items-center justify-around h-16 px-2">
         {primaryItems.map((item) => {
           const Icon = NAV_ICON_MAP[item.icon];
           const isActive = pathname === item.href;
+          const isPending = pending === item.href && pending !== pathname;
+          const highlighted = isActive || isPending;
           return (
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => select(item.href)}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 flex-1 py-1 text-[11px] font-medium transition-colors",
-                isActive ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-muted-foreground hover:text-foreground"
+                highlighted ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {Icon && <Icon className="h-5 w-5 shrink-0" />}
@@ -61,15 +76,16 @@ export function MobileNav() {
             <div className="grid grid-cols-2 gap-2.5 pt-4">
               {secondaryItems.map((item) => {
                 const Icon = NAV_ICON_MAP[item.icon];
-                const isActive = pathname === item.href;
+                const highlighted = pathname === item.href || (pending === item.href && pending !== pathname);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setMoreOpen(false)}
+                    onClick={() => select(item.href)}
+                    aria-current={pathname === item.href ? "page" : undefined}
                     className={cn(
                       "flex items-center gap-3 p-3 rounded-2xl border border-border text-xs font-semibold transition-colors",
-                      isActive
+                      highlighted
                         ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/50"
                         : "bg-slate-50 dark:bg-slate-900 text-foreground hover:bg-slate-100"
                     )}

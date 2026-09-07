@@ -3,7 +3,7 @@ import { getSnapshots } from "./snapshot.service";
 import { getSavingsGoals } from "./goal.service";
 import { getMonthlySummary } from "./financial.service";
 import { getCurrentMonthYear, getMonthName } from "@/lib/utils/date";
-import type { ForecastDataPoint } from "@/lib/types";
+import type { ForecastDataPoint, MonthlySnapshot, SavingsGoal } from "@/lib/types";
 
 export interface EmergencyFundStatus {
   hasFund: boolean;
@@ -14,11 +14,17 @@ export interface EmergencyFundStatus {
   status: "adequate" | "warning" | "critical" | "not_configured" | "insufficient_data";
 }
 
+interface EmergencyFundPreload {
+  goals?: SavingsGoal[];
+  snapshots?: MonthlySnapshot[];
+}
+
 export async function calculateEmergencyFundStatus(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  preloaded?: EmergencyFundPreload
 ): Promise<EmergencyFundStatus> {
-  const goals = await getSavingsGoals(supabase, userId);
+  const goals = preloaded?.goals ?? (await getSavingsGoals(supabase, userId));
   const emergencyGoal = goals.find((g) => g.is_emergency_fund);
 
   if (!emergencyGoal) {
@@ -33,7 +39,8 @@ export async function calculateEmergencyFundStatus(
   }
 
   // Calculate average expenses from snapshots (up to 6 months)
-  const snapshots = await getSnapshots(supabase, userId, 6);
+  const snapshots =
+    preloaded?.snapshots ?? (await getSnapshots(supabase, userId, 6));
   let averageExpenses = 0;
 
   if (snapshots.length > 0) {
@@ -85,9 +92,10 @@ export async function calculateEmergencyFundStatus(
 
 export async function calculateMonthlyNetSavings(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  preloaded?: { snapshots?: MonthlySnapshot[] }
 ): Promise<number> {
-  const snapshots = await getSnapshots(supabase, userId, 6);
+  const snapshots = preloaded?.snapshots ?? (await getSnapshots(supabase, userId, 6));
   let monthlyNetSavings = 0;
 
   if (snapshots.length > 0) {
@@ -116,16 +124,17 @@ export async function calculateMonthlyNetSavings(
 
 export async function generateSavingsForecast(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  preloaded?: { snapshots?: MonthlySnapshot[]; goals?: SavingsGoal[] }
 ): Promise<ForecastDataPoint[]> {
-  const snapshots = await getSnapshots(supabase, userId, 6);
-  const goals = await getSavingsGoals(supabase, userId);
+  const snapshots = preloaded?.snapshots ?? (await getSnapshots(supabase, userId, 6));
+  const goals = preloaded?.goals ?? (await getSavingsGoals(supabase, userId));
 
   // Initial balance is the sum of current savings goal amounts
   const startBalance = goals.reduce((sum, g) => sum + Math.max(0, Number(g.current_amount) || 0), 0);
 
-  // Compute average monthly net savings
-  const monthlyNetSavings = await calculateMonthlyNetSavings(supabase, userId);
+  // Compute average monthly net savings from the same snapshots (avoids a re-fetch)
+  const monthlyNetSavings = await calculateMonthlyNetSavings(supabase, userId, { snapshots });
 
   const dataPoints: ForecastDataPoint[] = [];
   const now = new Date();

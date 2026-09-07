@@ -11,28 +11,28 @@ export async function getMonthlySummary(
 ): Promise<MonthlySummary> {
   const { start, end } = getMonthDateRange(month, year);
 
-  const { data: incomeData } = await supabase
-    .from("income_entries")
-    .select("amount, source_id")
-    .eq("user_id", userId)
-    .gte("date", start)
-    .lte("date", end);
-
-  const { data: expenseData } = await supabase
-    .from("expenses")
-    .select("amount, category_id")
-    .eq("user_id", userId)
-    .is("goal_id", null)
-    .gte("date", start)
-    .lte("date", end);
-
-  const { data: budget } = await supabase
-    .from("budgets")
-    .select("id, budget_categories(amount)")
-    .eq("user_id", userId)
-    .eq("month", month)
-    .eq("year", year)
-    .maybeSingle();
+  const [{ data: incomeData }, { data: expenseData }, { data: budget }] = await Promise.all([
+    supabase
+      .from("income_entries")
+      .select("amount, source_id")
+      .eq("user_id", userId)
+      .gte("date", start)
+      .lte("date", end),
+    supabase
+      .from("expenses")
+      .select("amount, category_id")
+      .eq("user_id", userId)
+      .is("goal_id", null)
+      .gte("date", start)
+      .lte("date", end),
+    supabase
+      .from("budgets")
+      .select("id, budget_categories(amount)")
+      .eq("user_id", userId)
+      .eq("month", month)
+      .eq("year", year)
+      .maybeSingle(),
+  ]);
 
   const totalIncome = (incomeData || []).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const totalExpenses = (expenseData || []).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);

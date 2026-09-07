@@ -1,6 +1,7 @@
 import { createClient, getUser } from "@/lib/supabase/server";
 import { generateSavingsForecast } from "@/lib/services/forecast.service";
 import { getSavingsGoals } from "@/lib/services/goal.service";
+import { getSnapshots } from "@/lib/services/snapshot.service";
 import { ForecastingClient } from "./forecasting-client";
 import { redirect } from "next/navigation";
 
@@ -11,10 +12,15 @@ export default async function ForecastingPage() {
     redirect("/login");
   }
 
-  const [forecastData, goals] = await Promise.all([
-    generateSavingsForecast(supabase, user.id),
+  const [snapshots, goals] = await Promise.all([
+    getSnapshots(supabase, user.id, 6),
     getSavingsGoals(supabase, user.id),
   ]);
+
+  const forecastData = await generateSavingsForecast(supabase, user.id, {
+    snapshots,
+    goals,
+  });
 
   return <ForecastingClient forecastData={forecastData} goals={goals} />;
 }

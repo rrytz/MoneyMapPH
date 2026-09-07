@@ -3,20 +3,33 @@ import { getMonthlySummary, getBudgetStatuses } from "./financial.service";
 import { calculateEmergencyFundStatus } from "./forecast.service";
 import { getPaychecks } from "./paycheck.service";
 import { getCurrentMonthYear } from "@/lib/utils/date";
-import type { FinancialHealthReport } from "@/lib/types";
+import type { FinancialHealthReport, MonthlySummary, SavingsGoal, MonthlySnapshot, Paycheck, BudgetStatus } from "@/lib/types";
+
+interface HealthPreload {
+  summary?: MonthlySummary;
+  goals?: SavingsGoal[];
+  snapshots?: MonthlySnapshot[];
+  budgetStatuses?: BudgetStatus[];
+  paychecks?: Paycheck[];
+}
 
 export async function calculateFinancialHealthReport(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  preloaded?: HealthPreload
 ): Promise<FinancialHealthReport> {
   const { month, year } = getCurrentMonthYear();
 
-  // Fetch metrics concurrently
+  // Fetch metrics concurrently; pages that already have this data pass it along
+  // to skip redundant Supabase round trips.
   const [summary, emergencyStatus, budgetStatuses, paychecks] = await Promise.all([
-    getMonthlySummary(supabase, userId, month, year),
-    calculateEmergencyFundStatus(supabase, userId),
-    getBudgetStatuses(supabase, userId, month, year),
-    getPaychecks(supabase, userId, month, year),
+    preloaded?.summary ?? getMonthlySummary(supabase, userId, month, year),
+    calculateEmergencyFundStatus(supabase, userId, {
+      goals: preloaded?.goals,
+      snapshots: preloaded?.snapshots,
+    }),
+    preloaded?.budgetStatuses ?? getBudgetStatuses(supabase, userId, month, year),
+    preloaded?.paychecks ?? getPaychecks(supabase, userId, month, year),
   ]);
 
   // 1. Savings Rate Score (Max 30 pts)

@@ -1,8 +1,9 @@
 import { createClient, getUser } from "@/lib/supabase/server";
-import { getMonthlySummary } from "@/lib/services/financial.service";
+import { getMonthlySummary, getBudgetStatuses } from "@/lib/services/financial.service";
 import { getSnapshots } from "@/lib/services/snapshot.service";
 import { getExpenseCategories } from "@/lib/services/category.service";
 import { getSavingsGoals } from "@/lib/services/goal.service";
+import { getPaychecks } from "@/lib/services/paycheck.service";
 import { calculateFinancialHealthReport } from "@/lib/services/health.service";
 import { getCurrentMonthYear } from "@/lib/utils/date";
 import { KpiCard } from "@/components/dashboard/kpi-card";
@@ -24,20 +25,20 @@ export default async function DashboardPage() {
 
   const { month, year } = getCurrentMonthYear();
 
-  const [summary, snapshots, categories, goals, healthReport] = await Promise.all([
+  const [
+    summary,
+    snapshots,
+    categories,
+    goals,
+    recentIncome,
+    recentExpenses,
+    budgetStatuses,
+    paychecks,
+  ] = await Promise.all([
     getMonthlySummary(supabase, user.id, month, year),
     getSnapshots(supabase, user.id, 6),
     getExpenseCategories(supabase, user.id),
     getSavingsGoals(supabase, user.id),
-    calculateFinancialHealthReport(supabase, user.id),
-  ]);
-
-  const lastMonthSnapshot = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
-  const incomeChange = lastMonthSnapshot && Number(lastMonthSnapshot.total_income) > 0
-    ? ((summary.totalIncome - Number(lastMonthSnapshot.total_income)) / Number(lastMonthSnapshot.total_income)) * 100
-    : null;
-
-  const [{ data: recentIncome }, { data: recentExpenses }] = await Promise.all([
     supabase
       .from("income_entries")
       .select("id, amount, date, source:income_sources(name)")
@@ -50,10 +51,25 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .order("date", { ascending: false })
       .limit(5),
+    getBudgetStatuses(supabase, user.id, month, year),
+    getPaychecks(supabase, user.id, month, year),
   ]);
 
+  const healthReport = await calculateFinancialHealthReport(supabase, user.id, {
+    summary,
+    goals,
+    snapshots,
+    budgetStatuses,
+    paychecks,
+  });
+
+  const lastMonthSnapshot = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
+  const incomeChange = lastMonthSnapshot && Number(lastMonthSnapshot.total_income) > 0
+    ? ((summary.totalIncome - Number(lastMonthSnapshot.total_income)) / Number(lastMonthSnapshot.total_income)) * 100
+    : null;
+
   const transactions = [
-    ...(recentIncome || []).map((e) => {
+    ...(recentIncome.data || []).map((e) => {
       const item = e as unknown as { id: string; amount: number; date: string; source: { name: string } | null };
       return {
         id: item.id,
@@ -63,7 +79,7 @@ export default async function DashboardPage() {
         date: item.date,
       };
     }),
-    ...(recentExpenses || []).map((e) => {
+    ...(recentExpenses.data || []).map((e) => {
       const item = e as unknown as { id: string; title: string; amount: number; date: string; category: { name: string } | null };
       return {
         id: item.id,

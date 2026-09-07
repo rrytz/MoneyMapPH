@@ -1,7 +1,7 @@
 import { createClient, getUser } from "@/lib/supabase/server";
-import { getSavingsGoals } from "@/lib/services/goal.service";
-import { getExpenseCategories } from "@/lib/services/category.service";
-import { getSnapshots } from "@/lib/services/snapshot.service";
+import { cachedGetSavingsGoals as getSavingsGoals } from "@/lib/cache/shared-queries";
+import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
+import { cachedGetSnapshots as getSnapshots } from "@/lib/cache/shared-queries";
 import { calculateEmergencyFundStatus } from "@/lib/services/forecast.service";
 import { SavingsPageClient } from "./savings-page-client";
 import { redirect } from "next/navigation";

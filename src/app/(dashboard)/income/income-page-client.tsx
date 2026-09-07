@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useOptimistic, useTransition } from "react";
 import { Plus, Pencil, Trash2, TrendingUp, DollarSign, Wallet, Layers, CalendarRange } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
@@ -12,14 +12,13 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IncomeForm } from "@/components/forms/income-form";
 import { PaycheckPlanner } from "./paycheck-planner";
-import { removeIncome } from "./actions";
+import { removeIncome, addIncome } from "./actions";
 import { formatDate } from "@/lib/utils/date";
 import { toast } from "sonner";
 import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory } from "@/lib/types";
 
 interface IncomePageClientProps {
   initialEntries: IncomeEntry[];
-  initialCount: number;
   sources: IncomeSource[];
   paychecks: Paycheck[];
   categories: ExpenseCategory[];
@@ -30,7 +29,6 @@ interface IncomePageClientProps {
 
 export function IncomePageClient({
   initialEntries,
-  initialCount,
   sources,
   paychecks,
   categories,
@@ -40,6 +38,39 @@ export function IncomePageClient({
   const [editEntry, setEditEntry] = useState<IncomeEntry | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [, startTransition] = useTransition();
+
+  const [optimisticEntries, addOptimisticEntry] = useOptimistic(
+    initialEntries,
+    (state: IncomeEntry[], newEntry: IncomeEntry) => [newEntry, ...state]
+  );
+
+  function handleAddIncome(data: { amount: number; source_id: string; date: string; notes?: string }) {
+    const source = sources.find((s) => s.id === data.source_id);
+    const optimistic: IncomeEntry = {
+      id: `optimistic-${Date.now()}`,
+      user_id: "",
+      amount: data.amount,
+      source_id: data.source_id,
+      date: data.date,
+      notes: data.notes || null,
+      paycheck_id: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      source,
+    };
+
+    startTransition(async () => {
+      addOptimisticEntry(optimistic);
+      const result = await addIncome(data);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Income added");
+      }
+    });
+    setFormOpen(false);
+  }
 
   function handleEdit(entry: IncomeEntry) {
     setEditEntry(entry);
@@ -66,7 +97,7 @@ export function IncomePageClient({
 
   // Group earnings by source for variable income breakdown
   const sourceTotals: Record<string, number> = {};
-  initialEntries.forEach((e) => {
+  optimisticEntries.forEach((e) => {
     const sName = e.source?.name || "Other";
     sourceTotals[sName] = (sourceTotals[sName] || 0) + Number(e.amount);
   });
@@ -117,7 +148,7 @@ export function IncomePageClient({
                 </div>
                 <div>
                   <span className="text-xs font-medium text-muted-foreground block">Total Payments</span>
-                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{initialCount}</p>
+                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{optimisticEntries.length}</p>
                 </div>
               </FintechCardContent>
             </FintechCard>
@@ -141,7 +172,7 @@ export function IncomePageClient({
           </div>
 
           {/* Income List Section */}
-          {initialEntries.length === 0 ? (
+          {optimisticEntries.length === 0 ? (
             <EmptyState
               icon={<TrendingUp className="h-6 w-6" />}
               title="No income recorded"
@@ -153,10 +184,10 @@ export function IncomePageClient({
             <FintechCard className="p-0 overflow-hidden">
               <div className="px-6 py-4 border-b border-border flex items-center justify-between">
                 <h3 className="font-semibold text-base text-foreground">Income Transactions</h3>
-                <span className="text-xs text-muted-foreground">{initialEntries.length} items logged</span>
+                <span className="text-xs text-muted-foreground">{optimisticEntries.length} items logged</span>
               </div>
               <div className="divide-y divide-border">
-                {initialEntries.map((entry) => (
+                {optimisticEntries.map((entry) => (
                   <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex items-center gap-2 mb-1">
@@ -193,6 +224,7 @@ export function IncomePageClient({
             onOpenChange={setFormOpen}
             sources={sources}
             editEntry={editEntry}
+            onAdd={handleAddIncome}
           />
 
           <ConfirmDialog

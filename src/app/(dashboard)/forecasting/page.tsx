@@ -1,7 +1,7 @@
 import { createClient, getUser } from "@/lib/supabase/server";
 import { generateSavingsForecast } from "@/lib/services/forecast.service";
-import { getSavingsGoals } from "@/lib/services/goal.service";
-import { getSnapshots } from "@/lib/services/snapshot.service";
+import { cachedGetSavingsGoals as getSavingsGoals } from "@/lib/cache/shared-queries";
+import { cachedGetSnapshots as getSnapshots } from "@/lib/cache/shared-queries";
 import { ForecastingClient } from "./forecasting-client";
 import { redirect } from "next/navigation";
 

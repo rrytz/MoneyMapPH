@@ -16,12 +16,12 @@ export const CURRENCY_MAP: Record<string, { symbol: string; code: string; locale
 export const DEFAULT_CURRENCY = "PHP";
 
 export const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
-  { label: "Income", href: "/income", icon: "TrendingUp" },
-  { label: "Expenses", href: "/expenses", icon: "TrendingDown" },
-  { label: "Budgets", href: "/budgets", icon: "PieChart" },
-  { label: "Savings Goals", href: "/savings", icon: "PiggyBank" },
-  { label: "Transactions", href: "/transactions", icon: "History" },
-  { label: "Forecasting", href: "/forecasting", icon: "LineChart" },
-  { label: "Settings", href: "/settings", icon: "Settings" },
+  { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard", description: "At-a-glance overview of your monthly finances" },
+  { label: "Income", href: "/income", icon: "TrendingUp", description: "Log salary, overtime, incentives & track earnings" },
+  { label: "Expenses", href: "/expenses", icon: "TrendingDown", description: "Track spending by category & search entries" },
+  { label: "Budgets", href: "/budgets", icon: "PieChart", description: "Plan monthly budgets & monitor category limits" },
+  { label: "Savings Goals", href: "/savings", icon: "PiggyBank", description: "Track targets like emergency & travel funds" },
+  { label: "Transactions", href: "/transactions", icon: "History", description: "Searchable history of income and expenses" },
+  { label: "Forecasting", href: "/forecasting", icon: "LineChart", description: "12-month projected net wealth" },
+  { label: "Settings", href: "/settings", icon: "Settings", description: "Profile, currency & app preferences" },
 ] as const;

@@ -1,9 +1,9 @@
 import { createClient, getUser } from "@/lib/supabase/server";
-import { getMonthlySummary, getBudgetStatuses } from "@/lib/services/financial.service";
-import { getSnapshots } from "@/lib/services/snapshot.service";
-import { getExpenseCategories } from "@/lib/services/category.service";
-import { getSavingsGoals } from "@/lib/services/goal.service";
-import { getPaychecks } from "@/lib/services/paycheck.service";
+import { cachedGetMonthlySummary as getMonthlySummary, cachedGetBudgetStatuses as getBudgetStatuses } from "@/lib/cache/shared-queries";
+import { cachedGetSnapshots as getSnapshots } from "@/lib/cache/shared-queries";
+import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
+import { cachedGetSavingsGoals as getSavingsGoals } from "@/lib/cache/shared-queries";
+import { cachedGetPaychecks as getPaychecks } from "@/lib/cache/shared-queries";
 import { calculateFinancialHealthReport } from "@/lib/services/health.service";
 import { getCurrentMonthYear } from "@/lib/utils/date";
 import { KpiCard } from "@/components/dashboard/kpi-card";

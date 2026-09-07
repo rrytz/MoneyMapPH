@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useOptimistic, useTransition } from "react";
 import { Plus, Pencil, Trash2, TrendingDown, Search, Filter, PieChart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,13 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ExpenseForm } from "@/components/forms/expense-form";
-import { removeExpense } from "./actions";
+import { removeExpense, addExpense } from "./actions";
 import { formatDate } from "@/lib/utils/date";
 import { toast } from "sonner";
 import type { Expense, ExpenseCategory } from "@/lib/types";
 
 interface ExpensesPageClientProps {
   initialEntries: Expense[];
-  initialCount: number;
   categories: ExpenseCategory[];
   totalThisMonth: number;
   currentMonth: number;
@@ -28,7 +27,6 @@ interface ExpensesPageClientProps {
 
 export function ExpensesPageClient({
   initialEntries,
-  initialCount,
   categories,
   totalThisMonth,
 }: ExpensesPageClientProps) {
@@ -38,6 +36,40 @@ export function ExpensesPageClient({
   const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [, startTransition] = useTransition();
+
+  const [optimisticEntries, addOptimisticEntry] = useOptimistic(
+    initialEntries,
+    (state: Expense[], newEntry: Expense) => [newEntry, ...state]
+  );
+
+  function handleAddExpense(data: { title: string; amount: number; category_id: string; date: string; notes?: string }) {
+    const category = categories.find((c) => c.id === data.category_id);
+    const optimistic: Expense = {
+      id: `optimistic-${Date.now()}`,
+      user_id: "",
+      title: data.title,
+      amount: data.amount,
+      category_id: data.category_id,
+      date: data.date,
+      notes: data.notes || null,
+      paycheck_id: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      category,
+    };
+
+    startTransition(async () => {
+      addOptimisticEntry(optimistic);
+      const result = await addExpense(data);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Expense added");
+      }
+    });
+    setFormOpen(false);
+  }
 
   function handleEdit(entry: Expense) {
     setEditEntry(entry);
@@ -62,7 +94,7 @@ export function ExpensesPageClient({
     setDeleteId(null);
   }
 
-  const filteredEntries = initialEntries.filter((entry) => {
+  const filteredEntries = optimisticEntries.filter((entry) => {
     const matchesSearch = entry.title.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === "all" || entry.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -70,7 +102,7 @@ export function ExpensesPageClient({
 
   // Calculate largest category
   const categoryTotals: Record<string, { name: string; amount: number }> = {};
-  initialEntries.forEach((e) => {
+  optimisticEntries.forEach((e) => {
     const cName = e.category?.name || "Uncategorized";
     if (!categoryTotals[cName]) categoryTotals[cName] = { name: cName, amount: 0 };
     categoryTotals[cName].amount += Number(e.amount);
@@ -129,7 +161,7 @@ export function ExpensesPageClient({
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Total Expenses</span>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{initialCount}</p>
+              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{optimisticEntries.length}</p>
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -217,6 +249,7 @@ export function ExpensesPageClient({
         onOpenChange={setFormOpen}
         categories={categories}
         editEntry={editEntry}
+        onAdd={handleAddExpense}
       />
 
       <ConfirmDialog

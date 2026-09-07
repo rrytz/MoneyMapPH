@@ -37,10 +37,14 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
   const [reminderTitle, setReminderTitle] = useState("");
   const [reminderDate, setReminderDate] = useState("");
   const [reminderNotes, setReminderNotes] = useState("");
-  
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+
   const [isPending, startTransition] = useTransition();
 
   const warningCount = notifications.length;
+
+  const systemAlerts = notifications.filter((n) => !n.id.startsWith("custom-reminder-") && !dismissedIds.has(n.id));
+  const reminderChecklist = notifications.filter((n) => n.id.startsWith("custom-reminder-"));
 
   async function handleAddReminder(e: React.FormEvent) {
     e.preventDefault();
@@ -88,9 +92,15 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
   }
 
   async function handleDismissSystemAlert(id: string) {
+    setDismissedIds((prev) => new Set(prev).add(id));
     startTransition(async () => {
       const res = await dismissNotification(id);
       if (res.error) {
+        setDismissedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
         toast.error(res.error);
       } else {
         toast.success("Alert dismissed");
@@ -124,17 +134,15 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
           {/* Section: Financial Health Alerts */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              System Alerts ({notifications.filter(n => !n.id.startsWith("custom-reminder-")).length})
+              System Alerts ({systemAlerts.length})
             </h3>
-            {notifications.filter(n => !n.id.startsWith("custom-reminder-")).length === 0 ? (
+            {systemAlerts.length === 0 ? (
               <p className="text-xs text-muted-foreground italic py-1">
                 No active financial warnings or alerts. You are on track!
               </p>
             ) : (
               <div className="space-y-2.5">
-                {notifications
-                  .filter(n => !n.id.startsWith("custom-reminder-"))
-                  .map((item) => (
+                {systemAlerts.map((item) => (
                     <div
                       key={item.id}
                       className={`p-3 rounded-lg border text-xs flex items-start gap-2.5 ${
@@ -169,17 +177,15 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
           {/* Section: Custom Reminders Checklists */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Reminders Checklist ({notifications.filter(n => n.id.startsWith("custom-reminder-")).length})
+              Reminders Checklist ({reminderChecklist.length})
             </h3>
-            {notifications.filter(n => n.id.startsWith("custom-reminder-")).length === 0 ? (
+            {reminderChecklist.length === 0 ? (
               <p className="text-xs text-muted-foreground italic py-1">
                 No pending custom reminders. Add one below to track actions.
               </p>
             ) : (
               <div className="space-y-2">
-                {notifications
-                  .filter(n => n.id.startsWith("custom-reminder-"))
-                  .map((item) => {
+                {reminderChecklist.map((item) => {
                     const isDone = !!item.completed;
                     return (
                       <div

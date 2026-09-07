@@ -18,9 +18,10 @@ interface ExpenseFormProps {
   onOpenChange: (open: boolean) => void;
   categories: ExpenseCategory[];
   editEntry?: Expense | null;
+  onAdd?: (data: { title: string; amount: number; category_id: string; date: string; notes?: string }) => void;
 }
 
-export function ExpenseForm({ open, onOpenChange, categories, editEntry }: ExpenseFormProps) {
+export function ExpenseForm({ open, onOpenChange, categories, editEntry, onAdd }: ExpenseFormProps) {
   const [loading, setLoading] = useState(false);
   const isEditing = !!editEntry;
 
@@ -36,6 +37,13 @@ export function ExpenseForm({ open, onOpenChange, categories, editEntry }: Expen
       date: formData.get("date") as string,
       notes: formData.get("notes") as string,
     };
+
+    if (!isEditing && onAdd) {
+      onAdd(data);
+      onOpenChange(false);
+      setLoading(false);
+      return;
+    }
 
     const result = isEditing
       ? await editExpense(editEntry.id, data)

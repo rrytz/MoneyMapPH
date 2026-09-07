@@ -1,7 +1,7 @@
 import { createClient, getUser } from "@/lib/supabase/server";
 import { getIncomeEntries } from "@/lib/services/income.service";
-import { getIncomeSources, getExpenseCategories } from "@/lib/services/category.service";
-import { getPaychecks } from "@/lib/services/paycheck.service";
+import { cachedGetIncomeSources as getIncomeSources, cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
+import { cachedGetPaychecks as getPaychecks } from "@/lib/cache/shared-queries";
 import { getCurrentMonthYear } from "@/lib/utils/date";
 import { IncomePageClient } from "./income-page-client";
 
@@ -11,7 +11,7 @@ export default async function IncomePage() {
   if (!user) return null;
 
   const { month, year } = getCurrentMonthYear();
-  const [{ data: entries, count }, sources, paychecks, categories] = await Promise.all([
+  const [{ data: entries }, sources, paychecks, categories] = await Promise.all([
     getIncomeEntries(supabase, user.id, { month, year, limit: 20 }),
     getIncomeSources(supabase, user.id),
     getPaychecks(supabase, user.id, month, year),
@@ -23,7 +23,6 @@ export default async function IncomePage() {
   return (
     <IncomePageClient
       initialEntries={entries}
-      initialCount={count}
       sources={sources}
       paychecks={paychecks}
       categories={categories}

@@ -1,6 +1,6 @@
 import { createClient, getUser } from "@/lib/supabase/server";
 import { getSimulatedPurchases } from "@/lib/services/simulation.service";
-import { getSavingsGoals } from "@/lib/services/goal.service";
+import { cachedGetSavingsGoals as getSavingsGoals } from "@/lib/cache/shared-queries";
 import { calculateEmergencyFundStatus, calculateMonthlyNetSavings } from "@/lib/services/forecast.service";
 import { SimulatorClient } from "./simulator-client";
 import { redirect } from "next/navigation";

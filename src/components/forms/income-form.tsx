@@ -18,9 +18,10 @@ interface IncomeFormProps {
   onOpenChange: (open: boolean) => void;
   sources: IncomeSource[];
   editEntry?: IncomeEntry | null;
+  onAdd?: (data: { amount: number; source_id: string; date: string; notes?: string }) => void;
 }
 
-export function IncomeForm({ open, onOpenChange, sources, editEntry }: IncomeFormProps) {
+export function IncomeForm({ open, onOpenChange, sources, editEntry, onAdd }: IncomeFormProps) {
   const [loading, setLoading] = useState(false);
   const isEditing = !!editEntry;
 
@@ -35,6 +36,13 @@ export function IncomeForm({ open, onOpenChange, sources, editEntry }: IncomeFor
       date: formData.get("date") as string,
       notes: formData.get("notes") as string,
     };
+
+    if (!isEditing && onAdd) {
+      onAdd(data);
+      onOpenChange(false);
+      setLoading(false);
+      return;
+    }
 
     const result = isEditing
       ? await editIncome(editEntry.id, data)

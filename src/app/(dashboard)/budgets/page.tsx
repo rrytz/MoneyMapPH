@@ -1,6 +1,6 @@
 import { createClient, getUser } from "@/lib/supabase/server";
-import { getBudgetStatuses } from "@/lib/services/financial.service";
-import { getExpenseCategories } from "@/lib/services/category.service";
+import { cachedGetBudgetStatuses as getBudgetStatuses } from "@/lib/cache/shared-queries";
+import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { getCurrentMonthYear } from "@/lib/utils/date";
 import { BudgetsPageClient } from "./budgets-page-client";
 

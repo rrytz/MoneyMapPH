@@ -1,6 +1,6 @@
 import { createClient, getUser } from "@/lib/supabase/server";
 import { getExpenses } from "@/lib/services/expense.service";
-import { getExpenseCategories } from "@/lib/services/category.service";
+import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { getCurrentMonthYear } from "@/lib/utils/date";
 import { ExpensesPageClient } from "./expenses-page-client";
 
@@ -10,7 +10,7 @@ export default async function ExpensesPage() {
   if (!user) return null;
 
   const { month, year } = getCurrentMonthYear();
-  const [{ data: entries, count }, categories] = await Promise.all([
+  const [{ data: entries }, categories] = await Promise.all([
     getExpenses(supabase, user.id, { month, year, limit: 50 }),
     getExpenseCategories(supabase, user.id),
   ]);
@@ -20,7 +20,6 @@ export default async function ExpensesPage() {
   return (
     <ExpensesPageClient
       initialEntries={entries}
-      initialCount={count}
       categories={categories}
       totalThisMonth={totalThisMonth}
       currentMonth={month}

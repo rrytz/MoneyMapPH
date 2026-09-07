@@ -13,7 +13,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-muted/40 px-4 py-8 sm:py-12 flex items-start sm:items-center justify-center dark:bg-background">
       <div className="auth-animate-rise w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-emerald-950/[0.06] dark:border-border dark:shadow-black/40 lg:grid lg:grid-cols-[1.15fr_1fr]">
         {/* Story panel */}
-        <div className="relative hidden lg:flex flex-col justify-between overflow-hidden border-b border-border bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-10 xl:p-12 dark:from-emerald-950/50 dark:via-card dark:to-background lg:border-b-0 lg:border-r">
+        <div className="relative hidden min-w-0 lg:flex flex-col justify-between overflow-hidden border-b border-border bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-10 xl:p-12 dark:from-emerald-950/50 dark:via-card dark:to-background lg:border-b-0 lg:border-r">
           <div
             aria-hidden
             className="auth-glow pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full bg-emerald-300/30 blur-3xl dark:bg-emerald-500/20"
@@ -69,7 +69,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Form column */}
-        <div className="flex flex-col justify-center px-6 py-10 sm:px-10 sm:py-12">{children}</div>
+        <div className="flex min-w-0 flex-col justify-center px-6 py-10 sm:px-10 sm:py-12">{children}</div>
       </div>
     </div>
   );

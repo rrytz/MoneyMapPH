@@ -94,16 +94,25 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
   async function handleDismissSystemAlert(id: string) {
     setDismissedIds((prev) => new Set(prev).add(id));
     startTransition(async () => {
-      const res = await dismissNotification(id);
-      if (res.error) {
+      try {
+        const res = await dismissNotification(id);
+        if (res.error) {
+          setDismissedIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+          toast.error(res.error);
+        } else {
+          toast.success("Alert dismissed");
+        }
+      } catch {
         setDismissedIds((prev) => {
           const next = new Set(prev);
           next.delete(id);
           return next;
         });
-        toast.error(res.error);
-      } else {
-        toast.success("Alert dismissed");
+        toast.error("Unable to dismiss alert. Please try again.");
       }
     });
   }

@@ -129,7 +129,7 @@ export function AuthForm() {
     <div className="w-full">
       {/* Sliding tab pill */}
       <div
-        className="relative mb-7 inline-flex rounded-xl border border-border bg-muted p-1"
+        className="relative mb-7 grid w-full grid-cols-2 rounded-xl border border-border bg-muted p-1"
         role="tablist"
         aria-label="Authentication mode"
       >
@@ -146,7 +146,7 @@ export function AuthForm() {
             role="tab"
             aria-selected={mode === m}
             onClick={() => switchMode(m)}
-            className={`relative z-10 rounded-lg px-5 py-2 text-[13px] font-semibold transition-colors duration-200 ${
+            className={`relative z-10 whitespace-nowrap rounded-lg py-2 text-center text-[13px] font-semibold transition-colors duration-200 ${
               mode === m
                 ? "text-white dark:text-emerald-950"
                 : "text-muted-foreground hover:text-foreground"

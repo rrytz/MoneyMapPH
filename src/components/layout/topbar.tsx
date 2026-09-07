@@ -40,7 +40,7 @@ export function Topbar({ profile, notifications = [] }: TopbarProps) {
   const ThemeIcon = themeIcon;
 
   return (
-    <header className="vt-topbar sticky top-0 z-30 flex items-center justify-between h-16 px-4 sm:px-6 border-b border-border bg-card/90 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 sm:px-6 border-b border-border bg-card/90 backdrop-blur-md">
       <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
         <span>Workspace</span>
         <span>›</span>

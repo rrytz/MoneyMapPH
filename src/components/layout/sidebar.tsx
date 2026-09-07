@@ -27,7 +27,7 @@ export function Sidebar({ profile }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "vt-sidebar hidden lg:flex flex-col border-r border-border bg-card h-screen sticky top-0 transition-all duration-300 z-20",
+        "hidden lg:flex flex-col border-r border-border bg-card h-screen sticky top-0 transition-all duration-300 z-20",
         collapsed ? "w-[72px]" : "w-[250px]"
       )}
     >

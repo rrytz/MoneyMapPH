@@ -32,7 +32,7 @@ export function MobileNav() {
   const MoreIcon = NAV_ICON_MAP.MoreHorizontal;
 
   return (
-    <nav className="vt-mobile-nav fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md">
       <div className="flex items-center justify-around h-16 px-2">
         {primaryItems.map((item) => {
           const Icon = NAV_ICON_MAP[item.icon];

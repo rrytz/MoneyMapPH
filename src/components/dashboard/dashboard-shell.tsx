@@ -111,6 +111,7 @@ function useChromeData(): ChromeData {
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { profile, notifications, budgetUtilization } = useChromeData();
+  const pathname = usePathname();
 
   return (
     <>
@@ -119,7 +120,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col overflow-hidden">
           <FinancialPulse budgetUtilization={budgetUtilization} />
           <Topbar profile={profile} notifications={notifications} />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
+          <main key={pathname} className="page-enter-anim flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
             {children}
           </main>
         </div>

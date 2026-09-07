@@ -233,36 +233,23 @@
   }
 }
 
-/* Dashboard chrome stays put during route-transition cross-fades */
-.vt-sidebar {
-  view-transition-name: app-sidebar;
+/* Dashboard content arrival: smooth fade/slide that masks the skeleton-to-content swap */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.vt-topbar {
-  view-transition-name: app-topbar;
-}
-.vt-mobile-nav {
-  view-transition-name: app-mobile-nav;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 240ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-old(app-sidebar),
-::view-transition-new(app-sidebar),
-::view-transition-old(app-topbar),
-::view-transition-new(app-topbar),
-::view-transition-old(app-mobile-nav),
-::view-transition-new(app-mobile-nav) {
-  animation: none;
-  mix-blend-mode: normal;
+.page-enter-anim {
+  animation: page-enter 200ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  .page-enter-anim {
     animation: none;
   }
 }

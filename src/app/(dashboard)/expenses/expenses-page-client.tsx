@@ -61,11 +61,15 @@ export function ExpensesPageClient({
 
     startTransition(async () => {
       addOptimisticEntry(optimistic);
-      const result = await addExpense(data);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Expense added");
+      try {
+        const result = await addExpense(data);
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success("Expense added");
+        }
+      } catch {
+        toast.error("Unable to add expense. Please try again.");
       }
     });
     setFormOpen(false);

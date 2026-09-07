@@ -62,11 +62,15 @@ export function IncomePageClient({
 
     startTransition(async () => {
       addOptimisticEntry(optimistic);
-      const result = await addIncome(data);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Income added");
+      try {
+        const result = await addIncome(data);
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success("Income added");
+        }
+      } catch {
+        toast.error("Unable to add income. Please try again.");
       }
     });
     setFormOpen(false);

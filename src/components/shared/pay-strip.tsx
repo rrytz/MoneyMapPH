@@ -61,7 +61,7 @@ export function PayStrip() {
                 {m.label} · {currency.format(m.value)}
               </div>
               <div
-                className={`overflow-hidden rounded-t-[5px] ${
+                className={`w-full overflow-hidden rounded-t-[5px] ${
                   isLean
                     ? "bg-gradient-to-t from-amber-500/20 to-amber-400"
                     : "bg-gradient-to-t from-emerald-600/20 to-emerald-500"

@@ -11,7 +11,9 @@ import { toast } from "sonner";
 import { addPaycheck } from "@/app/(dashboard)/income/actions";
 import { AllocationEditor, type AllocationItem } from "./allocation-editor";
 import type { ExpenseCategory } from "@/lib/types";
-import { toISODateString } from "@/lib/utils/date";
+import { parseISO } from "date-fns";
+import { toISODateString, formatDate } from "@/lib/utils/date";
+import { CUTOFF_ANCHOR_DAYS, estimatePeriodEndForPayout, getCutoffPeriodForDate } from "@/lib/utils/pay-period";
 
 interface PaycheckFormProps {
   open: boolean;
@@ -23,6 +25,16 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState<number>(0);
   const [allocations, setAllocations] = useState<AllocationItem[]>([]);
+  const [payDate, setPayDate] = useState<string>(toISODateString(new Date()));
+  const [overridePeriodEnd, setOverridePeriodEnd] = useState<string | null>(null);
+
+  const inferredPeriodEnd = toISODateString(estimatePeriodEndForPayout(parseISO(payDate)));
+  const cutoff = overridePeriodEnd ?? inferredPeriodEnd;
+  const cutoffDate = parseISO(cutoff);
+  const periodRange = getCutoffPeriodForDate(cutoffDate);
+  const cutoffOptions = CUTOFF_ANCHOR_DAYS.map((d) =>
+    toISODateString(new Date(cutoffDate.getFullYear(), cutoffDate.getMonth(), d))
+  );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,6 +45,7 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
       name: formData.get("name") as string,
       amount: Number(formData.get("amount")),
       date: formData.get("date") as string,
+      period_end: cutoff,
       notes: formData.get("notes") as string,
       allocations: allocations.map((a) => ({
         label: a.label,
@@ -90,9 +103,33 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
               id="date"
               name="date"
               type="date"
-              defaultValue={toISODateString(new Date())}
+              value={payDate}
+              onChange={(e) => {
+                setPayDate(e.target.value);
+                setOverridePeriodEnd(null);
+              }}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cutoff">Cutoff</Label>
+            <select
+              id="cutoff"
+              name="cutoff"
+              value={cutoff}
+              onChange={(e) => setOverridePeriodEnd(e.target.value)}
+              className="flex h-10 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
+            >
+              {cutoffOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {formatDate(opt, "MMM d, yyyy")}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">
+              Work period {formatDate(periodRange.periodStart, "MMM d")} – {formatDate(periodRange.periodEnd, "MMM d")}
+            </p>
           </div>
 
           <AllocationEditor

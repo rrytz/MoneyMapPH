@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
-import { formatDate } from "@/lib/utils/date";
 import type { LeanStatus } from "@/lib/types";
 
 export function LeanStatusChip({ status }: { status: LeanStatus }) {
@@ -17,7 +16,7 @@ export function LeanStatusChip({ status }: { status: LeanStatus }) {
     );
   }
 
-  const { targetPeriodEnd, targetIncome, median, ratio } = status;
+  const { targetIncome, median, ratio } = status;
   const drop = ratio != null && ratio < 1 ? Math.round((1 - ratio) * 100) : 0;
 
   if (status.phase === "lean") {

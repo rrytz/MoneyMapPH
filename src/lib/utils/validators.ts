@@ -45,6 +45,7 @@ export const paycheckSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than 0"),
   date: z.string().min(1, "Date is required"),
   notes: z.string().max(500).optional().or(z.literal("")),
+  period_end: z.string().optional().or(z.literal("")),
   allocations: z.array(allocationSchema),
 });
 

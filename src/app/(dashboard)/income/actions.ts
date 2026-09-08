@@ -105,6 +105,7 @@ export async function addPaycheck(formData: {
   amount: number;
   date: string;
   notes?: string;
+  period_end?: string;
   allocations: Array<{ category_id?: string; label: string; amount: number }>;
 }) {
   const parsed = paycheckSchema.safeParse(formData);

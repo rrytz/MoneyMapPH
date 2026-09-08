@@ -4,7 +4,8 @@ import { calculateEmergencyFundStatus } from "./forecast.service";
 import { getSavingsGoals } from "./goal.service";
 import { getPaychecks } from "./paycheck.service";
 import { getReminders } from "./reminder.service";
-import { getCurrentMonthYear } from "@/lib/utils/date";
+import { getCurrentMonthYear, formatDate } from "@/lib/utils/date";
+import { getLeanStatus } from "./pay-period.service";
 
 export interface NotificationItem {
   id: string;
@@ -27,12 +28,13 @@ export async function getDynamicNotifications(
   const list: NotificationItem[] = [];
 
   // Run checks concurrently to optimize response time
-  const [budgetStatuses, emergencyStatus, goals, paychecks, reminders] = await Promise.all([
+  const [budgetStatuses, emergencyStatus, goals, paychecks, reminders, leanStatus] = await Promise.all([
     getBudgetStatuses(supabase, userId, month, year).catch(() => []),
     calculateEmergencyFundStatus(supabase, userId).catch(() => null),
     getSavingsGoals(supabase, userId).catch(() => []),
     getPaychecks(supabase, userId, month, year).catch(() => []),
     getReminders(supabase, userId, { completed: false }).catch(() => []),
+    getLeanStatus(supabase, userId).catch(() => null),
   ]);
 
   // 1. Budget warnings
@@ -126,6 +128,20 @@ export async function getDynamicNotifications(
       due_date: r.due_date,
     });
   });
+
+  // 6. Lean cutoff check (pay-period engine; paycheck income only)
+  if (leanStatus) {
+    if (leanStatus.phase === "lean" && leanStatus.targetPeriodEnd && leanStatus.median > 0) {
+      const drop = Math.round((1 - (leanStatus.ratio ?? 0)) * 100);
+      list.push({
+        id: `lean-cutoff-${leanStatus.targetPeriodEnd}`,
+        type: "warning",
+        title: "Lean Cutoff Detected",
+        message: `You earned ₱${leanStatus.targetIncome.toLocaleString()} for the cutoff ending ${formatDate(leanStatus.targetPeriodEnd, "MMM d")} vs your typical ₱${Math.round(leanStatus.median).toLocaleString()} (${drop}% below). Variable budgets will suggest tightening next cutoff.`,
+        date: new Date().toISOString(),
+      });
+    }
+  }
 
   // Filter out notifications the user has explicitly dismissed
   if (dismissedIds.length > 0) {

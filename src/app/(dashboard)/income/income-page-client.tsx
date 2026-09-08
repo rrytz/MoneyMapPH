@@ -12,16 +12,18 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IncomeForm } from "@/components/forms/income-form";
 import { PaycheckPlanner } from "./paycheck-planner";
+import { LeanStatusChip } from "./lean-status-chip";
 import { removeIncome, addIncome } from "./actions";
 import { formatDate } from "@/lib/utils/date";
 import { toast } from "sonner";
-import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory } from "@/lib/types";
+import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory, LeanStatus } from "@/lib/types";
 
 interface IncomePageClientProps {
   initialEntries: IncomeEntry[];
   sources: IncomeSource[];
   paychecks: Paycheck[];
   categories: ExpenseCategory[];
+  leanStatus: LeanStatus;
   totalThisMonth: number;
   currentMonth: number;
   currentYear: number;
@@ -32,6 +34,7 @@ export function IncomePageClient({
   sources,
   paychecks,
   categories,
+  leanStatus,
   totalThisMonth,
 }: IncomePageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
@@ -241,7 +244,8 @@ export function IncomePageClient({
           />
         </TabsContent>
 
-        <TabsContent value="paychecks">
+        <TabsContent value="paychecks" className="space-y-6">
+          <LeanStatusChip status={leanStatus} />
           <PaycheckPlanner
             initialPaychecks={paychecks}
             categories={categories}

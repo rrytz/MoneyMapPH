@@ -5,6 +5,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { LineChart as LineChartIcon } from "lucide-react";
+import { getTrendChartState, TREND_SPARSE_TITLE, TREND_SPARSE_DESC } from "@/lib/utils/dashboard-charts";
 import type { MonthlySnapshot } from "@/lib/types";
 import { getMonthName } from "@/lib/utils/date";
 import { formatCurrency } from "@/lib/utils/currency";
@@ -21,7 +22,9 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
     setIsMounted(true);
   }, []);
 
-  if (!snapshots || snapshots.length === 0) {
+  const trendState = getTrendChartState(snapshots?.length ?? 0);
+
+  if (trendState !== "chart") {
     return (
       <FintechCard>
         <FintechCardHeader>
@@ -31,8 +34,12 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
         <FintechCardContent>
           <EmptyState
             icon={<LineChartIcon className="h-6 w-6" />}
-            title="No snapshot data yet"
-            description="Log your income and expenses to view historical trend performance."
+            title={trendState === "empty" ? "No snapshot data yet" : TREND_SPARSE_TITLE}
+            description={
+              trendState === "empty"
+                ? "Log your income and expenses to view historical trend performance."
+                : TREND_SPARSE_DESC
+            }
             actionLabel="Add Transaction"
             actionHref="/transactions"
           />

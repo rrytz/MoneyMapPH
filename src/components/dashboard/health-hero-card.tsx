@@ -1,4 +1,5 @@
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
+import { getHealthHeroMessage } from "@/lib/utils/health-hero-copy";
 import type { FinancialHealthReport } from "@/lib/types";
 
 interface HealthHeroCardProps {
@@ -55,7 +56,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              You&apos;re doing better than 82% of similar earners in BPO sector. Keep it up!
+              {getHealthHeroMessage(score, report.grade)}
             </p>
           </div>
         </div>

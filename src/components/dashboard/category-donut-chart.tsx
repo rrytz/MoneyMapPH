@@ -89,27 +89,47 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
       <FintechCardContent className="flex flex-col gap-4">
         {/* Recharts Donut */}
         {isMounted ? (
-          <div className="w-full" style={{ height: 180 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={top5}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="55%"
-                  outerRadius="80%"
-                  paddingAngle={3}
-                  dataKey="amount"
-                  nameKey="name"
-                  strokeWidth={0}
-                >
-                  {top5.map((entry) => (
-                    <Cell key={`cell-${entry.id}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<DonutTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="relative w-full" style={{ height: 180 }}>
+            {top5.length === 1 ? (
+              <div className="flex h-full items-center justify-center">
+                <svg viewBox="0 0 100 100" className="h-[144px] w-[144px]" role="img" aria-label={`${top5[0].name} 100% of monthly spending`}>
+                  <circle cx="50" cy="50" r="40" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="9" fill="transparent" />
+                  <circle cx="50" cy="50" r="40" stroke={top5[0].color} strokeWidth="9" fill="transparent" />
+                </svg>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={top5}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="55%"
+                    outerRadius="80%"
+                    paddingAngle={3}
+                    dataKey="amount"
+                    nameKey="name"
+                    strokeWidth={0}
+                    isAnimationActive={false}
+                  >
+                    {top5.map((entry) => (
+                      <Cell key={`cell-${entry.id}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<DonutTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+            {top5.length === 1 && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-xl font-black text-foreground tabular-nums">
+                  {top5[0].percentage.toFixed(0)}%
+                </span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">
+                  {formatCurrency(top5[0].amount)}
+                </span>
+              </div>
+            )}
           </div>
         ) : (
           <div className="w-full rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse" style={{ height: 180 }} />

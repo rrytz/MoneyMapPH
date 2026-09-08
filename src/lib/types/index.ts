@@ -85,6 +85,7 @@ export interface Paycheck {
   amount: number;
   date: string;
   notes: string | null;
+  period_end?: string | null;
   created_at: string;
   updated_at: string;
   allocations?: PaycheckAllocation[];
@@ -198,6 +199,7 @@ export type PaycheckFormData = {
   amount: number;
   date: string;
   notes?: string;
+  period_end?: string;
   allocations: Array<{
     category_id?: string;
     label: string;

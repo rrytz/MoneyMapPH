@@ -1,6 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import type { Paycheck, PaycheckSummary } from "@/lib/types";
 import { getMonthDateRange } from "@/lib/utils/date";
+import { parseISO } from "date-fns";
+import { toISODateString } from "@/lib/utils/date";
+import { getCutoffPeriodForDate } from "@/lib/utils/pay-period";
 
 export async function getPaychecks(
   supabase: SupabaseClient,
@@ -36,6 +39,7 @@ export async function createPaycheck(
     amount: number;
     date: string;
     notes?: string;
+    period_end?: string;
     allocations: Array<{
       category_id?: string;
       label: string;
@@ -51,6 +55,8 @@ export async function createPaycheck(
       amount: data.amount,
       date: data.date,
       notes: data.notes || null,
+      period_end:
+        data.period_end || toISODateString(getCutoffPeriodForDate(parseISO(data.date)).periodEnd),
     })
     .select()
     .single();

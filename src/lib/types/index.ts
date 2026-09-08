@@ -142,6 +142,19 @@ export interface BudgetStatus {
   status: "under" | "near" | "over";
 }
 
+export type LeanPhase = "insufficient" | "normal" | "lean";
+
+export interface LeanStatus {
+  phase: LeanPhase;
+  targetPeriodEnd: string | null;
+  targetIncome: number;
+  median: number;
+  ratio: number | null;
+  threshold: number;
+  periodsUsed: number;
+  windowPeriods: number;
+}
+
 export interface PaycheckSummary {
   paycheck: Paycheck;
   totalAllocated: number;

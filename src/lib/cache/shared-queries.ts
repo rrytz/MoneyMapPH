@@ -5,6 +5,7 @@ import { getSnapshots } from "@/lib/services/snapshot.service";
 import { getExpenseCategories, getIncomeSources } from "@/lib/services/category.service";
 import { getSavingsGoals } from "@/lib/services/goal.service";
 import { getPaychecks } from "@/lib/services/paycheck.service";
+import { getLeanStatus } from "@/lib/services/pay-period.service";
 import type {
   MonthlySummary,
   BudgetStatus,
@@ -13,6 +14,7 @@ import type {
   MonthlySnapshot,
   ExpenseCategory,
   IncomeSource,
+  LeanStatus,
 } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 60;
@@ -93,3 +95,13 @@ export const cachedGetPaychecks = (
     ["paychecks", userId],
     { revalidate: REVALIDATE_SECONDS, tags: [`q:paychecks:${userId}`, "q:financial"] }
   )(month, year);
+
+export const cachedGetLeanStatus = (
+  supabase: SupabaseClient,
+  userId: string
+): Promise<LeanStatus> =>
+  unstable_cache(
+    async () => getLeanStatus(supabase, userId),
+    ["lean-status", userId],
+    { revalidate: REVALIDATE_SECONDS, tags: [`q:lean:${userId}`, "q:financial"] }
+  )();

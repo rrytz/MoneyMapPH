@@ -5,6 +5,10 @@ export const BUDGET_THRESHOLDS = {
   NEAR: 100,
 } as const;
 
+export const LEAN_CUTOFF_THRESHOLD = 0.75;
+export const MIN_LEAN_PERIODS = 6;
+export const LEAN_WINDOW_PERIODS = 24;
+
 export const ITEMS_PER_PAGE = 20;
 
 export const CURRENCY_MAP: Record<string, { symbol: string; code: string; locale: string }> = {

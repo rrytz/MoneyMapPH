@@ -30,7 +30,7 @@ import {
   editIncomeSourceSetting,
   removeIncomeSourceSetting,
 } from "./actions";
-import type { Profile, ExpenseCategory, IncomeSource } from "@/lib/types";
+import type { Profile, ExpenseCategory, IncomeSource, IncomeSourceType } from "@/lib/types";
 
 interface SettingsClientProps {
   profile: Profile | null;
@@ -60,6 +60,7 @@ export function SettingsClient({
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
   const [selectedSource, setSelectedSource] = useState<IncomeSource | null>(null);
   const [sourceName, setSourceName] = useState("");
+  const [sourceType, setSourceType] = useState<IncomeSourceType>("core");
   const [sourceDeleteId, setSourceDeleteId] = useState<string | null>(null);
   const [sourceDeleting, setSourceDeleting] = useState(false);
 
@@ -149,12 +150,14 @@ export function SettingsClient({
   function openNewSourceModal() {
     setSelectedSource(null);
     setSourceName("");
+    setSourceType("core");
     setSourceModalOpen(true);
   }
 
   function openEditSourceModal(src: IncomeSource) {
     setSelectedSource(src);
     setSourceName(src.name);
+    setSourceType(src.type ?? "core");
     setSourceModalOpen(true);
   }
 
@@ -167,8 +170,8 @@ export function SettingsClient({
 
     startTransition(async () => {
       const res = selectedSource
-        ? await editIncomeSourceSetting(selectedSource.id, { name: sourceName })
-        : await addIncomeSourceSetting({ name: sourceName });
+        ? await editIncomeSourceSetting(selectedSource.id, { name: sourceName, type: sourceType })
+        : await addIncomeSourceSetting({ name: sourceName, type: sourceType });
 
       if (res.error) {
         toast.error(res.error);
@@ -344,6 +347,11 @@ export function SettingsClient({
                             Default Source
                           </span>
                         )}
+                        {src.type === "incentive" && (
+                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/40 text-[9px] font-bold text-violet-700 dark:text-violet-300">
+                            Incentive
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -432,6 +440,21 @@ export function SettingsClient({
                 onChange={(e) => setSourceName(e.target.value)}
                 required
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="src-type">Source Type</Label>
+              <Select value={sourceType} onValueChange={(v) => setSourceType((v || "core") as IncomeSourceType)}>
+                <SelectTrigger id="src-type">
+                  <SelectValue placeholder="Select source type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="core">Core income (regular salary)</SelectItem>
+                  <SelectItem value="incentive">Incentive (bonus, OT, commission)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                Core income is paychecks only. Incentives count toward safe-to-spend only when you log them.
+              </p>
             </div>
             <DialogFooter className="pt-2">
               <Button type="button" variant="outline" onClick={() => setSourceModalOpen(false)}>

@@ -6,6 +6,9 @@ import { getExpenseCategories, getIncomeSources } from "@/lib/services/category.
 import { getSavingsGoals } from "@/lib/services/goal.service";
 import { getPaychecks } from "@/lib/services/paycheck.service";
 import { getLeanStatus } from "@/lib/services/pay-period.service";
+import { getSafeToSpend } from "@/lib/services/safe-to-spend.service";
+import { getCutoffPeriodForDate } from "@/lib/utils/pay-period";
+import { toISODateString } from "@/lib/utils/date";
 import type {
   MonthlySummary,
   BudgetStatus,
@@ -15,6 +18,7 @@ import type {
   ExpenseCategory,
   IncomeSource,
   LeanStatus,
+  SafeToSpendStatus,
 } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 60;
@@ -105,3 +109,16 @@ export const cachedGetLeanStatus = (
     ["lean-status", userId],
     { revalidate: REVALIDATE_SECONDS, tags: [`q:lean:${userId}`, "q:financial"] }
   )();
+
+export const cachedGetSafeToSpend = (
+  supabase: SupabaseClient,
+  userId: string,
+  now: Date = new Date()
+): Promise<SafeToSpendStatus> => {
+  const periodEnd = toISODateString(getCutoffPeriodForDate(now).periodEnd);
+  return unstable_cache(
+    async () => getSafeToSpend(supabase, userId, now),
+    ["safe-to-spend", userId, periodEnd],
+    { revalidate: REVALIDATE_SECONDS, tags: [`q:safe-to-spend:${userId}`, "q:financial"] }
+  )();
+};

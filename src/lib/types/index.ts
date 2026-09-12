@@ -302,5 +302,20 @@ export type ActionResponse<T = void> = {
   error?: string;
 };
 
+export interface SafeToSpendStatus {
+  periodStart: string;
+  periodEnd: string;
+  payoutDate: string;
+  coreIncome: number;
+  incentiveIncomeLogged: number;
+  spentThisPeriod: number;
+  safeToSpend: number;
+  hasPaychecks: boolean;
+  daysTotal: number;
+  daysElapsed: number;
+  daysRemaining: number;
+  fractionElapsed: number;
+}
+
 
 

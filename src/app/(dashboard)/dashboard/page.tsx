@@ -4,9 +4,11 @@ import { cachedGetSnapshots as getSnapshots } from "@/lib/cache/shared-queries";
 import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { cachedGetSavingsGoals as getSavingsGoals } from "@/lib/cache/shared-queries";
 import { cachedGetPaychecks as getPaychecks } from "@/lib/cache/shared-queries";
+import { cachedGetSafeToSpend as getSafeToSpend } from "@/lib/cache/shared-queries";
 import { calculateFinancialHealthReport } from "@/lib/services/health.service";
 import { getCurrentMonthYear } from "@/lib/utils/date";
 import { KpiCard } from "@/components/dashboard/kpi-card";
+import { SafeToSpendCard } from "@/components/dashboard/safe-to-spend-card";
 import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
@@ -34,6 +36,7 @@ export default async function DashboardPage() {
     recentExpenses,
     budgetStatuses,
     paychecks,
+    safeToSpend,
   ] = await Promise.all([
     getMonthlySummary(supabase, user.id, month, year),
     getSnapshots(supabase, user.id, 6),
@@ -53,6 +56,7 @@ export default async function DashboardPage() {
       .limit(5),
     getBudgetStatuses(supabase, user.id, month, year),
     getPaychecks(supabase, user.id, month, year),
+    getSafeToSpend(supabase, user.id),
   ]);
 
   const healthReport = await calculateFinancialHealthReport(supabase, user.id, {
@@ -102,6 +106,7 @@ export default async function DashboardPage() {
           <FinancialHealthHeroCard report={healthReport} />
         </div>
         <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <SafeToSpendCard status={safeToSpend} />
           <KpiCard
             title="Remaining Budget"
             value={summary.remainingBudget}

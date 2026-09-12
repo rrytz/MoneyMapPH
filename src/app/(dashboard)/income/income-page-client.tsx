@@ -13,10 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IncomeForm } from "@/components/forms/income-form";
 import { PaycheckPlanner } from "./paycheck-planner";
 import { LeanStatusChip } from "./lean-status-chip";
+import { PeriodSafeToSpendCard } from "./period-safe-to-spend-card";
 import { removeIncome, addIncome } from "./actions";
 import { formatDate } from "@/lib/utils/date";
 import { toast } from "sonner";
-import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory, LeanStatus } from "@/lib/types";
+import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory, LeanStatus, SafeToSpendStatus } from "@/lib/types";
 
 interface IncomePageClientProps {
   initialEntries: IncomeEntry[];
@@ -24,6 +25,7 @@ interface IncomePageClientProps {
   paychecks: Paycheck[];
   categories: ExpenseCategory[];
   leanStatus: LeanStatus;
+  safeToSpend: SafeToSpendStatus;
   totalThisMonth: number;
   currentMonth: number;
   currentYear: number;
@@ -35,6 +37,7 @@ export function IncomePageClient({
   paychecks,
   categories,
   leanStatus,
+  safeToSpend,
   totalThisMonth,
 }: IncomePageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
@@ -246,6 +249,7 @@ export function IncomePageClient({
 
         <TabsContent value="paychecks" className="space-y-6">
           <LeanStatusChip status={leanStatus} />
+          <PeriodSafeToSpendCard status={safeToSpend} />
           <PaycheckPlanner
             initialPaychecks={paychecks}
             categories={categories}

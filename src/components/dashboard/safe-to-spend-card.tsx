@@ -29,9 +29,9 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
 
   const received = status.coreIncome + status.incentiveIncomeLogged;
   const state =
-    status.safeToSpend <= 0
+    status.safeToSpend < 0
       ? { color: "text-rose-500", bar: "bg-rose-500", label: "Over this cutoff" }
-      : received > 0 && status.safeToSpend / received <= 0.2
+      : status.safeToSpend === 0 || (received > 0 && status.safeToSpend / received <= 0.2)
         ? { color: "text-amber-500", bar: "bg-amber-500", label: "Nearly out this cutoff" }
         : { color: "text-emerald-600 dark:text-emerald-400", bar: "bg-emerald-500", label: "Safe to spend this cutoff" };
   const pct = Math.min(100, Math.round(status.fractionElapsed * 100));
@@ -50,7 +50,7 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
 
         <div className="space-y-1">
           <span className="text-xs font-medium text-muted-foreground">Safe to Spend</span>
-          <CurrencyDisplay amount={status.safeToSpend} className={cn("text-2xl sm:text-3xl font-bold tracking-tight tabular-nums", state.color)} />
+          <CurrencyDisplay amount={status.safeToSpend} signed className={cn("text-2xl sm:text-3xl font-bold tracking-tight tabular-nums", state.color)} />
           <p className="text-[11px] text-muted-foreground">
             this cutoff · ends {formatDate(status.periodEnd, "MMM d")}
           </p>

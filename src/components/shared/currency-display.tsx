@@ -6,6 +6,7 @@ interface CurrencyDisplayProps {
   currency?: string;
   className?: string;
   colored?: boolean;
+  signed?: boolean;
 }
 
 export function CurrencyDisplay({
@@ -13,6 +14,7 @@ export function CurrencyDisplay({
   currency = "PHP",
   className,
   colored = false,
+  signed = false,
 }: CurrencyDisplayProps) {
   return (
     <span
@@ -23,7 +25,7 @@ export function CurrencyDisplay({
         className
       )}
     >
-      {formatCurrency(Math.abs(amount), currency)}
+      {formatCurrency(signed ? amount : Math.abs(amount), currency)}
     </span>
   );
 }

@@ -43,6 +43,7 @@ export function PeriodSafeToSpendCard({ status }: { status: SafeToSpendStatus })
               <span className="text-xs text-muted-foreground">Safe to spend</span>
               <CurrencyDisplay
                 amount={status.safeToSpend}
+                signed
                 className={cn(
                   "text-2xl font-bold tracking-tight tabular-nums",
                   status.safeToSpend <= 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"

@@ -3,6 +3,7 @@ import {
   CUTOFF_ANCHOR_DAYS,
   getCutoffPeriodForDate,
   getPayoutDateForPeriodEnd,
+  getPeriodProgress,
   getPeriodRange,
   listCutoffPeriodsBetween,
   estimatePeriodEndForPayout,
@@ -105,5 +106,40 @@ describe("estimatePeriodEndForPayout", () => {
   });
   it("a mid-period pay date falls back to its containing cutoff", () => {
     expect(estimatePeriodEndForPayout(ymd(2026, 9, 18))).toEqual(ymd(2026, 9, 28));
+  });
+});
+
+describe("getPeriodProgress", () => {
+  const PERIOD_END_B = new Date(2026, 8, 28); // period B: 2026-09-14..2026-09-28 (15 days, inclusive)
+
+  it("returns days left at the very start of the period", () => {
+    const p = getPeriodProgress(PERIOD_END_B, new Date(2026, 8, 13));
+    expect(p.daysTotal).toBe(15);
+    expect(p.daysElapsed).toBe(0);
+    expect(p.daysRemaining).toBe(15);
+    expect(p.fractionElapsed).toBe(0);
+  });
+
+  it("counts the first day as elapsed on periodStart", () => {
+    const p = getPeriodProgress(PERIOD_END_B, new Date(2026, 8, 14));
+    expect(p.daysElapsed).toBe(1);
+    expect(p.daysRemaining).toBe(14);
+    expect(p.fractionElapsed).toBeCloseTo(1 / 15);
+  });
+
+  it("reaches 1 on periodEnd", () => {
+    const p = getPeriodProgress(new Date(2026, 8, 13), new Date(2026, 8, 13));
+    // period A: 2026-08-29..2026-09-13 (16 days, inclusive)
+    expect(p.daysTotal).toBe(16);
+    expect(p.daysElapsed).toBe(16);
+    expect(p.daysRemaining).toBe(0);
+    expect(p.fractionElapsed).toBe(1);
+  });
+
+  it("clamps past the period end", () => {
+    const p = getPeriodProgress(PERIOD_END_B, new Date(2026, 8, 29));
+    expect(p.daysElapsed).toBe(15);
+    expect(p.daysRemaining).toBe(0);
+    expect(p.fractionElapsed).toBe(1);
   });
 });

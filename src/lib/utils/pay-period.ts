@@ -83,3 +83,27 @@ export function estimatePeriodEndForPayout(payoutDate: Date): Date {
   }
   return getCutoffPeriodForDate(payoutDate).periodEnd;
 }
+
+const DAY_MS = 86_400_000;
+
+export interface PeriodProgress {
+  daysTotal: number;
+  daysElapsed: number;
+  daysRemaining: number;
+  fractionElapsed: number;
+}
+
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function getPeriodProgress(periodEnd: Date, now: Date = new Date()): PeriodProgress {
+  const { periodStart } = getPeriodRange(periodEnd);
+  const daysTotal =
+    Math.round((startOfDay(periodEnd).getTime() - startOfDay(periodStart).getTime()) / DAY_MS) + 1;
+  const elapsed = Math.round((startOfDay(now).getTime() - startOfDay(periodStart).getTime()) / DAY_MS) + 1;
+  const daysElapsed = Math.min(Math.max(elapsed, 0), daysTotal);
+  const daysRemaining = Math.max(daysTotal - daysElapsed, 0);
+  const fractionElapsed = daysTotal > 0 ? daysElapsed / daysTotal : 0;
+  return { daysTotal, daysElapsed, daysRemaining, fractionElapsed };
+}

@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import type { ExpenseCategory, IncomeSource } from "@/lib/types";
+import type { ExpenseCategory, IncomeSource, IncomeSourceType } from "@/lib/types";
 
 export async function getExpenseCategories(
   supabase: SupabaseClient,
@@ -93,7 +93,7 @@ export async function deleteExpenseCategory(
 export async function createIncomeSource(
   supabase: SupabaseClient,
   userId: string,
-  data: { name: string }
+  data: { name: string; type?: IncomeSourceType }
 ): Promise<IncomeSource> {
   const { data: maxOrder } = await supabase
     .from("income_sources")
@@ -108,6 +108,7 @@ export async function createIncomeSource(
     .insert({
       user_id: userId,
       name: data.name,
+      type: data.type ?? "core",
       sort_order: (maxOrder?.sort_order || 0) + 1,
     })
     .select()
@@ -121,7 +122,7 @@ export async function updateIncomeSource(
   supabase: SupabaseClient,
   userId: string,
   sourceId: string,
-  data: { name: string }
+  data: { name: string; type?: IncomeSourceType }
 ): Promise<IncomeSource> {
   const { data: source, error } = await supabase
     .from("income_sources")

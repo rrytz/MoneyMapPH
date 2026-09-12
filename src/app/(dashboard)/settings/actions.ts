@@ -105,7 +105,7 @@ export async function removeExpenseCategorySetting(categoryId: string) {
   }
 }
 
-export async function addIncomeSourceSetting(data: { name: string }) {
+export async function addIncomeSourceSetting(data: { name: string; type?: "core" | "incentive" }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
@@ -127,7 +127,7 @@ export async function addIncomeSourceSetting(data: { name: string }) {
   }
 }
 
-export async function editIncomeSourceSetting(sourceId: string, data: { name: string }) {
+export async function editIncomeSourceSetting(sourceId: string, data: { name: string; type?: "core" | "incentive" }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };

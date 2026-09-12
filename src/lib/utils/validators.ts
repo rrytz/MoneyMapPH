@@ -99,6 +99,7 @@ export const categorySchema = z.object({
 
 export const sourceSchema = z.object({
   name: z.string().min(1, "Source name is required").max(50, "Name must be 50 characters or less"),
+  type: z.enum(["core", "incentive"]).default("core"),
 });
 
 export type ProfileSchemaType = z.infer<typeof profileSchema>;

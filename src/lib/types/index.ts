@@ -8,10 +8,13 @@ export interface Profile {
   updated_at: string;
 }
 
+export type IncomeSourceType = "core" | "incentive";
+
 export interface IncomeSource {
   id: string;
   user_id: string;
   name: string;
+  type: IncomeSourceType;
   is_default: boolean;
   sort_order: number;
   created_at: string;

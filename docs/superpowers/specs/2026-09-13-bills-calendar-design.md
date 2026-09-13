@@ -16,7 +16,7 @@ The app's cutoff model (V1 lean detection, V2 safe-to-spend) tells a Filipino BP
 6. **Never invent a number**: seeded template rows arrive `active = true` but with `expected_amount = NULL` and `day_of_month = NULL` — not `ready`, so they are invisible to every money surface until the user explicitly sets both fields. No fake placeholder amounts or due days.
 7. **Actual beats forecast**: once an occurrence is paid, every summary uses the actual paid amount; `expected_amount` is used only where no payment exists.
 8. **Navigation stays at 8 items**: Bills lives as a second tab inside **Income** (`/income?tab=bills`). Domain ownership over usage frequency — Income owns the cash-flow-coverage question via the cutoff/safe-to-spend model. `NAV_ITEMS` and the sidebar are untouched.
-9. **Surfaces shipped**: Bills tab (calendar + CRUD), "before next paycheck" summary, drawer alerts (`bills-due-soon-<periodEnd>`, `bills-coverage-<periodEnd>`). Dashboard widget is deferred.
+9. **Surfaces shipped**: Bills tab (calendar + CRUD), "before next paycheck" summary, drawer alerts (`bills-due-soon-<setHash>`, `bills-coverage-<periodEnd>`). Dashboard widget is deferred.
 
 ## 2. Data model — `supabase/migrations/008_bills_schema.sql`
 
@@ -123,10 +123,11 @@ Two alerts added to `getDynamicNotifications` (runs in its existing `Promise.all
 
 | Alert | ID (deterministic, exactly-one) | Fires when | Copy |
 |---|---|---|---|
-| Due-soon | `bills-due-soon-<periodEnd>` | ≥1 unpaid `ready && active` bill with `dueDate ∈ [today, today + 7]` | "N bills due in the next 7 days · ₱Y total" |
+| Due-soon | `bills-due-soon-<setHash>` | ≥1 unpaid `ready && active` bill with `dueDate ∈ [today, today + 7]` | "N bills due in the next 7 days · ₱Y total" |
 | Coverage nudge | `bills-coverage-<periodEnd>` | `Upcoming > safeToSpend` | "Bills before your <payout> payout exceed what's left this cutoff by ₱X" |
 
-- IDs anchor to the **current in-flight cutoff's `periodEnd`** (the app's canonical money-window primitive), not a rolling date: content (counts/totals) re-computes on every read under a stable ID, so the alert updates in place day-to-day — it neither duplicates nor resurrects a dismissed alert. Dismissal silences the alert for that cutoff; a new cutoff refires it under a fresh `-<periodEnd>` ID. (A `-<horizonDate>` key was rejected: the horizon slides daily, so the ID would change daily and resurrect dismissed alerts.)
+- **Due-soon keys to its qualifying content, not to a date**: `setHash` = short hash of the canonical sorted tuple string `(bill_id, due_date, expected_amount)` over the qualifying occurrences. A 7-day window is rolling content, not a per-cutoff constant — keying it to `periodEnd` would let one dismissal silence materially different content for the whole cutoff, while keying to the rolling date (`-<horizonDate>`) would resurrect a dismissed alert daily with new IDs. Content-keying fixes both: identical qualifying content ⇒ same key (dismissal holds day-to-day); any material change — a bill entering the window, getting paid, or having its amount edited ⇒ new key ⇒ the alert legitimately re-fires. Deterministic ⇒ exactly-one-non-duplicating, consistent with the drawer's `dismissedIds`.
+- **Coverage keys to `periodEnd` because its comparison is period-scoped**: both terms (`Upcoming`, `safeToSpend`) are defined relative to the current cutoff, so a period-stable ID that rotates on rollover mirrors the V1-verified `lean-cutoff-<periodEnd>` behavior — a fixed single fact per cutoff, no day-over-day drift.
 - Graceful absence: no eligible bills ⇒ no alerts. Dedupe by construction (deterministic keys) consistent with the V1-verified `lean-cutoff-<periodEnd>` behavior and the drawer's `dismissedIds`.
 
 ## 8. Testing
@@ -135,6 +136,7 @@ Two alerts added to `getDynamicNotifications` (runs in its existing `Promise.all
 - **Service** (`src/tests/bills.service.test.ts`, mock-supabase pattern): CRUD user-scoping; `NULLS LAST` ordering; `getBillView` keeps raw + gated arrays separate; `getBillsDueBy` total = paid-actual + unpaid-expected, overdue inclusion, paused/incomplete exclusion.
 - **RPCs**: `pay_bill` atomicity (both inserts or neither), double-pay rejection, `unpay_bill` symmetric removal (payment + expense), paused/incomplete rejection — via mocked rpc calls.
 - **Components**: calendar cell (unpaid / paid / overdue / insufficient-not-rendered), summary card states (`covered` / `tight` / `short`, Paid/Upcoming split), activation form callout.
+- **Notification-key stability**: the pure `keyForDueSoon(occurrences)` helper — same qualifying set ⇒ same key; one bill paid (exits set) / a new bill enters / an amount edit ⇒ new key; `bills-coverage-<periodEnd>` rotates only on cutoff rollover.
 - **Migration**: `008` applied to cloud (Management API / `supabase db push` per the 007 pattern); verify tables, RLS policies, seeding trigger on a fresh user (templates land `Incomplete`), both RPCs deployed.
 - **Gates**: `tsc`, vitest (125 tests grow), lint, production build (19+ pages).
 - **Live (CDP, QA account, prod, V2 T8 pattern)**: activate a seeded template (fill amount + day) → appears; pay via quick form → verify the **expense** exists in `/expenses` and is linked; double-pay rejection; pause excludes from calendar+summary (but stays in the CRUD list); incomplete bill excluded from all money surfaces; calendar anchor/payout markers; drawer due-soon + coverage-nudge alerts (crafted safe-to-spend to force each state); summary shows paid at actual, not expected. Screenshots to the verification folder.

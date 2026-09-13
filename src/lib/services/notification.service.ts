@@ -4,7 +4,10 @@ import { calculateEmergencyFundStatus } from "./forecast.service";
 import { getSavingsGoals } from "./goal.service";
 import { getPaychecks } from "./paycheck.service";
 import { getReminders } from "./reminder.service";
+import { getBillsDueBy } from "./bills.service";
+import { getSafeToSpend } from "./safe-to-spend.service";
 import { getCurrentMonthYear, formatDate } from "@/lib/utils/date";
+import { dueSoonKey } from "@/lib/utils/bills";
 import { getLeanStatus } from "./pay-period.service";
 
 export interface NotificationItem {
@@ -28,14 +31,23 @@ export async function getDynamicNotifications(
   const list: NotificationItem[] = [];
 
   // Run checks concurrently to optimize response time
-  const [budgetStatuses, emergencyStatus, goals, paychecks, reminders, leanStatus] = await Promise.all([
-    getBudgetStatuses(supabase, userId, month, year).catch(() => []),
-    calculateEmergencyFundStatus(supabase, userId).catch(() => null),
-    getSavingsGoals(supabase, userId).catch(() => []),
-    getPaychecks(supabase, userId, month, year).catch(() => []),
-    getReminders(supabase, userId, { completed: false }).catch(() => []),
-    getLeanStatus(supabase, userId).catch(() => null),
-  ]);
+  const [budgetStatuses, emergencyStatus, goals, paychecks, reminders, leanStatus, funds, billsDue] =
+    await Promise.all([
+      getBudgetStatuses(supabase, userId, month, year).catch(() => []),
+      calculateEmergencyFundStatus(supabase, userId).catch(() => null),
+      getSavingsGoals(supabase, userId).catch(() => []),
+      getPaychecks(supabase, userId, month, year).catch(() => []),
+      getReminders(supabase, userId, { completed: false }).catch(() => []),
+      getLeanStatus(supabase, userId).catch(() => null),
+      getSafeToSpend(supabase, userId).catch(() => null), // → funds
+      (async () => {
+        const fundsRes = await getSafeToSpend(supabase, userId).catch(() => null);
+        if (!fundsRes) return null;
+        const todayPlus7 = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const horizon = todayPlus7 > fundsRes.payoutDate ? todayPlus7 : fundsRes.payoutDate;
+        return getBillsDueBy(supabase, userId, horizon).catch(() => null); // → billsDue
+      })(),
+    ]);
 
   // 1. Budget warnings
   budgetStatuses.forEach((b) => {
@@ -138,6 +150,38 @@ export async function getDynamicNotifications(
         type: "warning",
         title: "Lean Cutoff Detected",
         message: `You earned ₱${leanStatus.targetIncome.toLocaleString()} for the cutoff ending ${formatDate(leanStatus.targetPeriodEnd, "MMM d")} vs your typical ₱${Math.round(leanStatus.median).toLocaleString()} (${drop}% below). Variable budgets will suggest tightening next cutoff.`,
+        date: new Date().toISOString(),
+      });
+    }
+  }
+
+  // 7. Bills (K2): due-soon + coverage nudge
+  if (funds && billsDue) {
+    const today = new Date();
+    const todayISO = today.toISOString().slice(0, 10);
+    const plus7 = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const dueSoonOcc = billsDue.occurrences.filter(
+      (o) => o.dueDate >= todayISO && o.dueDate <= plus7
+    );
+    if (dueSoonOcc.length > 0) {
+      const total = dueSoonOcc.reduce((s, o) => s + o.expectedAmount, 0);
+      list.push({
+        id: dueSoonKey(dueSoonOcc.map((o) => ({ bill_id: o.bill_id, dueDate: o.dueDate, expectedAmount: o.expectedAmount }))),
+        type: "warning",
+        title: "Bills Due Soon",
+        message: `${dueSoonOcc.length} bill${dueSoonOcc.length === 1 ? "" : "s"} due in the next 7 days · ₱${total.toLocaleString()} total`,
+        date: new Date().toISOString(),
+      });
+    }
+
+    if (billsDue.upcomingTotal > funds.safeToSpend) {
+      const shortfall = Math.round(billsDue.upcomingTotal - funds.safeToSpend);
+      list.push({
+        id: `bills-coverage-${funds.periodEnd}`,
+        type: "warning",
+        title: "Bills before Next Paycheck",
+        message: `Bills before your ${formatDate(funds.payoutDate, "MMM d")} payout exceed what's left this cutoff by ₱${shortfall.toLocaleString()}.`,
         date: new Date().toISOString(),
       });
     }

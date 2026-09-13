@@ -96,11 +96,16 @@ export async function getBudgetStatuses(
 
   if (!budget?.budget_categories) return [];
 
+  // Intentionally includes savings-goal contributions (goal_id set): an expense
+  // tagged with a category that has a budget target counts toward that category's
+  // spent total regardless of origin. getMonthlySummary deliberately excludes
+  // goal-linked expenses from the dashboard's net-savings math — those are
+  // treated as money set aside, not consumption spend — but a budget category
+  // tracking target adherence must see its full tagged outflow.
   const { data: expenses } = await supabase
     .from("expenses")
     .select("amount, category_id")
     .eq("user_id", userId)
-    .is("goal_id", null)
     .gte("date", start)
     .lte("date", end);
 

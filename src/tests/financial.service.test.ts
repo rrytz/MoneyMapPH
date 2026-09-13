@@ -218,4 +218,34 @@ describe("getBudgetStatuses", () => {
     expect(statuses[0].status).toBe("over");
     expect(statuses[0].spent).toBe(10001);
   });
+
+  it("counts savings-goal-contribution expenses in the budget category spent total", async () => {
+    // Savings contributions are stored in `expenses` with a goal_id set and the
+    // Savings category_id. They must feed the category spent rollup the same way
+    // manual entries do.
+    const supabase = makeSupabase({
+      income_entries: [],
+      expenses: [
+        { amount: 1000, category_id: "c-savings", goal_id: "goal-1" },
+        { amount: 1300, category_id: "c-savings", goal_id: "goal-1" },
+      ],
+      budgets: [
+        {
+          id: "b1",
+          budget_categories: [
+            {
+              category_id: "c-savings",
+              amount: 5000,
+              category: { id: "c-savings", name: "Savings", icon: null, color: null },
+            },
+          ],
+        },
+      ],
+    });
+
+    const statuses = await getBudgetStatuses(supabase, USER_ID, MONTH, YEAR);
+
+    expect(statuses[0].spent).toBe(2300);
+    expect(statuses[0].remaining).toBe(2700);
+  });
 });

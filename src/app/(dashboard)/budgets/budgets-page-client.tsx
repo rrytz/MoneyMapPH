@@ -142,7 +142,7 @@ export function BudgetsPageClient({
                 <div className="p-2.5 rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
                   <AlertTriangle className="h-5 w-5" />
                 </div>
-                <Badge variant="expense">Total Outflow</Badge>
+                <Badge variant="expense">Budgeted Spend</Badge>
               </div>
               <div>
                 <span className="text-xs font-medium text-muted-foreground block">Total Spent</span>

@@ -317,5 +317,53 @@ export interface SafeToSpendStatus {
   fractionElapsed: number;
 }
 
+export interface Bill {
+  id: string;
+  user_id: string;
+  name: string;
+  expected_amount: string | null;
+  category_id: string | null;
+  day_of_month: number | null;
+  active: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BillPayment {
+  id: string;
+  bill_id: string;
+  due_date: string;
+  paid_at: string;
+  amount: string;
+  expense_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BillOccurrence {
+  bill_id: string;
+  billName: string;
+  dueDate: string;
+  expectedAmount: number;
+  cutoffPeriodEnd: string;
+}
+
+export interface BillView {
+  bills: Bill[];
+  occurrences: BillOccurrence[];
+  payments: BillPayment[];
+}
+
+export interface BillsDueBy {
+  occurrences: BillOccurrence[];
+  paidTotal: number;
+  upcomingTotal: number;
+  totalDue: number;
+  horizonDate: string;
+}
+
+export type SummaryVerdict = "covered" | "tight" | "short";
+
 
 

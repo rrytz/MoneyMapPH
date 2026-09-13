@@ -88,7 +88,7 @@ The predicate lives in the engine and the engine enforces it internally; consume
 |---|---|
 | `getBills` | All bills for the user, `ORDER BY day_of_month NULLS LAST` — the management array, never gated. |
 | `createBill` / `updateBill` / `deleteBill` | User-scoped CRUD. `updateBill` recomputes ready-state from the posted fields and carries the `active` toggle; deleting cascades payments (deprioritized in UI — pause is primary). |
-| `getBillView(supabase, userId, month)` | Page contract in one object with **two separately-kept arrays**: `bills` (raw, unfiltered — feeds the CRUD list) and `occurrences` (from `listBillOccurrences`, engine-gated — feeds the calendar), plus `payments` (raw `bill_payments` in range). No single filter is shared between the two roles. |
+| `getBillView(supabase, userId, year, month)` | Page contract in one object (1-based `month`) — with **two separately-kept arrays**: `bills` (raw, unfiltered — feeds the CRUD list) and `occurrences` (from `listBillOccurrences`, engine-gated — feeds the calendar), plus `payments` (raw `bill_payments` in range). No single filter is shared between the two roles. |
 | `getBillsDueBy(supabase, userId, horizonDate)` | Unpaid `ready && active` occurrences with `dueDate ≤ horizonDate` (overdue past occurrences included). Returns `{ occurrences, totalDue }` where **`totalDue = Σ(bill_payments.amount)` for paid occurrences ≤ horizon (actual) + `Σ(expected_amount)` for unpaid occurrences ≤ horizon (estimate only where no payment exists)**. |
 
 - Additive to existing expense/category/income behavior — no changes to `expense.service`, `financial.service`, `snapshot.service`, budget services, or Health Score.

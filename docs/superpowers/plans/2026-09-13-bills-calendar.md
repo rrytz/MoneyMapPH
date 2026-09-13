@@ -484,8 +484,8 @@ export async function getBillView(
   year: number,
   month: number
 ): Promise<BillView> {
-  const from = startOfMonth(new Date(year, month, 1));
-  const to = endOfMonth(new Date(year, month, 1));
+  const from = startOfMonth(new Date(year, month - 1, 1));
+  const to = endOfMonth(new Date(year, month - 1, 1));
   const [bills, payments] = await Promise.all([
     getBills(supabase, userId),
     supabase
@@ -516,8 +516,8 @@ export async function getBillView(
   year: number,
   month: number
 ): Promise<BillView> {
-  const from = startOfMonth(new Date(year, month, 1));
-  const to = endOfMonth(new Date(year, month, 1));
+  const from = startOfMonth(new Date(year, month - 1, 1));
+  const to = endOfMonth(new Date(year, month - 1, 1));
   const bills = await getBills(supabase, userId);
 
   const { data: payments, error } = await supabase
@@ -889,7 +889,7 @@ describe("bill action schemas", () => {
   });
 
   it("payBillSchema rejects zero amount and accepts empty optional category", () => {
-    expect(() => payBillSchema.parse({ billId: "b", dueDate: "2026-09-15", paidAt: "2026-09-15", amount: 0 })).toThrow();
+    expect(() => payBillSchema.parse({ billId: "11111111-1111-4111-8111-111111111111", dueDate: "2026-09-15", paidAt: "2026-09-15", amount: 0 })).toThrow();
     const ok = payBillSchema.parse({
       billId: "0f000000-0000-0000-0000-000000000000",
       dueDate: "2026-09-15",

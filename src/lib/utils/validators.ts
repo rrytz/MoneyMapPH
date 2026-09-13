@@ -107,5 +107,30 @@ export type ReminderSchemaType = z.infer<typeof reminderSchema>;
 export type CategorySchemaType = z.infer<typeof categorySchema>;
 export type SourceSchemaType = z.infer<typeof sourceSchema>;
 
+export const billInputSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
+  expected_amount: z.coerce.number().positive("Amount must be greater than 0").optional().or(z.literal("")),
+  category_id: z.string().uuid("Select a category").optional().or(z.literal("")),
+  day_of_month: z.coerce.number().int().min(1, "Day must be between 1 and 31").max(31, "Day must be between 1 and 31").optional().or(z.literal("")),
+  notes: z.string().max(500, "Notes must be 500 characters or less").optional().or(z.literal("")),
+});
+
+export const payBillSchema = z.object({
+  billId: z.string().uuid("Select a bill"),
+  dueDate: z.string().min(1, "Due date is required"),
+  paidAt: z.string().min(1, "Paid date is required"),
+  amount: z.coerce.number().positive("Amount must be greater than 0").max(999999999999, "Amount is too large"),
+  categoryId: z.string().uuid().optional().or(z.literal("")),
+  notes: z.string().max(500).optional().or(z.literal("")),
+});
+
+export const unpayBillSchema = z.object({
+  paymentId: z.string().uuid(),
+});
+
+export type BillInputSchemaType = z.infer<typeof billInputSchema>;
+export type PayBillSchemaType = z.infer<typeof payBillSchema>;
+export type UnpayBillSchemaType = z.infer<typeof unpayBillSchema>;
+
 
 

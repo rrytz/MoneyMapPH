@@ -6,7 +6,7 @@ import { getPaychecks } from "./paycheck.service";
 import { getReminders } from "./reminder.service";
 import { getBillsDueBy } from "./bills.service";
 import { getSafeToSpend } from "./safe-to-spend.service";
-import { getCurrentMonthYear, formatDate } from "@/lib/utils/date";
+import { getCurrentMonthYear, getManilaNow, toISODateString, formatDate } from "@/lib/utils/date";
 import { dueSoonKey, getBillsDueWindow } from "@/lib/utils/bills";
 import { getLeanStatus } from "./pay-period.service";
 
@@ -43,7 +43,7 @@ export async function getDynamicNotifications(
       (async () => {
         const fundsRes = await getSafeToSpend(supabase, userId).catch(() => null);
         if (!fundsRes) return null;
-        const { fromISO, toISO } = getBillsDueWindow(new Date());
+        const { fromISO, toISO } = getBillsDueWindow(getManilaNow());
         return getBillsDueBy(supabase, userId, fromISO, toISO).catch(() => null); // → billsDue
       })(),
     ]);
@@ -156,9 +156,9 @@ export async function getDynamicNotifications(
 
   // 7. Bills (K2): due-soon + coverage nudge
   if (funds && billsDue) {
-    const today = new Date();
-    const todayISO = today.toISOString().slice(0, 10);
-    const plus7 = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const today = getManilaNow();
+    const todayISO = toISODateString(today);
+    const plus7 = toISODateString(new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000));
 
     const dueSoonOcc = billsDue.occurrences.filter(
       (o) => o.dueDate >= todayISO && o.dueDate <= plus7

@@ -3,7 +3,7 @@ import {
   getCutoffPeriodForDate,
   getPayoutDateForPeriodEnd,
 } from "@/lib/utils/pay-period";
-import { toISODateString } from "@/lib/utils/date";
+import { getManilaNow, toISODateString } from "@/lib/utils/date";
 import { lastDayOfMonth } from "date-fns";
 
 export function isBillOnMoneySurfaces(
@@ -58,7 +58,7 @@ export function getNextPayoutDate(from: Date): Date {
   return getPayoutDateForPeriodEnd(getCutoffPeriodForDate(from).periodEnd);
 }
 
-export function getBillsDueWindow(now: Date): { fromISO: string; toISO: string } {
+export function getBillsDueWindow(now: Date = getManilaNow()): { fromISO: string; toISO: string } {
   const cutoff = getCutoffPeriodForDate(now);
   const nextPayoutISO = toISODateString(getPayoutDateForPeriodEnd(cutoff.periodEnd));
   const todayPlus7ISO = toISODateString(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));

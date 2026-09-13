@@ -2,7 +2,7 @@ import { createClient, getUser } from "@/lib/supabase/server";
 import { getIncomeEntries } from "@/lib/services/income.service";
 import { cachedGetIncomeSources as getIncomeSources, cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { cachedGetPaychecks as getPaychecks, cachedGetLeanStatus as getLeanStatus, cachedGetSafeToSpend as getSafeToSpend, cachedGetBillView, cachedGetBillsDueBy } from "@/lib/cache/shared-queries";
-import { getCurrentMonthYear } from "@/lib/utils/date";
+import { getCurrentMonthYear, getManilaNow } from "@/lib/utils/date";
 import { getBillsDueWindow } from "@/lib/utils/bills";
 import { IncomePageClient } from "./income-page-client";
 
@@ -31,7 +31,7 @@ export default async function IncomePage({
   let billView = undefined as Awaited<ReturnType<typeof cachedGetBillView>> | undefined;
   let billsDueBy = undefined as Awaited<ReturnType<typeof cachedGetBillsDueBy>> | undefined;
   if (activeTab === "bills") {
-    const { fromISO, toISO } = getBillsDueWindow(new Date());
+    const { fromISO, toISO } = getBillsDueWindow(getManilaNow());
     const horizon = toISO;
     [billView, billsDueBy] = await Promise.all([
       cachedGetBillView(supabase, user.id, year, month),

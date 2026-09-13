@@ -9,7 +9,7 @@ import { getLeanStatus } from "@/lib/services/pay-period.service";
 import { getSafeToSpend } from "@/lib/services/safe-to-spend.service";
 import { getBillView, getBillsDueBy } from "@/lib/services/bills.service";
 import { getCutoffPeriodForDate } from "@/lib/utils/pay-period";
-import { toISODateString } from "@/lib/utils/date";
+import { getManilaNow, toISODateString } from "@/lib/utils/date";
 import type {
   MonthlySummary,
   BudgetStatus,
@@ -116,7 +116,7 @@ export const cachedGetLeanStatus = (
 export const cachedGetSafeToSpend = (
   supabase: SupabaseClient,
   userId: string,
-  now: Date = new Date()
+  now: Date = getManilaNow()
 ): Promise<SafeToSpendStatus> => {
   const periodEnd = toISODateString(getCutoffPeriodForDate(now).periodEnd);
   return unstable_cache(

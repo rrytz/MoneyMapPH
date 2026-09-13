@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { parseISO } from "date-fns";
-import { toISODateString } from "@/lib/utils/date";
+import { getManilaNow, toISODateString } from "@/lib/utils/date";
 import {
   getCutoffPeriodForDate,
   getPayoutDateForPeriodEnd,
@@ -18,7 +18,7 @@ export async function getTrailingCutoffIncomes(
   supabase: SupabaseClient,
   userId: string,
   windowPeriods: number = LEAN_WINDOW_PERIODS,
-  now: Date = new Date()
+  now: Date = getManilaNow()
 ): Promise<CutoffIncome[]> {
   const current = getCutoffPeriodForDate(now);
   const cutoffs = listCutoffPeriodsBetween(
@@ -69,7 +69,7 @@ function medianOf(values: number[]): number {
 export async function getLeanStatus(
   supabase: SupabaseClient,
   userId: string,
-  now: Date = new Date()
+  now: Date = getManilaNow()
 ): Promise<LeanStatus> {
   const periods = await getTrailingCutoffIncomes(supabase, userId, LEAN_WINDOW_PERIODS, now);
 

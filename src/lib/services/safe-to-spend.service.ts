@@ -1,12 +1,12 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { getCutoffPeriodForDate, getPeriodProgress } from "@/lib/utils/pay-period";
-import { toISODateString } from "@/lib/utils/date";
+import { getManilaNow, toISODateString } from "@/lib/utils/date";
 import type { SafeToSpendStatus } from "@/lib/types";
 
 export async function getSafeToSpend(
   supabase: SupabaseClient,
   userId: string,
-  now: Date = new Date()
+  now: Date = getManilaNow()
 ): Promise<SafeToSpendStatus> {
   const current = getCutoffPeriodForDate(now);
   const periodStartISO = toISODateString(current.periodStart);

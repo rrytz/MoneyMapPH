@@ -6,6 +6,7 @@ import {
   getNextPayoutDate,
   bucketCutoff,
   dueSoonKey,
+  getBillsDueWindow,
 } from "@/lib/utils/bills";
 import type { Bill } from "@/lib/types";
 import { toISODateString } from "@/lib/utils/date";
@@ -75,6 +76,27 @@ describe("getNextPayoutDate & bucketCutoff", () => {
   it("buckets a due date into its cutoff", () => {
     expect(bucketCutoff(new Date(2026, 8, 5))).toBe("2026-09-13");
     expect(bucketCutoff(new Date(2026, 8, 20))).toBe("2026-09-28");
+  });
+});
+
+describe("getBillsDueWindow", () => {
+  it("K2-WINDOW: derives from=current cutoff periodStart and to=max(today+7, nextPayout)", () => {
+    expect(getBillsDueWindow(new Date(2026, 8, 20))).toEqual({
+      fromISO: "2026-09-14", // cutoff 09-14..09-28
+      toISO: "2026-09-28", // nextPayout 09-28 (Mon) > today+7 09-27
+    });
+  });
+  it("K2-WINDOW: mid-cutoff window caps at today+7 when nextPayout has already passed", () => {
+    expect(getBillsDueWindow(new Date(2026, 8, 8))).toEqual({
+      fromISO: "2026-08-29", // cutoff 08-29..09-13
+      toISO: "2026-09-15", // nextPayout 09-11 (Fri) < today+7 09-15
+    });
+  });
+  it("K2-WINDOW: Oct cutoff anchors on the 29th of the prior month", () => {
+    expect(getBillsDueWindow(new Date(2026, 9, 5))).toEqual({
+      fromISO: "2026-09-29", // cutoff 09-29..10-13
+      toISO: "2026-10-13", // nextPayout 10-13 (Tue) > today+7 10-12
+    });
   });
 });
 

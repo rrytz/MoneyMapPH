@@ -323,10 +323,10 @@ git commit -m "feat(bills): pure occurrence engine and money-surface gate"
   - `updateBill(supabase, userId, id, input: Partial<BillInput>): Promise<Bill>`
   - `deleteBill(supabase, userId, id): Promise<void>`
   - `getBillView(supabase, userId, year, month): Promise<BillView>`
-  - `getBillsDueBy(supabase, userId, horizonDate: string): Promise<BillsDueBy>`
+  - `getBillsDueBy(supabase, userId, fromDate: string, toDate: string): Promise<BillsDueBy>`
   - `type BillInput = { name: string; expected_amount?: string | null; category_id?: string | null; day_of_month?: number | null; notes?: string | null; active?: boolean }` (export from `bills.service.ts`)
   - `cachedGetBillView(supabase, userId, year, month): Promise<BillView>` (tag `q:bills:<userId>`)
-  - `cachedGetBillsDueBy(supabase, userId, horizonDate): Promise<BillsDueBy>` (tag `q:bills:<userId>`)
+  - `cachedGetBillsDueBy(supabase, userId, fromDate, toDate): Promise<BillsDueBy>` (tag `q:bills:<userId>`)
 
 - [ ] **Step 1: Write the failing test** — `src/tests/bills.service.test.ts`
 
@@ -573,6 +573,8 @@ export async function getBillsDueBy(
   return { occurrences, paidTotal, upcomingTotal, totalDue: paidTotal + upcomingTotal, horizonDate };
 }
 ```
+
+> **[K2-WINDOW adjudicated 2026-09-13: getBillsDueBy now windows to the current cutoff; see commit body]** — live verification showed "Upcoming" summed ~6 months of unpaid bills while the card copy says "Bills before next paycheck · Due through {horizon}" and "what's left THIS CUTOFF". The fixed 180-day lookback is gone. Signature is now `getBillsDueBy(supabase, userId, fromDate, toDate)` — `fromDate` = current cutoff's `periodStart` (the 29th of the prior month for a 13th-anchored cutoff, e.g. `2026-09-14` for the 09-14..09-28 cutoff), `toDate` = `max(todayPlus7, nextPayout)` with `nextPayout = getPayoutDateForPeriodEnd(currentCutoffPeriod.periodEnd)`. Window: unpaid `ready && active` occurrences with `fromDate ≤ dueDate ≤ toDate`; `paidTotal` = payments whose `due_date` is inside the same window ("Paid this cutoff" literally true); overdue occurrences inside the window stay included. Both call sites (`income/page.tsx`, `notification.service.ts` IIFE) derive from/to via the shared pure `getBillsDueWindow(now)` helper in `src/lib/utils/bills.ts` so they agree on the same `now`. `BILLS_OVERDUE_LOOKBACK_MONTHS`/`isoDaysAgo` removed; `getBillView` untouched; `cachedGetBillsDueBy` keyed `["bills-due-by", userId, fromDate, toDate]`.
 
 - [ ] **Step 5: Add cached wrappers to `src/lib/cache/shared-queries.ts`**
 
@@ -2069,6 +2071,8 @@ For the Promise.all, the added members are:
       return getBillsDueBy(supabase, userId, horizon).catch(() => null); // → billsDue
     })(),
 ```
+
+> **[K2-WINDOW adjudicated 2026-09-13: getBillsDueBy now windows to the current cutoff; see commit body]** — this IIFE now calls `const { fromISO, toISO } = getBillsDueWindow(new Date())` (shared with `income/page.tsx`, same `now` ⇒ same window) and passes `getBillsDueBy(supabase, userId, fromISO, toISO)`. The windowed `upcomingTotal` is what the coverage alert compares against `safeToSpend`, so the nudge can no longer fire from lookback-month bills with nothing due before the next payout.
 
 (the second member resolves `billsDue`; both run inside the same `Promise.all`, keeping the read-time guarantee. `fundsRes` computed once for both due-soon and coverage so the coverage comparison uses the payoff-derived horizon.)
 

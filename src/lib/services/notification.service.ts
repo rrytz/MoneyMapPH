@@ -7,7 +7,7 @@ import { getReminders } from "./reminder.service";
 import { getBillsDueBy } from "./bills.service";
 import { getSafeToSpend } from "./safe-to-spend.service";
 import { getCurrentMonthYear, formatDate } from "@/lib/utils/date";
-import { dueSoonKey } from "@/lib/utils/bills";
+import { dueSoonKey, getBillsDueWindow } from "@/lib/utils/bills";
 import { getLeanStatus } from "./pay-period.service";
 
 export interface NotificationItem {
@@ -43,9 +43,8 @@ export async function getDynamicNotifications(
       (async () => {
         const fundsRes = await getSafeToSpend(supabase, userId).catch(() => null);
         if (!fundsRes) return null;
-        const todayPlus7 = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        const horizon = todayPlus7 > fundsRes.payoutDate ? todayPlus7 : fundsRes.payoutDate;
-        return getBillsDueBy(supabase, userId, horizon).catch(() => null); // → billsDue
+        const { fromISO, toISO } = getBillsDueWindow(new Date());
+        return getBillsDueBy(supabase, userId, fromISO, toISO).catch(() => null); // → billsDue
       })(),
     ]);
 

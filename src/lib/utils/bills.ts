@@ -58,6 +58,16 @@ export function getNextPayoutDate(from: Date): Date {
   return getPayoutDateForPeriodEnd(getCutoffPeriodForDate(from).periodEnd);
 }
 
+export function getBillsDueWindow(now: Date): { fromISO: string; toISO: string } {
+  const cutoff = getCutoffPeriodForDate(now);
+  const nextPayoutISO = toISODateString(getPayoutDateForPeriodEnd(cutoff.periodEnd));
+  const todayPlus7ISO = toISODateString(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
+  return {
+    fromISO: toISODateString(cutoff.periodStart),
+    toISO: todayPlus7ISO > nextPayoutISO ? todayPlus7ISO : nextPayoutISO,
+  };
+}
+
 export function bucketCutoff(dueDate: Date): string {
   return toISODateString(getCutoffPeriodForDate(dueDate).periodEnd);
 }

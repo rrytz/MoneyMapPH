@@ -141,10 +141,11 @@ export const cachedGetBillView = (
 export const cachedGetBillsDueBy = (
   supabase: SupabaseClient,
   userId: string,
-  horizonDate: string
+  fromDate: string,
+  toDate: string
 ): Promise<BillsDueBy> =>
   unstable_cache(
-    async (h: string) => getBillsDueBy(supabase, userId, h),
-    ["bills-due-by", userId, horizonDate],
+    async (f: string, t: string) => getBillsDueBy(supabase, userId, f, t),
+    ["bills-due-by", userId, fromDate, toDate],
     { revalidate: REVALIDATE_SECONDS, tags: [`q:bills:${userId}`] }
-  )(horizonDate);
+  )(fromDate, toDate);

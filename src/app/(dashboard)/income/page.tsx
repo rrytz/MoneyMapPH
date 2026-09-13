@@ -2,8 +2,8 @@ import { createClient, getUser } from "@/lib/supabase/server";
 import { getIncomeEntries } from "@/lib/services/income.service";
 import { cachedGetIncomeSources as getIncomeSources, cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { cachedGetPaychecks as getPaychecks, cachedGetLeanStatus as getLeanStatus, cachedGetSafeToSpend as getSafeToSpend, cachedGetBillView, cachedGetBillsDueBy } from "@/lib/cache/shared-queries";
-import { getCurrentMonthYear, toISODateString } from "@/lib/utils/date";
-import { getNextPayoutDate } from "@/lib/utils/bills";
+import { getCurrentMonthYear } from "@/lib/utils/date";
+import { getBillsDueWindow } from "@/lib/utils/bills";
 import { IncomePageClient } from "./income-page-client";
 
 export default async function IncomePage({
@@ -31,14 +31,11 @@ export default async function IncomePage({
   let billView = undefined as Awaited<ReturnType<typeof cachedGetBillView>> | undefined;
   let billsDueBy = undefined as Awaited<ReturnType<typeof cachedGetBillsDueBy>> | undefined;
   if (activeTab === "bills") {
-    const now = new Date();
-    const nextPayout = toISODateString(getNextPayoutDate(now));
-    const todayPlus7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const todayPlus7ISO = toISODateString(todayPlus7);
-    const horizon = todayPlus7ISO > nextPayout ? todayPlus7ISO : nextPayout;
+    const { fromISO, toISO } = getBillsDueWindow(new Date());
+    const horizon = toISO;
     [billView, billsDueBy] = await Promise.all([
       cachedGetBillView(supabase, user.id, year, month),
-      cachedGetBillsDueBy(supabase, user.id, horizon),
+      cachedGetBillsDueBy(supabase, user.id, fromISO, horizon),
     ]);
   }
 

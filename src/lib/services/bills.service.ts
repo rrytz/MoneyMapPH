@@ -2,7 +2,6 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { Bill, BillPayment, BillView, BillsDueBy } from "@/lib/types";
 import { listBillOccurrences } from "@/lib/utils/bills";
-import { toISODateString } from "@/lib/utils/date";
 
 export type BillInput = {
   name: string;
@@ -97,15 +96,6 @@ export async function getBillView(
   };
 }
 
-const BILLS_OVERDUE_LOOKBACK_MONTHS = 6;
-
-function isoDaysAgo(base: string, days: number): string {
-  const [y, m, d] = base.split("-").map(Number);
-  const dt = new Date(y, m - 1, d);
-  dt.setDate(dt.getDate() - days);
-  return toISODateString(dt);
-}
-
 function isoToLocalDate(iso: string): Date {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, m - 1, d);
@@ -114,12 +104,12 @@ function isoToLocalDate(iso: string): Date {
 export async function getBillsDueBy(
   supabase: SupabaseClient,
   userId: string,
-  horizonDate: string
+  fromDate: string,
+  toDate: string
 ): Promise<BillsDueBy> {
   const bills = await getBills(supabase, userId);
-  const lookbackStart = isoDaysAgo(horizonDate, BILLS_OVERDUE_LOOKBACK_MONTHS * 30);
-  const from = isoToLocalDate(lookbackStart);
-  const to = isoToLocalDate(horizonDate);
+  const from = isoToLocalDate(fromDate);
+  const to = isoToLocalDate(toDate);
 
   let payments: BillPayment[] = [];
   if (bills.length > 0) {
@@ -140,8 +130,8 @@ export async function getBillsDueBy(
   );
 
   const paidTotal = payments
-    .filter((p) => p.due_date <= horizonDate)
+    .filter((p) => p.due_date >= fromDate && p.due_date <= toDate)
     .reduce((s, p) => s + Number(p.amount), 0);
   const upcomingTotal = occurrences.reduce((s, o) => s + o.expectedAmount, 0);
-  return { occurrences, paidTotal, upcomingTotal, totalDue: paidTotal + upcomingTotal, horizonDate };
+  return { occurrences, paidTotal, upcomingTotal, totalDue: paidTotal + upcomingTotal, horizonDate: toDate };
 }

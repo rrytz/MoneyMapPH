@@ -91,17 +91,16 @@ export async function updateBillAction(
   const user = await getUser();
   if (!user) return { error: "Not signed in" };
 
-  const dayOfMonth = parsed.data.day_of_month === "" ? null : parsed.data.day_of_month;
-
   try {
-    await updateBill(supabase, user.id, input.id, {
+    const patch = {
       name: parsed.data.name,
       expected_amount: parsed.data.expected_amount ? String(parsed.data.expected_amount) : null,
       category_id: parsed.data.category_id || null,
-      day_of_month: dayOfMonth,
+      day_of_month: parsed.data.day_of_month === "" ? null : parsed.data.day_of_month,
       notes: parsed.data.notes || null,
-      active: input.active ?? true,
-    });
+      ...(input.active !== undefined ? { active: input.active } : {}),
+    };
+    await updateBill(supabase, user.id, input.id, patch);
   } catch {
     return { error: "Could not save bill" };
   }

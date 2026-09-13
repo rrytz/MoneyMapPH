@@ -7,6 +7,7 @@ import { getSavingsGoals } from "@/lib/services/goal.service";
 import { getPaychecks } from "@/lib/services/paycheck.service";
 import { getLeanStatus } from "@/lib/services/pay-period.service";
 import { getSafeToSpend } from "@/lib/services/safe-to-spend.service";
+import { getBillView, getBillsDueBy } from "@/lib/services/bills.service";
 import { getCutoffPeriodForDate } from "@/lib/utils/pay-period";
 import { toISODateString } from "@/lib/utils/date";
 import type {
@@ -19,6 +20,8 @@ import type {
   IncomeSource,
   LeanStatus,
   SafeToSpendStatus,
+  BillView,
+  BillsDueBy,
 } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 60;
@@ -122,3 +125,26 @@ export const cachedGetSafeToSpend = (
     { revalidate: REVALIDATE_SECONDS, tags: [`q:safe-to-spend:${userId}`, "q:financial"] }
   )();
 };
+
+export const cachedGetBillView = (
+  supabase: SupabaseClient,
+  userId: string,
+  year: number,
+  month: number
+): Promise<BillView> =>
+  unstable_cache(
+    async (y: number, m: number) => getBillView(supabase, userId, y, m),
+    ["bill-view", userId],
+    { revalidate: REVALIDATE_SECONDS, tags: [`q:bills:${userId}`] }
+  )(year, month);
+
+export const cachedGetBillsDueBy = (
+  supabase: SupabaseClient,
+  userId: string,
+  horizonDate: string
+): Promise<BillsDueBy> =>
+  unstable_cache(
+    async (h: string) => getBillsDueBy(supabase, userId, h),
+    ["bills-due-by", userId, horizonDate],
+    { revalidate: REVALIDATE_SECONDS, tags: [`q:bills:${userId}`] }
+  )(horizonDate);

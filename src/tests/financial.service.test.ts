@@ -11,7 +11,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 // ─── Supabase mock factory ────────────────────────────────────────────────────
 
-function makeQueryBuilder(rows: unknown[], count = 0) {
+export function makeQueryBuilder(rows: unknown[], count = 0) {
   const result = { data: rows, error: null, count };
   const q: Record<string, unknown> = {
     data: rows,
@@ -25,17 +25,34 @@ function makeQueryBuilder(rows: unknown[], count = 0) {
       );
       return q;
     }),
+    in: vi.fn((column: string, values: unknown[]) => {
+      result.data = (result.data as Record<string, unknown>[]).filter((r) =>
+        values.includes(r[column])
+      );
+      return q;
+    }),
+    insert: vi.fn((row: unknown) => {
+      result.data = [{ id: "n1", ...(row as object) }, ...(result.data as unknown[])];
+      q.data = result.data;
+      return q;
+    }),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
     lte: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
-    maybeSingle: vi.fn().mockResolvedValue({ data: rows[0] ?? null, error: null }),
-    single: vi.fn().mockResolvedValue({ data: rows[0] ?? null, error: null }),
+    maybeSingle: vi.fn(() =>
+      Promise.resolve({ data: (result.data as unknown[])[0] ?? null, error: null })
+    ),
+    single: vi.fn(() =>
+      Promise.resolve({ data: (result.data as unknown[])[0] ?? null, error: null })
+    ),
     then: (resolve: (v: unknown) => void) => Promise.resolve(result).then(resolve),
   };
   return q;
 }
 
-function makeSupabase(tables: Record<string, unknown[]>): SupabaseClient {
+export function makeSupabase(tables: Record<string, unknown[]>): SupabaseClient {
   return {
     from: vi.fn((table: string) => makeQueryBuilder(tables[table] ?? [])),
   } as unknown as SupabaseClient;

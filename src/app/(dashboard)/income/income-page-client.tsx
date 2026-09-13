@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useOptimistic, useTransition } from "react";
-import { Plus, Pencil, Trash2, TrendingUp, DollarSign, Wallet, Layers, CalendarRange } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingUp, DollarSign, Wallet, Layers, CalendarRange, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
 import { Badge } from "@/components/ui/badge";
@@ -14,10 +14,14 @@ import { IncomeForm } from "@/components/forms/income-form";
 import { PaycheckPlanner } from "./paycheck-planner";
 import { LeanStatusChip } from "./lean-status-chip";
 import { PeriodSafeToSpendCard } from "./period-safe-to-spend-card";
+import { BillsSummaryCard } from "./bills-summary-card";
+import { MonthCalendar } from "./month-calendar";
+import { BillsCrud } from "./bills-crud";
 import { removeIncome, addIncome } from "./actions";
 import { formatDate } from "@/lib/utils/date";
 import { toast } from "sonner";
 import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory, LeanStatus, SafeToSpendStatus } from "@/lib/types";
+import type { BillView, BillsDueBy } from "@/lib/types";
 
 interface IncomePageClientProps {
   initialEntries: IncomeEntry[];
@@ -29,6 +33,9 @@ interface IncomePageClientProps {
   totalThisMonth: number;
   currentMonth: number;
   currentYear: number;
+  initialActiveTab: "income" | "bills";
+  billView?: BillView;
+  billsDueBy?: BillsDueBy;
 }
 
 export function IncomePageClient({
@@ -39,6 +46,11 @@ export function IncomePageClient({
   leanStatus,
   safeToSpend,
   totalThisMonth,
+  currentMonth,
+  currentYear,
+  initialActiveTab,
+  billView,
+  billsDueBy,
 }: IncomePageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<IncomeEntry | null>(null);
@@ -120,13 +132,16 @@ export function IncomePageClient({
         </Button>
       </PageHeader>
 
-      <Tabs defaultValue="income" className="space-y-6">
+      <Tabs defaultValue={initialActiveTab} className="space-y-6">
         <TabsList className="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
           <TabsTrigger value="income" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
             <TrendingUp className="h-4 w-4" /> Log Income
           </TabsTrigger>
           <TabsTrigger value="paychecks" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
             <CalendarRange className="h-4 w-4" /> Allocate Paycheck
+          </TabsTrigger>
+          <TabsTrigger value="bills" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
+            <Receipt className="h-4 w-4" /> Bills
           </TabsTrigger>
         </TabsList>
 
@@ -254,6 +269,37 @@ export function IncomePageClient({
             initialPaychecks={paychecks}
             categories={categories}
           />
+        </TabsContent>
+
+        <TabsContent value="bills" className="space-y-6">
+          {billView && billsDueBy && safeToSpend ? (
+            <div className="space-y-6">
+              <BillsSummaryCard
+                paidTotal={billsDueBy.paidTotal}
+                upcomingTotal={billsDueBy.upcomingTotal}
+                totalDue={billsDueBy.totalDue}
+                horizonDate={billsDueBy.horizonDate}
+                payoutDate={safeToSpend.payoutDate}
+                safeToSpend={safeToSpend.safeToSpend}
+              />
+              <MonthCalendar
+                bills={billView.bills}
+                occurrences={billView.occurrences}
+                payments={billView.payments}
+                categories={categories}
+                month={currentMonth}
+                year={currentYear}
+              />
+              <BillsCrud
+                bills={billView.bills}
+                categories={categories}
+              />
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground py-10 text-center">
+              Load your bills from the Income tab.
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

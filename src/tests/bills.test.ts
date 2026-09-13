@@ -8,6 +8,7 @@ import {
   dueSoonKey,
 } from "@/lib/utils/bills";
 import type { Bill } from "@/lib/types";
+import { toISODateString } from "@/lib/utils/date";
 
 const readyActive = (over: Partial<Bill> = {}): Bill => ({
   id: "b1",
@@ -68,8 +69,8 @@ describe("listBillOccurrences", () => {
 
 describe("getNextPayoutDate & bucketCutoff", () => {
   it("rolls weekends back to Friday via the V1 engine", () => {
-    expect(getNextPayoutDate(new Date(2026, 8, 1)).toISOString().slice(0, 10)).toBe("2026-09-11"); // cutoff 09-13 (Sun)
-    expect(getNextPayoutDate(new Date(2026, 8, 14)).toISOString().slice(0, 10)).toBe("2026-09-28");
+    expect(toISODateString(getNextPayoutDate(new Date(2026, 8, 1)))).toBe("2026-09-11"); // cutoff 09-13 (Sun)
+    expect(toISODateString(getNextPayoutDate(new Date(2026, 8, 14)))).toBe("2026-09-28");
   });
   it("buckets a due date into its cutoff", () => {
     expect(bucketCutoff(new Date(2026, 8, 5))).toBe("2026-09-13");

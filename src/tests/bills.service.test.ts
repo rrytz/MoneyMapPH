@@ -41,11 +41,15 @@ describe("bills.service", () => {
     expect(view.bills.length).toBe(2); // raw: management list sees everything
     const paid = view.occurrences.every((o) => o.bill_id === "ready"); // engine gate: only ready+active
     expect(paid).toBe(true);
+    expect(view.occurrences.every((o) => o.dueDate.startsWith("2026-08"))).toBe(true); // 1-based month: 8 => August
   });
 
   it("getBillsDueBy totals paid-at-actual and unpaid-at-expected", async () => {
     const supabase = makeSupabase({
-      bills: [billRow({ id: "bill28", name: "WiFi", expected_amount: "1000", day_of_month: 28 })],
+      bills: [
+        billRow({ id: "bill1", name: "Rent", expected_amount: "1000", day_of_month: 1 }),
+        billRow({ id: "bill28", name: "WiFi", expected_amount: "1000", day_of_month: 28 }),
+      ],
       bill_payments: [
         {
           id: "p1",
@@ -62,6 +66,7 @@ describe("bills.service", () => {
     const due = await getBillsDueBy(supabase, userId, "2026-09-28");
     expect(typeof due.totalDue).toBe("number");
     expect(due.horizonDate).toBe("2026-09-28");
+    expect(due.occurrences.some((o) => o.dueDate === "2026-04-01")).toBe(true); // lookback boundary PRESENT (local-midnight from)
     expect(due.occurrences.some((o) => o.dueDate === "2026-09-28")).toBe(true); // R13: horizon inclusive
     expect(due.paidTotal).toBe(0); // R7: payment due after horizon is excluded
   });

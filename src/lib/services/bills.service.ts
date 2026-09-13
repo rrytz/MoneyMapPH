@@ -77,8 +77,8 @@ export async function getBillView(
   year: number,
   month: number
 ): Promise<BillView> {
-  const from = startOfMonth(new Date(year, month, 1));
-  const to = endOfMonth(new Date(year, month, 1));
+  const from = startOfMonth(new Date(year, month - 1, 1));
+  const to = endOfMonth(new Date(year, month - 1, 1));
   const bills = await getBills(supabase, userId);
 
   const { data: payments, error } = await supabase

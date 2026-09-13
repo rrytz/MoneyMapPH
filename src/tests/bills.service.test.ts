@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { makeSupabase } from "@/tests/financial.service.test";
+import { makeSupabase } from "@/tests/supabase-mock";
 import { createBill, deleteBill, getBillView, getBillsDueBy } from "@/lib/services/bills.service";
 import type { Bill, BillPayment } from "@/lib/types";
 

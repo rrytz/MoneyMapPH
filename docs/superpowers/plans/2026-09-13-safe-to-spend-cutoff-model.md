@@ -1043,7 +1043,7 @@ git commit -m "chore: clean up safe-to-spend gates"
 
 - [ ] **Step 1: Apply migration `007` to the cloud DB (controller)**
 
-POST `https://api.supabase.com/v1/projects/jaaeeyeyidvekzdssqfv/database/migrations` with header `Authorization: Bearer sbp_...REDACTED` and body:
+POST `https://api.supabase.com/v1/projects/jaaeeyeyidvekzdssqfv/database/migrations` with header `Authorization: Bearer <PAT_REDACTED>` and body:
 
 ```json
 { "version": "007", "statements": ["ALTER TABLE public.income_sources ADD COLUMN type TEXT NOT NULL DEFAULT 'core' CHECK (type IN ('core', 'incentive'));"] }

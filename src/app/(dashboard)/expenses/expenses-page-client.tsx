@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useOptimistic, useTransition } from "react";
+import { useState, useOptimistic, useTransition } from "react";
 import { Plus, Pencil, Trash2, TrendingDown, Search, Filter, PieChart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,11 +48,23 @@ export function ExpensesPageClient({
   );
 
   const [total, setTotal] = useState(initialTotal);
+  const [prevTotal, setPrevTotal] = useState(initialTotal);
+  if (initialTotal !== prevTotal) {
+    setPrevTotal(initialTotal);
+    setTotal(initialTotal);
+  }
   const [count, setCount] = useState(initialCount);
+  const [prevCount, setPrevCount] = useState(initialCount);
+  if (initialCount !== prevCount) {
+    setPrevCount(initialCount);
+    setCount(initialCount);
+  }
   const [categoryTotals, setCategoryTotals] = useState(initialCategoryTotals);
-  useEffect(() => { setTotal(initialTotal); }, [initialTotal]);
-  useEffect(() => { setCount(initialCount); }, [initialCount]);
-  useEffect(() => { setCategoryTotals(initialCategoryTotals); }, [initialCategoryTotals]);
+  const [prevCategoryTotals, setPrevCategoryTotals] = useState(initialCategoryTotals);
+  if (initialCategoryTotals !== prevCategoryTotals) {
+    setPrevCategoryTotals(initialCategoryTotals);
+    setCategoryTotals(initialCategoryTotals);
+  }
 
   function handleAddExpense(data: { title: string; amount: number; category_id: string; date: string; notes?: string }) {
     const category = categories.find((c) => c.id === data.category_id);

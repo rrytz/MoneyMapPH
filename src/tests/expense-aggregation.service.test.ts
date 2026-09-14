@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import type { Mock } from "vitest";
 import { makeSupabase } from "@/tests/supabase-mock";
 import {
   sumExpenses,
@@ -82,6 +83,10 @@ describe("pure aggregation helpers", () => {
 });
 
 describe("getMonthlyExpenseAggregation", () => {
+  function queryBuilderOf(supabase: ReturnType<typeof makeSupabase>) {
+    return vi.mocked(supabase.from).mock.results[0].value as { gte: Mock; lte: Mock };
+  }
+
   it("aggregates ALL expenses for the month including goal-linked contributions", async () => {
     const supabase = makeSupabase({
       income_entries: [],
@@ -112,7 +117,7 @@ describe("getMonthlyExpenseAggregation", () => {
 
     await getMonthlyExpenseAggregation(supabase, USER_ID, MONTH, YEAR);
 
-    const q = vi.mocked(supabase.from).mock.results[0].value as any;
+    const q = queryBuilderOf(supabase);
     expect(q.gte).toHaveBeenCalledWith("date", "2026-09-01");
     expect(q.lte).toHaveBeenCalledWith("date", "2026-09-30");
   });
@@ -125,7 +130,7 @@ describe("getMonthlyExpenseAggregation", () => {
     ] as Array<[number, number, string, string]>) {
       const supabase = makeSupabase({ income_entries: [], expenses: [{ amount: 1, category_id: "c1" }], budgets: [] });
       await getMonthlyExpenseAggregation(supabase, USER_ID, m, y);
-      const q = vi.mocked(supabase.from).mock.results[0].value as any;
+      const q = queryBuilderOf(supabase);
       expect(q.gte).toHaveBeenCalledWith("date", start);
       expect(q.lte).toHaveBeenCalledWith("date", end);
     }

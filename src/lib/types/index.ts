@@ -363,6 +363,22 @@ export interface BillsDueBy {
   horizonDate: string;
 }
 
+export interface MonthlyExpenseAggregation {
+  month: number;
+  year: number;
+  totalExpenses: number;
+  expenseCount: number;
+  byCategory: Record<string, number>;
+}
+
+export interface UnbudgetedCategorySpend {
+  categoryId: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  spent: number;
+}
+
 export type SummaryVerdict = "covered" | "tight" | "short";
 
 

@@ -22,7 +22,10 @@ export async function getMonthlySummary(
       .from("expenses")
       .select("amount, category_id")
       .eq("user_id", userId)
-      .is("goal_id", null)
+      .is("goal_id", null) // Deliberate: goal-linked amounts are money set aside, not
+      // consumption spend — excluded from net-flow figures (dashboard Remaining
+      // Budget, savings rate, snapshots, forecasts, health scoring). Budget-category
+      // targets still count them; see getBudgetStatuses.
       .gte("date", start)
       .lte("date", end),
     supabase

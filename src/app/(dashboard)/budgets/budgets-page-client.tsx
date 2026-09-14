@@ -2,7 +2,7 @@
 
 import { useState, useOptimistic, useTransition } from "react";
 import Link from "next/link";
-import { Plus, Copy, PieChart, Wallet, Target, AlertTriangle, Calculator } from "lucide-react";
+import { Plus, Copy, PieChart, Wallet, Target, TrendingDown, Calculator } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { Progress } from "@/components/ui/progress";
@@ -17,13 +17,16 @@ import { copyPreviousMonthBudget } from "./actions";
 import { addExpense } from "../expenses/actions";
 import { getCurrentMonthYear, getMonthName, toISODateString } from "@/lib/utils/date";
 import { computeBudgetStatus } from "@/lib/utils/budget-status";
+import { formatCompactAmount } from "@/lib/utils/currency";
+import { computeUnbudgetedSpent, computeRemainingBudget, buildUnbudgetedCategoryViews } from "@/lib/services/expense-aggregation.service";
 import { toast } from "sonner";
-import type { BudgetStatus, ExpenseCategory } from "@/lib/types";
+import type { BudgetStatus, ExpenseCategory, MonthlyExpenseAggregation } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface BudgetsPageClientProps {
   statuses: BudgetStatus[];
   categories: ExpenseCategory[];
+  aggregation: MonthlyExpenseAggregation;
   currentMonth: number;
   currentYear: number;
 }
@@ -31,6 +34,7 @@ interface BudgetsPageClientProps {
 export function BudgetsPageClient({
   statuses,
   categories,
+  aggregation,
   currentMonth: initialMonth,
   currentYear: initialYear,
 }: BudgetsPageClientProps) {
@@ -65,21 +69,35 @@ export function BudgetsPageClient({
   );
 
   const totalBudgeted = optimisticStatuses.reduce((sum, s) => sum + s.budgeted, 0);
-  const totalSpent = optimisticStatuses.reduce((sum, s) => sum + s.spent, 0);
-  const totalRemaining = totalBudgeted - totalSpent;
+  const totalBudgetedSpent = optimisticStatuses.reduce((sum, s) => sum + s.spent, 0);
+  const [actualTotal, setActualTotal] = useState(aggregation.totalExpenses);
+  const [prevTotalExpenses, setPrevTotalExpenses] = useState(aggregation.totalExpenses);
+  if (prevTotalExpenses !== aggregation.totalExpenses) {
+    setPrevTotalExpenses(aggregation.totalExpenses);
+    setActualTotal(aggregation.totalExpenses);
+  }
+
+  const budgetedCategoryIds = optimisticStatuses.map((s) => s.categoryId);
+  const unbudgetedViews = buildUnbudgetedCategoryViews(aggregation.byCategory, budgetedCategoryIds, categories);
+
+  const totalUnbudgetedSpent = computeUnbudgetedSpent(actualTotal, totalBudgetedSpent);
+  const totalRemaining = computeRemainingBudget(totalBudgeted, totalBudgetedSpent);
 
   function handleAddExpense(data: { title: string; amount: number; category_id: string; date: string; notes?: string }) {
     startTransition(async () => {
       addSpend({ categoryId: data.category_id, amount: data.amount });
+      setActualTotal((v) => v + data.amount);
       try {
         const result = await addExpense(data);
         if (result.error) {
           toast.error(result.error);
+          setActualTotal((v) => v - data.amount);
         } else {
           toast.success("Expense added");
         }
       } catch {
         toast.error("Unable to add expense. Please try again.");
+        setActualTotal((v) => v - data.amount);
       }
     });
     setExpenseForm(null);
@@ -120,7 +138,7 @@ export function BudgetsPageClient({
 
       {/* Top Summary Cards */}
       {statuses.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <FintechCard>
             <FintechCardContent className="p-5 space-y-3">
               <div className="flex items-center justify-between">
@@ -140,13 +158,31 @@ export function BudgetsPageClient({
             <FintechCardContent className="p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
-                  <AlertTriangle className="h-5 w-5" />
+                  <TrendingDown className="h-5 w-5" />
                 </div>
-                <Badge variant="expense">Budgeted Spend</Badge>
+                <Badge variant="expense">All Expenses</Badge>
               </div>
               <div>
-                <span className="text-xs font-medium text-muted-foreground block">Total Spent</span>
-                <CurrencyDisplay amount={totalSpent} className="text-3xl sm:text-4xl font-bold tracking-tight text-rose-600 dark:text-rose-400" />
+                <span className="text-xs font-medium text-muted-foreground block">Total Actual Spending</span>
+                <CurrencyDisplay amount={actualTotal} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
+              </div>
+            </FintechCardContent>
+          </FintechCard>
+
+          <FintechCard>
+            <FintechCardContent className="p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="p-2.5 rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                  <PieChart className="h-5 w-5" />
+                </div>
+                <Badge variant="warning">Targeted</Badge>
+              </div>
+              <div>
+                <span className="text-xs font-medium text-muted-foreground block">Budgeted Spending</span>
+                <CurrencyDisplay amount={totalBudgetedSpent} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  {totalRemaining >= 0 ? `${formatCompactAmount(totalRemaining)} remaining allowance` : "Over allowance"}
+                </p>
               </div>
             </FintechCardContent>
           </FintechCard>
@@ -157,17 +193,12 @@ export function BudgetsPageClient({
                 <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                   <Target className="h-5 w-5" />
                 </div>
-                <Badge variant="info">Available</Badge>
+                <Badge variant="info">No Target</Badge>
               </div>
               <div>
-                <span className="text-xs font-medium text-muted-foreground block">Remaining Allowance</span>
-                <CurrencyDisplay
-                  amount={totalRemaining}
-                  className={cn(
-                    "text-3xl sm:text-4xl font-bold tracking-tight",
-                    totalRemaining >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
-                  )}
-                />
+                <span className="text-xs font-medium text-muted-foreground block">Unbudgeted Spending</span>
+                <CurrencyDisplay amount={totalUnbudgetedSpent} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
+                <p className="text-xs text-muted-foreground tabular-nums">categories without a budget target</p>
               </div>
             </FintechCardContent>
           </FintechCard>
@@ -242,6 +273,50 @@ export function BudgetsPageClient({
               </FintechCard>
             );
           })}
+        </div>
+      )}
+
+      {unbudgetedViews.length > 0 && (
+        <div className="space-y-4 mt-8">
+          <div>
+            <h3 className="font-semibold text-base text-foreground">Unbudgeted Categories</h3>
+            <p className="text-xs text-muted-foreground">Spending in categories without a budget target this month.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {unbudgetedViews.map((view) => (
+              <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
+                <FintechCardContent className="p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-base">
+                        {view.icon || "📦"}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-foreground">{view.name}</h4>
+                        <span className="text-[11px] text-muted-foreground tabular-nums">
+                          No budget configured
+                        </span>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">Unbudgeted</Badge>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
+                    <span className="text-muted-foreground">
+                      Spent: <CurrencyDisplay amount={view.spent} className="font-bold text-foreground" />
+                    </span>
+                    <Button
+                      onClick={() => setFormOpen(true)}
+                      variant="outline"
+                      className="rounded-xl h-9 text-xs"
+                    >
+                      <Target className="mr-1.5 h-4 w-4" /> Set Limit
+                    </Button>
+                  </div>
+                </FintechCardContent>
+              </FintechCard>
+            ))}
+          </div>
         </div>
       )}
 

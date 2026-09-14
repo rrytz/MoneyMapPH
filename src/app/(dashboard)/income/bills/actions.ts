@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { billInputSchema, payBillSchema, unpayBillSchema } from "@/lib/utils/validators";
 import { createBill, updateBill, deleteBill } from "@/lib/services/bills.service";
+import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 
 type ActionResult = { error?: string };
 
@@ -31,6 +32,7 @@ export async function payBill(input: z.infer<typeof payBillSchema>): Promise<Act
     return { error: "Could not log payment. Please try again." };
   }
 
+  revalidateUserFinancialCache(user.id);
   revalidatePath("/income");
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
@@ -48,6 +50,7 @@ export async function unpayBill(input: z.infer<typeof unpayBillSchema>): Promise
   const { error } = await supabase.rpc("unpay_bill", { p_payment_id: parsed.data.paymentId });
   if (error) return { error: "Could not undo payment. Please try again." };
 
+  revalidateUserFinancialCache(user.id);
   revalidatePath("/income");
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
@@ -76,6 +79,7 @@ export async function createBillAction(input: z.infer<typeof billInputSchema>): 
     return { error: "Could not create bill" };
   }
 
+  revalidateUserFinancialCache(user.id);
   revalidatePath("/income");
   revalidatePath("/dashboard");
   return {};
@@ -105,6 +109,7 @@ export async function updateBillAction(
     return { error: "Could not save bill" };
   }
 
+  revalidateUserFinancialCache(user.id);
   revalidatePath("/income");
   revalidatePath("/dashboard");
   return {};
@@ -121,6 +126,7 @@ export async function deleteBillAction(input: { id: string }): Promise<ActionRes
     return { error: "Could not delete bill" };
   }
 
+  revalidateUserFinancialCache(user.id);
   revalidatePath("/income");
   revalidatePath("/dashboard");
   return {};

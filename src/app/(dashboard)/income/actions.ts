@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createIncomeEntry, updateIncomeEntry, deleteIncomeEntry } from "@/lib/services/income.service";
 import { createPaycheck, deletePaycheck } from "@/lib/services/paycheck.service";
 import { generateSnapshot } from "@/lib/services/snapshot.service";
+import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 import { incomeSchema, paycheckSchema } from "@/lib/utils/validators";
 
 export async function addIncome(formData: {
@@ -27,6 +28,7 @@ export async function addIncome(formData: {
     await createIncomeEntry(supabase, user.id, parsed.data);
     const date = new Date(parsed.data.date);
     await generateSnapshot(supabase, user.id, date.getMonth() + 1, date.getFullYear());
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/income");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
@@ -58,6 +60,7 @@ export async function editIncome(id: string, formData: {
     await updateIncomeEntry(supabase, user.id, id, parsed.data);
     const date = new Date(parsed.data.date);
     await generateSnapshot(supabase, user.id, date.getMonth() + 1, date.getFullYear());
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/income");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
@@ -89,6 +92,7 @@ export async function removeIncome(id: string) {
       await generateSnapshot(supabase, user.id, date.getMonth() + 1, date.getFullYear());
     }
 
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/income");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
@@ -119,6 +123,7 @@ export async function addPaycheck(formData: {
 
   try {
     await createPaycheck(supabase, user.id, parsed.data);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/income");
     revalidatePath("/dashboard");
     return { success: true };
@@ -135,6 +140,7 @@ export async function removePaycheck(id: string) {
 
   try {
     await deletePaycheck(supabase, user.id, id);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/income");
     revalidatePath("/dashboard");
     return { success: true };

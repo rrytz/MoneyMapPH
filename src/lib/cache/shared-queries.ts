@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { buildFinancialTags } from "@/lib/cache/tags";
 import { getMonthlySummary, getBudgetStatuses } from "@/lib/services/financial.service";
 import { getSnapshots } from "@/lib/services/snapshot.service";
 import { getExpenseCategories, getIncomeSources } from "@/lib/services/category.service";
@@ -37,7 +38,7 @@ export const cachedGetMonthlySummary = (
   unstable_cache(
     async (m: number, y: number) => getMonthlySummary(supabase, userId, m, y),
     ["monthly-summary", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:summary:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "summary") }
   )(month, year);
 
 export const cachedGetBudgetStatuses = (
@@ -49,7 +50,7 @@ export const cachedGetBudgetStatuses = (
   unstable_cache(
     async (m: number, y: number) => getBudgetStatuses(supabase, userId, m, y),
     ["budget-statuses", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:budgets:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "budgets") }
   )(month, year);
 
 export const cachedGetMonthlyExpenseAggregation = (
@@ -61,7 +62,7 @@ export const cachedGetMonthlyExpenseAggregation = (
   unstable_cache(
     async (m: number, y: number) => getMonthlyExpenseAggregation(supabase, userId, m, y),
     ["expense-aggregation", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:summary:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "summary") }
   )(month, year);
 
 export const cachedGetSnapshots = (
@@ -72,7 +73,7 @@ export const cachedGetSnapshots = (
   unstable_cache(
     async (cnt: number) => getSnapshots(supabase, userId, cnt),
     ["snapshots", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:snapshots:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "snapshots") }
   )(months);
 
 export const cachedGetExpenseCategories = (
@@ -82,7 +83,7 @@ export const cachedGetExpenseCategories = (
   unstable_cache(
     async () => getExpenseCategories(supabase, userId),
     ["expense-categories", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:categories:${userId}`] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "categories") }
   )();
 
 export const cachedGetIncomeSources = (
@@ -92,7 +93,7 @@ export const cachedGetIncomeSources = (
   unstable_cache(
     async () => getIncomeSources(supabase, userId),
     ["income-sources", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:sources:${userId}`] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "sources") }
   )();
 
 export const cachedGetSavingsGoals = (
@@ -102,7 +103,7 @@ export const cachedGetSavingsGoals = (
   unstable_cache(
     async () => getSavingsGoals(supabase, userId),
     ["savings-goals", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:goals:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "goals") }
   )();
 
 export const cachedGetPaychecks = (
@@ -114,7 +115,7 @@ export const cachedGetPaychecks = (
   unstable_cache(
     async (m: number, y: number) => getPaychecks(supabase, userId, m, y),
     ["paychecks", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:paychecks:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "paychecks") }
   )(month, year);
 
 export const cachedGetLeanStatus = (
@@ -124,7 +125,7 @@ export const cachedGetLeanStatus = (
   unstable_cache(
     async () => getLeanStatus(supabase, userId),
     ["lean-status", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:lean:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "lean") }
   )();
 
 export const cachedGetSafeToSpend = (
@@ -136,7 +137,7 @@ export const cachedGetSafeToSpend = (
   return unstable_cache(
     async () => getSafeToSpend(supabase, userId, now),
     ["safe-to-spend", userId, periodEnd],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:safe-to-spend:${userId}`, "q:financial"] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "safe-to-spend") }
   )();
 };
 
@@ -149,7 +150,7 @@ export const cachedGetBillView = (
   unstable_cache(
     async (y: number, m: number) => getBillView(supabase, userId, y, m),
     ["bill-view", userId],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:bills:${userId}`] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "bills") }
   )(year, month);
 
 export const cachedGetBillsDueBy = (
@@ -161,5 +162,5 @@ export const cachedGetBillsDueBy = (
   unstable_cache(
     async (f: string, t: string) => getBillsDueBy(supabase, userId, f, t),
     ["bills-due-by", userId, fromDate, toDate],
-    { revalidate: REVALIDATE_SECONDS, tags: [`q:bills:${userId}`] }
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "bills") }
   )(fromDate, toDate);

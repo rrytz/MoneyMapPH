@@ -8,6 +8,7 @@ import {
   deleteSavingsGoal,
   addGoalContribution,
 } from "@/lib/services/goal.service";
+import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 import { savingsGoalSchema, contributionSchema } from "@/lib/utils/validators";
 
 export async function addGoal(formData: {
@@ -28,6 +29,7 @@ export async function addGoal(formData: {
 
   try {
     await createSavingsGoal(supabase, user.id, parsed.data);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/savings");
     revalidatePath("/dashboard");
     revalidatePath("/forecasting");
@@ -59,6 +61,7 @@ export async function editGoal(
 
   try {
     await updateSavingsGoal(supabase, user.id, goalId, parsed.data);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/savings");
     revalidatePath("/dashboard");
     revalidatePath("/forecasting");
@@ -76,6 +79,7 @@ export async function removeGoal(goalId: string) {
 
   try {
     await deleteSavingsGoal(supabase, user.id, goalId);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/savings");
     revalidatePath("/dashboard");
     revalidatePath("/forecasting");
@@ -113,6 +117,7 @@ export async function recordContribution(
       categoryId: parsed.data.category_id,
       title: `Contribution to ${goalName}`,
     });
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/savings");
     revalidatePath("/dashboard");
     revalidatePath("/expenses");

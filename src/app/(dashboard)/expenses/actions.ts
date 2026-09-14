@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createExpense, updateExpense, deleteExpense } from "@/lib/services/expense.service";
 import { generateSnapshot } from "@/lib/services/snapshot.service";
+import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 import { expenseSchema } from "@/lib/utils/validators";
 
 export async function addExpense(formData: {
@@ -27,6 +28,7 @@ export async function addExpense(formData: {
     await createExpense(supabase, user.id, parsed.data);
     const date = new Date(parsed.data.date);
     await generateSnapshot(supabase, user.id, date.getMonth() + 1, date.getFullYear());
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     revalidatePath("/budgets");
@@ -60,6 +62,7 @@ export async function editExpense(id: string, formData: {
     await updateExpense(supabase, user.id, id, parsed.data);
     const date = new Date(parsed.data.date);
     await generateSnapshot(supabase, user.id, date.getMonth() + 1, date.getFullYear());
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     revalidatePath("/budgets");
@@ -92,6 +95,7 @@ export async function removeExpense(id: string) {
       await generateSnapshot(supabase, user.id, date.getMonth() + 1, date.getFullYear());
     }
 
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     revalidatePath("/budgets");

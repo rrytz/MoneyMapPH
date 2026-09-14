@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createBudget, updateBudgetCategory, copyBudgetFromPreviousMonth } from "@/lib/services/budget.service";
 import { generateSnapshot } from "@/lib/services/snapshot.service";
+import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 import { budgetSchema } from "@/lib/utils/validators";
 
 export async function addBudget(formData: {
@@ -23,6 +24,7 @@ export async function addBudget(formData: {
   try {
     await createBudget(supabase, user.id, parsed.data);
     await generateSnapshot(supabase, user.id, parsed.data.month, parsed.data.year);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
@@ -41,6 +43,7 @@ export async function updateBudgetCategoryLimit(budgetCategoryId: string, amount
   try {
     await updateBudgetCategory(supabase, user.id, budgetCategoryId, amount);
     await generateSnapshot(supabase, user.id, month, year);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
@@ -60,6 +63,7 @@ export async function copyPreviousMonthBudget(targetMonth: number, targetYear: n
     const result = await copyBudgetFromPreviousMonth(supabase, user.id, targetMonth, targetYear);
     if (!result) return { error: "No budget found for previous month" };
     await generateSnapshot(supabase, user.id, targetMonth, targetYear);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");

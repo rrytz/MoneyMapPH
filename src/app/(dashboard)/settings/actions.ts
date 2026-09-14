@@ -12,6 +12,7 @@ import {
 } from "@/lib/services/category.service";
 import { revalidatePath } from "next/cache";
 import { profileSchema, categorySchema, sourceSchema } from "@/lib/utils/validators";
+import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 
 export async function updateProfileSettings(data: {
   display_name: string;
@@ -50,6 +51,7 @@ export async function addExpenseCategorySetting(data: { name: string; icon?: str
 
   try {
     const category = await createExpenseCategory(supabase, user.id, data);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/settings");
     revalidatePath("/dashboard");
     revalidatePath("/expenses");
@@ -76,6 +78,7 @@ export async function editExpenseCategorySetting(
 
   try {
     const category = await updateExpenseCategory(supabase, user.id, categoryId, data);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/settings");
     revalidatePath("/dashboard");
     revalidatePath("/expenses");
@@ -94,6 +97,7 @@ export async function removeExpenseCategorySetting(categoryId: string) {
 
   try {
     await deleteExpenseCategory(supabase, user.id, categoryId);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/settings");
     revalidatePath("/dashboard");
     revalidatePath("/expenses");
@@ -117,6 +121,7 @@ export async function addIncomeSourceSetting(data: { name: string; type?: "core"
 
   try {
     const source = await createIncomeSource(supabase, user.id, data);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/settings");
     revalidatePath("/dashboard");
     revalidatePath("/income");
@@ -139,6 +144,7 @@ export async function editIncomeSourceSetting(sourceId: string, data: { name: st
 
   try {
     const source = await updateIncomeSource(supabase, user.id, sourceId, data);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/settings");
     revalidatePath("/dashboard");
     revalidatePath("/income");
@@ -156,6 +162,7 @@ export async function removeIncomeSourceSetting(sourceId: string) {
 
   try {
     await deleteIncomeSource(supabase, user.id, sourceId);
+    revalidateUserFinancialCache(user.id);
     revalidatePath("/settings");
     revalidatePath("/dashboard");
     revalidatePath("/income");

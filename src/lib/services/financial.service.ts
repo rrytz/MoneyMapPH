@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import type { MonthlySummary, BudgetStatus } from "@/lib/types";
 import { computeBudgetStatus } from "@/lib/utils/budget-status";
 import { getMonthDateRange } from "@/lib/utils/date";
+import { groupExpensesByCategory } from "./expense-aggregation.service";
 
 export async function getMonthlySummary(
   supabase: SupabaseClient,
@@ -112,10 +113,9 @@ export async function getBudgetStatuses(
     .gte("date", start)
     .lte("date", end);
 
-  const spendingByCategory: Record<string, number> = {};
-  (expenses || []).forEach((e) => {
-    spendingByCategory[e.category_id] = (spendingByCategory[e.category_id] || 0) + Number(e.amount);
-  });
+  const spendingByCategory = groupExpensesByCategory(
+    (expenses || []) as Array<{ amount: number; category_id: string }>
+  );
 
   return (budget.budget_categories as unknown as Array<{
     category_id: string;

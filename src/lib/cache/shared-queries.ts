@@ -8,6 +8,7 @@ import { getPaychecks } from "@/lib/services/paycheck.service";
 import { getLeanStatus } from "@/lib/services/pay-period.service";
 import { getSafeToSpend } from "@/lib/services/safe-to-spend.service";
 import { getBillView, getBillsDueBy } from "@/lib/services/bills.service";
+import { getMonthlyExpenseAggregation } from "@/lib/services/expense-aggregation.service";
 import { getCutoffPeriodForDate } from "@/lib/utils/pay-period";
 import { getManilaNow, toISODateString } from "@/lib/utils/date";
 import type {
@@ -22,6 +23,7 @@ import type {
   SafeToSpendStatus,
   BillView,
   BillsDueBy,
+  MonthlyExpenseAggregation,
 } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 60;
@@ -48,6 +50,18 @@ export const cachedGetBudgetStatuses = (
     async (m: number, y: number) => getBudgetStatuses(supabase, userId, m, y),
     ["budget-statuses", userId],
     { revalidate: REVALIDATE_SECONDS, tags: [`q:budgets:${userId}`, "q:financial"] }
+  )(month, year);
+
+export const cachedGetMonthlyExpenseAggregation = (
+  supabase: SupabaseClient,
+  userId: string,
+  month: number,
+  year: number
+): Promise<MonthlyExpenseAggregation> =>
+  unstable_cache(
+    async (m: number, y: number) => getMonthlyExpenseAggregation(supabase, userId, m, y),
+    ["expense-aggregation", userId],
+    { revalidate: REVALIDATE_SECONDS, tags: [`q:summary:${userId}`, "q:financial"] }
   )(month, year);
 
 export const cachedGetSnapshots = (

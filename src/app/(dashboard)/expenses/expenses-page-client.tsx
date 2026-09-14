@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useOptimistic, useTransition } from "react";
+import { useState, useEffect, useOptimistic, useTransition } from "react";
 import { Plus, Pencil, Trash2, TrendingDown, Search, Filter, PieChart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,8 @@ interface ExpensesPageClientProps {
   initialEntries: Expense[];
   categories: ExpenseCategory[];
   totalThisMonth: number;
+  expenseCount: number;
+  categoryTotals: Record<string, number>;
   currentMonth: number;
   currentYear: number;
 }
@@ -28,7 +30,9 @@ interface ExpensesPageClientProps {
 export function ExpensesPageClient({
   initialEntries,
   categories,
-  totalThisMonth,
+  totalThisMonth: initialTotal,
+  expenseCount: initialCount,
+  categoryTotals: initialCategoryTotals,
 }: ExpensesPageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<Expense | null>(null);
@@ -42,6 +46,13 @@ export function ExpensesPageClient({
     initialEntries,
     (state: Expense[], newEntry: Expense) => [newEntry, ...state]
   );
+
+  const [total, setTotal] = useState(initialTotal);
+  const [count, setCount] = useState(initialCount);
+  const [categoryTotals, setCategoryTotals] = useState(initialCategoryTotals);
+  useEffect(() => { setTotal(initialTotal); }, [initialTotal]);
+  useEffect(() => { setCount(initialCount); }, [initialCount]);
+  useEffect(() => { setCategoryTotals(initialCategoryTotals); }, [initialCategoryTotals]);
 
   function handleAddExpense(data: { title: string; amount: number; category_id: string; date: string; notes?: string }) {
     const category = categories.find((c) => c.id === data.category_id);
@@ -59,17 +70,27 @@ export function ExpensesPageClient({
       category,
     };
 
+    setTotal((v) => v + data.amount);
+    setCount((v) => v + 1);
+    setCategoryTotals((prev) => ({ ...prev, [data.category_id]: (prev[data.category_id] || 0) + data.amount }));
+
     startTransition(async () => {
       addOptimisticEntry(optimistic);
       try {
         const result = await addExpense(data);
         if (result.error) {
           toast.error(result.error);
+          setTotal((v) => v - data.amount);
+          setCount((v) => v - 1);
+          setCategoryTotals((prev) => ({ ...prev, [data.category_id]: (prev[data.category_id] || 0) - data.amount }));
         } else {
           toast.success("Expense added");
         }
       } catch {
         toast.error("Unable to add expense. Please try again.");
+        setTotal((v) => v - data.amount);
+        setCount((v) => v - 1);
+        setCategoryTotals((prev) => ({ ...prev, [data.category_id]: (prev[data.category_id] || 0) - data.amount }));
       }
     });
     setFormOpen(false);
@@ -104,14 +125,12 @@ export function ExpensesPageClient({
     return matchesSearch && matchesCategory;
   });
 
-  // Calculate largest category
-  const categoryTotals: Record<string, { name: string; amount: number }> = {};
-  optimisticEntries.forEach((e) => {
-    const cName = e.category?.name || "Uncategorized";
-    if (!categoryTotals[cName]) categoryTotals[cName] = { name: cName, amount: 0 };
-    categoryTotals[cName].amount += Number(e.amount);
-  });
-  const sortedCategories = Object.values(categoryTotals).sort((a, b) => b.amount - a.amount);
+  const sortedCategories = Object.entries(categoryTotals)
+    .map(([categoryId, amount]) => {
+      const cName = categories.find((c) => c.id === categoryId)?.name || "Uncategorized";
+      return { name: cName, amount };
+    })
+    .sort((a, b) => b.amount - a.amount);
   const topCategory = sortedCategories[0] || { name: "None", amount: 0 };
 
   return (
@@ -134,7 +153,7 @@ export function ExpensesPageClient({
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Monthly Spend</span>
-              <CurrencyDisplay amount={totalThisMonth} className="text-3xl sm:text-4xl font-bold tracking-tight text-rose-600 dark:text-rose-400" />
+              <CurrencyDisplay amount={total} className="text-3xl sm:text-4xl font-bold tracking-tight text-rose-600 dark:text-rose-400" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -165,7 +184,7 @@ export function ExpensesPageClient({
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Total Expenses</span>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{optimisticEntries.length}</p>
+              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{count}</p>
             </div>
           </FintechCardContent>
         </FintechCard>

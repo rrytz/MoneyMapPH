@@ -135,4 +135,23 @@ describe("getMonthlyExpenseAggregation", () => {
       expect(q.lte).toHaveBeenCalledWith("date", end);
     }
   });
+
+  it("regression: switching the viewed month changes the aggregation output", async () => {
+    const expenses = [
+      { amount: 500, category_id: "c-transport", date: "2026-08-15" },
+      { amount: 289, category_id: "c-groceries", date: "2026-09-03" },
+      { amount: 300, category_id: "c-utilities", date: "2026-08-31" },
+      { amount: 3500, category_id: "c-misc", date: "2026-09-20" },
+    ];
+    const august = await getMonthlyExpenseAggregation(makeSupabase({ income_entries: [], expenses, budgets: [] }), USER_ID, 8, 2026);
+    const september = await getMonthlyExpenseAggregation(makeSupabase({ income_entries: [], expenses, budgets: [] }), USER_ID, 9, 2026);
+
+    expect(august.totalExpenses).toBe(800); // 500 + 300
+    expect(august.expenseCount).toBe(2);
+    expect(august.byCategory["c-transport"]).toBe(500);
+    expect(september.totalExpenses).toBe(3789); // 289 + 3500
+    expect(september.expenseCount).toBe(2);
+    expect(september.byCategory["c-misc"]).toBe(3500);
+    expect(august.totalExpenses).not.toBe(september.totalExpenses);
+  });
 });

@@ -2,6 +2,7 @@
 
 import { useState, useOptimistic, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Copy, PieChart, Wallet, Target, TrendingDown, Calculator } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
@@ -44,6 +45,7 @@ export function BudgetsPageClient({
   const [copying, setCopying] = useState(false);
   const [expenseForm, setExpenseForm] = useState<BudgetStatus | null>(null);
   const [, startTransition] = useTransition();
+  const router = useRouter();
 
   const { month: realMonth, year: realYear } = getCurrentMonthYear();
   const isCurrentMonth = month === realMonth && year === realYear;
@@ -118,7 +120,15 @@ export function BudgetsPageClient({
     <div className="space-y-6">
       <PageHeader title="Budget Planner" description="Set and monitor category targets for variable and fixed expenses">
         <div className="flex flex-wrap items-center gap-3">
-          <MonthYearPicker month={month} year={year} onChange={(m, y) => { setMonth(m); setYear(y); }} />
+          <MonthYearPicker
+            month={month}
+            year={year}
+            onChange={(m, y) => {
+              setMonth(m);
+              setYear(y);
+              router.replace(`/budgets?month=${m}&year=${y}`, { scroll: false });
+            }}
+          />
           {statuses.length === 0 ? (
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleCopy} disabled={copying} className="rounded-xl border-border h-9 text-xs">

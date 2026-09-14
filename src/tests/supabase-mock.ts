@@ -28,8 +28,23 @@ export function makeQueryBuilder(rows: unknown[], count = 0) {
     }),
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
+    // Inclusive range filters. Rows that don't define the column pass through
+    // so fixtures without an explicit date keep their pre-existing behavior;
+    // rows that define it are matched lexicographically (ISO dates sort
+    // correctly as strings). This mirrors .gte()/.lte() enough to test that a
+    // month-scoped query returns different rows for different months.
+    gte: vi.fn((column: string, value: unknown) => {
+      result.data = (result.data as Record<string, unknown>[]).filter((r) =>
+        r[column] == null || (r[column] as string) >= (value as string)
+      );
+      return q;
+    }),
+    lte: vi.fn((column: string, value: unknown) => {
+      result.data = (result.data as Record<string, unknown>[]).filter((r) =>
+        r[column] == null || (r[column] as string) <= (value as string)
+      );
+      return q;
+    }),
     order: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn(() =>
       Promise.resolve({ data: (result.data as unknown[])[0] ?? null, error: null })

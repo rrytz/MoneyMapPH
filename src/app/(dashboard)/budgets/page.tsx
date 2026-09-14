@@ -3,14 +3,20 @@ import { cachedGetBudgetStatuses as getBudgetStatuses } from "@/lib/cache/shared
 import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { cachedGetMonthlyExpenseAggregation as getExpenseAggregation } from "@/lib/cache/shared-queries";
 import { getCurrentMonthYear } from "@/lib/utils/date";
+import { resolveViewMonth } from "@/lib/utils/view-month";
 import { BudgetsPageClient } from "./budgets-page-client";
 
-export default async function BudgetsPage() {
+export default async function BudgetsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string; year?: string }>;
+}) {
   const supabase = await createClient();
   const user = await getUser();
   if (!user) return null;
 
-  const { month, year } = getCurrentMonthYear();
+  const params = await searchParams;
+  const { month, year } = resolveViewMonth(params.month, params.year, getCurrentMonthYear());
   const [statuses, categories, aggregation] = await Promise.all([
     getBudgetStatuses(supabase, user.id, month, year),
     getExpenseCategories(supabase, user.id),
@@ -19,6 +25,7 @@ export default async function BudgetsPage() {
 
   return (
     <BudgetsPageClient
+      key={`${month}-${year}`}
       statuses={statuses}
       categories={categories}
       aggregation={aggregation}

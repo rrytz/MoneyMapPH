@@ -77,7 +77,7 @@ export function BudgetsPageClient({
     setActualTotal(aggregation.totalExpenses);
   }
 
-  const budgetedCategoryIds = optimisticStatuses.map((s) => s.categoryId);
+  const budgetedCategoryIds = statuses.map((s) => s.categoryId);
   const unbudgetedViews = buildUnbudgetedCategoryViews(aggregation.byCategory, budgetedCategoryIds, categories);
 
   const totalUnbudgetedSpent = computeUnbudgetedSpent(actualTotal, totalBudgetedSpent);
@@ -215,6 +215,7 @@ export function BudgetsPageClient({
           onAction={() => setFormOpen(true)}
         />
       ) : (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {optimisticStatuses.map((status) => {
             const isOver = status.status === "over";
@@ -274,50 +275,51 @@ export function BudgetsPageClient({
             );
           })}
         </div>
-      )}
 
-      {unbudgetedViews.length > 0 && (
-        <div className="space-y-4 mt-8">
-          <div>
-            <h3 className="font-semibold text-base text-foreground">Unbudgeted Categories</h3>
-            <p className="text-xs text-muted-foreground">Spending in categories without a budget target this month.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {unbudgetedViews.map((view) => (
-              <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
-                <FintechCardContent className="p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-base">
-                        {view.icon || "📦"}
+        {unbudgetedViews.length > 0 && (
+          <div className="space-y-4 mt-8">
+            <div>
+              <h3 className="font-semibold text-base text-foreground">Unbudgeted Categories</h3>
+              <p className="text-xs text-muted-foreground">Spending in categories without a budget target this month.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {unbudgetedViews.map((view) => (
+                <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
+                  <FintechCardContent className="p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-base">
+                          {view.icon || "📦"}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm text-foreground">{view.name}</h4>
+                          <span className="text-[11px] text-muted-foreground tabular-nums">
+                            No budget configured
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-foreground">{view.name}</h4>
-                        <span className="text-[11px] text-muted-foreground tabular-nums">
-                          No budget configured
-                        </span>
-                      </div>
+                      <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">Unbudgeted</Badge>
                     </div>
-                    <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">Unbudgeted</Badge>
-                  </div>
 
-                  <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
-                    <span className="text-muted-foreground">
-                      Spent: <CurrencyDisplay amount={view.spent} className="font-bold text-foreground" />
-                    </span>
-                    <Button
-                      onClick={() => setFormOpen(true)}
-                      variant="outline"
-                      className="rounded-xl h-9 text-xs"
-                    >
-                      <Target className="mr-1.5 h-4 w-4" /> Set Limit
-                    </Button>
-                  </div>
-                </FintechCardContent>
-              </FintechCard>
-            ))}
+                    <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
+                      <span className="text-muted-foreground">
+                        Spent: <CurrencyDisplay amount={view.spent} className="font-bold text-foreground" />
+                      </span>
+                      <Button
+                        onClick={() => setFormOpen(true)}
+                        variant="outline"
+                        className="rounded-xl h-9 text-xs"
+                      >
+                        <Target className="mr-1.5 h-4 w-4" /> Set Limit
+                      </Button>
+                    </div>
+                  </FintechCardContent>
+                </FintechCard>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+        </>
       )}
 
       <FintechCard>

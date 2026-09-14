@@ -1,5 +1,7 @@
 import { createClient, getUser } from "@/lib/supabase/server";
 import { getIncomeEntries } from "@/lib/services/income.service";
+import { resolveIncomeViewEntries } from "@/lib/utils/income-view";
+import type { IncomeEntry } from "@/lib/types";
 import { cachedGetIncomeSources as getIncomeSources, cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { cachedGetPaychecks as getPaychecks, cachedGetLeanStatus as getLeanStatus, cachedGetSafeToSpend as getSafeToSpend, cachedGetBillView, cachedGetBillsDueBy } from "@/lib/cache/shared-queries";
 import { getCurrentMonthYear, getManilaNow } from "@/lib/utils/date";
@@ -9,7 +11,7 @@ import { IncomePageClient } from "./income-page-client";
 export default async function IncomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; view?: string }>;
 }) {
   const supabase = await createClient();
   const user = await getUser();
@@ -17,10 +19,12 @@ export default async function IncomePage({
 
   const params = await searchParams;
   const activeTab = params.tab === "bills" ? "bills" : "income";
+  const view = params.view === "all" ? "all" : "month";
 
   const { month, year } = getCurrentMonthYear();
-  const [incomeData, sources, paychecks, categories, leanStatus, safeToSpend] = await Promise.all([
+  const [monthEntries, allEntries, sources, paychecks, categories, leanStatus, safeToSpend] = await Promise.all([
     getIncomeEntries(supabase, user.id, { month, year, limit: 20 }),
+    view === "all" ? getIncomeEntries(supabase, user.id, { limit: 10_000 }) : Promise.resolve({ data: [] as IncomeEntry[], count: 0 }),
     getIncomeSources(supabase, user.id),
     getPaychecks(supabase, user.id, month, year),
     getExpenseCategories(supabase, user.id),
@@ -39,11 +43,15 @@ export default async function IncomePage({
     ]);
   }
 
-  const totalThisMonth = incomeData.data.reduce((sum, e) => sum + Number(e.amount), 0);
+  const totalThisMonth = monthEntries.data.reduce((sum, e) => sum + Number(e.amount), 0);
+  const activeEntries = resolveIncomeViewEntries(monthEntries.data, allEntries.data, view);
 
   return (
     <IncomePageClient
-      initialEntries={incomeData.data}
+      key={view}
+      initialEntries={activeEntries}
+      monthEntries={monthEntries.data}
+      view={view}
       sources={sources}
       paychecks={paychecks}
       categories={categories}

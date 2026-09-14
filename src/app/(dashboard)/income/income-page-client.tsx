@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useOptimistic, useTransition } from "react";
+import Link from "next/link";
 import { Plus, Pencil, Trash2, TrendingUp, DollarSign, Wallet, Layers, CalendarRange, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
@@ -19,12 +20,16 @@ import { MonthCalendar } from "./month-calendar";
 import { BillsCrud } from "./bills-crud";
 import { removeIncome, addIncome } from "./actions";
 import { formatDate } from "@/lib/utils/date";
+import { isInShownMonth, type IncomeView } from "@/lib/utils/income-view";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory, LeanStatus, SafeToSpendStatus } from "@/lib/types";
 import type { BillView, BillsDueBy } from "@/lib/types";
 
 interface IncomePageClientProps {
   initialEntries: IncomeEntry[];
+  monthEntries: IncomeEntry[];
+  view: IncomeView;
   sources: IncomeSource[];
   paychecks: Paycheck[];
   categories: ExpenseCategory[];
@@ -40,6 +45,8 @@ interface IncomePageClientProps {
 
 export function IncomePageClient({
   initialEntries,
+  monthEntries,
+  view,
   sources,
   paychecks,
   categories,
@@ -63,6 +70,11 @@ export function IncomePageClient({
     (state: IncomeEntry[], newEntry: IncomeEntry) => [newEntry, ...state]
   );
 
+  const [optimisticMonthEntries, addOptimisticMonthEntry] = useOptimistic(
+    monthEntries,
+    (state: IncomeEntry[], newEntry: IncomeEntry) => [newEntry, ...state]
+  );
+
   function handleAddIncome(data: { amount: number; source_id: string; date: string; notes?: string }) {
     const source = sources.find((s) => s.id === data.source_id);
     const optimistic: IncomeEntry = {
@@ -80,6 +92,9 @@ export function IncomePageClient({
 
     startTransition(async () => {
       addOptimisticEntry(optimistic);
+      if (isInShownMonth(data.date, currentMonth, currentYear)) {
+        addOptimisticMonthEntry(optimistic);
+      }
       try {
         const result = await addIncome(data);
         if (result.error) {
@@ -173,7 +188,7 @@ export function IncomePageClient({
                 </div>
                 <div>
                   <span className="text-xs font-medium text-muted-foreground block">Total Payments</span>
-                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{optimisticEntries.length}</p>
+                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{optimisticMonthEntries.length}</p>
                 </div>
               </FintechCardContent>
             </FintechCard>
@@ -197,20 +212,52 @@ export function IncomePageClient({
           </div>
 
           {/* Income List Section */}
-          {optimisticEntries.length === 0 ? (
-            <EmptyState
-              icon={<TrendingUp className="h-6 w-6" />}
-              title="No income recorded"
-              description="Start tracking your salary, night differential, overtime, and incentives."
-              actionLabel="Add First Income Entry"
-              onAction={handleAdd}
-            />
-          ) : (
-            <FintechCard className="p-0 overflow-hidden">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                <h3 className="font-semibold text-base text-foreground">Income Transactions</h3>
+          <FintechCard className="p-0 overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between gap-3 flex-wrap">
+              <h3 className="font-semibold text-base text-foreground">Income Transactions</h3>
+              <div className="flex items-center gap-3">
                 <span className="text-xs text-muted-foreground">{optimisticEntries.length} items logged</span>
+                <div className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-900 p-0.5">
+                  <Link
+                    href="/income"
+                    className={cn(
+                      "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+                      view === "all"
+                        ? "text-muted-foreground hover:text-foreground"
+                        : "bg-background text-foreground shadow-sm"
+                    )}
+                  >
+                    This Month
+                  </Link>
+                  <Link
+                    href="/income?view=all"
+                    className={cn(
+                      "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
+                      view === "all"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    All Entries
+                  </Link>
+                </div>
               </div>
+            </div>
+            {optimisticEntries.length === 0 ? (
+              <div className="p-6">
+                <EmptyState
+                  icon={<TrendingUp className="h-6 w-6" />}
+                  title="No income recorded"
+                  description={
+                    view === "all"
+                      ? "Start tracking your salary, night differential, overtime, and incentives."
+                      : "No earnings logged for this month. Switch to All Entries to view older records."
+                  }
+                  actionLabel="Add First Income Entry"
+                  onAction={handleAdd}
+                />
+              </div>
+            ) : (
               <div className="divide-y divide-border">
                 {optimisticEntries.map((entry) => (
                   <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
@@ -241,8 +288,8 @@ export function IncomePageClient({
                   </div>
                 ))}
               </div>
-            </FintechCard>
-          )}
+            )}
+          </FintechCard>
 
           <IncomeForm
             open={formOpen}

@@ -363,6 +363,33 @@ export interface BillsDueBy {
   horizonDate: string;
 }
 
+export interface Debt {
+  id: string;
+  user_id: string;
+  name: string;
+  total_amount: string;
+  due_date: string;
+  category_id: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DebtPayment {
+  id: string;
+  debt_id: string;
+  paid_at: string;
+  amount: string;
+  expense_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DebtView = {
+  debts: Debt[];
+  payments: DebtPayment[];
+};
+
 export interface MonthlyExpenseAggregation {
   month: number;
   year: number;

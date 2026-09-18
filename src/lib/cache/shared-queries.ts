@@ -9,6 +9,7 @@ import { getPaychecks } from "@/lib/services/paycheck.service";
 import { getLeanStatus } from "@/lib/services/pay-period.service";
 import { getSafeToSpend } from "@/lib/services/safe-to-spend.service";
 import { getBillView, getBillsDueBy } from "@/lib/services/bills.service";
+import { getDebts } from "@/lib/services/debt.service";
 import { getMonthlyExpenseAggregation } from "@/lib/services/expense-aggregation.service";
 import { getCutoffPeriodForDate } from "@/lib/utils/pay-period";
 import { getManilaNow, toISODateString } from "@/lib/utils/date";
@@ -24,6 +25,7 @@ import type {
   SafeToSpendStatus,
   BillView,
   BillsDueBy,
+  DebtView,
   MonthlyExpenseAggregation,
 } from "@/lib/types";
 
@@ -104,6 +106,16 @@ export const cachedGetSavingsGoals = (
     async () => getSavingsGoals(supabase, userId),
     ["savings-goals", userId],
     { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "goals") }
+  )();
+
+export const cachedGetDebts = (
+  supabase: SupabaseClient,
+  userId: string
+): Promise<DebtView> =>
+  unstable_cache(
+    async () => getDebts(supabase, userId),
+    ["debts", userId],
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "debts") }
   )();
 
 export const cachedGetPaychecks = (

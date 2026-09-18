@@ -23,6 +23,7 @@ export const FINANCIAL_TAG_SUFFIXES = [
   "lean",
   "safe-to-spend",
   "bills",
+  "debts",
 ] as const;
 
 export type FinancialTagSuffix = (typeof FINANCIAL_TAG_SUFFIXES)[number];

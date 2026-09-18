@@ -132,5 +132,29 @@ export type BillInputSchemaType = z.infer<typeof billInputSchema>;
 export type PayBillSchemaType = z.infer<typeof payBillSchema>;
 export type UnpayBillSchemaType = z.infer<typeof unpayBillSchema>;
 
+export const debtInputSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
+  total_amount: z.coerce.number().positive("Amount must be greater than 0").max(999999999999, "Amount is too large"),
+  due_date: z.string().min(1, "Due date is required"),
+  category_id: z.string().uuid("Select a category").optional().or(z.literal("")),
+  notes: z.string().max(500, "Notes must be 500 characters or less").optional().or(z.literal("")),
+});
+
+export const payDebtSchema = z.object({
+  debtId: z.string().uuid("Select a debt"),
+  paidAt: z.string().min(1, "Paid date is required"),
+  amount: z.coerce.number().positive("Amount must be greater than 0").max(999999999999, "Amount is too large"),
+  categoryId: z.string().uuid().optional().or(z.literal("")),
+  notes: z.string().max(500).optional().or(z.literal("")),
+});
+
+export const unpayDebtSchema = z.object({
+  paymentId: z.string().uuid(),
+});
+
+export type DebtInputSchemaType = z.infer<typeof debtInputSchema>;
+export type PayDebtSchemaType = z.infer<typeof payDebtSchema>;
+export type UnpayDebtSchemaType = z.infer<typeof unpayDebtSchema>;
+
 
 

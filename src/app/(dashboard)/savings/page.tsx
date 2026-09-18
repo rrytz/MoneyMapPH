@@ -2,6 +2,7 @@ import { createClient, getUser } from "@/lib/supabase/server";
 import { cachedGetSavingsGoals as getSavingsGoals } from "@/lib/cache/shared-queries";
 import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/shared-queries";
 import { cachedGetSnapshots as getSnapshots } from "@/lib/cache/shared-queries";
+import { cachedGetDebts as getDebts } from "@/lib/cache/shared-queries";
 import { calculateEmergencyFundStatus } from "@/lib/services/forecast.service";
 import { SavingsPageClient } from "./savings-page-client";
 import { redirect } from "next/navigation";
@@ -13,10 +14,11 @@ export default async function SavingsPage() {
     redirect("/login");
   }
 
-  const [goals, categories, snapshots] = await Promise.all([
+  const [goals, categories, snapshots, debtView] = await Promise.all([
     getSavingsGoals(supabase, user.id),
     getExpenseCategories(supabase, user.id),
     getSnapshots(supabase, user.id, 6),
+    getDebts(supabase, user.id),
   ]);
 
   const emergencyStatus = await calculateEmergencyFundStatus(supabase, user.id, {
@@ -29,6 +31,8 @@ export default async function SavingsPage() {
       initialGoals={goals}
       categories={categories}
       emergencyStatus={emergencyStatus}
+      initialDebts={debtView.debts}
+      debtPayments={debtView.payments}
     />
   );
 }

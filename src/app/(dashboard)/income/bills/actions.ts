@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { billInputSchema, payBillSchema, unpayBillSchema } from "@/lib/utils/validators";
 import { createBill, updateBill, deleteBill } from "@/lib/services/bills.service";
+import { generateSnapshot } from "@/lib/services/snapshot.service";
 import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 
 type ActionResult = { error?: string };
@@ -32,10 +33,16 @@ export async function payBill(input: z.infer<typeof payBillSchema>): Promise<Act
     return { error: "Could not log payment. Please try again." };
   }
 
+  const [yr, mo] = parsed.data.paidAt.split("-").map(Number);
+  await generateSnapshot(supabase, user.id, mo, yr);
+
   revalidateUserFinancialCache(user.id);
   revalidatePath("/income");
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
+  revalidatePath("/budgets");
+  revalidatePath("/transactions");
+  revalidatePath("/forecasting");
   return {};
 }
 
@@ -47,13 +54,27 @@ export async function unpayBill(input: z.infer<typeof unpayBillSchema>): Promise
   const user = await getUser();
   if (!user) return { error: "Not signed in" };
 
+  const { data: payment } = await supabase
+    .from("bill_payments")
+    .select("paid_at")
+    .eq("id", parsed.data.paymentId)
+    .maybeSingle();
+  if (!payment) return { error: "Payment not found." };
+
+  const [yr, mo] = payment.paid_at.split("-").map(Number);
+
   const { error } = await supabase.rpc("unpay_bill", { p_payment_id: parsed.data.paymentId });
   if (error) return { error: "Could not undo payment. Please try again." };
+
+  await generateSnapshot(supabase, user.id, mo, yr);
 
   revalidateUserFinancialCache(user.id);
   revalidatePath("/income");
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
+  revalidatePath("/budgets");
+  revalidatePath("/transactions");
+  revalidatePath("/forecasting");
   return {};
 }
 

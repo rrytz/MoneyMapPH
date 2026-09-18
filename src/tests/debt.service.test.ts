@@ -140,7 +140,10 @@ describe("getDebtPayment", () => {
   it("returns null when the payment is not owned", async () => {
     const rows = {
       debt_payments: [{ id: "p1", debt_id: "d1", paid_at: "2026-09-18", amount: "5000" }],
-      debts: [{ id: "d2", user_id: "uX" }],
+      debts: [
+        { id: "d1", user_id: "uX" },
+        { id: "d2", user_id: "u1" },
+      ],
     };
     const s = clientStub(rows) as never;
     await expect(getDebtPayment(s, "u1", "p1")).resolves.toBeNull();

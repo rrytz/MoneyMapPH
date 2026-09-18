@@ -63,10 +63,11 @@ export async function updateDebt(
   patch: Partial<DebtInput>
 ): Promise<Debt> {
   if (patch.total_amount !== undefined) {
-    const { data: payments } = await supabase
+    const { data: payments, error } = await supabase
       .from("debt_payments")
       .select("amount")
       .eq("debt_id", id);
+    if (error) throw error;
     const paid = (payments || []).reduce((sum, p) => sum + Number(p.amount), 0);
     if (patch.total_amount < paid) throw new Error("TOTAL_BELOW_PAID");
   }

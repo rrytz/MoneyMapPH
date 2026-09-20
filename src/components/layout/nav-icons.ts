@@ -8,6 +8,7 @@ import {
   History,
   Settings,
   MoreHorizontal,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,4 +22,5 @@ export const NAV_ICON_MAP: Record<string, LucideIcon> = {
   History,
   Settings,
   MoreHorizontal,
+  Wallet,
 };

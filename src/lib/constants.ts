@@ -21,6 +21,7 @@ export const DEFAULT_CURRENCY = "PHP";
 
 export const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard", description: "At-a-glance overview of your monthly finances" },
+  { label: "Accounts", href: "/accounts", icon: "Wallet", description: "Track balances across bank accounts, e-wallets & cash" },
   { label: "Income", href: "/income", icon: "TrendingUp", description: "Log salary, overtime, incentives & track earnings" },
   { label: "Expenses", href: "/expenses", icon: "TrendingDown", description: "Track spending by category & search entries" },
   { label: "Budgets", href: "/budgets", icon: "PieChart", description: "Plan monthly budgets & monitor category limits" },

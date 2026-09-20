@@ -106,7 +106,7 @@ export function TransferModal({
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           <div className="space-y-2">
             <Label>From Account (Source)</Label>
-            <Select value={fromAccountId} onValueChange={setFromAccountId}>
+            <Select value={fromAccountId} onValueChange={(v) => setFromAccountId(v ?? "")}>
               <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-100">
                 <SelectValue placeholder="Select source account" />
               </SelectTrigger>
@@ -122,7 +122,7 @@ export function TransferModal({
 
           <div className="space-y-2">
             <Label>To Account (Destination)</Label>
-            <Select value={toAccountId} onValueChange={setToAccountId}>
+            <Select value={toAccountId} onValueChange={(v) => setToAccountId(v ?? "")}>
               <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-100">
                 <SelectValue placeholder="Select destination account" />
               </SelectTrigger>

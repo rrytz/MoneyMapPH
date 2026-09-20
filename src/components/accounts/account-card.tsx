@@ -72,10 +72,8 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-200">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-xl p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">
+            <MoreVertical className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {!account.is_archived && (
@@ -113,7 +111,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           {account.is_negative && (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <div className="flex items-center gap-1 text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 cursor-help">
                     <AlertTriangle className="h-3 w-3" />
                     Negative Balance

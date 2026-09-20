@@ -70,4 +70,34 @@ describe("Accounts Server Actions", () => {
     });
     expect(res.error).toBe("Source and destination accounts must be different");
   });
+
+  it("scopes mutations to the authenticated user id, not a caller-supplied one", async () => {
+    const { createClient } = await import("@/lib/supabase/server");
+    const client = (await createClient()) as any;
+
+    const res = await removeTransfer("tr-999");
+    expect(res.success).toBe(true);
+
+    const fromMock = client.from;
+    const transferResults = fromMock.mock.results.filter(
+      (r: any) => r.value && typeof r.value.delete === "function"
+    );
+    expect(transferResults.length).toBeGreaterThan(0);
+
+    const eqCalls: any[][] = [];
+    for (const r of transferResults) {
+      const deleteChain = r.value.delete();
+      eqCalls.push(...(deleteChain.eq.mock.calls as any[][]));
+      const fromIdEq = (deleteChain.eq.mock.results as any[])
+        .map((res) => res.value && res.value.eq)
+        .find(Boolean);
+      if (fromIdEq) eqCalls.push(...(fromIdEq.mock.calls as any[][]));
+    }
+
+    const userEqCalls = eqCalls.filter((c) => c[0] === "user_id");
+    expect(userEqCalls.length).toBeGreaterThan(0);
+    for (const [, userId] of userEqCalls) {
+      expect(userId).toBe("user-123");
+    }
+  });
 });

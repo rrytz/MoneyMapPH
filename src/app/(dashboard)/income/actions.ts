@@ -101,6 +101,7 @@ export async function removeIncome(id: string) {
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
     revalidatePath("/forecasting");
+    revalidatePath("/accounts");
     return { success: true };
   } catch (err) {
     console.error("Failed to delete income entry:", err);

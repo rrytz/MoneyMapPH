@@ -77,7 +77,7 @@ export function IncomePageClient({
     (state: IncomeEntry[], newEntry: IncomeEntry) => [newEntry, ...state]
   );
 
-  function handleAddIncome(data: { amount: number; source_id: string; date: string; notes?: string }) {
+  function handleAddIncome(data: { amount: number; source_id: string; date: string; notes?: string; account_id?: string }) {
     const source = sources.find((s) => s.id === data.source_id);
     const optimistic: IncomeEntry = {
       id: `optimistic-${Date.now()}`,
@@ -87,7 +87,7 @@ export function IncomePageClient({
       date: data.date,
       notes: data.notes || null,
       paycheck_id: null,
-      account_id: (data as any).account_id || null,
+      account_id: data.account_id || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       source,

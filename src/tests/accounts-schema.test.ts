@@ -27,9 +27,9 @@ describe("Accounts Schema & Migration SQL", () => {
 
   it("adds optional account_id composite FKs to income_entries and expenses", () => {
     expect(sql).toContain("ALTER TABLE public.income_entries");
-    expect(sql).toContain("FOREIGN KEY (account_id, user_id) REFERENCES public.accounts(id, user_id) ON DELETE SET NULL");
+    expect(sql).toContain("FOREIGN KEY (account_id, user_id) REFERENCES public.accounts(id, user_id) ON DELETE RESTRICT");
     expect(sql).toContain("ALTER TABLE public.expenses");
-    expect(sql).toContain("FOREIGN KEY (account_id, user_id) REFERENCES public.accounts(id, user_id) ON DELETE SET NULL");
+    expect(sql).toContain("FOREIGN KEY (account_id, user_id) REFERENCES public.accounts(id, user_id) ON DELETE RESTRICT");
   });
 
   it("includes required performance indexes", () => {

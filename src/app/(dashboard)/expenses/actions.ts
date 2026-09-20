@@ -105,6 +105,7 @@ export async function removeExpense(id: string) {
     revalidatePath("/budgets");
     revalidatePath("/transactions");
     revalidatePath("/forecasting");
+    revalidatePath("/accounts");
     return { success: true };
   } catch (err) {
     console.error("Failed to delete expense:", err);

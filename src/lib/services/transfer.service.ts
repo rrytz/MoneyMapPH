@@ -66,6 +66,23 @@ export async function updateTransfer(
     throw new Error("Transfer fee cannot be negative.");
   }
 
+  if (data.from_account_id || data.to_account_id) {
+    const accountIds = [data.from_account_id, data.to_account_id].filter((id): id is string => !!id);
+    const { data: accounts, error: accErr } = await supabase
+      .from("accounts")
+      .select("id, is_archived")
+      .eq("user_id", userId)
+      .in("id", accountIds);
+
+    if (accErr) throw accErr;
+    if (!accounts || accounts.length < accountIds.length) {
+      throw new Error("One or both accounts do not exist or belong to another user.");
+    }
+    if (accounts.some((a) => a.is_archived)) {
+      throw new Error("Transfers cannot be performed on archived accounts.");
+    }
+  }
+
   const { data: updated, error } = await supabase
     .from("account_transfers")
     .update({

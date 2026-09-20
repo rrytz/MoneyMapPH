@@ -59,14 +59,14 @@ ALTER TABLE public.income_entries
   ADD CONSTRAINT fk_income_entries_account 
     FOREIGN KEY (account_id, user_id) 
     REFERENCES public.accounts(id, user_id) 
-    ON DELETE SET NULL;
+    ON DELETE RESTRICT;
 
 ALTER TABLE public.expenses
   ADD COLUMN IF NOT EXISTS account_id UUID,
   ADD CONSTRAINT fk_expenses_account 
     FOREIGN KEY (account_id, user_id) 
     REFERENCES public.accounts(id, user_id) 
-    ON DELETE SET NULL;
+    ON DELETE RESTRICT;
 
 -- 4. PERFORMANCE INDEXES
 CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON public.accounts(user_id);

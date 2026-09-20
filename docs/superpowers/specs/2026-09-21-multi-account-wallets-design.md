@@ -75,14 +75,22 @@ CREATE POLICY "Users can manage their own transfers"
 
 ### 1.3 `income_entries` and `expenses` Modifications
 
-Add optional `account_id` foreign key columns to existing transaction tables.
+Add optional `account_id` foreign key columns to existing transaction tables using composite foreign keys on `(account_id, user_id)` to guarantee database-level same-user ownership.
 
 ```sql
 ALTER TABLE public.income_entries
-  ADD COLUMN IF NOT EXISTS account_id UUID REFERENCES public.accounts(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS account_id UUID,
+  ADD CONSTRAINT fk_income_entries_account 
+    FOREIGN KEY (account_id, user_id) 
+    REFERENCES public.accounts(id, user_id) 
+    ON DELETE SET NULL;
 
 ALTER TABLE public.expenses
-  ADD COLUMN IF NOT EXISTS account_id UUID REFERENCES public.accounts(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS account_id UUID,
+  ADD CONSTRAINT fk_expenses_account 
+    FOREIGN KEY (account_id, user_id) 
+    REFERENCES public.accounts(id, user_id) 
+    ON DELETE SET NULL;
 ```
 
 ### 1.4 Database Performance Indexes
@@ -98,7 +106,7 @@ CREATE INDEX IF NOT EXISTS idx_expenses_account_id ON public.expenses(account_id
 
 ### 1.5 Architecture Decisions & Constraints
 
-1. **Transfer Ownership Integrity**: Composite FKs `(from_account_id, user_id)` and `(to_account_id, user_id)` guarantee at the database schema level that both accounts in a transfer belong to `account_transfers.user_id`.
+1. **Transfer & Entry Ownership Integrity**: Composite FKs `(from_account_id, user_id)`, `(to_account_id, user_id)`, and `(account_id, user_id)` guarantee at the database schema level that referenced accounts belong to the exact same `user_id`.
 2. **Initial Balance**: `initial_balance` is constrained `CHECK (initial_balance >= 0)`.
 3. **Transfer Fee Semantics**: Transfer from Account A to Account B for `amount` with `transfer_fee`:
    - Account A (Source) delta: `-(amount + transfer_fee)`
@@ -106,6 +114,7 @@ CREATE INDEX IF NOT EXISTS idx_expenses_account_id ON public.expenses(account_id
    - `transfer_fee` is paid exclusively by the source account and does NOT become an Income or Expense record.
 4. **`credit` Account Type Scope**: `credit` is a categorization/type label only. It has no special credit or debt behavior in v1. Its balance is calculated using the same generic account formula as other account types.
 5. **Financial History Preservation**: `ON DELETE RESTRICT` on transfers prevents hard-deleting accounts with transfer history. Account management relies on soft archiving (`is_archived = TRUE`). Transaction deletion uses `ON DELETE SET NULL`.
+6. **`updated_at` Timestamp Convention**: Service methods pass `updated_at: new Date().toISOString()` during updates, matching MoneyMapPH's existing service pattern (`debt.service.ts`, `bills.service.ts`, `reminder.service.ts`).
 
 ---
 
@@ -260,9 +269,9 @@ GRANT EXECUTE ON FUNCTION public.get_account_aggregates(UUID, DATE) TO authentic
 
 1. **`AccountService` (`src/lib/services/account.service.ts`)**:
    - `getAccountsWithBalances(supabase, userId, includeArchived = false)`: Fetches accounts, calls `get_account_aggregates` RPC for `todayStr`, computes `current_balance = initial_balance + income - expenses + transfers_in - transfers_out - transfer_fees`, flags `is_negative = current_balance < 0`, and calculates unassigned totals.
-   - `createAccount`, `updateAccount`, `archiveAccount`: Scoped CRUD operations.
+   - `createAccount`, `updateAccount`, `archiveAccount`: Scoped CRUD operations (passing `updated_at: new Date().toISOString()`).
 2. **`TransferService` (`src/lib/services/transfer.service.ts`)**:
-   - `createTransfer`, `updateTransfer`, `deleteTransfer`: Validates account ownership and parameters (`from_account_id !== to_account_id`, `amount > 0`, `transfer_fee >= 0`, neither account is archived). Under **Policy 2**, does NOT block transfers that result in a negative derived balance.
+   - `createTransfer`, `updateTransfer`, `deleteTransfer`: Validates account ownership and parameters (`from_account_id !== to_account_id`, `amount > 0`, `transfer_fee >= 0`, neither account is archived). Under **Policy 2**, does NOT block transfers that result in a negative derived balance. Updates include `updated_at: new Date().toISOString()`.
 3. **Server Actions (`src/app/(dashboard)/accounts/actions.ts`)**:
    - Exposes mutations with Zod schema validation, session authentication checks (`auth.uid()`), and path revalidation (`/accounts`, `/dashboard`, `/transactions`).
 
@@ -305,7 +314,7 @@ GRANT EXECUTE ON FUNCTION public.get_account_aggregates(UUID, DATE) TO authentic
 
 1. **Database & Schema Isolation Tests (`src/tests/accounts-schema.test.ts`)**:
    - SELECT, INSERT, UPDATE, DELETE RLS isolation for accounts and transfers.
-   - DB constraints (`initial_balance >= 0`, `amount > 0`, `transfer_fee >= 0`, composite FKs, `ON DELETE RESTRICT`, `ON DELETE SET NULL`).
+   - DB constraints (`initial_balance >= 0`, `amount > 0`, `transfer_fee >= 0`, composite FKs on transfers and income/expenses, `ON DELETE RESTRICT`, `ON DELETE SET NULL`).
 2. **RPC & Security Tests (`src/tests/accounts-rpc.test.ts`)**:
    - Verifies `SET search_path = ''` RPC authorization, session ID checks, anonymous rejection, and `Asia/Manila` date filter.
 3. **Service Layer & Balance Calculation Tests (`src/tests/account-service.test.ts`)**:
@@ -325,7 +334,7 @@ GRANT EXECUTE ON FUNCTION public.get_account_aggregates(UUID, DATE) TO authentic
 | Requirement | Verification Method | Expected Result |
 | :--- | :--- | :--- |
 | **Optional Account Tagging** | `Income/Expense Action Test` | Form submits with `account_id = null`; no errors thrown; global totals updated. |
-| **Database Ownership Integrity** | `Composite FK Schema Test` | Cross-user transfer blocked at database schema level. |
+| **Database Ownership Integrity** | `Composite FK Schema Test` | Cross-user transfer and transaction account assignment blocked at database schema level. |
 | **Hardened Aggregation RPC** | `RPC Security Test` | Caller ID mismatch throws exception; execution returns compact user-scoped aggregates (`SET search_path = ''`). |
 | **Policy 2 Non-Blocking Warnings** | `Transfer & UI Test` | Overdrawn account permits transfer execution; UI displays negative balance warning badge. |
 | **Transfer Fee Accounting** | `Transfer Calculation Test` | Source account debited `amount + fee`; Destination account credited `amount`; Fees excluded from Income/Expense totals. |

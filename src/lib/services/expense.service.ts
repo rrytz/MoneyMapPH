@@ -53,6 +53,7 @@ export async function createExpense(
     date: string;
     notes?: string;
     paycheck_id?: string;
+    account_id?: string;
   }
 ): Promise<Expense> {
   const { data, error } = await supabase
@@ -65,6 +66,7 @@ export async function createExpense(
       date: entry.date,
       notes: entry.notes || null,
       paycheck_id: entry.paycheck_id || null,
+      account_id: entry.account_id || null,
     })
     .select("*, category:expense_categories(*)")
     .single();
@@ -84,11 +86,16 @@ export async function updateExpense(
     date?: string;
     notes?: string;
     paycheck_id?: string;
+    account_id?: string;
   }
 ): Promise<Expense> {
   const { data, error } = await supabase
     .from("expenses")
-    .update(entry)
+    .update({
+      ...entry,
+      account_id: entry.account_id || null,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", expenseId)
     .eq("user_id", userId)
     .select("*, category:expense_categories(*)")

@@ -47,6 +47,7 @@ export async function createIncomeEntry(
     date: string;
     notes?: string;
     paycheck_id?: string;
+    account_id?: string;
   }
 ): Promise<IncomeEntry> {
   const { data, error } = await supabase
@@ -58,6 +59,7 @@ export async function createIncomeEntry(
       date: entry.date,
       notes: entry.notes || null,
       paycheck_id: entry.paycheck_id || null,
+      account_id: entry.account_id || null,
     })
     .select("*, source:income_sources(*)")
     .single();
@@ -76,11 +78,16 @@ export async function updateIncomeEntry(
     date?: string;
     notes?: string;
     paycheck_id?: string;
+    account_id?: string;
   }
 ): Promise<IncomeEntry> {
   const { data, error } = await supabase
     .from("income_entries")
-    .update(entry)
+    .update({
+      ...entry,
+      account_id: entry.account_id || null,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", entryId)
     .eq("user_id", userId)
     .select("*, source:income_sources(*)")

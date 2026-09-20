@@ -29,7 +29,7 @@ export interface IncomeEntry {
   date: string;
   notes: string | null;
   paycheck_id: string | null;
-  account_id: string | null;
+  account_id?: string | null;
   created_at: string;
   updated_at: string;
   source?: IncomeSource;
@@ -56,7 +56,7 @@ export interface Expense {
   date: string;
   notes: string | null;
   paycheck_id: string | null;
-  account_id: string | null;
+  account_id?: string | null;
   created_at: string;
   updated_at: string;
   category?: ExpenseCategory;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,20 +10,27 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { addExpense, editExpense } from "@/app/(dashboard)/expenses/actions";
-import type { Expense, ExpenseCategory } from "@/lib/types";
+import type { Expense, ExpenseCategory, Account } from "@/lib/types";
 import { toISODateString } from "@/lib/utils/date";
+import { AccountSelect } from "@/components/forms/account-select";
 
 interface ExpenseFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   categories: ExpenseCategory[];
+  accounts?: Account[];
   editEntry?: Expense | null;
-  onAdd?: (data: { title: string; amount: number; category_id: string; date: string; notes?: string }) => void;
+  onAdd?: (data: { title: string; amount: number; category_id: string; date: string; notes?: string; account_id?: string }) => void;
 }
 
-export function ExpenseForm({ open, onOpenChange, categories, editEntry, onAdd }: ExpenseFormProps) {
+export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntry, onAdd }: ExpenseFormProps) {
   const [loading, setLoading] = useState(false);
+  const [accountId, setAccountId] = useState("");
   const isEditing = !!editEntry;
+
+  useEffect(() => {
+    setAccountId(editEntry?.account_id || "");
+  }, [editEntry, open]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -36,6 +43,7 @@ export function ExpenseForm({ open, onOpenChange, categories, editEntry, onAdd }
       category_id: formData.get("category_id") as string,
       date: formData.get("date") as string,
       notes: formData.get("notes") as string,
+      account_id: accountId || undefined,
     };
 
     if (!isEditing && onAdd) {
@@ -131,6 +139,14 @@ export function ExpenseForm({ open, onOpenChange, categories, editEntry, onAdd }
               rows={3}
             />
           </div>
+
+          {accounts && accounts.length > 0 && (
+            <AccountSelect
+              accounts={accounts}
+              value={accountId}
+              onChange={setAccountId}
+            />
+          )}
 
           <div className="flex gap-2 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)} disabled={loading}>

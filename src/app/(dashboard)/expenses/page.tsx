@@ -1,5 +1,6 @@
 import { createClient, getUser } from "@/lib/supabase/server";
 import { getExpenses } from "@/lib/services/expense.service";
+import { getAccountsWithBalances } from "@/lib/services/account.service";
 import {
   cachedGetExpenseCategories as getExpenseCategories,
   cachedGetMonthlyExpenseAggregation as getExpenseAggregation,
@@ -13,10 +14,11 @@ export default async function ExpensesPage() {
   if (!user) return null;
 
   const { month, year } = getCurrentMonthYear();
-  const [{ data: entries }, categories, aggregation] = await Promise.all([
+  const [{ data: entries }, categories, aggregation, accountsResult] = await Promise.all([
     getExpenses(supabase, user.id, { month, year, limit: 50 }),
     getExpenseCategories(supabase, user.id),
     getExpenseAggregation(supabase, user.id, month, year),
+    getAccountsWithBalances(supabase, user.id, false).catch(() => ({ accounts: [], unassigned: { unassignedIncome: 0, unassignedExpenses: 0 }, totalLiquidity: 0 })),
   ]);
 
   return (
@@ -28,6 +30,7 @@ export default async function ExpensesPage() {
       categoryTotals={aggregation.byCategory}
       currentMonth={month}
       currentYear={year}
+      accounts={accountsResult.accounts}
     />
   );
 }

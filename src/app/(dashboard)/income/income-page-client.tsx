@@ -23,7 +23,7 @@ import { formatDate } from "@/lib/utils/date";
 import { isInShownMonth, type IncomeView } from "@/lib/utils/income-view";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory, LeanStatus, SafeToSpendStatus } from "@/lib/types";
+import type { IncomeEntry, IncomeSource, Paycheck, ExpenseCategory, LeanStatus, SafeToSpendStatus, Account } from "@/lib/types";
 import type { BillView, BillsDueBy } from "@/lib/types";
 
 interface IncomePageClientProps {
@@ -38,6 +38,7 @@ interface IncomePageClientProps {
   totalThisMonth: number;
   currentMonth: number;
   currentYear: number;
+  accounts?: Account[];
   initialActiveTab: "income" | "bills";
   billView?: BillView;
   billsDueBy?: BillsDueBy;
@@ -56,6 +57,7 @@ export function IncomePageClient({
   currentMonth,
   currentYear,
   initialActiveTab,
+  accounts,
   billView,
   billsDueBy,
 }: IncomePageClientProps) {
@@ -85,6 +87,7 @@ export function IncomePageClient({
       date: data.date,
       notes: data.notes || null,
       paycheck_id: null,
+      account_id: (data as any).account_id || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       source,
@@ -295,6 +298,7 @@ export function IncomePageClient({
             open={formOpen}
             onOpenChange={setFormOpen}
             sources={sources}
+            accounts={accounts}
             editEntry={editEntry}
             onAdd={handleAddIncome}
           />

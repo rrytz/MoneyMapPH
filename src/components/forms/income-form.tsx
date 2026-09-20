@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,20 +10,28 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { addIncome, editIncome } from "@/app/(dashboard)/income/actions";
-import type { IncomeEntry, IncomeSource } from "@/lib/types";
+import type { IncomeEntry, IncomeSource, Account } from "@/lib/types";
 import { toISODateString } from "@/lib/utils/date";
+import { AccountSelect } from "@/components/forms/account-select";
 
 interface IncomeFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sources: IncomeSource[];
+  accounts?: Account[];
   editEntry?: IncomeEntry | null;
-  onAdd?: (data: { amount: number; source_id: string; date: string; notes?: string }) => void;
+  onAdd?: (data: { amount: number; source_id: string; date: string; notes?: string; account_id?: string }) => void;
 }
 
-export function IncomeForm({ open, onOpenChange, sources, editEntry, onAdd }: IncomeFormProps) {
+export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, onAdd }: IncomeFormProps) {
   const [loading, setLoading] = useState(false);
+  const [accountId, setAccountId] = useState("");
   const isEditing = !!editEntry;
+
+  // Sync accountId from editEntry when modal opens/changes
+  useEffect(() => {
+    setAccountId(editEntry?.account_id || "");
+  }, [editEntry, open]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,6 +43,7 @@ export function IncomeForm({ open, onOpenChange, sources, editEntry, onAdd }: In
       source_id: formData.get("source_id") as string,
       date: formData.get("date") as string,
       notes: formData.get("notes") as string,
+      account_id: accountId || undefined,
     };
 
     if (!isEditing && onAdd) {
@@ -116,6 +125,14 @@ export function IncomeForm({ open, onOpenChange, sources, editEntry, onAdd }: In
               rows={3}
             />
           </div>
+
+          {accounts && accounts.length > 0 && (
+            <AccountSelect
+              accounts={accounts}
+              value={accountId}
+              onChange={setAccountId}
+            />
+          )}
 
           <div className="flex gap-2 pt-4">
             <Button

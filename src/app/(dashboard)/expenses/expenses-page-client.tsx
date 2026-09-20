@@ -15,7 +15,7 @@ import { ExpenseForm } from "@/components/forms/expense-form";
 import { removeExpense, addExpense } from "./actions";
 import { formatDate } from "@/lib/utils/date";
 import { toast } from "sonner";
-import type { Expense, ExpenseCategory } from "@/lib/types";
+import type { Expense, ExpenseCategory, Account } from "@/lib/types";
 
 interface ExpensesPageClientProps {
   initialEntries: Expense[];
@@ -25,6 +25,7 @@ interface ExpensesPageClientProps {
   categoryTotals: Record<string, number>;
   currentMonth: number;
   currentYear: number;
+  accounts?: Account[];
 }
 
 export function ExpensesPageClient({
@@ -33,6 +34,7 @@ export function ExpensesPageClient({
   totalThisMonth: initialTotal,
   expenseCount: initialCount,
   categoryTotals: initialCategoryTotals,
+  accounts,
 }: ExpensesPageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<Expense | null>(null);
@@ -66,7 +68,7 @@ export function ExpensesPageClient({
     setCategoryTotals(initialCategoryTotals);
   }
 
-  function handleAddExpense(data: { title: string; amount: number; category_id: string; date: string; notes?: string }) {
+  function handleAddExpense(data: { title: string; amount: number; category_id: string; date: string; notes?: string; account_id?: string }) {
     const category = categories.find((c) => c.id === data.category_id);
     const optimistic: Expense = {
       id: `optimistic-${Date.now()}`,
@@ -77,6 +79,7 @@ export function ExpensesPageClient({
       date: data.date,
       notes: data.notes || null,
       paycheck_id: null,
+      account_id: data.account_id || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       category,
@@ -283,6 +286,7 @@ export function ExpensesPageClient({
         open={formOpen}
         onOpenChange={setFormOpen}
         categories={categories}
+        accounts={accounts}
         editEntry={editEntry}
         onAdd={handleAddExpense}
       />

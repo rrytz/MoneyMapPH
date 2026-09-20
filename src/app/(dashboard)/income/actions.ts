@@ -14,6 +14,7 @@ export async function addIncome(formData: {
   date: string;
   notes?: string;
   paycheck_id?: string;
+  account_id?: string;
 }) {
   const parsed = incomeSchema.safeParse(formData);
   if (!parsed.success) {
@@ -33,6 +34,7 @@ export async function addIncome(formData: {
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
     revalidatePath("/forecasting");
+    revalidatePath("/accounts");
     return { success: true };
   } catch (err) {
     console.error("Failed to add income entry:", err);
@@ -46,6 +48,7 @@ export async function editIncome(id: string, formData: {
   date: string;
   notes?: string;
   paycheck_id?: string;
+  account_id?: string;
 }) {
   const parsed = incomeSchema.safeParse(formData);
   if (!parsed.success) {
@@ -65,6 +68,7 @@ export async function editIncome(id: string, formData: {
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
     revalidatePath("/forecasting");
+    revalidatePath("/accounts");
     return { success: true };
   } catch (err) {
     console.error("Failed to update income entry:", err);

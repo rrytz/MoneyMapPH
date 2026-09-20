@@ -14,6 +14,7 @@ export async function addExpense(formData: {
   date: string;
   notes?: string;
   paycheck_id?: string;
+  account_id?: string;
 }) {
   const parsed = expenseSchema.safeParse(formData);
   if (!parsed.success) {
@@ -34,6 +35,7 @@ export async function addExpense(formData: {
     revalidatePath("/budgets");
     revalidatePath("/transactions");
     revalidatePath("/forecasting");
+    revalidatePath("/accounts");
     return { success: true };
   } catch (err) {
     console.error("Failed to add expense:", err);
@@ -48,6 +50,7 @@ export async function editExpense(id: string, formData: {
   date: string;
   notes?: string;
   paycheck_id?: string;
+  account_id?: string;
 }) {
   const parsed = expenseSchema.safeParse(formData);
   if (!parsed.success) {
@@ -68,6 +71,7 @@ export async function editExpense(id: string, formData: {
     revalidatePath("/budgets");
     revalidatePath("/transactions");
     revalidatePath("/forecasting");
+    revalidatePath("/accounts");
     return { success: true };
   } catch (err) {
     console.error("Failed to update expense:", err);

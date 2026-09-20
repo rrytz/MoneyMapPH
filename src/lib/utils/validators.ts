@@ -9,6 +9,7 @@ export const incomeSchema = z.object({
   date: z.string().min(1, "Date is required"),
   notes: z.string().max(500, "Notes must be 500 characters or less").optional().or(z.literal("")),
   paycheck_id: z.string().uuid().optional().or(z.literal("")),
+  account_id: z.string().uuid().optional().or(z.literal("")),
 });
 
 export const expenseSchema = z.object({
@@ -21,6 +22,7 @@ export const expenseSchema = z.object({
   date: z.string().min(1, "Date is required"),
   notes: z.string().max(500, "Notes must be 500 characters or less").optional().or(z.literal("")),
   paycheck_id: z.string().uuid().optional().or(z.literal("")),
+  account_id: z.string().uuid().optional().or(z.literal("")),
 });
 
 export const budgetCategorySchema = z.object({
@@ -55,6 +57,26 @@ export const savingsGoalSchema = z.object({
   target_date: z.string().optional().or(z.literal("")),
   notes: z.string().max(500).optional().or(z.literal("")),
   is_emergency_fund: z.boolean().default(false),
+});
+
+export const accountSchema = z.object({
+  name: z.string().min(1, "Account name is required").max(100, "Name must be 100 characters or less"),
+  type: z.enum(["bank", "ewallet", "cash", "digital_bank", "credit"]),
+  initial_balance: z.coerce.number().min(0, "Initial balance cannot be negative"),
+  color: z.string().optional().or(z.literal("")),
+  icon: z.string().optional().or(z.literal("")),
+});
+
+export const accountTransferSchema = z.object({
+  from_account_id: z.string().uuid("Select source account"),
+  to_account_id: z.string().uuid("Select destination account"),
+  amount: z.coerce.number().positive("Transfer amount must be greater than 0"),
+  transfer_fee: z.coerce.number().min(0, "Fee cannot be negative").default(0),
+  date: z.string().min(1, "Date is required"),
+  notes: z.string().max(500, "Notes must be 500 characters or less").optional().or(z.literal("")),
+}).refine((data) => data.from_account_id !== data.to_account_id, {
+  message: "Source and destination accounts must be different",
+  path: ["to_account_id"],
 });
 
 export const contributionSchema = z.object({

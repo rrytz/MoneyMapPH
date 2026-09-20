@@ -43,7 +43,9 @@ export async function createTransfer(
       date: data.date,
       notes: data.notes || null,
     })
-    .select("*, from_account:accounts!from_account_id(*), to_account:accounts!to_account_id(*)")
+    .select(
+      "*, from_account:accounts!fk_transfers_from_account(*), to_account:accounts!fk_transfers_to_account(*)"
+    )
     .single();
 
   if (error) throw error;
@@ -91,7 +93,9 @@ export async function updateTransfer(
     })
     .eq("id", transferId)
     .eq("user_id", userId)
-    .select("*, from_account:accounts!from_account_id(*), to_account:accounts!to_account_id(*)")
+    .select(
+      "*, from_account:accounts!fk_transfers_from_account(*), to_account:accounts!fk_transfers_to_account(*)"
+    )
     .single();
 
   if (error) throw error;
@@ -119,7 +123,9 @@ export async function getTransfers(
 ): Promise<AccountTransfer[]> {
   let query = supabase
     .from("account_transfers")
-    .select("*, from_account:accounts!from_account_id(*), to_account:accounts!to_account_id(*)")
+    .select(
+      "*, from_account:accounts!fk_transfers_from_account(*), to_account:accounts!fk_transfers_to_account(*)"
+    )
     .eq("user_id", userId)
     .order("date", { ascending: false })
     .order("created_at", { ascending: false });

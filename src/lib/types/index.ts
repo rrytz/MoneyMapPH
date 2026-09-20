@@ -29,6 +29,7 @@ export interface IncomeEntry {
   date: string;
   notes: string | null;
   paycheck_id: string | null;
+  account_id: string | null;
   created_at: string;
   updated_at: string;
   source?: IncomeSource;
@@ -55,6 +56,7 @@ export interface Expense {
   date: string;
   notes: string | null;
   paycheck_id: string | null;
+  account_id: string | null;
   created_at: string;
   updated_at: string;
   category?: ExpenseCategory;
@@ -177,6 +179,7 @@ export type IncomeFormData = {
   date: string;
   notes?: string;
   paycheck_id?: string;
+  account_id?: string;
 };
 
 export type ExpenseFormData = {
@@ -186,6 +189,7 @@ export type ExpenseFormData = {
   date: string;
   notes?: string;
   paycheck_id?: string;
+  account_id?: string;
 };
 
 export type BudgetFormData = {
@@ -407,6 +411,70 @@ export interface UnbudgetedCategorySpend {
 }
 
 export type SummaryVerdict = "covered" | "tight" | "short";
+
+export type AccountType = "bank" | "ewallet" | "cash" | "digital_bank" | "credit";
+
+export interface Account {
+  id: string;
+  user_id: string;
+  name: string;
+  type: AccountType;
+  initial_balance: number;
+  color: string | null;
+  icon: string | null;
+  is_archived: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AccountWithBalance extends Account {
+  current_balance: number;
+  total_income: number;
+  total_expenses: number;
+  total_transfers_in: number;
+  total_transfers_out: number;
+  total_transfer_fees: number;
+  is_negative: boolean;
+}
+
+export interface AccountTransfer {
+  id: string;
+  user_id: string;
+  from_account_id: string;
+  to_account_id: string;
+  amount: number;
+  transfer_fee: number;
+  date: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  from_account?: Account;
+  to_account?: Account;
+}
+
+export interface AccountFormData {
+  name: string;
+  type: AccountType;
+  initial_balance: number;
+  color?: string;
+  icon?: string;
+}
+
+export interface AccountTransferFormData {
+  from_account_id: string;
+  to_account_id: string;
+  amount: number;
+  transfer_fee?: number;
+  date: string;
+  notes?: string;
+}
+
+export interface UnassignedTotals {
+  unassignedIncome: number;
+  unassignedExpenses: number;
+}
+
 
 
 

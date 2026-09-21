@@ -16,9 +16,9 @@ import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
-import { AccountsSummaryCard } from "@/components/dashboard/accounts-summary-card";
-import { TotalDebtCard } from "@/components/dashboard/total-debt-card";
 import { UpcomingBillsCard } from "@/components/dashboard/upcoming-bills-card";
+import { DashboardStatStrip } from "@/components/dashboard/dashboard-stat-strip";
+import { computeDashboardStats } from "@/lib/services/dashboard-stats";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Wallet, PiggyBank, Target, Plus } from "lucide-react";
@@ -82,6 +82,15 @@ export default async function DashboardPage() {
     paychecks,
   });
 
+  const stats = computeDashboardStats({
+    summary,
+    snapshots,
+    totalLiquidity: accountsView.totalLiquidity,
+    goals,
+    debts: debtView.debts,
+    payments: debtView.payments,
+  });
+
   const lastMonthSnapshot = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
   const incomeChange = lastMonthSnapshot && Number(lastMonthSnapshot.total_income) > 0
     ? ((summary.totalIncome - Number(lastMonthSnapshot.total_income)) / Number(lastMonthSnapshot.total_income)) * 100
@@ -120,7 +129,7 @@ export default async function DashboardPage() {
         <div className="lg:col-span-1">
           <FinancialHealthHeroCard report={healthReport} />
         </div>
-        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-5">
           <SafeToSpendCard status={safeToSpend} />
           <KpiCard
             title="Remaining Budget"
@@ -141,19 +150,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Row 2: Wallets Summary + Total Debt */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
-          <AccountsSummaryCard
-            accounts={accountsView.accounts}
-            unassigned={accountsView.unassigned}
-            totalLiquidity={accountsView.totalLiquidity}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <TotalDebtCard debts={debtView.debts} payments={debtView.payments} todayIso={todayIso} />
-        </div>
-      </div>
+      {/* Row 2: Compact Stat Strip */}
+      <DashboardStatStrip stats={stats} />
 
       {/* Row 3: Performance Charts & Category Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

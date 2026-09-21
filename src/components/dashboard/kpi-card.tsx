@@ -13,6 +13,7 @@ interface KpiCardProps {
   colorClass?: string;
   badge?: string;
   iconBgClass?: string;
+  favorableWhenDown?: boolean;
 }
 
 export function KpiCard({
@@ -25,6 +26,7 @@ export function KpiCard({
   isPercentage = false,
   colorClass,
   iconBgClass = "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+  favorableWhenDown = false,
 }: KpiCardProps) {
   const TrendIcon =
     changePercent === null || changePercent === undefined
@@ -34,6 +36,13 @@ export function KpiCard({
         : changePercent < 0
           ? TrendingDown
           : Minus;
+
+  const trendFavorable =
+    changePercent !== null && changePercent !== undefined
+      ? favorableWhenDown
+        ? changePercent < 0
+        : changePercent > 0
+      : false;
 
   return (
     <FintechCard className="relative">
@@ -67,7 +76,7 @@ export function KpiCard({
             <TrendIcon
               className={cn(
                 "h-3.5 w-3.5",
-                changePercent > 0 ? "text-emerald-600" : changePercent < 0 ? "text-rose-500" : "text-slate-400"
+                trendFavorable ? "text-emerald-600" : changePercent < 0 ? "text-rose-500" : "text-slate-400"
               )}
             />
             <span className="text-muted-foreground text-[11px]">

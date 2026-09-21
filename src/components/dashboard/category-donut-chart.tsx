@@ -84,7 +84,9 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
     <FintechCard className="flex flex-col">
       <FintechCardHeader className="pb-2">
         <FintechCardTitle>Spending by Category</FintechCardTitle>
-        <p className="text-xs text-muted-foreground">Monthly expense allocation breakdown</p>
+        <p className="text-xs text-muted-foreground">
+          {formatCurrency(totalSpending)} total this month · top {top5.length} {top5.length === 1 ? "category" : "categories"}
+        </p>
       </FintechCardHeader>
       <FintechCardContent className="flex flex-col gap-4">
         {/* Recharts Donut */}

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 import { createAccount, updateAccount, archiveAccount } from "@/lib/services/account.service";
 import { createTransfer, updateTransfer, deleteTransfer } from "@/lib/services/transfer.service";
 import { accountSchema, accountTransferSchema } from "@/lib/utils/validators";
@@ -26,6 +27,7 @@ export async function addAccount(formData: {
     await createAccount(supabase, user.id, parsed.data);
     revalidatePath("/accounts");
     revalidatePath("/dashboard");
+    revalidateUserFinancialCache(user.id);
     return { success: true };
   } catch (err: any) {
     console.error("Failed to add account:", err);
@@ -56,6 +58,7 @@ export async function editAccount(
     await updateAccount(supabase, user.id, accountId, parsed.data);
     revalidatePath("/accounts");
     revalidatePath("/dashboard");
+    revalidateUserFinancialCache(user.id);
     return { success: true };
   } catch (err: any) {
     console.error("Failed to edit account:", err);
@@ -72,6 +75,7 @@ export async function toggleArchiveAccount(accountId: string, isArchived: boolea
     await archiveAccount(supabase, user.id, accountId, isArchived);
     revalidatePath("/accounts");
     revalidatePath("/dashboard");
+    revalidateUserFinancialCache(user.id);
     return { success: true };
   } catch (err: any) {
     console.error("Failed to toggle archive status:", err);
@@ -101,6 +105,7 @@ export async function addTransfer(formData: {
     revalidatePath("/accounts");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
+    revalidateUserFinancialCache(user.id);
     return { success: true };
   } catch (err: any) {
     console.error("Failed to create transfer:", err);
@@ -133,6 +138,7 @@ export async function editTransfer(
     revalidatePath("/accounts");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
+    revalidateUserFinancialCache(user.id);
     return { success: true };
   } catch (err: any) {
     console.error("Failed to update transfer:", err);
@@ -150,6 +156,7 @@ export async function removeTransfer(transferId: string) {
     revalidatePath("/accounts");
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
+    revalidateUserFinancialCache(user.id);
     return { success: true };
   } catch (err: any) {
     console.error("Failed to delete transfer:", err);

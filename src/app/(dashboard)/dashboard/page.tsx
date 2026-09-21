@@ -5,14 +5,20 @@ import { cachedGetExpenseCategories as getExpenseCategories } from "@/lib/cache/
 import { cachedGetSavingsGoals as getSavingsGoals } from "@/lib/cache/shared-queries";
 import { cachedGetPaychecks as getPaychecks } from "@/lib/cache/shared-queries";
 import { cachedGetSafeToSpend as getSafeToSpend } from "@/lib/cache/shared-queries";
+import { cachedGetDebts as getDebts, cachedGetBillsDueBy as getBillsDueBy } from "@/lib/cache/shared-queries";
+import { cachedGetAccountsWithBalances as getAccounts } from "@/lib/cache/shared-queries";
 import { calculateFinancialHealthReport } from "@/lib/services/health.service";
-import { getCurrentMonthYear } from "@/lib/utils/date";
+import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/date";
+import { getBillsDueWindow } from "@/lib/utils/bills";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { SafeToSpendCard } from "@/components/dashboard/safe-to-spend-card";
 import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
+import { AccountsSummaryCard } from "@/components/dashboard/accounts-summary-card";
+import { TotalDebtCard } from "@/components/dashboard/total-debt-card";
+import { UpcomingBillsCard } from "@/components/dashboard/upcoming-bills-card";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Wallet, PiggyBank, Target, Plus } from "lucide-react";
@@ -26,6 +32,9 @@ export default async function DashboardPage() {
   if (!user) return null;
 
   const { month, year } = getCurrentMonthYear();
+  const now = getManilaNow();
+  const todayIso = toISODateString(now);
+  const { fromISO, toISO } = getBillsDueWindow(now);
 
   const [
     summary,
@@ -37,6 +46,9 @@ export default async function DashboardPage() {
     budgetStatuses,
     paychecks,
     safeToSpend,
+    debtView,
+    accountsView,
+    billsDueBy,
   ] = await Promise.all([
     getMonthlySummary(supabase, user.id, month, year),
     getSnapshots(supabase, user.id, 6),
@@ -57,6 +69,9 @@ export default async function DashboardPage() {
     getBudgetStatuses(supabase, user.id, month, year),
     getPaychecks(supabase, user.id, month, year),
     getSafeToSpend(supabase, user.id),
+    getDebts(supabase, user.id),
+    getAccounts(supabase, user.id, false),
+    getBillsDueBy(supabase, user.id, fromISO, toISO),
   ]);
 
   const healthReport = await calculateFinancialHealthReport(supabase, user.id, {
@@ -126,14 +141,34 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Row 2: Performance Charts & Category Breakdown */}
+      {/* Row 2: Wallets Summary + Total Debt */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <AccountsSummaryCard
+            accounts={accountsView.accounts}
+            unassigned={accountsView.unassigned}
+            totalLiquidity={accountsView.totalLiquidity}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <TotalDebtCard debts={debtView.debts} payments={debtView.payments} todayIso={todayIso} />
+        </div>
+      </div>
+
+      {/* Row 3: Performance Charts & Category Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <IncomeExpenseChart snapshots={snapshots} />
         <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
       </div>
 
-      {/* Row 3: Savings Goals & Recent Activity */}
+      {/* Row 4: Upcoming Bills & Debt Payments + Savings Goals */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <UpcomingBillsCard
+          billsDueBy={billsDueBy}
+          debts={debtView.debts}
+          payments={debtView.payments}
+          todayIso={todayIso}
+        />
         <FintechCard className="flex flex-col">
           <FintechCardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
@@ -201,8 +236,13 @@ export default async function DashboardPage() {
             )}
           </FintechCardContent>
         </FintechCard>
+      </div>
 
-        <RecentTransactions transactions={transactions} />
+      {/* Row 5: Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="lg:col-span-2">
+          <RecentTransactions transactions={transactions} />
+        </div>
       </div>
     </div>
   );

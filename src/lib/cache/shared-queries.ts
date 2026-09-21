@@ -4,6 +4,7 @@ import { buildFinancialTags } from "@/lib/cache/tags";
 import { getMonthlySummary, getBudgetStatuses } from "@/lib/services/financial.service";
 import { getSnapshots } from "@/lib/services/snapshot.service";
 import { getExpenseCategories, getIncomeSources } from "@/lib/services/category.service";
+import { getAccountsWithBalances } from "@/lib/services/account.service";
 import { getSavingsGoals } from "@/lib/services/goal.service";
 import { getPaychecks } from "@/lib/services/paycheck.service";
 import { getLeanStatus } from "@/lib/services/pay-period.service";
@@ -27,9 +28,22 @@ import type {
   BillsDueBy,
   DebtView,
   MonthlyExpenseAggregation,
+  AccountWithBalance,
+  UnassignedTotals,
 } from "@/lib/types";
 
 const REVALIDATE_SECONDS = 60;
+
+export const cachedGetAccountsWithBalances = (
+  supabase: SupabaseClient,
+  userId: string,
+  includeArchived = false
+): Promise<{ accounts: AccountWithBalance[]; unassigned: UnassignedTotals; totalLiquidity: number }> =>
+  unstable_cache(
+    async (archived: boolean) => getAccountsWithBalances(supabase, userId, archived),
+    ["accounts", userId, includeArchived ? "archived" : "active"],
+    { revalidate: REVALIDATE_SECONDS, tags: buildFinancialTags(userId, "accounts") }
+  )(includeArchived);
 
 export const cachedGetMonthlySummary = (
   supabase: SupabaseClient,

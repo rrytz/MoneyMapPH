@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-21T00:00:00.000Z",
+  "title": "Design System: MoneyMap PH",
+  "extensions": {
+    "colorMeta": {
+      "peso-emerald": { "role": "primary", "displayName": "Peso Emerald", "canonical": "#059669", "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7"] },
+      "peso-emerald-vivid": { "role": "primary", "displayName": "Peso Emerald Vivid", "canonical": "#10b981", "tonalRamp": ["#022c22", "#065f46", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#d1fae5"] },
+      "peso-emerald-deep": { "role": "primary", "displayName": "Peso Emerald Deep", "canonical": "#047857", "tonalRamp": ["#022c22", "#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7"] },
+      "peso-emerald-pale": { "role": "primary", "displayName": "Peso Emerald Pale", "canonical": "#34d399", "tonalRamp": ["#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#d1fae5", "#ecfdf5"] },
+      "peso-emerald-soft": { "role": "primary", "displayName": "Peso Emerald Soft", "canonical": "#ecfdf5", "tonalRamp": ["#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#d1fae5", "#ecfdf5"] },
+      "overdraft-rose": { "role": "destructive", "displayName": "Overdraft Rose", "canonical": "#f43f5e", "tonalRamp": ["#4c0519", "#881337", "#9f1239", "#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fda4af"] },
+      "overdraft-rose-deep": { "role": "semantic", "displayName": "Overdraft Rose Deep", "canonical": "#be123c", "tonalRamp": ["#4c0519", "#881337", "#9f1239", "#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fda4af"] },
+      "overdraft-rose-soft": { "role": "semantic", "displayName": "Overdraft Rose Soft", "canonical": "#fff1f2", "tonalRamp": ["#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fda4af", "#fecdd3", "#ffe4e6", "#fff1f2"] },
+      "late-fee-amber": { "role": "warning", "displayName": "Late-Fee Amber", "canonical": "#f59e0b", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d"] },
+      "late-fee-amber-deep": { "role": "semantic", "displayName": "Late-Fee Amber Deep", "canonical": "#b45309", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d"] },
+      "late-fee-amber-soft": { "role": "semantic", "displayName": "Late-Fee Amber Soft", "canonical": "#fffbeb", "tonalRamp": ["#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fde68a", "#fef3c7", "#fffbeb"] },
+      "receipt-indigo": { "role": "info", "displayName": "Receipt Indigo", "canonical": "#4f46e5", "tonalRamp": ["#1e1b4b", "#312e81", "#3730a3", "#4338ca", "#4f46e5", "#6366f1", "#818cf8", "#a5b4fc"] },
+      "receipt-indigo-deep": { "role": "semantic", "displayName": "Receipt Indigo Deep", "canonical": "#4338ca", "tonalRamp": ["#1e1b4b", "#312e81", "#3730a3", "#4338ca", "#4f46e5", "#6366f1", "#818cf8", "#a5b4fc"] },
+      "receipt-indigo-soft": { "role": "semantic", "displayName": "Receipt Indigo Soft", "canonical": "#eef2ff", "tonalRamp": ["#4338ca", "#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff", "#eef2ff"] },
+      "ledger-slate-950": { "role": "neutral", "displayName": "Ledger Slate 950", "canonical": "#020617", "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1"] },
+      "ledger-slate-900": { "role": "neutral", "displayName": "Ledger Slate 900", "canonical": "#0f172a", "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1"] },
+      "ledger-slate-800": { "role": "neutral", "displayName": "Ledger Slate 800", "canonical": "#1e293b", "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1"] },
+      "ledger-slate-100": { "role": "neutral", "displayName": "Ledger Slate 100", "canonical": "#f1f5f9", "tonalRamp": ["#0f172a", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9"] },
+      "ledger-slate-500": { "role": "neutral", "displayName": "Ledger Slate 500", "canonical": "#64748b", "tonalRamp": ["#0f172a", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9"] },
+      "ledger-slate-400": { "role": "neutral", "displayName": "Ledger Slate 400", "canonical": "#94a3b8", "tonalRamp": ["#0f172a", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9"] },
+      "ledger-slate-200": { "role": "neutral", "displayName": "Ledger Slate 200", "canonical": "#e2e8f0", "tonalRamp": ["#0f172a", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9"] },
+      "ledger-slate-50": { "role": "neutral", "displayName": "Ledger Slate 50", "canonical": "#f8fafc", "tonalRamp": ["#0f172a", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc"] },
+      "paper-white": { "role": "neutral", "displayName": "Paper White", "canonical": "#ffffff", "tonalRamp": ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9", "#ffffff"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Auth hero headline and its stat values only — never general page titles." },
+      "title": { "displayName": "Title", "purpose": "Card and dialog titles only (Sora, text-base, medium)." },
+      "body": { "displayName": "Body", "purpose": "Default reading text, card body, table cells (Inter, 14px)." },
+      "stat": { "displayName": "Stat", "purpose": "Headline money/percent figures; always tabular-nums, tracking-tight." },
+      "label": { "displayName": "Label", "purpose": "Badges, nav items, breadcrumbs, microcopy (Inter, 12–13px)." }
+    },
+    "shadows": [
+      { "name": "raised-rest", "value": "0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10)", "purpose": "Headline summary cards at rest (FintechCard, account cards, pay-strip)." },
+      { "name": "raised-hover", "value": "0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10)", "purpose": "The same cards on hover (200ms transition)." },
+      { "name": "overlay", "value": "0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10)", "purpose": "Floating controls: dropdown menus, selects, popovers (paired with 1px ring-foreground/10)." },
+      { "name": "overlay-high", "value": "0 10px 15px -3px rgb(0 0 0 / 0.10), 0 4px 6px -4px rgb(0 0 0 / 0.10)", "purpose": "Sheets, toasts, tooltips, error cards." },
+      { "name": "hero", "value": "0 20px 25px -5px rgb(0 0 0 / 0.10), 0 8px 10px -6px rgb(0 0 0 / 0.10)", "purpose": "Auth hero card only (tinted emerald-950/6% light, black/40 dark)." },
+      { "name": "chart-tooltip", "value": "0 10px 15px -3px rgb(0 0 0 / 0.30)", "purpose": "Recharts tooltip (dark pill)." }
+    ],
+    "motion": [
+      { "name": "page-enter", "value": "opacity 0→1, translateY(6px)→0, 200ms ease-out", "purpose": "Dashboard content arrival; masks skeleton-to-content swap. Disabled on prefers-reduced-motion." },
+      { "name": "auth-rise", "value": "opacity 0→1, translateY(14px)→0, 500ms cubic-bezier(0.22,1,0.36,1)", "purpose": "Auth story panel entrance sequence (staggered 0.1–0.3s)." },
+      { "name": "auth-glow", "value": "9s ease-in-out infinite; scale 1→1.07, opacity 0.55→0.85", "purpose": "Emerald glow orb in the auth story panel." },
+      { "name": "auth-barbeat", "value": "4.5s ease-in-out infinite (delay 2.4s), opacity beat", "purpose": "PayStrip bars pulse in the auth story panel." },
+      { "name": "overlay-open", "value": "fade-in-0 + zoom-in-95 + slide-in-from-* (~100ms, tw-animate-css)", "purpose": "Dropdown/popover/select open animation." },
+      { "name": "state-transition", "value": "150ms transition-all", "purpose": "Button and nav item state changes." },
+      { "name": "sidebar-collapse", "value": "300ms width transition", "purpose": "Sidebar expand/collapse." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single primary action on a surface: emerald fill, soft-rounded, dense.",
+      "html": "<button class=\"ds-btn-primary\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg>Add Transaction</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border:1px solid transparent;border-radius:16px;background:#059669;color:#ffffff;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background 150ms ease,transform 150ms ease}.ds-btn-primary svg{flex-shrink:0}.ds-btn-primary:hover{background:rgba(5,150,105,.8)}.ds-btn-primary:focus-visible{outline:none;border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.5)}.ds-btn-primary:active{transform:translateY(1px)}"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Dense 32px input: hairline slate stroke, transparent fill, one decisive emerald ring on focus.",
+      "html": "<label class=\"ds-wrap\"><span class=\"ds-label\">Amount</span><input class=\"ds-input\" type=\"text\" placeholder=\"₱0.00\"></label>",
+      "css": ".ds-wrap{display:flex;flex-direction:column;gap:4px}.ds-label{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:500;color:#64748b}.ds-input{height:32px;width:220px;border:1px solid #e2e8f0;border-radius:16px;background:transparent;padding:0 10px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:14px;color:#0f172a;transition:border-color 150ms ease,box-shadow 150ms ease}.ds-input::placeholder{color:#64748b}.ds-input:focus{outline:none;border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.5)}"
+    },
+    {
+      "name": "Income Badge",
+      "kind": "chip",
+      "refersTo": "badge-income",
+      "description": "Semantic soft pill: emerald soft fill, deep emerald label. Money-in signals only.",
+      "html": "<span class=\"ds-badge ds-badge-income\">+ ₱2,500</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;justify-content:center;height:20px;border-radius:9999px;padding:0 8px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.ds-badge-income{background:#ecfdf5;color:#047857;border:1px solid rgba(167,243,208,.5)}"
+    },
+    {
+      "name": "Expense Badge",
+      "kind": "chip",
+      "refersTo": "badge-expense",
+      "description": "Semantic soft pill: rose soft fill, deep rose label. Money-out / danger signals only.",
+      "html": "<span class=\"ds-badge ds-badge-expense\">− ₱1,200</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;justify-content:center;height:20px;border-radius:9999px;padding:0 8px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.ds-badge-expense{background:#fff1f2;color:#be123c;border:1px solid rgba(254,205,211,.5)}"
+    },
+    {
+      "name": "Hairline Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Quiet structural card: paper, 1px hairline ring, tonal muted footer — no shadow at rest.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Remaining Budget</div><div class=\"ds-card-stat\">₱14,270.00</div><div class=\"ds-card-sub\">2,730.00 of 17,000.00 spent</div></div>",
+      "css": ".ds-card{display:flex;flex-direction:column;gap:4px;background:#ffffff;border-radius:22.4px;padding:16px;box-shadow:0 0 0 1px rgba(15,23,42,.10);font-family:Inter,ui-sans-serif,system-ui,sans-serif}.ds-card-title{font-family:Sora,ui-sans-serif,system-ui,sans-serif;font-size:16px;font-weight:500;line-height:1.375;color:#0f172a}.ds-card-stat{font-size:24px;font-weight:700;letter-spacing:-0.025em;font-variant-numeric:tabular-nums;color:#0f172a}.ds-card-sub{font-size:12px;color:#64748b;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Raised Summary Card",
+      "kind": "card",
+      "refersTo": "fintech-card",
+      "description": "Headline card: rounder, bordered, soft shadow that rises one step on hover.",
+      "html": "<div class=\"ds-fintech\"><div class=\"ds-fintech-title\">Income vs Expenses</div><div class=\"ds-fintech-sub\">Trailing 6 months performance</div></div>",
+      "css": ".ds-fintech{display:flex;flex-direction:column;gap:2px;background:#ffffff;border:1px solid #e2e8f0;border-radius:28.8px;padding:20px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;box-shadow:0 1px 3px 0 rgba(0,0,0,.10),0 1px 2px -1px rgba(0,0,0,.10);transition:box-shadow 200ms ease}.ds-fintech:hover{box-shadow:0 4px 6px -1px rgba(0,0,0,.10),0 2px 4px -2px rgba(0,0,0,.10)}.ds-fintech-title{font-size:16px;font-weight:600;letter-spacing:-0.025em;color:#0f172a}.ds-fintech-sub{font-size:12px;color:#64748b}"
+    },
+    {
+      "name": "Active Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "The active sidebar destination: emerald soft pill, emerald icon, semibold label.",
+      "html": "<a class=\"ds-nav-active\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#059669\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 3v18h18\"/><path d=\"m19 9-5 5-4-4-3 3\"/></svg><span>Budgets</span></a>",
+      "css": ".ds-nav-active{display:flex;align-items:center;gap:12px;height:40px;padding:0 14px;border-radius:22.4px;background:#ecfdf5;color:#047857;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;box-shadow:0 1px 2px 0 rgba(0,0,0,.05)}.ds-nav-active svg{flex-shrink:0}"
+    },
+    {
+      "name": "KPI Stat",
+      "kind": "custom",
+      "refersTo": "fintech-card",
+      "description": "The headline money statistic: tinted icon tile + large tabular number + role-colored delta.",
+      "html": "<div class=\"ds-kpi\"><div class=\"ds-kpi-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#059669\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/></svg></div><div class=\"ds-kpi-label\">Total Accounts Balance</div><div class=\"ds-kpi-value\">₱42,580.75</div><div class=\"ds-kpi-delta\">+2.4% from last month</div></div>",
+      "css": ".ds-kpi{display:flex;flex-direction:column;gap:4px;background:#ffffff;border:1px solid #e2e8f0;border-radius:28.8px;padding:20px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;box-shadow:0 1px 3px 0 rgba(0,0,0,.10),0 1px 2px -1px rgba(0,0,0,.10)}.ds-kpi-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:#ecfdf5;margin-bottom:8px}.ds-kpi-label{font-size:12px;color:#64748b}.ds-kpi-value{font-size:24px;font-weight:700;letter-spacing:-0.025em;font-variant-numeric:tabular-nums;color:#0f172a}.ds-kpi-delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:#059669}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Emerald Ledger",
+    "overview": "MoneyMap PH is a personal finance companion for Filipino earners, built around one idea: your entire financial life is a single ledger, and the ledger is an emerald ribbon of money moving in the right direction. The interface is calm, confident, and quietly premium — Stripe-dashboard discipline translated for paycheck-to-paycheck reality. Slate does the talking; emerald is the one accented voice, heard only when money behaves or an action is worth taking.\n\nThe system is dense by design, not decorative: 32px controls, 14px body text, tabular numerals on every figure, and hairlines instead of shadows. Surfaces sit flat on the page; elevation is a response — menus and popovers float on soft shadows, cards rise one step on hover, never at rest. This is a tool a person reaches into several times a day with real money in it; it should feel precise, trustworthy, and quiet, with the numbers always the loudest thing on screen.",
+    "keyCharacteristics": [
+      "Single accent: Peso Emerald. Rose, amber, and indigo appear only as semantic signals (expense/danger, warnings, info/savings).",
+      "Flat-by-default surfaces: hairline rings (1px, foreground/10) and tonal muted layers; shadows only for floating overlays.",
+      "Dense fintech controls: 32px (h-8) default actions and inputs, 14px text, decisive 3px focus rings.",
+      "Tabular numerals on every money figure; numerals lead, copy follows.",
+      "Two card dialects: quiet hairline cards for structure, soft-raised cards for headline summaries.",
+      "Signature motif: the ascending money-bar (logo + pay-strip) — growth read as bars, not pie charts.",
+      "Rejected: purple-blue SaaS gradients, shadow-stacked card-in-card, decorative gradient blobs on content, dark-on-dark gray text, decorative copy that isn't financial truth."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Peso Emerald is the only brand accent on a slate field; it is reserved for money moving in the right direction and for primary actions. Rose, amber, and indigo are semantic signals, never decoration. When in doubt, reach for slate.", "section": "colors" },
+      { "name": "The Green-Red Ledger Rule", "body": "Green always means money in (income, savings, positive delta); rose always means money out or dangerous (expenses, debt, errors). The pairing is never swapped for stylistic effect.", "section": "colors" },
+      { "name": "The Tabular Ledger Rule", "body": "Every money figure, percentage, and progress value is set with tabular-nums so columns of pesos align and never jitter. Exceptions: none.", "section": "typography" },
+      { "name": "The Sora-Lanes Rule", "body": "Sora appears in exactly two lanes: auth-screen headings (hero, form titles, stat values) and card/dialog titles via font-heading. It is never used for body copy, never for general page headers (those are Inter, text-2xl bold), and never for money figures (Inter, tabular stat). Two type families, never three, never mixed mid-sentence.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, floating) or on the auth hero; a shadow is never how a resting card asserts importance.", "section": "elevation" },
+      { "name": "The Radius Ladder Rule", "body": "Radius steps belong to roles: controls lg, structural cards xl, summary cards 2xl, hero/sheets 3xl, pills fully round. Don't jump roles for decorative variety (a primary action button is never 3xl).", "section": "shapes" }
+    ],
+    "dos": [
+      "Do let Peso Emerald carry every primary action and every \"money in\" figure, and nothing else — the accent is rare and that rarity is its power.",
+      "Do set every money, percent, and progress figure in tabular numerals; financial columns must align.",
+      "Do keep resting surfaces flat with a 1px hairline; raise a card (shadow-sm → md) only when it is a headline summary that merits attention.",
+      "Do reserve rose for money out / danger, amber for warnings, indigo for information and savings — the semantic signals never cosplay as the accent.",
+      "Do keep the 32px control rhythm for actions and inputs; the system is dense on purpose.",
+      "Do use the ascending-bar motif (logo, pay-strip) when a financial trend needs a signature visual."
+    ],
+    "donts": [
+      "Don't introduce purple-blue SaaS gradients, glassy blobs, or gradient fills on content cards, buttons, or charts — the gradient is the logo and auth panel's signature, and theirs alone.",
+      "Don't stack card-in-card with shadows to create hierarchy; layer tonally (bg-muted/50) instead.",
+      "Don't use Sora for body copy or labels, or Inter tracking-tight where tabular figures belong — voices stay in their lane.",
+      "Don't swap the green/red money polarity for style (income = emerald, expense = rose is an invariant, light and dark).",
+      "Don't ship a UI change without the app's real viewports — desktop and the installed-PWA mobile size — checked side by side."
+    ]
+  }
+}

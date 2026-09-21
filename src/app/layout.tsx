@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import Script from "next/script";
+import { SerwistProvider } from "@serwist/turbopack/react";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 
@@ -18,6 +19,23 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "MoneyMap PH",
   description: "Personal finance management for Filipinos",
+  applicationName: "MoneyMapPH",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MoneyMapPH",
+  },
+  icons: {
+    icon: [
+      { url: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#020617",
 };
 
 export default function RootLayout({
@@ -28,6 +46,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Legacy iOS PWA tag — modern Safari uses mobile-web-app-capable (emitted by Next), older iOS reads this one. */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <Script
           id="theme-init"
           strategy="beforeInteractive"
@@ -46,7 +66,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${sora.variable} font-sans antialiased`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <SerwistProvider
+            swUrl="/serwist/sw.js"
+            disable={process.env.NODE_ENV === "development"}
+          >
+            {children}
+          </SerwistProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

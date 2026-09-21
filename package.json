@@ -31,15 +31,18 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@serwist/turbopack": "^9.5.12",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "jsdom": "^29.1.1",
+    "serwist": "^9.5.12",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^8.2.2",

@@ -36,6 +36,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#020617",
+  // Required for env(safe-area-inset-*) to resolve to real values in standalone
+  // (without viewport-fit=cover the insets are all 0 and content runs under the
+  // notch/Dynamic Island and home indicator).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

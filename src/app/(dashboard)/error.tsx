@@ -18,7 +18,7 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center p-4">
+    <div className="flex min-h-[60dvh] items-center justify-center p-4">
       <FintechCard className="max-w-md w-full text-center p-6 space-y-4">
         <FintechCardHeader className="pb-2 flex flex-col items-center">
           <div className="h-12 w-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2 shadow-xs">

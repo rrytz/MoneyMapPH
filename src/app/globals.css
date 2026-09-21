@@ -132,6 +132,10 @@
   }
   html {
     @apply font-sans;
+    /* Prevent iOS Safari text autosizing / Android font boosting from inflating
+       text past fixed-height tracks (topbar, nav, badges, chart heights). */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 }
 

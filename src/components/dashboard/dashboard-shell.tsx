@@ -115,12 +115,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-dvh overflow-hidden">
         <Sidebar profile={profile} />
         <div className="flex-1 flex flex-col overflow-hidden">
           <FinancialPulse budgetUtilization={budgetUtilization} />
           <Topbar profile={profile} notifications={notifications} />
-          <main key={pathname} className="page-enter-anim flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
+          <main key={pathname} className="page-enter-anim flex-1 overflow-y-auto p-4 sm:p-6 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-6">
             {children}
           </main>
         </div>

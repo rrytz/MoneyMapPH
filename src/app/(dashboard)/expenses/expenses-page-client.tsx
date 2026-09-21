@@ -251,13 +251,13 @@ export function ExpensesPageClient({
             {filteredEntries.map((entry) => (
               <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
                 <div className="flex-1 min-w-0 pr-4">
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <span className="font-semibold text-sm text-foreground">{entry.title}</span>
-                    <Badge variant="expense" className="text-[10px] flex items-center gap-1">
-                      {entry.category?.icon && <span>{entry.category.icon}</span>}
-                      {entry.category?.name || "Uncategorized"}
+                  <div className="flex items-center gap-2.5 mb-1 min-w-0">
+                    <span className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{entry.title}</span>
+                    <Badge variant="expense" className="text-[10px] flex items-center gap-1 shrink max-w-[45%] overflow-hidden">
+                      {entry.category?.icon && <span className="shrink-0">{entry.category.icon}</span>}
+                      <span className="truncate min-w-0">{entry.category?.name || "Uncategorized"}</span>
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">
                       {formatDate(entry.date, "MMM d, yyyy")}
                     </span>
                   </div>
@@ -265,7 +265,7 @@ export function ExpensesPageClient({
                     <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
                   )}
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 shrink-0">
                   <CurrencyDisplay amount={Number(entry.amount)} className="text-sm font-bold text-rose-600 dark:text-rose-400" />
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-foreground" onClick={() => handleEdit(entry)}>

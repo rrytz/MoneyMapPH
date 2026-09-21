@@ -32,8 +32,8 @@ export function MobileNav() {
   const MoreIcon = NAV_ICON_MAP.MoreHorizontal;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md">
-      <div className="flex items-center justify-around h-16 px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-center justify-around min-h-16 px-2">
         {primaryItems.map((item) => {
           const Icon = NAV_ICON_MAP[item.icon];
           const isActive = pathname === item.href;
@@ -69,7 +69,7 @@ export function MobileNav() {
             </span>
           </SheetTrigger>
 
-          <SheetContent side="bottom" className="rounded-t-3xl border-t border-border bg-card p-6 pt-4 max-h-[80vh] overflow-y-auto">
+          <SheetContent side="bottom" className="rounded-t-3xl border-t border-border bg-card p-6 pt-4 max-h-[80dvh] overflow-y-auto">
             <SheetHeader className="pb-4 border-b border-border">
               <SheetTitle className="text-base font-bold text-foreground">Navigation & Tools</SheetTitle>
             </SheetHeader>

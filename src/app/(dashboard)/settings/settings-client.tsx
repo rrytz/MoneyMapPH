@@ -9,6 +9,7 @@ import {
   Pencil,
   Trash2,
   Globe,
+  Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
@@ -19,6 +20,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/page-header";
+import { BackupCard } from "@/components/shared/backup-card";
 import { toast } from "sonner";
 import { useTheme } from "@/providers/theme-provider";
 import {
@@ -199,7 +201,7 @@ export function SettingsClient({
     <div className="space-y-6">
       <PageHeader
         title="Account Settings"
-        description="Configure account profile, localization preferences, expense categories, and income sources"
+        description="Configure account profile, localization preferences, expense categories, income sources, and backup"
       />
 
       <Tabs defaultValue="profile" className="space-y-6">
@@ -212,6 +214,9 @@ export function SettingsClient({
           </TabsTrigger>
           <TabsTrigger value="sources" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
             <TrendingUp className="h-4 w-4" /> Income Sources
+          </TabsTrigger>
+          <TabsTrigger value="backup" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
+            <Database className="h-4 w-4" /> Backup
           </TabsTrigger>
         </TabsList>
 
@@ -369,6 +374,11 @@ export function SettingsClient({
               </div>
             </FintechCardContent>
           </FintechCard>
+        </TabsContent>
+
+        {/* BACKUP & RESTORE TAB */}
+        <TabsContent value="backup">
+          <BackupCard />
         </TabsContent>
       </Tabs>
 

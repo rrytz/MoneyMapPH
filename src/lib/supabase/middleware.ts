@@ -31,7 +31,10 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isAuthCallback = path.startsWith("/auth/callback");
-  const isAuthRoute = path.startsWith("/login") || path.startsWith("/signup");
+  const isAuthRoute =
+    path.startsWith("/login") ||
+    path.startsWith("/signup") ||
+    path.startsWith("/recover");
   const isPublicRoute =
     isAuthRoute || isAuthCallback || path === "/" ||
     path.startsWith("/privacy") || path.startsWith("/terms");

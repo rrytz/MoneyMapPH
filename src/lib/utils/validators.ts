@@ -178,5 +178,13 @@ export type DebtInputSchemaType = z.infer<typeof debtInputSchema>;
 export type PayDebtSchemaType = z.infer<typeof payDebtSchema>;
 export type UnpayDebtSchemaType = z.infer<typeof unpayDebtSchema>;
 
+export const recoverySchema = z.object({
+  email: z.string().trim().email("Enter a valid email address"),
+  passphrase: z.string().trim().min(8, "Recovery passphrase is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type RecoverySchemaType = z.infer<typeof recoverySchema>;
+
 
 

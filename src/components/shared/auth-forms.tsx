@@ -267,6 +267,17 @@ export function AuthForm() {
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isSignin ? "Sign in" : "Create account"}
                 </Button>
+
+                {isSignin && (
+                  <div className={`${entrance} -mt-1 pt-1 text-center`} style={anim(0.22)}>
+                    <Link
+                      href="/recover"
+                      className="text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Forgot your password? Recover access
+                    </Link>
+                  </div>
+                )}
               </form>
 
               <div

@@ -41,10 +41,10 @@ export function Topbar({ profile, notifications = [] }: TopbarProps) {
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between min-h-16 px-4 sm:px-6 pt-[env(safe-area-inset-top)] border-b border-border bg-card/90 backdrop-blur-md">
-      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
         <span>Workspace</span>
         <span>›</span>
-        <span className="font-semibold text-foreground">Overview</span>
+        <span className="font-normal text-foreground">Overview</span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -60,7 +60,7 @@ export function Topbar({ profile, notifications = [] }: TopbarProps) {
         <NotificationsDrawer notifications={notifications} />
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors hover:bg-muted h-9 w-9 cursor-pointer border border-border">
+          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-muted h-9 w-9 cursor-pointer border border-border">
             <ThemeIcon className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

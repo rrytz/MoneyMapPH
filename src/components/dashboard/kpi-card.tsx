@@ -48,7 +48,7 @@ export function KpiCard({
     <FintechCard className="relative">
       <FintechCardContent className="p-5 flex flex-col justify-between h-full space-y-4">
         <div className="flex items-center justify-between">
-          <div className={cn("p-2.5 rounded-2xl shrink-0", iconBgClass)}>
+          <div className={cn("p-2.5 rounded-md shrink-0", iconBgClass)}>
             <Icon className="h-4.5 w-4.5" />
           </div>
           {badge && (
@@ -59,12 +59,12 @@ export function KpiCard({
         </div>
 
         <div className="space-y-1">
-          <span className="text-xs font-medium text-muted-foreground">{title}</span>
-          <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums">
+          <span className="caption">{title}</span>
+          <div className="ledger-figure tabular-nums text-foreground">
             {isCurrency ? (
-              <CurrencyDisplay amount={value} className={cn("font-bold text-foreground", colorClass)} />
+              <CurrencyDisplay amount={value} className={cn("font-semibold text-foreground", colorClass)} />
             ) : (
-              <span className={cn("font-bold text-foreground tabular-nums", colorClass)}>
+              <span className={cn("font-semibold text-foreground tabular-nums", colorClass)}>
                 {isPercentage ? `${value.toFixed(1)}%` : value}
               </span>
             )}

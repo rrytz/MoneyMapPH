@@ -111,12 +111,12 @@ export function AccountsClient({
         {/* Card 1: Total Tracked Liquidity */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Total Tracked Liquidity</span>
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400">
+            <span className="caption text-slate-400">Total Tracked Liquidity</span>
+            <div className="p-2 rounded-md bg-cyan-500/10 text-cyan-400">
               <Wallet className="h-4 w-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-100 tabular-nums">
+          <div className="ledger-figure tabular-nums text-slate-100">
             <CurrencyDisplay amount={totalLiquidity} />
           </div>
           <p className="text-xs text-slate-400">
@@ -127,8 +127,8 @@ export function AccountsClient({
         {/* Card 2: Unassigned Context Notice */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Unassigned Transactions</span>
-            <div className="p-2 rounded-xl bg-slate-800 text-slate-400">
+            <span className="caption text-slate-400">Unassigned Transactions</span>
+            <div className="p-2 rounded-md bg-slate-800 text-slate-400">
               <Info className="h-4 w-4" />
             </div>
           </div>
@@ -143,7 +143,7 @@ export function AccountsClient({
         {/* Card 3: Account Controls */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Active Accounts</span>
+            <span className="caption text-slate-400">Active Accounts</span>
             <span className="text-xs font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full">
               {initialAccounts.length} Active
             </span>

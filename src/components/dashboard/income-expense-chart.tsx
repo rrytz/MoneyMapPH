@@ -61,7 +61,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
           <FintechCardTitle>Income vs Expenses</FintechCardTitle>
           <p className="text-xs text-muted-foreground">Trailing 6 months performance</p>
         </div>
-        <div className="flex items-center gap-4 text-xs font-semibold">
+        <div className="flex items-center gap-4 text-xs font-normal">
           <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Income
           </span>

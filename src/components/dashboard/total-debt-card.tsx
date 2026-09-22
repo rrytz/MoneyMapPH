@@ -45,21 +45,21 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
       </FintechCardHeader>
 
       <FintechCardContent className="flex-1 flex flex-col gap-4">
-        <div className="rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-950 p-4 flex items-center justify-between gap-4">
+        <div className="rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-950 p-4 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium text-rose-700 dark:text-rose-300">Remaining balance</p>
-            <div className="text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400 tabular-nums mt-0.5">
+            <div className="ledger-figure tabular-nums text-rose-600 dark:text-rose-400 mt-0.5">
               <CurrencyDisplay amount={totalRemaining} />
             </div>
           </div>
-          <div className="p-2.5 rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400">
+          <div className="p-2.5 rounded-md bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400">
             <BadgeDollarSign className="h-5 w-5" />
           </div>
         </div>
 
         {outstanding.length === 0 ? (
-          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border/70">
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+          <div className="flex items-center gap-3 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70">
+            <div className="p-2 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
               <BadgeDollarSign className="h-4 w-4" />
             </div>
             <div>
@@ -74,11 +74,11 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
             {top.map(({ debt, remaining, overdue }) => (
               <div
                 key={debt.id}
-                className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-rose-200 transition-colors"
+                className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-rose-200 transition-colors"
               >
                 <div
                   className={cn(
-                    "p-2 rounded-xl shrink-0",
+                    "p-2 rounded-md shrink-0",
                     overdue
                       ? "bg-rose-50 text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"
                       : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"

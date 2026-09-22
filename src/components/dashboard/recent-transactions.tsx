@@ -71,7 +71,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       <FintechCardContent className="p-0 overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-border bg-slate-50/50 dark:bg-slate-900/50 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+            <tr className="border-b border-border bg-slate-50/50 dark:bg-slate-900/50 text-[10px] uppercase font-normal text-muted-foreground tracking-wider">
               <th className="py-3 px-5">Description</th>
               <th className="py-3 px-4">Category</th>
               <th className="py-3 px-4">Date</th>
@@ -90,7 +90,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 >
                   <td className="py-3.5 px-5">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0">
+                      <div className="p-2 rounded-md bg-slate-100 dark:bg-slate-800 shrink-0">
                         {getIconForTitle(tx.title, tx.type)}
                       </div>
                       <span className="font-semibold text-foreground text-xs">{tx.title}</span>

@@ -43,7 +43,7 @@ export function Sidebar({ profile }: SidebarProps) {
         {!collapsed && (
           <Link
             href="/transactions"
-            className="w-full inline-flex items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9.5 shadow-xs transition-colors cursor-pointer"
+            className="w-full inline-flex items-center justify-center rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9.5 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="h-4 w-4 mr-1.5" /> Add Transaction
           </Link>
@@ -51,7 +51,7 @@ export function Sidebar({ profile }: SidebarProps) {
 
         <div
           className={cn(
-            "flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border transition-colors",
+            "flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border transition-colors",
             collapsed && "justify-center p-1.5"
           )}
         >

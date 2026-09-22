@@ -205,17 +205,17 @@ export function SettingsClient({
       />
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
-          <TabsTrigger value="profile" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
+        <TabsList className="bg-slate-100 dark:bg-slate-900 p-1 rounded-md">
+          <TabsTrigger value="profile" className="flex items-center gap-1.5 text-xs font-normal rounded-md">
             <User className="h-4 w-4" /> Profile Preferences
           </TabsTrigger>
-          <TabsTrigger value="categories" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
+          <TabsTrigger value="categories" className="flex items-center gap-1.5 text-xs font-normal rounded-md">
             <Sliders className="h-4 w-4" /> Expense Categories
           </TabsTrigger>
-          <TabsTrigger value="sources" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
+          <TabsTrigger value="sources" className="flex items-center gap-1.5 text-xs font-normal rounded-md">
             <TrendingUp className="h-4 w-4" /> Income Sources
           </TabsTrigger>
-          <TabsTrigger value="backup" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
+          <TabsTrigger value="backup" className="flex items-center gap-1.5 text-xs font-normal rounded-md">
             <Database className="h-4 w-4" /> Backup
           </TabsTrigger>
         </TabsList>
@@ -225,7 +225,7 @@ export function SettingsClient({
           <FintechCard className="max-w-xl">
             <FintechCardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <div className="p-2 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
                   <Globe className="h-4 w-4" />
                 </div>
                 <FintechCardTitle>Profile & Preferences</FintechCardTitle>
@@ -272,7 +272,7 @@ export function SettingsClient({
                   </div>
                 </div>
                 <div className="pt-3 border-t border-border flex justify-end">
-                  <Button type="submit" disabled={isPending} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
+                  <Button type="submit" disabled={isPending} className="rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
                     {isPending ? "Saving..." : "Save Preferences"}
                   </Button>
                 </div>
@@ -285,10 +285,10 @@ export function SettingsClient({
         <TabsContent value="categories" className="space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Expense Categories</h3>
+              <h3 className="section-head text-foreground">Expense Categories</h3>
               <p className="text-xs text-muted-foreground">Manage your custom spending category mappings</p>
             </div>
-            <Button onClick={openNewCategoryModal} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
+            <Button onClick={openNewCategoryModal} className="rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
               <Plus className="mr-1.5 h-4 w-4" /> Add Category
             </Button>
           </div>
@@ -303,7 +303,7 @@ export function SettingsClient({
                       <div>
                         <span className="text-xs font-bold text-foreground block">{cat.name}</span>
                         {cat.is_default && (
-                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[9px] font-bold text-muted-foreground">
+                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[9px] font-normal text-muted-foreground">
                             Default Category
                           </span>
                         )}
@@ -330,10 +330,10 @@ export function SettingsClient({
         <TabsContent value="sources" className="space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Income Sources</h3>
+              <h3 className="section-head text-foreground">Income Sources</h3>
               <p className="text-xs text-muted-foreground">Configure sources generating income streams</p>
             </div>
-            <Button onClick={openNewSourceModal} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
+            <Button onClick={openNewSourceModal} className="rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
               <Plus className="mr-1.5 h-4 w-4" /> Add Source
             </Button>
           </div>
@@ -348,7 +348,7 @@ export function SettingsClient({
                       <div>
                         <span className="text-xs font-bold text-foreground block">{src.name}</span>
                         {src.is_default && (
-                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[9px] font-bold text-muted-foreground">
+                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[9px] font-normal text-muted-foreground">
                             Default Source
                           </span>
                         )}

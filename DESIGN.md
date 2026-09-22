@@ -43,23 +43,27 @@ typography:
     fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
-  stat:
+  ledger-figure:
     fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
+    fontSize: "2rem"
+    fontWeight: 600
     letterSpacing: "-0.025em"
     fontFeature: "'tnum'"
-  label:
+  caption:
     fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.75rem"
+    fontWeight: 400
+  section-head:
+    fontFamily: "Sora, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.125rem"
     fontWeight: 500
 rounded:
-  sm: "0.6rem"
-  md: "0.8rem"
-  lg: "1rem"
-  xl: "1.4rem"
-  2xl: "1.8rem"
-  3xl: "2.2rem"
+  sm: "0.375rem"
+  md: "0.5rem"
+  lg: "0.75rem"
+  xl: "1rem"
+  2xl: "1.25rem"
+  3xl: "1.75rem"
 spacing:
   control-h: "2rem"
   card-pad: "1rem"
@@ -71,13 +75,13 @@ components:
   button-primary:
     backgroundColor: "{colors.peso-emerald}"
     textColor: "{colors.paper-white}"
-    rounded: "{rounded.lg}"
+    rounded: "{rounded.md}"
     height: "{spacing.control-h}"
     padding: "0 0.625rem"
   input-default:
     backgroundColor: "transparent"
     textColor: "{colors.ledger-slate-900}"
-    rounded: "{rounded.lg}"
+    rounded: "{rounded.md}"
     height: "{spacing.control-h}"
     padding: "0 0.625rem"
   card-default:
@@ -93,7 +97,7 @@ components:
   nav-item-active:
     backgroundColor: "{colors.peso-emerald-soft}"
     textColor: "{colors.peso-emerald-deep}"
-    rounded: "{rounded.xl}"
+    rounded: "{rounded.lg}"
     height: "2.5rem"
     padding: "0 0.875rem"
   badge-income:
@@ -184,14 +188,14 @@ inverted slate steps and softened tints.
 ### Hierarchy
 - **Display** (Sora, 700, 2rem–2.35rem, line-height 1.15, tracking -0.025em): the auth hero headline and its stat values only. It is *not* the general page-title voice.
 - **Headline** (Inter, 700, 1.5rem tracking -0.025em): page titles (e.g., page headers at `text-2xl`), big goal percentages up to `text-4xl`.
-- **Title** (Sora, 500, 1rem line-height snug): card titles and dialog titles only.
-- **Body** (Inter, 400, 0.875rem): default surface text; card body, descriptions, table cells. Headline figures and money values step up to 700.
-- **Label** (Inter, 500, 0.75rem–0.8125rem): badges (semibold at 0.75rem), nav items (0.875rem medium), breadcrumbs (0.75rem over muted-foreground), icon-adjacent microcopy (0.6875rem).
-- **Stat** (Inter, 700, 1.5rem–1.875rem tracking -0.025em, tabular): every headline money/percent figure — KPI values, safe-to-spend, totals. The loudest type in the system, by design.
+- **Section Head** (Sora, 500, 1.125rem): card and dialog titles — `section-head`. Replaces the old 1rem Sora title lane at the card level.
+- **Body** (Inter, 400, 0.875rem): default surface text; card body, descriptions, table cells. Money values step up to the ledger figure voice.
+- **Ledger Figure** (Inter, 600, 2rem→2.5rem@sm, tracking -0.025em, tabular) — `ledger-figure`: the one biggest number per screen — KPI values, safe-to-spend, totals. All figures on a surface render at ONE shared computed size (`ledger-figure`), so equal-value figures never compete at different sizes.
+- **Caption** (Inter, 400, 0.75rem, uppercase, letter-spacing 0.05em, muted-foreground) — `caption`: labels and chips. The old "500 semibold" label voice drops to normal-weight uppercase captions.
 
 ### Named Rules
 **The Tabular Ledger Rule.** Every money figure, percentage, and progress value is set with `tabular-nums` so columns of pesos align and never jitter. Exceptions: none.
-**The Sora-Lanes Rule.** Sora appears in exactly two lanes: auth-screen headings (hero, form titles, stat values) and card/dialog titles via `font-heading`. It is never used for body copy, never for general page headers (those are Inter, `text-2xl` bold), and never for money figures (Inter, tabular `stat`). Two type families, never three, never mixed mid-sentence.
+**The Sora-Lanes Rule.** Sora appears in exactly two lanes: auth-screen headings (hero, form titles, stat values) and section heads/card titles via `font-heading` (`section-head`). It is never used for body copy, never for general page headers (those are Inter, `text-2xl` bold), and never for money figures (Inter, tabular `ledger-figure`). Two type families, never three, never mixed mid-sentence.
 
 ## Layout
 
@@ -236,25 +240,26 @@ on a large emerald-tinted `shadow-xl`. Nothing else casts a shadow at rest.
 
 ## Shapes
 
-The form language is soft but disciplined: controls use the `lg` radius step
-(1rem), which at the standard 32px height reads as a softly rounded,
-barely-pill shape — geometric, never bubbly. Structural cards use `xl` (1.4rem),
-headline summary cards one step rounder at `2xl` (1.8rem), and the auth hero
-and bottom sheet land at `3xl` (2.2rem). Badges are fully rounded pills
+The form language is a sharp rail: controls sit on the small `md` step (8px),
+which at the standard 32px height reads as a decisive, squared-off shape —
+geometric, never bubbly. Small chips/tags ride the `sm` rail (6px); large
+controls and list rows step up to `lg` (12px). Structural cards use `xl` (16px),
+headline summary cards one step rounder at `2xl` (20px), and the auth hero
+and bottom sheet land at `3xl` (28px). Badges are fully rounded pills
 (`9999px`). Borders are always the 1px hairline (`ledger-slate-200` light /
 `ledger-slate-800` dark); there is no other stroke weight in the system, no
 clipping, and no texture. Gradients are a signature exception owned by two
 places only: the logo mark and the auth story panel.
 
 ### Named Rules
-**The Radius Ladder Rule.** Radius steps belong to roles: controls `lg`, structural cards `xl`, summary cards `2xl`, hero/sheets `3xl`, pills fully round. Don't jump roles for decorative variety (a primary action button is never `3xl`).
+**The Radius Ladder Rule.** Radius steps belong to roles: `sm` 6px for chips/tags, `md` 8px for controls (buttons, inputs, selects), `lg` 12px for large controls and list rows, `xl` 16px for structural cards, `2xl` 20px for summary cards, `3xl` 28px for hero/sheets, pills fully round. Don't jump roles for decorative variety (a primary action button never exceeds `md`; a card never dips below `xl`).
 
 ## Components
 
 *Snapshot note: the render-ready snippets in `.impeccable/design.json` describe this system as of 2026-09-21. They are descriptive, not authoritative — if live code and a snippet disagree, live code wins and the snippet should be refreshed alongside the change.*
 
 ### Buttons
-- **Shape:** soft-rounded (radius 1rem), 32px default height, 10px horizontal padding, 14px medium text.
+- **Shape:** sharp rail (radius 8px `md`), 32px default height, 10px horizontal padding, 14px medium text.
 - **Primary:** Peso Emerald fill, Paper White text; hover drops the fill to 80% (`bg-primary/80`).
 - **Hover / Focus:** 150ms transitions; focus shows a 3px ring at `ring/50` plus a `border-ring` step; `:active` nudges the button down 1px. Disabled at 50% opacity, no pointer events.
 - **Outline:** 1px `ledger-slate-200` stroke on background, hover fills muted. **Secondary:** muted slate fill with a 5% foreground color-mix hover. **Ghost:** no fill until hover. **Destructive:** rose tinted (10% fill, rose text) — never full-rose except the danger moment itself. **Link:** emerald text, underline on hover.
@@ -270,7 +275,7 @@ places only: the logo mark and the auth story panel.
 - **State:** semantic soft pills — Income (emerald soft + deep label), Expense (rose soft + deep), Warning (amber soft + deep), Info (indigo soft + deep — savings/tips only). Dark mode swaps to /50 tints with 400-family labels. There is no neutral "filter chip" state in the system.
 
 ### Cards / Containers
-- **Corner Style:** structural cards 1.4rem; headline summary cards 1.8rem.
+- **Corner Style:** structural cards `xl` 16px; headline summary cards `2xl` 20px; the Financial Health hero `3xl` 28px (sole large corner).
 - **Dialect 1 — Hairline Card (`Card`):** Paper White, 1px `ring-foreground/10` hairline, tonal muted footer (`bg-muted/50` + top border), 16px padding (12px when `sm`). The quiet structural unit.
 - **Dialect 2 — Raise Card (`FintechCard`):** Paper White, 1px border, `shadow-sm` resting → `shadow-md` on hover (200ms), 20px padding. The headline unit: KPIs, charts, account cards, pay-strip.
 - **Border:** 1px hairline only. **Internal Padding:** 16–20px.
@@ -284,7 +289,7 @@ places only: the logo mark and the auth story panel.
 The identity motif is growth read as bars: three ascending pillars inside an "M" fold with an up-right arrow, in a Peso Emerald ribbon gradient (pale→vivid→deep) with a soft emerald glow. The wordmark sets "Money" in slate, "Map" in emerald, and "PH" as superscript tracking-wide; the tagline is letterspaced uppercase microcopy ("Plan • Track • Grow"). The same ascending-bar language carries into the auth story panel's **PayStrip** money-bar chart (paycheck vs. spending by period) and the auth "barbeat" animation — one motif, three surfaces.
 
 ### KPI Cards & Progress
-KPI cards pair a tinted icon tile (soft fill per role: emerald / indigo / rose / amber) with a large tabular stat (Inter 700, 1.5–1.875rem, tracking-tight) and a same-role delta. Progress bars are 4px-high emerald tracks on a muted rail with a tabular percent label; no gradient, no glow.
+KPI cards pair a tinted icon tile (soft fill per role: emerald / indigo / rose / amber) with a `ledger-figure` tabular stat (Inter 600, 2rem→2.5rem@sm, tracking-tight, tabular-nums) and a same-role delta. All KPI figures on a surface share one computed size, so equal-value figures never render at different sizes. Progress bars are 4px-high emerald tracks on a muted rail with a tabular percent label; no gradient, no glow.
 
 ### Charts
 Recharts, drawn from the ledger's color rules: income is a solid emerald 3px stroke with a pale emerald area fade; expenses are a dashed (4-4) slate 2px stroke with a faint slate fade — never rose in charts. Grid only horizontal (`strokeDasharray="3 3"`, slate 200 at 0.6 opacity); axis ticks 11px slate 500; the tooltip is a dark pill (slate-900 on slate-800 hairline, rounded 12px).

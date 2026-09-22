@@ -13,13 +13,13 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
       <FintechCard className="relative">
         <FintechCardContent className="p-5 flex flex-col justify-between h-full space-y-4">
           <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-2xl bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+            <div className="p-2.5 rounded-md bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
               <Gauge className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="space-y-1">
-            <span className="text-xs font-medium text-muted-foreground">Safe to Spend</span>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums">—</div>
+            <span className="caption">Safe to Spend</span>
+            <div className="ledger-figure tabular-nums text-foreground">—</div>
             <p className="text-[11px] text-muted-foreground">Log your paycheck to unlock safe-to-spend.</p>
           </div>
         </FintechCardContent>
@@ -58,7 +58,7 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
     <FintechCard className="relative">
       <FintechCardContent className="p-5 flex flex-col justify-between h-full space-y-4">
         <div className="flex items-center justify-between">
-          <div className={cn("p-2.5 rounded-2xl", state.chip)}>
+          <div className={cn("p-2.5 rounded-md", state.chip)}>
             <Gauge className="h-4.5 w-4.5" />
           </div>
           <span className={cn("text-[11px] font-semibold px-2.5 py-0.5 rounded-full border", state.pill)}>
@@ -67,8 +67,8 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
         </div>
 
         <div className="space-y-1">
-          <span className="text-xs font-medium text-muted-foreground">Safe to Spend</span>
-          <CurrencyDisplay amount={status.safeToSpend} signed className={cn("text-2xl sm:text-3xl font-bold tracking-tight tabular-nums", state.color)} />
+          <span className="caption">Safe to Spend</span>
+          <CurrencyDisplay amount={status.safeToSpend} signed className={cn("ledger-figure tabular-nums font-semibold", state.color)} />
           <p className="text-[11px] text-muted-foreground">
             this cutoff · ends {formatDate(status.periodEnd, "MMM d")}
           </p>

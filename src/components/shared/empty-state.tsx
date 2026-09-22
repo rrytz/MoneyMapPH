@@ -24,7 +24,7 @@ export function EmptyState({ icon: IconOrNode, title, description, actionLabel, 
       <p className="text-xs text-muted-foreground max-w-xs mb-4">{description}</p>
       {actionLabel && actionHref && (
         <Link href={actionHref}>
-          <Button size="sm" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs px-4 cursor-pointer">
+          <Button size="sm" className="rounded-md bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs px-4 cursor-pointer">
             {actionLabel}
           </Button>
         </Link>
@@ -32,7 +32,7 @@ export function EmptyState({ icon: IconOrNode, title, description, actionLabel, 
       {actionLabel && !actionHref && (
         <Button
           size="sm"
-          className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs px-4 cursor-pointer"
+          className="rounded-md bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs px-4 cursor-pointer"
           onClick={onAction}
         >
           {actionLabel}

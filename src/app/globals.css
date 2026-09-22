@@ -40,12 +40,12 @@
   --color-danger: var(--danger);
   --color-income: var(--income);
   --color-expense: var(--expense);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-sm: calc(var(--radius) * 0.375);
+  --radius-md: calc(var(--radius) * 0.5);
+  --radius-lg: calc(var(--radius) * 0.75);
+  --radius-xl: calc(var(--radius) * 1);
+  --radius-2xl: calc(var(--radius) * 1.25);
+  --radius-3xl: calc(var(--radius) * 1.75);
 }
 
 :root {
@@ -141,6 +141,38 @@
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ---- Type anchors (Slice 1) ----
+   Plain classes (no @apply) in the components layer so utilities win on
+   color/size overrides. All money figures share ONE scale via .ledger-figure;
+   section heads and captions are the two supporting label voices. */
+@layer components {
+  .ledger-figure {
+    font-size: 2rem;
+    line-height: 1.15;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.025em;
+  }
+  @media (min-width: 640px) {
+    .ledger-figure {
+      font-size: 2.5rem;
+    }
+  }
+  .section-head {
+    font-size: 1.125rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .caption {
+    font-size: 0.75rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 400;
+    color: var(--color-muted-foreground);
+  }
 }
 
 /* ---- Auth screen motion ---- */

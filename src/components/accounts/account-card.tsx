@@ -48,7 +48,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
     }`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-xl ${
+          <div className={`p-2.5 rounded-md ${
             account.is_negative
               ? "bg-rose-500/10 text-rose-400"
               : "bg-cyan-500/10 text-cyan-400"
@@ -72,7 +72,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-xl p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">
+          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">
             <MoreVertical className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -107,7 +107,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
 
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-400">Current Derived Balance</span>
+          <span className="caption text-slate-400">Current Derived Balance</span>
           {account.is_negative && (
             <TooltipProvider>
               <Tooltip>
@@ -125,10 +125,10 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           )}
         </div>
 
-        <div className="text-2xl font-bold tracking-tight text-slate-100 tabular-nums">
+        <div className="ledger-figure tabular-nums text-slate-100">
           <CurrencyDisplay
             amount={account.current_balance}
-            className={account.is_negative ? "text-rose-400" : "text-slate-100"}
+            className={account.is_negative ? "font-semibold text-rose-400" : "font-semibold text-slate-100"}
           />
         </div>
       </div>

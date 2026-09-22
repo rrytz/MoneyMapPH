@@ -1,4 +1,4 @@
-import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
+import { FintechCardContent } from "@/components/ui/fintech-card";
 import { getHealthHeroMessage } from "@/lib/utils/health-hero-copy";
 import type { FinancialHealthReport } from "@/lib/types";
 
@@ -12,7 +12,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
   const strokeDashoffset = strokeDasharray - (strokeDasharray * score) / 100;
 
   return (
-    <FintechCard className="relative overflow-hidden bg-card border border-border">
+    <div className="rounded-3xl relative overflow-hidden border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-200 p-5">
       <FintechCardContent className="p-6 flex flex-col justify-between h-full space-y-4">
         <div className="flex items-center gap-5" aria-label={`Financial Health Score: ${score} out of 100`}>
           <div className="relative h-24 w-24 flex items-center justify-center shrink-0">
@@ -46,7 +46,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
           </div>
 
           <div className="space-y-1 min-w-0">
-            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span className="caption">
               Financial Health Score
             </span>
             <div className="flex items-baseline gap-2">
@@ -80,8 +80,8 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
               pct: Math.round((report.breakdown.paycheckAllocationScore / 20) * 100),
             },
           ].map(({ label, pct }) => (
-            <div key={label} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
-              <span className="text-[10px] text-muted-foreground block font-medium">{label}</span>
+            <div key={label} className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border">
+              <span className="text-[10px] text-muted-foreground block font-normal">{label}</span>
               <span
                 className={`text-xs font-bold ${
                   pct >= 75
@@ -97,6 +97,6 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
           ))}
         </div>
       </FintechCardContent>
-    </FintechCard>
+    </div>
   );
 }

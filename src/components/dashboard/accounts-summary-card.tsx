@@ -41,21 +41,21 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
       </FintechCardHeader>
 
       <FintechCardContent className="flex-1 flex flex-col gap-4">
-        <div className="rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border/70 p-4 flex items-center justify-between gap-4">
+        <div className="rounded-xl bg-slate-50 dark:bg-slate-900 border border-border/70 p-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Total Tracked Liquidity</p>
-            <div className="text-2xl font-bold tracking-tight text-foreground tabular-nums mt-0.5">
+            <p className="caption">Total Tracked Liquidity</p>
+            <div className="ledger-figure tabular-nums text-foreground mt-0.5">
               <CurrencyDisplay amount={totalLiquidity} />
             </div>
           </div>
-          <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+          <div className="p-2.5 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
             <Wallet className="h-5 w-5" />
           </div>
         </div>
 
         {accounts.length === 0 ? (
-          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border/70">
-            <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400">
+          <div className="flex items-center gap-3 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70">
+            <div className="p-2 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400">
               <AlertTriangle className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -76,11 +76,11 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
             {visible.map((account) => (
               <div
                 key={account.id}
-                className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-emerald-200 transition-colors"
+                className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-emerald-200 transition-colors"
               >
                 <div
                   className={cn(
-                    "p-2 rounded-xl shrink-0",
+                    "p-2 rounded-md shrink-0",
                     account.is_negative
                       ? "bg-rose-50 text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"
                       : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"

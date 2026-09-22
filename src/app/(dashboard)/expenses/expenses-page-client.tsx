@@ -151,7 +151,7 @@ export function ExpensesPageClient({
   return (
     <div className="space-y-6">
       <PageHeader title="Spending Intelligence" description="Monitor expenses, category allocations, and daily outflow">
-        <Button onClick={handleAdd} className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
+        <Button onClick={handleAdd} className="rounded-md bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
           <Plus className="mr-1.5 h-4 w-4" /> Add Expense
         </Button>
       </PageHeader>
@@ -161,14 +161,14 @@ export function ExpensesPageClient({
         <FintechCard>
           <FintechCardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
+              <div className="p-2.5 rounded-md bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
                 <TrendingDown className="h-5 w-5" />
               </div>
               <Badge variant="expense">Total Outflow</Badge>
             </div>
             <div>
-              <span className="text-xs font-medium text-muted-foreground block">Monthly Spend</span>
-              <CurrencyDisplay amount={total} className="text-3xl sm:text-4xl font-bold tracking-tight text-rose-600 dark:text-rose-400" />
+              <span className="caption block">Monthly Spend</span>
+              <CurrencyDisplay amount={total} className="ledger-figure tabular-nums font-semibold text-rose-600 dark:text-rose-400" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -176,13 +176,13 @@ export function ExpensesPageClient({
         <FintechCard>
           <FintechCardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+              <div className="p-2.5 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
                 <PieChart className="h-5 w-5" />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500">Highest Spend</span>
+              <span className="caption">Highest Spend</span>
             </div>
             <div>
-              <span className="text-xs font-medium text-muted-foreground block">Top Category</span>
+              <span className="caption block">Top Category</span>
               <p className="text-xl font-bold tracking-tight text-foreground truncate">{topCategory.name}</p>
               <p className="text-xs text-muted-foreground tabular-nums">₱{topCategory.amount.toLocaleString()}</p>
             </div>
@@ -192,14 +192,14 @@ export function ExpensesPageClient({
         <FintechCard>
           <FintechCardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+              <div className="p-2.5 rounded-md bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                 <Calendar className="h-5 w-5" />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500">Logged Items</span>
+              <span className="caption">Logged Items</span>
             </div>
             <div>
-              <span className="text-xs font-medium text-muted-foreground block">Total Expenses</span>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{count}</p>
+              <span className="caption block">Total Expenses</span>
+              <p className="ledger-figure tabular-nums text-foreground">{count}</p>
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -213,11 +213,11 @@ export function ExpensesPageClient({
             placeholder="Search expense titles..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9.5 h-10 rounded-xl bg-card border-border text-xs"
+            className="pl-9.5 h-10 rounded-md bg-card border-border text-xs"
           />
         </div>
         <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val || "all")}>
-          <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-xl bg-card border-border text-xs">
+          <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-md bg-card border-border text-xs">
             <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>

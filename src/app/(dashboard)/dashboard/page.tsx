@@ -201,7 +201,7 @@ export default async function DashboardPage() {
                 return (
                   <div
                     key={goal.id}
-                    className="flex items-center gap-4 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-emerald-200 transition-colors"
+                    className="flex items-center gap-4 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-emerald-200 transition-colors"
                   >
                     <div className="relative h-12 w-12 flex items-center justify-center shrink-0">
                       <svg className="h-full w-full transform -rotate-90" viewBox="0 0 40 40" aria-hidden="true">

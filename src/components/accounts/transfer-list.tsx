@@ -14,8 +14,8 @@ interface TransferListProps {
 export function TransferList({ transfers, onEdit, onDelete }: TransferListProps) {
   if (transfers.length === 0) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-8 text-center">
-        <p className="text-sm text-slate-400">No internal transfers logged yet.</p>
+      <div className="rounded-2xl border border-border bg-card/60 p-8 text-center">
+        <p className="text-sm text-muted-foreground">No internal transfers logged yet.</p>
       </div>
     );
   }
@@ -25,26 +25,26 @@ export function TransferList({ transfers, onEdit, onDelete }: TransferListProps)
       {transfers.map((tr) => (
         <div
           key={tr.id}
-          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/70 p-4 transition hover:border-slate-700"
+          className="flex items-center justify-between rounded-xl border border-border bg-card p-4 transition hover:border-slate-300 dark:hover:border-slate-700"
         >
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-200">
-              <span className="rounded-lg bg-slate-800 px-2.5 py-1">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <span className="rounded-lg bg-muted px-2.5 py-1">
                 {tr.from_account?.name || "Unknown"}
                 {tr.from_account?.is_archived && " (Archived)"}
               </span>
-              <ArrowRight className="h-4 w-4 text-slate-400 shrink-0" />
-              <span className="rounded-lg bg-slate-800 px-2.5 py-1">
+              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="rounded-lg bg-muted px-2.5 py-1">
                 {tr.to_account?.name || "Unknown"}
                 {tr.to_account?.is_archived && " (Archived)"}
               </span>
             </div>
-            {tr.notes && <span className="text-xs text-slate-400 hidden sm:inline">• {tr.notes}</span>}
+            {tr.notes && <span className="text-xs text-muted-foreground hidden sm:inline">• {tr.notes}</span>}
           </div>
 
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="font-semibold text-slate-100 text-sm">
+              <div className="font-semibold text-foreground text-sm">
                 <CurrencyDisplay amount={tr.amount} />
               </div>
               {tr.transfer_fee > 0 && (
@@ -58,7 +58,7 @@ export function TransferList({ transfers, onEdit, onDelete }: TransferListProps)
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-slate-200"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
                 onClick={() => onEdit(tr)}
               >
                 <Edit2 className="h-3.5 w-3.5" />

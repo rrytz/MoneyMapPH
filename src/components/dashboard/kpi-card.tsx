@@ -25,7 +25,7 @@ export function KpiCard({
   isCurrency = true,
   isPercentage = false,
   colorClass,
-  iconBgClass = "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+  iconBgClass = "bg-muted text-muted-foreground",
   favorableWhenDown = false,
 }: KpiCardProps) {
   const TrendIcon =

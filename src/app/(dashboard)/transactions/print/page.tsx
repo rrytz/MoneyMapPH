@@ -46,7 +46,7 @@ export default async function PrintTransactionsPage(props: {
       <TriggerPrint />
       
       {/* Header */}
-      <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4">
+      <div className="flex justify-between items-start border-b-2 border-black pb-4">
         <div>
           <Logo size="md" showTagline />
           <p className="text-slate-500 text-[10px] mt-1">Financial Statement & Transactions Report</p>

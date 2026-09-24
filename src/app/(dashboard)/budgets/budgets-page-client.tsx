@@ -182,7 +182,7 @@ export function BudgetsPageClient({
           <FintechCard>
             <FintechCardContent className="p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="p-2.5 rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                   <PieChart className="h-5 w-5" />
                 </div>
                 <Badge variant="warning">Targeted</Badge>
@@ -200,7 +200,7 @@ export function BudgetsPageClient({
           <FintechCard>
             <FintechCardContent className="p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+                <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                   <Target className="h-5 w-5" />
                 </div>
                 <Badge variant="info">No Target</Badge>

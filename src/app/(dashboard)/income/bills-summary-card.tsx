@@ -19,7 +19,7 @@ const VERDICT: Record<
   },
   tight: {
     label: "Tight this cutoff",
-    pill: "text-amber-700 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/50",
+    pill: "text-amber-700 bg-muted/60 dark:text-amber-400 border-amber-200/50",
     color: "text-amber-500",
   },
   short: {

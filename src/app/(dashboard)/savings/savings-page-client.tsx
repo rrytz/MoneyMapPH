@@ -397,7 +397,7 @@ export function SavingsPageClient({
         <FintechCard>
           <FintechCardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <Target className="h-5 w-5" />
               </div>
               <span className="text-[11px] font-semibold text-slate-500">Progress</span>
@@ -412,7 +412,7 @@ export function SavingsPageClient({
         <FintechCard>
           <FintechCardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <Wallet className="h-5 w-5" />
               </div>
               <span className="text-[11px] font-semibold text-slate-500">Total Targets</span>
@@ -522,7 +522,7 @@ export function SavingsPageClient({
             </div>
             <h3 className="text-lg font-bold text-foreground">Payoff Debts</h3>
           </div>
-          <Button onClick={openNewDebtModal} className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
+          <Button onClick={openNewDebtModal} className="rounded-xl font-medium text-xs px-4 h-9 cursor-pointer">
             <Plus className="mr-1.5 h-4 w-4" /> New Debt
           </Button>
         </div>
@@ -627,7 +627,7 @@ export function SavingsPageClient({
                     <Button
                       onClick={() => openPayModal(debt)}
                       disabled={paidOff}
-                      className="w-full rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs h-9 shadow-xs cursor-pointer"
+                      className="w-full rounded-xl font-medium text-xs h-9 cursor-pointer"
                     >
                       <HandCoins className="h-4 w-4 mr-1.5" /> Make Payment
                     </Button>
@@ -853,7 +853,7 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setDebtModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-rose-600 hover:bg-rose-700 text-white">
+              <Button type="submit" disabled={isPending}>
                 {selectedDebt ? "Save Changes" : "Create Debt"}
               </Button>
             </DialogFooter>
@@ -921,7 +921,7 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setPayModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-rose-600 hover:bg-rose-700 text-white">
+              <Button type="submit" disabled={isPending}>
                 Record Payment
               </Button>
             </DialogFooter>

@@ -99,7 +99,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
                       "p-2 rounded-md shrink-0",
                       item.kind === "debt"
                         ? "bg-rose-50 text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"
-                        : "bg-indigo-50 text-indigo-500 dark:bg-indigo-950/40 dark:text-indigo-400"
+                        : "bg-muted text-muted-foreground"
                     )}
                   >
                     {item.kind === "debt" ? <HandCoins className="h-3.5 w-3.5" /> : <ReceiptText className="h-3.5 w-3.5" />}

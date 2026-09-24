@@ -42,7 +42,7 @@ export function PayStrip() {
   }, []);
 
   return (
-    <div ref={ref} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <div ref={ref} className="rounded-2xl border border-border bg-card p-5">
       <div className="mb-4 flex items-baseline justify-between text-xs text-muted-foreground">
         <span>Last 6 months of income</span>
         <b className="font-semibold text-foreground tabular-nums">{average} avg</b>

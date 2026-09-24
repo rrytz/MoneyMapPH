@@ -15,7 +15,7 @@ export function DashboardStatStrip({ stats }: { stats: DashboardStats }) {
         title="Savings"
         value={stats.savingsBalance}
         icon={PiggyBank}
-        iconBgClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"
+        iconBgClass="bg-muted text-muted-foreground"
       />
       <KpiCard
         title="Total Debt"
@@ -31,7 +31,7 @@ export function DashboardStatStrip({ stats }: { stats: DashboardStats }) {
         icon={TrendingDown}
         changePercent={stats.spendingDeltaPercent}
         favorableWhenDown={true}
-        iconBgClass="bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
+        iconBgClass="bg-muted text-rose-600 dark:text-rose-400"
       />
     </div>
   );

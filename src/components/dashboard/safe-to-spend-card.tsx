@@ -42,8 +42,8 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
             color: "text-amber-500",
             bar: "bg-amber-500",
             label: "Nearly out this cutoff",
-            chip: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
-            pill: "text-amber-700 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/50",
+            chip: "bg-muted text-muted-foreground",
+            pill: "text-amber-700 bg-muted/60 dark:text-amber-400 border-amber-200/50",
           }
         : {
             color: "text-emerald-600 dark:text-emerald-400",

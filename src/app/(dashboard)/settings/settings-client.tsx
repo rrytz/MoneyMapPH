@@ -95,7 +95,7 @@ export function SettingsClient({
     setSelectedCategory(null);
     setCategoryName("");
     setCategoryIcon("📦");
-    setCategoryColor("#6366f1");
+    setCategoryColor("#64748b");
     setCategoryModalOpen(true);
   }
 
@@ -103,7 +103,7 @@ export function SettingsClient({
     setSelectedCategory(cat);
     setCategoryName(cat.name);
     setCategoryIcon(cat.icon || "📦");
-    setCategoryColor(cat.color || "#6366f1");
+    setCategoryColor(cat.color || "#64748b");
     setCategoryModalOpen(true);
   }
 

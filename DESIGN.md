@@ -136,7 +136,7 @@ precise, trustworthy, and quiet, with the numbers always the loudest thing on
 screen.
 
 **Key Characteristics:**
-- Single accent: Peso Emerald. Rose, amber, and indigo appear only as semantic signals (expense/danger, warnings, info/savings).
+- Single accent: Peso Emerald — the *only* accent for interactive elements (primary buttons, focus rings, links, active nav). Cyan/sky/teal are banned outright (Slice 3). Rose, amber, and indigo are data/chart semantics only — they never fill a button and never tint a tile/chip background; their soft tints survive only on info-badges and chart fills.
 - Flat-by-default surfaces: hairline rings (1px, foreground/10) and tonal muted layers; shadows only for floating overlays.
 - Dense fintech controls: 32px (h-8) default actions and inputs, 14px text, decisive 3px focus rings.
 - Tabular numerals on every money figure; numerals lead, copy follows.
@@ -159,9 +159,9 @@ inverted slate steps and softened tints.
 - **Peso Emerald Soft** (#ecfdf5, emerald-50): *live* — soft pills, active nav, income badges, KPI icon tiles; dark mode tints it to emerald-950/40–50 with emerald-400 labels.
 
 ### Semantic Signals (Role Colors)
-- **Overdraft Rose** (#f43f5e, rose-500): anything money leaving or dangerous — expense strokes, destructive buttons and text, debt figures, error validation. **Overdraft Rose Soft** (#fff1f2) / **Deep** (#be123c) complete the expense pill family.
-- **Late-Fee Amber** (#f59e0b, amber-500): warnings that qualify, not panic — near-limit budgets, cautionary deltas, "est." markers. **Late-Fee Amber Soft** (#fffbeb) / **Deep** (#b45309).
-- **Receipt Indigo** (#4f46e5, indigo-600): information and savings-only roles — savings-adjacent icons, info badges ("tips"), not actions. **Receipt Indigo Soft** (#eef2ff) / **Deep** (#4338ca).
+- **Overdraft Rose** (#f43f5e, rose-500): anything money leaving or dangerous — expense strokes, destructive text, debt figures, error validation. Rose is a *text/data* channel: it may color labels, deltas, icons, chips, and chart fills, but it never fills a button. **Overdraft Rose Soft** (#fff1f2) / **Deep** (#be123c) complete the expense pill family.
+- **Late-Fee Amber** (#f59e0b, amber-500): warnings that qualify, not panic — near-limit budgets, cautionary deltas, "est." markers, warning callouts. Amber text/borders are data semantics; amber never tints a tile or chip background (Rule C) — those render on neutral `bg-muted/60` with amber-700/amber-400 text. **Late-Fee Amber Soft** (#fffbeb) / **Deep** (#b45309) survive only on info-badges.
+- **Receipt Indigo** (#4f46e5, indigo-600): information and savings-only *chart roles* — savings-adjacent chart series and info badges ("tips"), never actions and never tile/chip backgrounds (Rule C). **Receipt Indigo Soft** (#eef2ff) / **Deep** (#4338ca) survive only on info-badges.
 
 ### Neutral
 - **Ledger Slate 950** (#020617): the dark-mode page background. Never a content surface on its own.
@@ -176,6 +176,47 @@ inverted slate steps and softened tints.
 ### Named Rules
 **The One Accent Rule.** Peso Emerald is the only brand accent on a slate field; it is reserved for money moving in the right direction and for primary actions. Rose, amber, and indigo are semantic signals, never decoration. When in doubt, reach for slate.
 **The Green-Red Ledger Rule.** Green always means money in (income, savings, positive delta); rose always means money out or dangerous (expenses, debt, errors). The pairing is never swapped for stylistic effect.
+
+## Light World
+
+MoneyMap PH is a **two-world system**: `dark` is the OS-default world
+(`colorScheme: 'dark'` follows the user's device), and `light` is a class-toggle
+world rendered by removing `.dark` from `<html>`. A page is correct only when it
+renders in both. There is no third world, no per-page theme override, and no
+hard-coded "always dark" component.
+
+**Tokens do all the theming.** Content surfaces and text come exclusively from
+design tokens that resolve per world — `bg-background`, `bg-card`,
+`bg-muted`, `border-border`, `text-foreground`, `text-card-foreground`,
+`text-muted-foreground` — never from hard-coded slate utilities on content
+surfaces. A component that paints with bare `bg-slate-900`/`border-slate-800`/
+`text-slate-100` is a light-world bypass, because it renders in the wrong world
+and ignores the surface/card/muted role system. The conformance detector
+(`src/tests/design-conformance.test.ts`, Rule D) treats unconditional
+`bg|border|fill|stroke-slate-7/8/900/950` and `text-slate-100/200/300` on
+content surfaces as violations and fails the build until they are tokenized.
+
+**Legal slate usage still exists.** Two-world pairs (`bg-slate-50
+dark:bg-slate-900`) and muted text neutrals (`text-slate-400/500/600/700`) are
+explicitly legal — they carry their own world switch or they are the quiet
+neutral voice, not a bypass. The transactions print/export page is the one
+genuinely theme-free document: it forces `bg-white text-black` ink semantics
+and stays out of the accent system entirely.
+
+### Named Rules
+**The Light-World Rule.** Every surface and text color resolves through a
+token or a two-world pair — no unconditional dark-slate hard codes on content
+surfaces. If a component renders correctly in only one world, it is not done:
+dark follows the OS, light is the class-toggle, and both must be verified
+before a change ships.
+
+**The Accent Enforcement Rule.** Peso Emerald is the only accent allowed on
+interactive elements — buttons, focus rings, links, active nav, CTAs. Cyan,
+sky, and teal are banned outright (Rule A); they are not part of the palette
+and never return. Rose, amber, and indigo are data/chart semantics: they may
+color charts, deltas, icons, badges, and status text, but rose never fills a
+button (Rule B) and amber/indigo never tint a tile/chip background (Rule C).
+When a stat tile needs a background, it is `bg-muted` — neutral, not tinted.
 
 ## Typography
 
@@ -227,8 +268,9 @@ muted fills (`bg-muted/30` Inset boxes, `bg-muted` hover chips) rather than by
 stacking dropped shadows. Within the FintechCard dialect the Featured variant —
 and only it, the Financial Health hero — rests on `shadow-sm` and rises to
 `shadow-md` on hover; Surface and Inset never raise. (Legacy `shadow-sm`
-holders outside the dialect — `account-card`, `pay-strip` — are Slice-3
-normalization targets.) Floating overlays carry soft shadows so they read as
+holders outside the dialect — `account-card`, `pay-strip`, `account-select` —
+were flattened in Slice 3 and now rest flat like every other surface.) Floating
+overlays carry soft shadows so they read as
 *above* the ledger, and the auth hero card floats on a large emerald-tinted
 `shadow-xl`. Nothing else casts a shadow at rest.
 
@@ -294,7 +336,7 @@ exception owned by two places only: the logo mark and the auth story panel.
 The identity motif is growth read as bars: three ascending pillars inside an "M" fold with an up-right arrow, in a Peso Emerald ribbon gradient (pale→vivid→deep) with a soft emerald glow. The wordmark sets "Money" in slate, "Map" in emerald, and "PH" as superscript tracking-wide; the tagline is letterspaced uppercase microcopy ("Plan • Track • Grow"). The same ascending-bar language carries into the auth story panel's **PayStrip** money-bar chart (paycheck vs. spending by period) and the auth "barbeat" animation — one motif, three surfaces.
 
 ### KPI Cards & Progress
-KPI cards pair a tinted icon tile (soft fill per role: emerald / indigo / rose / amber) with a `ledger-figure` tabular stat (Inter 600, 2rem→2.5rem@sm, tracking-tight, tabular-nums) and a same-role delta. All KPI figures on a surface share one computed size, so equal-value figures never render at different sizes. Progress bars are 4px-high emerald tracks on a muted rail with a tabular percent label; no gradient, no glow.
+KPI cards pair an icon tile with a `ledger-figure` tabular stat (Inter 600, 2rem→2.5rem@sm, tracking-tight, tabular-nums) and a same-role delta. Icon tiles are neutral by default (`bg-muted text-muted-foreground`); only emerald (income/savings identity) and rose (expense identity) keep their soft tinted identity, and amber/indigo tiles are never tinted (Rule C) — their stat text carries the hue where a warning or info signal is needed. All KPI figures on a surface share one computed size, so equal-value figures never render at different sizes. Progress bars are 4px-high emerald tracks on a muted rail with a tabular percent label; no gradient, no glow.
 
 ### Charts
 Recharts, drawn from the ledger's color rules: income is a solid emerald 3px stroke with a pale emerald area fade; expenses are a dashed (4-4) slate 2px stroke with a faint slate fade — never rose in charts. Grid only horizontal (`strokeDasharray="3 3"`, slate 200 at 0.6 opacity); axis ticks 11px slate 500; the tooltip is a dark pill (slate-900 on slate-800 hairline, rounded 12px).

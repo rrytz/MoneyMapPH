@@ -170,7 +170,7 @@ export function SimulatorClient({
           <FintechCard>
             <FintechCardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+                <div className="p-2 rounded-xl bg-muted text-muted-foreground">
                   <Activity className="h-4 w-4" />
                 </div>
                 <FintechCardTitle>Emergency Reserve Impact</FintechCardTitle>
@@ -225,7 +225,7 @@ export function SimulatorClient({
           <FintechCard>
             <FintechCardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                <div className="p-2 rounded-xl bg-muted text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                 </div>
                 <FintechCardTitle>Savings Goals Timeline Shift</FintechCardTitle>

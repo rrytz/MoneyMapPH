@@ -137,7 +137,7 @@ export default async function DashboardPage() {
             value={summary.remainingBudget}
             icon={Wallet}
             changePercent={incomeChange}
-            iconBgClass="bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
+            iconBgClass="bg-muted text-muted-foreground"
           />
           <KpiCard
             title={SAVINGS_RATE_LABEL}
@@ -146,7 +146,7 @@ export default async function DashboardPage() {
             isCurrency={false}
             isPercentage={true}
             badge="25% goal"
-            iconBgClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"
+            iconBgClass="bg-muted text-muted-foreground"
           />
         </div>
       </div>

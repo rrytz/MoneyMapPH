@@ -61,7 +61,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-slate-900 border-slate-800 text-slate-100">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Account" : "Add New Account"}</DialogTitle>
         </DialogHeader>
@@ -75,17 +75,16 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="bg-slate-800 border-slate-700 text-slate-100"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="account-type">Account Type</Label>
             <Select value={type} onValueChange={(val) => setType(val as AccountType)}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-100">
+              <SelectTrigger>
                 <SelectValue placeholder="Select account type" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-slate-100">
+              <SelectContent>
                 <SelectItem value="bank">Bank Account</SelectItem>
                 <SelectItem value="ewallet">E-Wallet (GCash, Maya)</SelectItem>
                 <SelectItem value="digital_bank">Digital Bank (GoTyme, SeaBank)</SelectItem>
@@ -109,7 +108,6 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
               value={initialBalance}
               onChange={(e) => setInitialBalance(e.target.value)}
               required
-              className="bg-slate-800 border-slate-700 text-slate-100"
             />
           </div>
 
@@ -117,7 +115,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="bg-cyan-600 hover:bg-cyan-500 text-white">
+            <Button type="submit" disabled={loading}>
               {loading ? "Saving..." : isEditing ? "Update Account" : "Create Account"}
             </Button>
           </DialogFooter>

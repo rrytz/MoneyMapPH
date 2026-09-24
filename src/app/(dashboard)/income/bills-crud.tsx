@@ -13,7 +13,7 @@ import { createBillAction, updateBillAction, deleteBillAction } from "./bills/ac
 import type { Bill, ExpenseCategory } from "@/lib/types";
 
 const STATUS_STYLE: Record<string, string> = {
-  Incomplete: "bg-amber-50 text-amber-700 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-400",
+  Incomplete: "bg-muted/60 text-amber-700 border-amber-200/60 dark:text-amber-400",
   Paused: "bg-slate-100 text-slate-500 border-slate-200/60 dark:bg-slate-800 dark:text-slate-400",
 };
 

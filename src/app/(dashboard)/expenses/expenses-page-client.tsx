@@ -151,7 +151,7 @@ export function ExpensesPageClient({
   return (
     <div className="space-y-6">
       <PageHeader title="Spending Intelligence" description="Monitor expenses, category allocations, and daily outflow">
-        <Button onClick={handleAdd} className="rounded-md bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
+        <Button onClick={handleAdd} className="rounded-md font-medium text-xs px-4 h-9 cursor-pointer">
           <Plus className="mr-1.5 h-4 w-4" /> Add Expense
         </Button>
       </PageHeader>
@@ -176,7 +176,7 @@ export function ExpensesPageClient({
         <FintechCard>
           <FintechCardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+              <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <PieChart className="h-5 w-5" />
               </div>
               <span className="caption">Highest Spend</span>
@@ -192,7 +192,7 @@ export function ExpensesPageClient({
         <FintechCard>
           <FintechCardContent className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-md bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+              <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <Calendar className="h-5 w-5" />
               </div>
               <span className="caption">Logged Items</span>

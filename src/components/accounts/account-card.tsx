@@ -39,32 +39,32 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
   const Icon = getIcon();
 
   return (
-    <div className={`relative rounded-2xl border p-5 transition-all shadow-sm ${
+    <div className={`relative rounded-2xl border p-5 transition-all ${
       account.is_negative
-        ? "border-rose-500/50 bg-rose-950/10 dark:bg-rose-950/20"
+        ? "border-rose-500/50 bg-rose-500/10 dark:bg-rose-950/20"
         : account.is_archived
-        ? "border-slate-800 bg-slate-900/40 opacity-60"
-        : "border-slate-800 bg-slate-900/80 hover:border-slate-700"
+        ? "border-border bg-card/60 opacity-60"
+        : "border-border bg-card hover:border-border"
     }`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`p-2.5 rounded-md ${
             account.is_negative
               ? "bg-rose-500/10 text-rose-400"
-              : "bg-cyan-500/10 text-cyan-400"
+              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           }`}>
             <Icon className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-slate-100 text-base">{account.name}</h3>
+              <h3 className="font-semibold text-card-foreground text-base">{account.name}</h3>
               {account.is_archived && (
-                <span className="text-[10px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                   Archived
                 </span>
               )}
             </div>
-            <span className="text-xs font-medium text-slate-400 capitalize">
+            <span className="text-xs font-medium text-muted-foreground capitalize">
               {account.type.replace("_", " ")}
               {account.type === "credit" && " (Ledger)"}
             </span>
@@ -72,7 +72,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition cursor-pointer">
+          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer">
             <MoreVertical className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -107,7 +107,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
 
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="caption text-slate-400">Current Derived Balance</span>
+          <span className="caption text-muted-foreground">Current Derived Balance</span>
           {account.is_negative && (
             <TooltipProvider>
               <Tooltip>
@@ -125,17 +125,17 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           )}
         </div>
 
-        <div className="ledger-figure tabular-nums text-slate-100">
+        <div className="ledger-figure tabular-nums text-card-foreground">
           <CurrencyDisplay
             amount={account.current_balance}
-            className={account.is_negative ? "font-semibold text-rose-400" : "font-semibold text-slate-100"}
+            className={account.is_negative ? "font-semibold text-rose-400" : "font-semibold text-card-foreground"}
           />
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+      <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
         <span>Starting Balance</span>
-        <CurrencyDisplay amount={account.initial_balance} className="font-medium text-slate-300" />
+        <CurrencyDisplay amount={account.initial_balance} className="font-medium text-muted-foreground" />
       </div>
     </div>
   );

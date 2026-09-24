@@ -98,7 +98,7 @@ export function TransferModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-slate-900 border-slate-800 text-slate-100">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Internal Transfer" : "Transfer Money Between Accounts"}</DialogTitle>
         </DialogHeader>
@@ -107,10 +107,10 @@ export function TransferModal({
           <div className="space-y-2">
             <Label>From Account (Source)</Label>
             <Select value={fromAccountId} onValueChange={(v) => setFromAccountId(v ?? "")}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-100">
+              <SelectTrigger>
                 <SelectValue placeholder="Select source account" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-slate-100">
+              <SelectContent>
                 {activeAccounts.map((acc) => (
                   <SelectItem key={acc.id} value={acc.id}>
                     {acc.name} (Bal: ₱{acc.current_balance.toLocaleString("en-US", { minimumFractionDigits: 2 })})
@@ -123,10 +123,10 @@ export function TransferModal({
           <div className="space-y-2">
             <Label>To Account (Destination)</Label>
             <Select value={toAccountId} onValueChange={(v) => setToAccountId(v ?? "")}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-100">
+              <SelectTrigger>
                 <SelectValue placeholder="Select destination account" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-slate-100">
+              <SelectContent>
                 {activeAccounts
                   .filter((acc) => acc.id !== fromAccountId)
                   .map((acc) => (
@@ -150,7 +150,6 @@ export function TransferModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
-                className="bg-slate-800 border-slate-700 text-slate-100"
               />
             </div>
 
@@ -164,23 +163,22 @@ export function TransferModal({
                 placeholder="0.00"
                 value={fee}
                 onChange={(e) => setFee(e.target.value)}
-                className="bg-slate-800 border-slate-700 text-slate-100"
               />
             </div>
           </div>
 
           {/* Fee & Impact Breakdown */}
           {numAmount > 0 && sourceAccount && destAccount && (
-            <div className="rounded-lg bg-slate-800/80 p-3 text-xs space-y-1.5 border border-slate-700/60">
-              <div className="flex justify-between text-slate-300">
+            <div className="rounded-lg bg-muted/60 p-3 text-xs space-y-1.5 border border-border">
+              <div className="flex justify-between text-muted-foreground">
                 <span>Transfer Amount:</span>
                 <span>₱{numAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="flex justify-between text-slate-300">
+              <div className="flex justify-between text-muted-foreground">
                 <span>Fee:</span>
                 <span>₱{numFee.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="flex justify-between font-medium text-rose-400 border-t border-slate-700/60 pt-1">
+              <div className="flex justify-between font-medium text-rose-400 border-t border-border pt-1">
                 <span>Source ({sourceAccount.name}) impact:</span>
                 <span>-₱{totalDeduction.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>
@@ -193,7 +191,7 @@ export function TransferModal({
 
           {/* Policy 2 Non-blocking Warning Callout */}
           {willOverdrawSource && (
-            <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-xs text-amber-300 flex items-start gap-2">
+            <div className="rounded-lg bg-muted/60 border border-amber-500/30 p-3 text-xs text-amber-600 dark:text-amber-300 flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
               <div>
                 <strong>Informational Warning:</strong> This transfer will result in a negative balance (-₱
@@ -210,7 +208,6 @@ export function TransferModal({
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              className="bg-slate-800 border-slate-700 text-slate-100"
             />
           </div>
 
@@ -221,7 +218,6 @@ export function TransferModal({
               placeholder="e.g., Cash-in fee, wallet transfer"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="bg-slate-800 border-slate-700 text-slate-100"
             />
           </div>
 
@@ -229,7 +225,7 @@ export function TransferModal({
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="bg-cyan-600 hover:bg-cyan-500 text-white">
+            <Button type="submit" disabled={loading}>
               {loading ? "Processing..." : isEditing ? "Update Transfer" : "Confirm Transfer"}
             </Button>
           </DialogFooter>

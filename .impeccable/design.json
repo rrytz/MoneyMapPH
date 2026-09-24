@@ -37,8 +37,8 @@
       "section-head": { "displayName": "Section Head", "purpose": "Card and dialog titles (Sora, 1.125rem, medium) via font-heading." }
     },
     "shadows": [
-      { "name": "raised-rest", "value": "0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10)", "purpose": "Headline summary cards at rest (FintechCard, account cards, pay-strip)." },
-      { "name": "raised-hover", "value": "0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10)", "purpose": "The same cards on hover (200ms transition)." },
+      { "name": "raised-rest", "value": "0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10)", "purpose": "The Featured FintechCard at rest — Financial Health hero, the sole raised card in the FintechCard dialect." },
+      { "name": "raised-hover", "value": "0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10)", "purpose": "The Featured card on hover (200ms transition)." },
       { "name": "overlay", "value": "0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10)", "purpose": "Floating controls: dropdown menus, selects, popovers (paired with 1px ring-foreground/10)." },
       { "name": "overlay-high", "value": "0 10px 15px -3px rgb(0 0 0 / 0.10), 0 4px 6px -4px rgb(0 0 0 / 0.10)", "purpose": "Sheets, toasts, tooltips, error cards." },
       { "name": "hero", "value": "0 20px 25px -5px rgb(0 0 0 / 0.10), 0 8px 10px -6px rgb(0 0 0 / 0.10)", "purpose": "Auth hero card only (tinted emerald-950/6% light, black/40 dark)." },
@@ -102,12 +102,12 @@
       "css": ".ds-card{display:flex;flex-direction:column;gap:4px;background:#ffffff;border-radius:16px;padding:16px;box-shadow:0 0 0 1px rgba(15,23,42,.10);font-family:Inter,ui-sans-serif,system-ui,sans-serif}.ds-card-title{font-family:Sora,ui-sans-serif,system-ui,sans-serif;font-size:18px;font-weight:500;line-height:1.375;color:#0f172a}.ds-card-stat{font-size:32px;font-weight:600;letter-spacing:-0.025em;font-variant-numeric:tabular-nums;color:#0f172a}.ds-card-sub{font-size:12px;color:#64748b;font-variant-numeric:tabular-nums}"
     },
     {
-      "name": "Raised Summary Card",
+      "name": "Surface Card",
       "kind": "card",
       "refersTo": "fintech-card",
-      "description": "Headline card: rounder, bordered, soft shadow that rises one step on hover.",
+      "description": "Surface workhorse card: flat, hairline border, no shadow at rest. Featured (shadow-sm → md) is reserved for the Financial Health hero only.",
       "html": "<div class=\"ds-fintech\"><div class=\"ds-fintech-title\">Income vs Expenses</div><div class=\"ds-fintech-sub\">Trailing 6 months performance</div></div>",
-      "css": ".ds-fintech{display:flex;flex-direction:column;gap:2px;background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;padding:20px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;box-shadow:0 1px 3px 0 rgba(0,0,0,.10),0 1px 2px -1px rgba(0,0,0,.10);transition:box-shadow 200ms ease}.ds-fintech:hover{box-shadow:0 4px 6px -1px rgba(0,0,0,.10),0 2px 4px -2px rgba(0,0,0,.10)}.ds-fintech-title{font-size:18px;font-weight:500;letter-spacing:-0.025em;color:#0f172a}.ds-fintech-sub{font-size:12px;color:#64748b}"
+      "css": ".ds-fintech{display:flex;flex-direction:column;gap:2px;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;font-family:Inter,ui-sans-serif,system-ui,sans-serif}.ds-fintech-title{font-size:18px;font-weight:500;letter-spacing:-0.025em;color:#0f172a}.ds-fintech-sub{font-size:12px;color:#64748b}"
     },
     {
       "name": "Active Nav Item",
@@ -121,9 +121,9 @@
       "name": "KPI Stat",
       "kind": "custom",
       "refersTo": "fintech-card",
-      "description": "The headline money statistic: tinted icon tile + large tabular number + role-colored delta.",
+      "description": "The headline money statistic: tinted icon tile + large tabular number + role-colored delta. Flat surface (no rest shadow).",
       "html": "<div class=\"ds-kpi\"><div class=\"ds-kpi-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#059669\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/></svg></div><div class=\"ds-kpi-label\">Total Accounts Balance</div><div class=\"ds-kpi-value\">₱42,580.75</div><div class=\"ds-kpi-delta\">+2.4% from last month</div></div>",
-      "css": ".ds-kpi{display:flex;flex-direction:column;gap:4px;background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;padding:20px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;box-shadow:0 1px 3px 0 rgba(0,0,0,.10),0 1px 2px -1px rgba(0,0,0,.10)}.ds-kpi-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:8px;background:#ecfdf5;margin-bottom:8px}.ds-kpi-label{font-size:12px;font-weight:400;text-transform:uppercase;letter-spacing:0.05em;color:#64748b}.ds-kpi-value{font-size:32px;font-weight:600;letter-spacing:-0.025em;font-variant-numeric:tabular-nums;color:#0f172a}@media(min-width:640px){.ds-kpi-value{font-size:40px}}.ds-kpi-delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:#059669}"
+      "css": ".ds-kpi{display:flex;flex-direction:column;gap:4px;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;font-family:Inter,ui-sans-serif,system-ui,sans-serif}.ds-kpi-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:8px;background:#ecfdf5;margin-bottom:8px}.ds-kpi-label{font-size:12px;font-weight:400;text-transform:uppercase;letter-spacing:0.05em;color:#64748b}.ds-kpi-value{font-size:32px;font-weight:600;letter-spacing:-0.025em;font-variant-numeric:tabular-nums;color:#0f172a}@media(min-width:640px){.ds-kpi-value{font-size:40px}}.ds-kpi-delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;color:#059669}"
     }
   ],
   "narrative": {
@@ -134,7 +134,7 @@
       "Flat-by-default surfaces: hairline rings (1px, foreground/10) and tonal muted layers; shadows only for floating overlays.",
       "Dense fintech controls: 32px (h-8) default actions and inputs, 14px text, decisive 3px focus rings.",
       "Tabular numerals on every money figure; numerals lead, copy follows.",
-      "Two card dialects: quiet hairline cards for structure, soft-raised cards for headline summaries.",
+      "Three card variants: Surface (flat hairline workhorse), Featured (the one raised card — Financial Health hero only), and Inset (flat tonal layer boxed inside a card). Card-in-card shadow stacking is gone; hierarchy inside a card is tonal.",
       "Signature motif: the ascending money-bar (logo + pay-strip) — growth read as bars, not pie charts.",
       "Rejected: purple-blue SaaS gradients, shadow-stacked card-in-card, decorative gradient blobs on content, dark-on-dark gray text, decorative copy that isn't financial truth."
     ],
@@ -143,8 +143,8 @@
       { "name": "The Green-Red Ledger Rule", "body": "Green always means money in (income, savings, positive delta); rose always means money out or dangerous (expenses, debt, errors). The pairing is never swapped for stylistic effect.", "section": "colors" },
       { "name": "The Tabular Ledger Rule", "body": "Every money figure, percentage, and progress value is set with tabular-nums so columns of pesos align and never jitter. Exceptions: none.", "section": "typography" },
       { "name": "The Sora-Lanes Rule", "body": "Sora appears in exactly two lanes: auth-screen headings (hero, form titles, stat values) and card/dialog titles via font-heading. It is never used for body copy, never for general page headers (those are Inter, text-2xl bold), and never for money figures (Inter, tabular stat). Two type families, never three, never mixed mid-sentence.", "section": "typography" },
-      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, floating) or on the auth hero; a shadow is never how a resting card asserts importance.", "section": "elevation" },
-      { "name": "The Radius Ladder Rule", "body": "Radius steps belong to roles: controls lg, structural cards xl, summary cards 2xl, hero/sheets 3xl, pills fully round. Don't jump roles for decorative variety (a primary action button is never 3xl).", "section": "shapes" }
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, floating), on the Featured card (the one raised headline unit), or on the auth hero; a shadow is never how a resting card asserts importance.", "section": "elevation" },
+      { "name": "The Radius Ladder Rule", "body": "Radius steps belong to roles: controls lg, FintechCards xl (Surface and Featured), Inset sub-boxes lg, hero/sheets 3xl, pills fully round. Don't jump roles for decorative variety (a primary action button is never 3xl).", "section": "shapes" }
     ],
     "dos": [
       "Do let Peso Emerald carry every primary action and every \"money in\" figure, and nothing else — the accent is rare and that rarity is its power.",

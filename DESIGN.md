@@ -92,7 +92,7 @@ components:
   fintech-card:
     backgroundColor: "{colors.paper-white}"
     textColor: "{colors.ledger-slate-900}"
-    rounded: "{rounded.2xl}"
+    rounded: "{rounded.xl}"
     padding: "1.25rem"
   nav-item-active:
     backgroundColor: "{colors.peso-emerald-soft}"
@@ -140,7 +140,7 @@ screen.
 - Flat-by-default surfaces: hairline rings (1px, foreground/10) and tonal muted layers; shadows only for floating overlays.
 - Dense fintech controls: 32px (h-8) default actions and inputs, 14px text, decisive 3px focus rings.
 - Tabular numerals on every money figure; numerals lead, copy follows.
-- Two card dialects: quiet hairline cards for structure, soft-raised cards for headline summaries.
+- Three card variants: Surface (flat hairline workhorse), Featured (the one raised card — Financial Health hero), and Inset (flat tonal layer boxed inside a card). Card-in-card shadow stacking is gone; hierarchy inside a card is tonal.
 - Signature motif: the ascending money-bar (logo + pay-strip) — growth read as bars, not pie charts.
 - Rejected: purple-blue SaaS gradients, shadow-stacked card-in-card, decorative gradient blobs on content, dark-on-dark gray text, decorative copy that isn't financial truth.
 
@@ -210,7 +210,8 @@ destinations plus a "More" bottom sheet, and the topbar drops the search to a
 notched phones.
 
 Density is the default rhythm: controls are 32px tall (h-8), control padding
-is 10px horizontal, cards pad 16px (20px for raised cards), card grids use
+is 10px horizontal, FintechCards pad 20px (Surface and Featured alike; Inset
+sub-boxes pad 16px), card grids use
 20px gaps (`gap-5`), and page sections breath at 32px (`mb-8` / `gap-8`).
 KPI strips flow `1 → 2 → 4` columns across breakpoints; card grids use the
 same column philosophy rather than pixel-fixed widths. The auth surface is a
@@ -222,37 +223,40 @@ dramatic layout in the product.
 Flat-by-default with overlay-only shadows — confirmed invariant. Content
 surfaces at rest carry a 1px hairline (`ring-1 ring-foreground/10` plus
 `border-border`) and no shadow; hierarchy on the page is conveyed tonally via
-muted fills (`bg-muted/50` footers, `bg-muted` hover chips) rather than by
-stacking dropped shadows. Depth appears in exactly three places: floating
-overlays carry soft shadows so they read as *above* the ledger; a handful of
-headline summary cards (FintechCard, account cards, pay-strip) rest on
-`shadow-sm` and rise to `shadow-md` on hover; and the auth hero card floats
-on a large emerald-tinted `shadow-xl`. Nothing else casts a shadow at rest.
+muted fills (`bg-muted/30` Inset boxes, `bg-muted` hover chips) rather than by
+stacking dropped shadows. Within the FintechCard dialect the Featured variant —
+and only it, the Financial Health hero — rests on `shadow-sm` and rises to
+`shadow-md` on hover; Surface and Inset never raise. (Legacy `shadow-sm`
+holders outside the dialect — `account-card`, `pay-strip` — are Slice-3
+normalization targets.) Floating overlays carry soft shadows so they read as
+*above* the ledger, and the auth hero card floats on a large emerald-tinted
+`shadow-xl`. Nothing else casts a shadow at rest.
 
 ### Shadow Vocabulary
 - **Overlay** (`shadow-md`): dropdown menus, selects, popovers — floating controls. Paired with a 1px `ring-foreground/10` hairline.
 - **Overlay High** (`shadow-lg`): sheets, toasts, tooltips, the chart tooltip (dark, `0 10px 15px -3px rgba(0,0,0,0.3)`), error cards.
-- **Raised Card Rest / Hover** (`shadow-sm` → `shadow-md` with a 200ms transition): FintechCard, account cards, pay-strip.
+- **Raised Card Rest / Hover** (`shadow-sm` → `shadow-md` with a 200ms transition): the Featured FintechCard only — the Financial Health hero, the sole raised card in the FintechCard dialect.
 - **Hero** (`shadow-xl shadow-emerald-950/[0.06]`, dark `shadow-black/40`): the auth shell card only.
 
 ### Named Rules
-**The Flat-By-Default Rule.** Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, floating) or on the auth hero; a shadow is never how a resting card asserts importance.
+**The Flat-By-Default Rule.** Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, floating), on the Featured card (the one raised headline unit), or on the auth hero; a shadow is never how a resting card asserts importance.
 
 ## Shapes
 
 The form language is a sharp rail: controls sit on the small `md` step (8px),
 which at the standard 32px height reads as a decisive, squared-off shape —
 geometric, never bubbly. Small chips/tags ride the `sm` rail (6px); large
-controls and list rows step up to `lg` (12px). Structural cards use `xl` (16px),
-headline summary cards one step rounder at `2xl` (20px), and the auth hero
-and bottom sheet land at `3xl` (28px). Badges are fully rounded pills
-(`9999px`). Borders are always the 1px hairline (`ledger-slate-200` light /
-`ledger-slate-800` dark); there is no other stroke weight in the system, no
-clipping, and no texture. Gradients are a signature exception owned by two
-places only: the logo mark and the auth story panel.
+controls and list rows step up to `lg` (12px), and Inset sub-boxes ride the
+same `lg` step. FintechCards use `xl` (16px) — Surface and Featured alike
+(Featured has no radius claim of its own), the Financial Health hero lands at
+`3xl` (28px), and the auth hero and bottom sheet also land at `3xl` (28px).
+Badges are fully rounded pills (`9999px`). Borders are always the 1px hairline
+(`ledger-slate-200` light / `ledger-slate-800` dark); there is no other stroke
+weight in the system, no clipping, and no texture. Gradients are a signature
+exception owned by two places only: the logo mark and the auth story panel.
 
 ### Named Rules
-**The Radius Ladder Rule.** Radius steps belong to roles: `sm` 6px for chips/tags, `md` 8px for controls (buttons, inputs, selects), `lg` 12px for large controls and list rows, `xl` 16px for structural cards, `2xl` 20px for summary cards, `3xl` 28px for hero/sheets, pills fully round. Don't jump roles for decorative variety (a primary action button never exceeds `md`; a card never dips below `xl`).
+**The Radius Ladder Rule.** Radius steps belong to roles: `sm` 6px for chips/tags, `md` 8px for controls (buttons, inputs, selects), `lg` 12px for large controls, list rows, and Inset sub-boxes, `xl` 16px for FintechCards (Surface and Featured), `3xl` 28px for hero/sheets, pills fully round. Don't jump roles for decorative variety (a primary action button never exceeds `md`; a FintechCard never dips below `xl`).
 
 ## Components
 
@@ -275,9 +279,10 @@ places only: the logo mark and the auth story panel.
 - **State:** semantic soft pills — Income (emerald soft + deep label), Expense (rose soft + deep), Warning (amber soft + deep), Info (indigo soft + deep — savings/tips only). Dark mode swaps to /50 tints with 400-family labels. There is no neutral "filter chip" state in the system.
 
 ### Cards / Containers
-- **Corner Style:** structural cards `xl` 16px; headline summary cards `2xl` 20px; the Financial Health hero `3xl` 28px (sole large corner).
-- **Dialect 1 — Hairline Card (`Card`):** Paper White, 1px `ring-foreground/10` hairline, tonal muted footer (`bg-muted/50` + top border), 16px padding (12px when `sm`). The quiet structural unit.
-- **Dialect 2 — Raise Card (`FintechCard`):** Paper White, 1px border, `shadow-sm` resting → `shadow-md` on hover (200ms), 20px padding. The headline unit: KPIs, charts, account cards, pay-strip.
+- **Corner Style:** FintechCards `xl` 16px (Surface and Featured); the Financial Health hero `3xl` 28px (sole large corner); Inset sub-boxes `lg` 12px.
+- **Variant 1 — Surface (`FintechCard surface`):** Paper White, 1px border, `xl` 16px corner, 20px padding, entirely flat. The workhorse: KPI cards, account cards, savings goals, settings tiles, list panels.
+- **Variant 2 — Featured (`FintechCard featured`):** the *one* resting raised card. Same `xl` 16px corner and 20px padding, rests on `shadow-sm` → `shadow-md` on hover (200ms). Used only for the Financial Health hero.
+- **Variant 3 — Inset (`FintechCard inset`):** flat tonal layer boxed *inside* a card — `bg-muted/30`, no border (`border-transparent`), no shadow of its own, `lg` 12px corner, 16px padding. Sub-boxes (health breakdown tiles) that never read as cards-within-cards.
 - **Border:** 1px hairline only. **Internal Padding:** 16–20px.
 
 ### Navigation
@@ -299,14 +304,14 @@ Recharts, drawn from the ledger's color rules: income is a solid emerald 3px str
 ### Do:
 - **Do** let Peso Emerald carry every primary action and every "money in" figure, and nothing else — the accent is rare and that rarity is its power.
 - **Do** set every money, percent, and progress figure in tabular numerals; financial columns must align.
-- **Do** keep resting surfaces flat with a 1px hairline; raise a card (`shadow-sm → md`) only when it is a headline summary that merits attention.
+- **Do** keep resting surfaces flat with a 1px hairline; raise a card (`shadow-sm → md`) only for the Featured hero — it is the one card that may sit raised at rest.
 - **Do** reserve rose for money out / danger, amber for warnings, indigo for information and savings — the semantic signals never cosplay as the accent.
 - **Do** keep the 32px control rhythm for actions and inputs; the system is dense on purpose.
 - **Do** use the ascending-bar motif (logo, pay-strip) when a financial trend needs a signature visual.
 
 ### Don't:
 - **Don't** introduce purple-blue SaaS gradients, glassy blobs, or gradient fills on content cards, buttons, or charts — the gradient is the logo and auth panel's signature, and theirs alone.
-- **Don't** stack card-in-card with shadows to create hierarchy; layer tonally (`bg-muted/50`) instead.
+- **Don't** stack card-in-card with shadows to create hierarchy; layer inside a Featured card with the flat tonal Inset variant instead.
 - **Don't** use Sora for body copy or labels, or Inter tracking-tight where tabular figures belong — voices stay in their lane.
 - **Don't** swap the green/red money polarity for style (income = emerald, expense = rose is an invariant, light and dark).
 - **Don't** ship a UI change without the app's real viewports — desktop and the installed-PWA mobile size — checked side by side.

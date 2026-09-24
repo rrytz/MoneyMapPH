@@ -1,13 +1,27 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export function FintechCard({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+type FintechCardVariant = "surface" | "featured" | "inset";
+
+const variantClasses: Record<FintechCardVariant, string> = {
+  // Workhorse: flat hairline card for structure (KPI cards, account cards,
+  // settings tiles, list panels). Never raises a shadow at rest.
+  surface: "rounded-xl border border-border bg-card text-card-foreground p-5",
+  // The one resting raised card — the Financial Health hero only.
+  featured:
+    "rounded-3xl border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-200 p-5",
+  // Flat tonal layer boxed INSIDE a card: no border, no shadow of its own.
+  inset: "rounded-lg bg-muted/30 border-transparent p-4",
+};
+
+export function FintechCard({
+  variant = "surface",
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { variant?: FintechCardVariant }) {
   return (
     <div
-      className={cn(
-        "rounded-2xl border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-200 p-5",
-        className
-      )}
+      className={cn(variantClasses[variant], className)}
       {...props}
     />
   );

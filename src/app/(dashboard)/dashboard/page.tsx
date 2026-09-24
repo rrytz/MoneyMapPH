@@ -9,6 +9,7 @@ import { cachedGetDebts as getDebts, cachedGetBillsDueBy as getBillsDueBy } from
 import { cachedGetAccountsWithBalances as getAccounts } from "@/lib/cache/shared-queries";
 import { calculateFinancialHealthReport } from "@/lib/services/health.service";
 import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/date";
+import { SAVINGS_RATE_LABEL } from "@/lib/utils/health-breakdown";
 import { getBillsDueWindow } from "@/lib/utils/bills";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { SafeToSpendCard } from "@/components/dashboard/safe-to-spend-card";
@@ -139,7 +140,7 @@ export default async function DashboardPage() {
             iconBgClass="bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
           />
           <KpiCard
-            title="Savings Rate"
+            title={SAVINGS_RATE_LABEL}
             value={summary.savingsRate}
             icon={PiggyBank}
             isCurrency={false}

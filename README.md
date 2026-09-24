@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Tooling
+
+- **Impeccable skill** (frontend design/audit + `detect` gate CLI): install and usage in [`docs/setup.md`](docs/setup.md).
+
 ## Getting Started
 
 First, run the development server:

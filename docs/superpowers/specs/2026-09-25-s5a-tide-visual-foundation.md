@@ -200,6 +200,42 @@ Both currently describe a cold slate-and-emerald, dark-default, quietly-premium
 system. They get rewritten against S5a tokens, not edited. The sidecar's
 `colorMeta` tonal ramps are all keyed to the old palette.
 
+## Resolved decisions (approved 2026-09-25)
+
+**R1 — The 6-tint category palette is re-derived inside S5a, not deferred.**
+The stone slot fails contrast on paper, so it is **replaced with water-adjacent
+hues** that read against the actual `--paper` / `--surface` values. No 7th tint
+is added. A quiet category (Miscellaneous) gets the *faintest real hue*, never a
+stone.
+
+| Slot | Was | Becomes | Rationale |
+|---|---|---|---|
+| money in | emerald `#059669` | **`#0B8F45` sulpot** | aligns with the tide vocabulary |
+| information | indigo `#4f46e5` | `#4B4BC4` | data semantics, warmed |
+| warning | amber `#f59e0b` | `#C97A0A` | data semantics, warmed |
+| money out / danger | rose `#f43f5e` | `#E0455B` | data semantics, warmed |
+| neutral (mid) | slate `#64748b` | **`#1E5F8C` deep water** | reads on paper; water-adjacent |
+| neutral (quiet) | slate-deep `#334155` | **`#14496B` channel** | faintest real hue, for Miscellaneous |
+
+Both new neutrals are deep desaturated blues — **not** teal or sky, and outside
+Rule A's banned family. Contrast against `--paper` (`#F1F4F0`) and `--surface`
+(`#FAFBF9`) is verified as part of implementation, not assumed.
+
+**R2 — Rule D revision is verified against a real bypass before it ships.**
+A guard that passes on both correct code and a violation is worse than no guard,
+because it reports OK while protecting nothing. Implementation must: re-ground
+Rule D on the wet-stone family, **temporarily hard-code a wet-stone dark value
+(`#1B211C`) in a source file, confirm the detector goes RED, then remove it.**
+Red-before-green is required; a rule that has never been seen to fail has not
+been tested.
+
+**R3 — Density loosening applies to S5a, with two surfaces re-checked later.**
+S1's density was a fintech-aesthetic choice, not a use requirement, so the
+loosening stands. **The transaction list and the expense log are flagged for a
+real-device scanability re-check after S5b.** If loosened density measurably
+hurts scanning there, those two surfaces stay tighter — density is not required
+to be uniform.
+
 ## Detector review (Rules A–E)
 
 | Rule | Status |
@@ -218,6 +254,9 @@ slate-deep. Under Tide, `emerald → sulpot` and `slate`/`slate-deep` must becom
 stone neutrals — but a category's *data* color must stay distinguishable, and
 stone on paper is very low contrast. **This needs an explicit decision before
 S5a lands**, not a silent re-derivation.
+
+→ **RESOLVED — see R1 above.** The stone slots are replaced with water-adjacent
+hues (`#1E5F8C`, `#14496B`), no 7th tint added.
 
 ## Acceptance (token-verifiable, no shell changes)
 

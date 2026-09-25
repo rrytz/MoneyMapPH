@@ -11,8 +11,8 @@ import { calculateFinancialHealthReport } from "@/lib/services/health.service";
 import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/date";
 import { SAVINGS_RATE_LABEL } from "@/lib/utils/health-breakdown";
 import { getBillsDueWindow } from "@/lib/utils/bills";
-import { SafeToSpendCard } from "@/components/dashboard/safe-to-spend-card";
-import { BalanceBlock } from "@/components/dashboard/balance-block";import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
+import { BalanceBlock } from "@/components/dashboard/balance-block";
+import { AttentionStrip } from "@/components/dashboard/attention-strip";import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
@@ -133,14 +133,14 @@ export default async function DashboardPage() {
         monthExpenses={summary.totalExpenses}
       />
 
-      {/* Supporting: the one Featured card (Financial Health) stays the sole
-          raised surface; safe-to-spend sits beside it at lower weight. */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <FinancialHealthHeroCard report={healthReport} />
-        </div>
-        <SafeToSpendCard status={safeToSpend} />
-      </div>
+      {/* Attention — urgency only, and only when something is actually due.
+          The old SafeToSpendCard restated the balance block's numbers at
+          ledger-figure weight, putting two loud figures on one surface. */}
+      <AttentionStrip safeToSpend={safeToSpend} />
+
+      {/* Supporting: the one Featured card (Financial Health), now the only
+          large surface below the balance block. */}
+      <FinancialHealthHeroCard report={healthReport} />
 
       {/* Attention — rendered only when something is actually due. */}
       {billsDueBy.occurrences.length > 0 && (

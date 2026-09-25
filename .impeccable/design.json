@@ -19,12 +19,12 @@
       "category-water": { "role": "neutral", "displayName": "Water", "canonical": "#1e5f8c", "tonalRamp": ["#14496b", "#1e5f8c", "#2b7bb0", "#4a9ac9", "#73b5db", "#a3cfe8", "#c6e2f2", "#e4f1f9"] },
       "category-channel": { "role": "neutral", "displayName": "Channel", "canonical": "#14496b", "tonalRamp": ["#0c2f46", "#14496b", "#1e5f8c", "#2b7bb0", "#4a9ac9", "#73b5db", "#a3cfe8", "#c6e2f2"] }
     },    "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Auth hero headline and its stat values only — never general page titles." },
-      "title": { "displayName": "Title", "purpose": "Card and dialog titles only (Bricolage Grotesque, text-base, medium)." },
-      "body": { "displayName": "Body", "purpose": "Default reading text, card body, table cells (Instrument Sans, 15px)." },
-      "ledger-figure": { "displayName": "Ledger Figure", "purpose": "The one biggest number per screen — KPI values, safe-to-spend, totals. Inter 600, 2rem→2.5rem@sm, tracking-tight, tabular-nums; one shared computed size per surface." },
-      "caption": { "displayName": "Caption", "purpose": "Labels and chips — Instrument Sans 400, 12px, uppercase, letter-spacing 0.05em, muted-foreground. The old 500-semibold label voice." },
-      "section-head": { "displayName": "Section Head", "purpose": "Card and dialog titles (Bricolage Grotesque, 1.125rem, medium) via font-heading." }
+      "identity": { "displayName": "Identity", "purpose": "Bricolage Grotesque semibold — page H1s, the home hero figure, wordmark, and identity moments only." },
+      "function": { "displayName": "Function", "purpose": "Instrument Sans — body copy, controls, navigation, and ordinary UI copy." },
+      "section-label": { "displayName": "Section Label", "purpose": "Instrument Sans uppercase, tracked, semibold — card and section labels, visibly stronger than nav." },
+      "ledger-figure": { "displayName": "Ledger Figure", "purpose": "Instrument Sans semibold with tabular numerals — currency and financial answers; never mono merely because it is numeric." },
+      "measurement": { "displayName": "Measurement", "purpose": "Martian Mono tabular — gauge, chart axes/ticks, percentages, ratios, and counts." },
+      "character": { "displayName": "Character", "purpose": "Bricolage Grotesque normal case — Filipino character voice only; never controls or English functional copy." }
     },
     "shadows": [
       { "name": "raised-rest", "value": "0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.10)", "purpose": "The Featured FintechCard at rest — Financial Health hero, the sole raised card in the FintechCard dialect." },
@@ -117,15 +117,15 @@
     }
   ],
   "narrative": {
-    "northStar": "The Emerald Ledger",
-    "overview": "MoneyMap PH is a personal finance companion for Filipino earners, built around one idea: your entire financial life is a single ledger, and the ledger is an emerald ribbon of money moving in the right direction. The interface is calm, confident, and quietly premium — Stripe-dashboard discipline translated for paycheck-to-paycheck reality. Slate does the talking; emerald is the one accented voice, heard only when money behaves or an action is worth taking.\n\nThe system is dense by design, not decorative: 32px controls, 14px body text, tabular numerals on every figure, and hairlines instead of shadows. Surfaces sit flat on the page; elevation is a response — menus and popovers float on soft shadows, cards rise one step on hover, never at rest. This is a tool a person reaches into several times a day with real money in it; it should feel precise, trustworthy, and quiet, with the numbers always the loudest thing on screen.",
+    "northStar": "The Tide Ledger",
+    "overview": "MoneyMap PH is a personal finance companion for Filipino earners, built around one idea: your entire financial life is a single ledger, and the ledger is an emerald ribbon of money moving in the right direction. The interface is calm, confident, and quietly premium — Stripe-dashboard discipline translated for paycheck-to-paycheck reality. Tide neutrals do the talking; sulpot is the one accented voice, heard only when money behaves or an action is worth taking.\n\nThe system is dense by design, not decorative: 32px controls, 15px body text, semantic typography roles on every figure and label, and hairlines instead of shadows. Surfaces sit flat on the page; elevation is a response — menus and popovers float on soft shadows, cards rise one step on hover, never at rest. This is a tool a person reaches into several times a day with real money in it; it should feel precise, trustworthy, and quiet, with the numbers always the loudest thing on screen.",
     "keyCharacteristics": [
       "Single accent: Sulpot — the only accent on interactive elements; cyan/sky/teal banned outright. Rose, amber, and indigo are data/chart semantics only: they never fill a button and never tint a tile/chip background. Category identity renders as a monochrome Lucide glyph tinted by one of six governed tints — no raw emoji in the UI.",
       "Flat-by-default surfaces: hairline rings (1px, foreground/10) and tonal muted layers; shadows only for floating overlays.",
-      "Dense fintech controls: 32px (h-8) default actions and inputs, 14px text, decisive 3px focus rings.",
+      "Dense fintech controls: 32px (h-8) default actions and inputs, 15px text, decisive 3px focus rings.",
       "Tabular numerals on every money figure; numerals lead, copy follows.",
       "Three card variants: Surface (flat hairline workhorse), Featured (the one raised card — Financial Health hero only), and Inset (flat tonal layer boxed inside a card). Card-in-card shadow stacking is gone; hierarchy inside a card is tonal.",
-      "Signature motif: the ascending money-bar (logo + pay-strip) — growth read as bars, not pie charts.",
+      "Signature motif: the tide gauge and the unboxed TideMark — presence, water level, and Filipino character voice.",
       "Rejected: purple-blue SaaS gradients, shadow-stacked card-in-card, decorative gradient blobs on content, dark-on-dark gray text, decorative copy that isn't financial truth."
     ],
     "rules": [
@@ -133,7 +133,7 @@
       { "name": "The Light-World Rule", "body": "Every surface and text color resolves through a token or a two-world pair — no unconditional dark-slate hard codes on content surfaces. Dark follows the OS (colorScheme: 'dark'); light is the class-toggle (remove .dark). If a component renders correctly in only one world, it is not done.", "section": "colors" },
       { "name": "The Green-Red Ledger Rule", "body": "Green always means money in (income, savings, positive delta); rose always means money out or dangerous (expenses, debt, errors). The pairing is never swapped for stylistic effect.", "section": "colors" },
       { "name": "The Tabular Ledger Rule", "body": "Every money figure, percentage, and progress value is set with tabular-nums so columns of pesos align and never jitter. Exceptions: none.", "section": "typography" },
-      { "name": "The Three-Voice Rule", "body": "Bricolage Grotesque appears in exactly one lane (identity) and Instrument Sans carries function; Martian Mono is reserved strictly for real measurements (gauge graduations, phase labels, cutoff readout): auth-screen headings (hero, form titles, stat values) and card/dialog titles via font-heading. It is never used for body copy, never for general page headers (those are Inter, text-2xl bold), and never for money figures (Inter, tabular stat). Two type families, never three, never mixed mid-sentence.", "section": "typography" },
+      { "name": "The Semantic Type-Role Rule", "body": "Type is assigned by meaning before size: identity (Bricolage H1s, hero, wordmark), function (Instrument Sans body, controls, nav), section label (tracked uppercase Instrument Sans), ledger figure (tabular Instrument Sans currency), measurement (Martian Mono axes, percentages, ratios, counts), and character (Bricolage Filipino voice). Currency is never mono merely because it is numeric; controls never receive the character voice.", "section": "typography" },
       { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. Shadows appear only as a response to state (hover, focus, floating), on the Featured card (the one raised headline unit), or on the auth hero; a shadow is never how a resting card asserts importance.", "section": "elevation" },
       { "name": "The Radius Ladder Rule", "body": "Radius steps belong to roles: controls lg, FintechCards xl (Surface and Featured), Inset sub-boxes lg, hero/sheets 3xl, pills fully round. Don't jump roles for decorative variety (a primary action button is never 3xl).", "section": "shapes" }
     ],
@@ -143,12 +143,12 @@
       "Do keep resting surfaces flat with a 1px hairline; raise a card (shadow-sm → md) only when it is a headline summary that merits attention.",
       "Do reserve rose for money out / danger, amber for warnings, indigo for information and savings — the semantic signals never cosplay as the accent.",
       "Do keep the 32px control rhythm for actions and inputs; the system is dense on purpose.",
-      "Do use the ascending-bar motif (logo, pay-strip) when a financial trend needs a signature visual."
+      "Do assign typography by semantic role: identity, function, section label, ledger, measurement, or character."
     ],
     "donts": [
-      "Don't introduce purple-blue SaaS gradients, glassy blobs, or gradient fills on content cards, buttons, or charts — the gradient is the logo and auth panel's signature, and theirs alone.",
+      "Don't introduce purple-blue SaaS gradients, glassy blobs, or gradient fills on content cards, buttons, or charts — the Tide identity is carried by the gauge, wordmark, and character voice.",
       "Don't stack card-in-card with shadows to create hierarchy; layer tonally (bg-muted/50) instead.",
-      "Don't use Sora for body copy or labels, or Inter tracking-tight where tabular figures belong — voices stay in their lane.",
+      "Don't reintroduce the pre-S5 logo gradient/glow mark or the Plan • Track • Grow tagline on any surface.",
       "Don't swap the green/red money polarity for style (income = emerald, expense = rose is an invariant, light and dark).",
       "Don't ship a UI change without the app's real viewports — desktop and the installed-PWA mobile size — checked side by side."
     ]

@@ -29,28 +29,58 @@ typography:
   identity:
     fontFamily: "Bricolage Grotesque, ui-sans-serif, system-ui, sans-serif"
     fontWeight: 600
-    usage: hero figures, character voice — solitary elements only
+    usage: page H1s, home hero, wordmark, identity moments
   function:
     fontFamily: "Instrument Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.9375rem"
     fontWeight: 400
-    usage: all functional copy, UI labels, columnar figures (tabular-nums)
+    usage: body, controls, navigation, ordinary UI copy
+  section-label:
+    fontFamily: "Instrument Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 600
+    usage: uppercase tracked card and section labels
   measurement:
     fontFamily: "Martian Mono, ui-monospace, monospace"
     fontSize: "0.625rem"
-    usage: gauge graduations, phase labels, cutoff readout ONLY
+    usage: gauge, chart axes, percentages, ratios, counts
   ledger-figure:
     fontFamily: "Instrument Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "2rem"
     fontWeight: 600
     letterSpacing: "-0.025em"
     fontFeature: "'tnum'"
-  caption:
-    fontFamily: "Instrument Sans, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.75rem"
-    letterSpacing: "0.05em"
-    usage: uppercase small labels
+    usage: currency and financial answers
+  character:
+    fontFamily: "Bricolage Grotesque, ui-sans-serif, system-ui, sans-serif"
+    fontWeight: 600
+    usage: Filipino character voice only
 ---
+
+## Typography hierarchy
+
+Type is assigned by meaning before size:
+
+- **Identity** — Bricolage for page H1s, the home hero, and the wordmark
+- **Function** — Instrument Sans for body, controls, and navigation
+- **Section label** — tracked uppercase Instrument Sans for card/section labels
+- **Ledger figure** — tabular Instrument Sans for currency and financial answers
+- **Measurement** — Martian Mono for gauge, axes, percentages, ratios, and counts
+- **Character** — Bricolage normal case for Filipino character voice only
+
+Currency is never mono merely because it is numeric. Controls and English
+functional copy never receive the character voice. The committed typography
+conformance test is the enforcement point for these roles.
+
+## Navigation and identity mark
+
+- `≥1280px`: full grouped desktop navigation
+- `1024–1279px`: compact single row, group labels hidden, horizontal overflow with a visible edge affordance when needed
+- `<1024px`: existing bottom navigation
+
+The logo is an unboxed TideMark plus Bricolage wordmark. The old gradient/glow
+mark and `Plan • Track • Grow` tagline are retired everywhere: shell, auth,
+legal, offline, and print.
 
 # MoneyMap PH — Tide
 

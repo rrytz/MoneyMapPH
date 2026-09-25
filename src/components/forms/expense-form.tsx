@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Loader2 } from "lucide-react";
+import { CategoryIcon } from "@/components/shared/category-icon";
 import { toast } from "sonner";
 import { addExpense, editExpense } from "@/app/(dashboard)/expenses/actions";
 import type { Expense, ExpenseCategory, Account } from "@/lib/types";
@@ -109,7 +110,7 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     <span className="flex items-center gap-2">
-                      {cat.icon && <span>{cat.icon}</span>}
+                      <CategoryIcon icon={cat.icon} className="h-4 w-4 text-muted-foreground" />
                       {cat.name}
                     </span>
                   </SelectItem>

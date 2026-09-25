@@ -21,6 +21,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { CategoryIcon } from "@/components/shared/category-icon";
+import { resolveCategoryColor } from "@/lib/categories/color-map";
 import { formatCurrency } from "@/lib/utils/currency";
 import { getMonthName } from "@/lib/utils/date";
 import type { MonthlySummary, BudgetStatus, ExpenseCategory, MonthlySnapshot } from "@/lib/types";
@@ -62,8 +64,8 @@ export function SummaryView({
       return {
         id: catId,
         name: category?.name || "Other",
-        icon: category?.icon || "📦",
-        color: category?.color || "#64748b",
+        icon: category?.icon ?? null,
+        color: resolveCategoryColor(category?.color),
         amount,
       };
     })
@@ -198,7 +200,12 @@ export function SummaryView({
                   return (
                     <div key={item.id} className="p-3.5 px-5 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
                       <div className="min-w-0 flex items-center gap-2.5">
-                        <span className="text-base shrink-0">{item.icon}</span>
+                        <span
+                          className="h-8 w-8 rounded-lg shrink-0 flex items-center justify-center"
+                          style={{ backgroundColor: `${item.color}18`, color: item.color }}
+                        >
+                          <CategoryIcon icon={item.icon} className="h-4 w-4" />
+                        </span>
                         <div className="min-w-0">
                           <span className="text-xs font-semibold text-foreground block truncate">{item.name}</span>
                           <span className="text-[10px] text-muted-foreground">{pct.toFixed(1)}% of total</span>

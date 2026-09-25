@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { addBudget } from "@/app/(dashboard)/budgets/actions";
+import { CategoryIcon } from "@/components/shared/category-icon";
 import type { ExpenseCategory } from "@/lib/types";
 
 interface BudgetFormProps {
@@ -73,7 +74,7 @@ export function BudgetForm({ open, onOpenChange, categories, month, year }: Budg
             {categories.map((cat) => (
               <div key={cat.id} className="flex items-center justify-between gap-4 p-2 rounded-lg border border-border">
                 <div className="flex items-center gap-2">
-                  {cat.icon && <span>{cat.icon}</span>}
+                  <CategoryIcon icon={cat.icon} className="h-4 w-4 text-muted-foreground" />
                   <Label htmlFor={`cat-${cat.id}`} className="text-sm font-medium">
                     {cat.name}
                   </Label>

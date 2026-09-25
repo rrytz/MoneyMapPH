@@ -14,6 +14,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ExpenseForm } from "@/components/forms/expense-form";
 import { removeExpense, addExpense } from "./actions";
 import { formatDate } from "@/lib/utils/date";
+import { CategoryIcon } from "@/components/shared/category-icon";
 import { toast } from "sonner";
 import type { Expense, ExpenseCategory, Account } from "@/lib/types";
 
@@ -254,7 +255,7 @@ export function ExpensesPageClient({
                   <div className="flex items-center gap-2.5 mb-1 min-w-0">
                     <span className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{entry.title}</span>
                     <Badge variant="expense" className="text-[10px] flex items-center gap-1 shrink max-w-[45%] overflow-hidden">
-                      {entry.category?.icon && <span className="shrink-0">{entry.category.icon}</span>}
+                      <CategoryIcon icon={entry.category?.icon} className="h-3 w-3 shrink-0" />
                       <span className="truncate min-w-0">{entry.category?.name || "Uncategorized"}</span>
                     </Badge>
                     <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">

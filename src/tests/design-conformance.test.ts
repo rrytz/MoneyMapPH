@@ -25,7 +25,10 @@ import { join, relative } from "node:path";
  *       surfaces — the light-theme bypass class of bug. Two-world pairs
  *       (`bg-slate-50 dark:bg-slate-900`) and muted neutrals
  *       (`text-slate-400/500/600/700`) are legal.
- *   E — (additive, slice 4) — not enabled yet.
+ *   E — category identity renders as monochrome Lucide (Slice 4): raw emoji
+ *       literals and stored-icon text nodes are banned outside the read-time
+ *       map, and the category editor exposes an icon grid + governed swatches
+ *       instead of free-text emoji / a free color input.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -167,6 +170,59 @@ describe("design-conformance — accent + light-world regression guard", () => {
           if (isBgField || isLightText) {
             violations.push({ file: rel(file), line: i + 1, token });
           }
+        }
+      });
+    }
+    expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+  });
+
+  it("Rule E: category identity renders as Lucide, never a raw emoji text node", () => {
+    // Slice 4. Emoji may live in exactly one place — the read-time map
+    // (icon-map.ts) — plus SQL seed literals. Every render surface must go
+    // through <CategoryIcon>, and the free-text emoji/color inputs are gone.
+    const allowedEmojiFiles = new Set(["lib/categories/icon-map.ts", "lib/categories/color-map.ts"]);
+    // Pictographic blocks only (transport, food, objects, symbols). The
+    // 2600-27BF dingbat/misc-symbol block is deliberately excluded: it holds
+    // status glyphs like the "✓" bill-paid marker, which are not category
+    // identity. All 14 mapped category emoji live in 1F300-1FAFF.
+    const emojiRange =
+      /[\u{1F300}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}\uFE0F]/u;
+    const violations: Violation[] = [];
+
+    for (const file of files) {
+      const short = rel(file);
+      if (allowedEmojiFiles.has(short)) continue;
+      const lines = readFileSync(file, "utf8").split("\n");
+      lines.forEach((line, i) => {
+        const trimmed = line.trim();
+        // Comments describe the migration; they are not render surfaces.
+        if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return;
+        // 1. A raw emoji literal in a .tsx render surface.
+        if (emojiRange.test(trimmed)) {
+          violations.push({ file: short, line: i + 1, token: "raw-emoji-literal" });
+        }
+        // 2. Rendering the stored icon value as a text child. The negative
+        // lookbehind skips JSX *attribute* values (`icon={cat.icon}` on a
+        // <CategoryIcon> element) — a text node is never `= {...}`.
+        if (/(?<!=)\{\s*[^}]*\.\s*icon\s*\}/.test(trimmed) && !/CategoryIcon/.test(trimmed)) {
+          violations.push({ file: short, line: i + 1, token: "raw-icon-text-node" });
+        }
+      });
+    }
+    expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+  });
+
+  it("Rule E2: no free-text emoji input and no free color input for categories", () => {
+    // The category editor must expose an icon grid + governed swatches, not a
+    // text box or an OS color picker.
+    const violations: Violation[] = [];
+    for (const file of files) {
+      const short = rel(file);
+      if (!short.includes("settings")) continue;
+      const lines = readFileSync(file, "utf8").split("\n");
+      lines.forEach((line, i) => {
+        if (/type=["']color["']/.test(line)) {
+          violations.push({ file: short, line: i + 1, token: "free-color-input" });
         }
       });
     }

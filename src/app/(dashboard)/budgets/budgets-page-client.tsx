@@ -4,6 +4,8 @@ import { useState, useOptimistic, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Copy, PieChart, Wallet, Target, TrendingDown, Calculator } from "lucide-react";
+import { CategoryIcon } from "@/components/shared/category-icon";
+import { resolveCategoryColor } from "@/lib/categories/color-map";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { Progress } from "@/components/ui/progress";
@@ -238,8 +240,14 @@ export function BudgetsPageClient({
                 <FintechCardContent className="p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-base">
-                        {status.categoryIcon || "📦"}
+                      <div
+                        className="h-9 w-9 rounded-xl flex items-center justify-center"
+                        style={{
+                          backgroundColor: `${resolveCategoryColor(status.categoryColor)}18`,
+                          color: resolveCategoryColor(status.categoryColor),
+                        }}
+                      >
+                        <CategoryIcon icon={status.categoryIcon} size="md" />
                       </div>
                       <div>
                         <h4 className="font-semibold text-sm text-foreground">{status.categoryName}</h4>
@@ -298,8 +306,14 @@ export function BudgetsPageClient({
                   <FintechCardContent className="p-5 space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-base">
-                          {view.icon || "📦"}
+                        <div
+                          className="h-9 w-9 rounded-xl flex items-center justify-center"
+                          style={{
+                            backgroundColor: `${resolveCategoryColor(view.color)}18`,
+                            color: resolveCategoryColor(view.color),
+                          }}
+                        >
+                          <CategoryIcon icon={view.icon} size="md" />
                         </div>
                         <div>
                           <h4 className="font-semibold text-sm text-foreground">{view.name}</h4>

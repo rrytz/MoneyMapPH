@@ -10,7 +10,11 @@ import {
   Trash2,
   Globe,
   Database,
+  HandCoins,
 } from "lucide-react";
+import { CategoryIcon } from "@/components/shared/category-icon";
+import { ICON_CHOICES, resolveCategoryIcon, FALLBACK_ICON_KEY } from "@/lib/categories/icon-map";
+import { CATEGORY_COLOR_PALETTE, PALETTE_KEYS, PALETTE_LABELS, resolveCategoryColor } from "@/lib/categories/color-map";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { Input } from "@/components/ui/input";
@@ -94,16 +98,18 @@ export function SettingsClient({
   function openNewCategoryModal() {
     setSelectedCategory(null);
     setCategoryName("");
-    setCategoryIcon("📦");
-    setCategoryColor("#64748b");
+    setCategoryIcon(FALLBACK_ICON_KEY);
+    setCategoryColor(CATEGORY_COLOR_PALETTE.slate);
     setCategoryModalOpen(true);
   }
 
   function openEditCategoryModal(cat: ExpenseCategory) {
     setSelectedCategory(cat);
     setCategoryName(cat.name);
-    setCategoryIcon(cat.icon || "📦");
-    setCategoryColor(cat.color || "#64748b");
+    // Resolve on read: a legacy emoji (any variation-selector form) becomes
+    // its canonical Lucide key so the picker highlights the right cell.
+    setCategoryIcon(resolveCategoryIcon(cat.icon));
+    setCategoryColor(resolveCategoryColor(cat.color));
     setCategoryModalOpen(true);
   }
 
@@ -299,7 +305,11 @@ export function SettingsClient({
                 {categories.map((cat) => (
                   <div key={cat.id} className="p-3.5 px-6 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">{cat.icon || "📦"}</span>
+                      <CategoryIcon
+                        icon={cat.icon}
+                        size="md"
+                        className="h-5 w-5"
+                      />
                       <div>
                         <span className="text-xs font-bold text-foreground block">{cat.name}</span>
                         {cat.is_default && (
@@ -344,7 +354,7 @@ export function SettingsClient({
                 {sources.map((src) => (
                   <div key={src.id} className="p-3.5 px-6 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="text-base shrink-0 text-emerald-600">💰</span>
+                      <HandCoins className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <div>
                         <span className="text-xs font-bold text-foreground block">{src.name}</span>
                         {src.is_default && (
@@ -400,25 +410,62 @@ export function SettingsClient({
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="cat-icon">Icon Emoji</Label>
-                <Input
-                  id="cat-icon"
-                  placeholder="e.g. 🍿"
-                  value={categoryIcon}
-                  onChange={(e) => setCategoryIcon(e.target.value)}
-                />
+            <div className="space-y-1.5">
+              <Label>Icon</Label>
+              <div
+                role="radiogroup"
+                aria-label="Category icon"
+                className="grid grid-cols-7 gap-1.5 rounded-lg border border-border bg-muted/30 p-2"
+              >
+                {ICON_CHOICES.map(({ key, label }) => {
+                  const selected = resolveCategoryIcon(categoryIcon) === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      aria-label={label}
+                      title={label}
+                      onClick={() => setCategoryIcon(key)}
+                      className={`flex h-9 w-9 items-center justify-center rounded-md border transition ${
+                        selected
+                          ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                          : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      <CategoryIcon icon={key} className="h-4.5 w-4.5" />
+                    </button>
+                  );
+                })}
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="cat-color">Color Code</Label>
-                <Input
-                  id="cat-color"
-                  type="color"
-                  value={categoryColor}
-                  onChange={(e) => setCategoryColor(e.target.value)}
-                  className="h-9 p-0.5"
-                />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Color</Label>
+              <div
+                role="radiogroup"
+                aria-label="Category color"
+                className="flex flex-wrap gap-2"
+              >
+                {PALETTE_KEYS.map((paletteKey) => {
+                  const hex = CATEGORY_COLOR_PALETTE[paletteKey];
+                  const selected = resolveCategoryColor(categoryColor).toLowerCase() === hex.toLowerCase();
+                  return (
+                    <button
+                      key={paletteKey}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      aria-label={PALETTE_LABELS[paletteKey]}
+                      title={PALETTE_LABELS[paletteKey]}
+                      onClick={() => setCategoryColor(hex)}
+                      className={`h-9 w-9 rounded-lg border-2 transition ${
+                        selected ? "border-emerald-600 ring-2 ring-emerald-500/30" : "border-border hover:border-foreground/30"
+                      }`}
+                      style={{ backgroundColor: hex }}
+                    />
+                  );
+                })}
               </div>
             </div>
             <DialogFooter className="pt-2">

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { CategoryIcon } from "@/components/shared/category-icon";
+import { CATEGORY_COLOR_PALETTE, resolveCategoryColor } from "@/lib/categories/color-map";
 import { PieChart as PieChartIcon } from "lucide-react";
 import type { ExpenseCategory } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils/currency";
@@ -13,7 +15,16 @@ interface CategoryDonutChartProps {
   categories: ExpenseCategory[];
 }
 
-const FALLBACK_COLORS = ["#f97316", "#3b82f6", "#a855f7", "#ec4899", "#10b981", "#f43f5e", "#06b6d4", "#64748b"];
+// Governed 6-tint palette. Replaces the old rainbow fallback, which carried
+// banned cyan (#3b82f6, #06b6d4) and an off-palette orange.
+const FALLBACK_COLORS: string[] = [
+  CATEGORY_COLOR_PALETTE.emerald,
+  CATEGORY_COLOR_PALETTE.indigo,
+  CATEGORY_COLOR_PALETTE.amber,
+  CATEGORY_COLOR_PALETTE.rose,
+  CATEGORY_COLOR_PALETTE.slate,
+  CATEGORY_COLOR_PALETTE.slateDeep,
+];
 
 interface TooltipPayload {
   name: string;
@@ -50,10 +61,10 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
       return {
         id: categoryId,
         name: category?.name || "Other",
-        icon: category?.icon || "📦",
+        icon: category?.icon ?? null,
         amount: Number(amount) || 0,
         percentage: totalSpending > 0 ? ((Number(amount) || 0) / totalSpending) * 100 : 0,
-        color: category?.color || FALLBACK_COLORS[index % FALLBACK_COLORS.length] || "#f97316",
+        color: resolveCategoryColor(category?.color) || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
       };
     })
     .sort((a, b) => b.amount - a.amount);
@@ -150,7 +161,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
                   className="h-7 w-7 rounded-lg flex items-center justify-center text-xs shrink-0"
                   style={{ backgroundColor: `${item.color}18`, color: item.color }}
                 >
-                  {item.icon}
+                  <CategoryIcon icon={item.icon} className="h-3.5 w-3.5" />
                 </div>
                 <span className="text-xs font-semibold text-foreground truncate">{item.name}</span>
               </div>

@@ -341,6 +341,11 @@ KPI cards pair an icon tile with a `ledger-figure` tabular stat (Inter 600, 2rem
 ### Charts
 Recharts, drawn from the ledger's color rules: income is a solid emerald 3px stroke with a pale emerald area fade; expenses are a dashed (4-4) slate 2px stroke with a faint slate fade — never rose in charts. Grid only horizontal (`strokeDasharray="3 3"`, slate 200 at 0.6 opacity); axis ticks 11px slate 500; the tooltip is a dark pill (slate-900 on slate-800 hairline, rounded 12px).
 
+### Category Identity
+A category is a **monochrome Lucide glyph tinted by its data color** — stroke-2, 16–20px, never a raw emoji. Emoji are legacy *storage* only: the `icon` column is a free-text field that has always held emoji, and every render path resolves it through the read-time map (`src/lib/categories/icon-map.ts`). An unmapped, empty, or null value resolves to `Package` — the render layer never emits a blank slot or a raw emoji text node. Because emoji can be typed with or without a variation selector, lookups normalize (strip U+FE0F / ZWJ / skin-tone modifiers) first, so `🍽️` and `🍽` resolve identically.
+
+Colors draw from a **governed six-tint palette** — emerald `#059669`, indigo `#4f46e5`, amber `#f59e0b`, rose `#f43f5e`, slate `#64748b`, slate-deep `#334155`. The Settings category editor offers an icon grid and these six swatches; there is no free-text emoji field and no free color picker. Six tints across many categories means the donut's top-5 slices repeat a tint by design — the legend carries a dot plus the glyph plus the label, so identity survives the repetition. Seeded colors that fell outside the palette (notably three cyan-family seeds) are remapped **on read**, never by a data migration.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -350,6 +355,7 @@ Recharts, drawn from the ledger's color rules: income is a solid emerald 3px str
 - **Do** reserve rose for money out / danger, amber for warnings, indigo for information and savings — the semantic signals never cosplay as the accent.
 - **Do** keep the 32px control rhythm for actions and inputs; the system is dense on purpose.
 - **Do** use the ascending-bar motif (logo, pay-strip) when a financial trend needs a signature visual.
+- **Do** render category identity as a monochrome Lucide glyph tinted by the category's governed color; let the legend's glyph + label disambiguate repeated tints.
 
 ### Don't:
 - **Don't** introduce purple-blue SaaS gradients, glassy blobs, or gradient fills on content cards, buttons, or charts — the gradient is the logo and auth panel's signature, and theirs alone.
@@ -357,3 +363,4 @@ Recharts, drawn from the ledger's color rules: income is a solid emerald 3px str
 - **Don't** use Sora for body copy or labels, or Inter tracking-tight where tabular figures belong — voices stay in their lane.
 - **Don't** swap the green/red money polarity for style (income = emerald, expense = rose is an invariant, light and dark).
 - **Don't** ship a UI change without the app's real viewports — desktop and the installed-PWA mobile size — checked side by side.
+- **Don't** render a raw emoji as category identity, and don't reintroduce a free-text emoji or free-color field for categories — the read-time map and the six governed swatches own that surface.

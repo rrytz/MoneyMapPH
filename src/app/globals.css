@@ -216,11 +216,81 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Type anchors (Slice 1) ----
-   Plain classes (no @apply) in the components layer so utilities win on
-   color/size overrides. All money figures share ONE scale via .ledger-figure;
-   section heads and captions are the two supporting label voices. */
+/* ---- S5c semantic typography roles ----
+   Roles assign meaning first. Sizes follow the role, and utilities may only
+   provide a documented size step or color override. */
 @layer components {
+  .type-identity {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .type-page-title {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .type-nav {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .type-nav-group {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .type-section-label {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.1;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted-foreground);
+  }
+  .type-ledger {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 2rem;
+    line-height: 1.15;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.025em;
+  }
+  .type-measurement {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.625rem;
+    line-height: 1.15;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  .type-character {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  @media (min-width: 640px) {
+    .type-page-title {
+      font-size: 2.5rem;
+    }
+    .type-ledger {
+      font-size: 2.5rem;
+    }
+  }
+
+  /* Compatibility aliases during the semantic sweep. */
   .ledger-figure {
     font-size: 2rem;
     line-height: 1.15;

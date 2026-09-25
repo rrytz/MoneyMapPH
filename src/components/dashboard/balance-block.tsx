@@ -82,17 +82,17 @@ export function BalanceBlock({
       {hasAnyAccount ? (
         <div className="space-y-8">
           <div className="space-y-3">
-            <p className="caption text-muted-foreground">Total across your accounts</p>
+            <p className="type-section-label text-muted-foreground">Total across your accounts</p>
             <p
               className={cn(
-                "font-display text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl",
+                "type-identity text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl",
                 negative ? "text-rose" : "text-ink"
               )}
             >
               <CurrencyDisplay amount={totalBalance} signed />
             </p>
             {state !== "unmeasured" && (
-              <p className="text-sm text-muted-foreground">{phaseLine[phase]}</p>
+              <p className="type-character text-foreground">{phaseLine[phase]}</p>
             )}
           </div>
 
@@ -108,10 +108,10 @@ export function BalanceBlock({
 
           <div className="grid grid-cols-2 gap-6 border-t border-border pt-6 sm:grid-cols-3">
             <div>
-              <p className="caption text-muted-foreground">Safe to spend</p>
+              <p className="type-section-label text-muted-foreground">Safe to spend</p>
               <p
                 className={cn(
-                  "mt-1 text-lg font-semibold tabular-nums",
+                  "type-ledger mt-1 text-lg font-semibold tabular-nums",
                   remaining < 0 ? "text-rose" : "text-ink"
                 )}
               >
@@ -126,16 +126,16 @@ export function BalanceBlock({
               </p>
             </div>
             <div>
-              <p className="caption text-muted-foreground">Spent this period</p>
-              <p className="mt-1 text-lg font-semibold tabular-nums text-ink">
+              <p className="type-section-label text-muted-foreground">Spent this period</p>
+              <p className="type-ledger mt-1 text-lg font-semibold tabular-nums text-ink">
                 <CurrencyDisplay amount={spent} />
               </p>
             </div>
             <div>
-              <p className="caption text-muted-foreground">Calendar month net</p>
+              <p className="type-section-label text-muted-foreground">Calendar month net</p>
               <p
                 className={cn(
-                  "mt-1 text-lg font-semibold tabular-nums",
+                  "type-ledger mt-1 text-lg font-semibold tabular-nums",
                   net >= 0 ? "text-sulpot" : "text-rose"
                 )}
               >
@@ -149,7 +149,7 @@ export function BalanceBlock({
         /* First-run: the balance block IS the invitation. The character speaks
            here because silence would read as broken rather than calm. */
         <div className="space-y-5">
-          <p className="caption text-muted-foreground">Wala pang datos</p>
+          <p className="type-character text-foreground">Wala pang datos</p>
           <h2 className="font-display text-3xl font-semibold tracking-tight text-ink">
             Itikha muna ang iyong unang account.
           </h2>

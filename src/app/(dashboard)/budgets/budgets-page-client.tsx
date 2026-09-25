@@ -239,7 +239,7 @@ export function BudgetsPageClient({
                       </div>
                       <div>
                         <h4 className="font-semibold text-sm text-foreground">{status.categoryName}</h4>
-                        <span className="text-[11px] text-muted-foreground tabular-nums">
+                        <span className="type-measurement text-[11px] text-muted-foreground tabular-nums">
                           {status.percentage.toFixed(0)}% used
                         </span>
                       </div>
@@ -263,10 +263,10 @@ export function BudgetsPageClient({
 
                   <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
                     <span className="text-muted-foreground">
-                      Spent: <CurrencyDisplay amount={status.spent} className="font-bold text-foreground" />
+                      Spent: <CurrencyDisplay amount={status.spent} className="type-ledger font-bold text-foreground" />
                     </span>
                     <span className="text-muted-foreground">
-                      Target: <CurrencyDisplay amount={status.budgeted} className="font-bold text-foreground" />
+                      Target: <CurrencyDisplay amount={status.budgeted} className="type-ledger font-bold text-foreground" />
                     </span>
                   </div>
 

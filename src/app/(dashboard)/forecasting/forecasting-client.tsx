@@ -101,7 +101,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
           <FintechCardTitle>Savings Trajectory Projections</FintechCardTitle>
           <p className="text-xs text-muted-foreground">Continuous curve combining past savings balances with future monthly predictions</p>
         </FintechCardHeader>
-        <FintechCardContent className="p-5 pt-0">
+        <FintechCardContent className="type-measurement p-5 pt-0">
           <div className="h-[340px] w-full mt-2">
             {!isMounted ? (
               <div className="h-full w-full flex items-center justify-center">
@@ -125,7 +125,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: "#64748b" }}
+                    tick={{ fontSize: 11, fill: "#64748b", fontFamily: "Instrument Sans, ui-sans-serif, sans-serif" }}
                     tickFormatter={(v) => `₱${(v / 1000).toFixed(0)}k`}
                   />
                   <Tooltip

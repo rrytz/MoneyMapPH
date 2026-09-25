@@ -95,7 +95,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
               axisLine={false}
               tickLine={false}
               width={54}
-              tick={{ fontSize: 11, fill: "#64748b" }}
+              tick={{ fontSize: 11, fill: "#64748b", fontFamily: "Instrument Sans, ui-sans-serif, sans-serif" }}
               tickFormatter={(v) => `₱${(v / 1000).toFixed(0)}k`}
             />
             <Tooltip

@@ -86,7 +86,7 @@ export function MonthCalendar({
               )}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-medium">{Number(cell.date.slice(8, 10))}</span>
+                <span className="type-measurement text-[10px] font-medium">{Number(cell.date.slice(8, 10))}</span>
                 {cell.isCutoffAnchor && <span className="h-1 w-1 rounded-full bg-emerald-500" title="Cutoff anchor" />}
               </div>
               <div className="space-y-1 mt-1">
@@ -105,7 +105,7 @@ export function MonthCalendar({
                     )}
                   >
                     <span className="truncate">{occ.billName}</span>
-                    <span className="tabular-nums font-semibold">{occ.paid ? "✓" : <CurrencyDisplay amount={occ.expectedAmount} className="inline text-[10px]" />}</span>
+                    <span className="tabular-nums font-semibold">{occ.paid ? "✓" : <CurrencyDisplay amount={occ.expectedAmount} className="type-ledger inline text-[10px]" />}</span>
                   </button>
                 ))}
               </div>

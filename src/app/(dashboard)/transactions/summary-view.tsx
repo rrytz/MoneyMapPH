@@ -137,7 +137,7 @@ export function SummaryView({
           </div>
           <p className="text-xs text-muted-foreground">Income vs Expense comparisons across historical monthly snapshots</p>
         </FintechCardHeader>
-        <FintechCardContent className="p-5 pt-0">
+        <FintechCardContent className="type-measurement p-5 pt-0">
           {cashFlowData.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-10 italic">
               No historical data available. Run more snapshots to display trends.
@@ -156,7 +156,7 @@ export function SummaryView({
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 11, fill: "#64748b" }}
+                      tick={{ fontSize: 11, fill: "#64748b", fontFamily: "Instrument Sans, ui-sans-serif, sans-serif" }}
                       tickFormatter={(v) => `₱${(v / 1000).toFixed(0)}k`}
                     />
                     <Tooltip

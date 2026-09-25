@@ -288,7 +288,7 @@ export function TransactionsClient({
                       </td>
                       <td className="py-3.5 px-5 text-right font-bold tabular-nums text-xs">
                         <span className={isIncome ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
-                          {isIncome ? "+" : "-"}<CurrencyDisplay amount={tx.amount} className="inline font-bold" />
+                          {isIncome ? "+" : "-"}<CurrencyDisplay amount={tx.amount} className="type-ledger inline font-bold" />
                         </span>
                       </td>
                     </tr>
@@ -300,7 +300,7 @@ export function TransactionsClient({
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between p-4 px-6 border-t border-border">
-              <span className="text-xs text-muted-foreground">
+              <span className="type-measurement text-xs text-muted-foreground">
                 Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} items
               </span>
               <div className="flex gap-2">

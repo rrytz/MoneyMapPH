@@ -64,7 +64,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Total Paycheck Income</span>
-              <CurrencyDisplay amount={totalPaycheckIncome} className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
+              <CurrencyDisplay amount={totalPaycheckIncome} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -79,7 +79,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Paychecks Recorded</span>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{initialPaychecks.length}</p>
+              <p className="type-measurement text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{initialPaychecks.length}</p>
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -112,9 +112,9 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                         </Badge>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 font-medium">
-                        <span>Total: <CurrencyDisplay amount={Number(paycheck.amount)} className="font-bold text-foreground" /></span>
-                        <span>Allocated: <CurrencyDisplay amount={summary.totalAllocated} className="font-bold text-emerald-600 dark:text-emerald-400" /></span>
-                        <span>Unallocated: <CurrencyDisplay amount={summary.totalUnallocated} className="font-bold text-slate-500" /></span>
+                        <span>Total: <CurrencyDisplay amount={Number(paycheck.amount)} className="type-ledger font-bold text-foreground" /></span>
+                        <span>Allocated: <CurrencyDisplay amount={summary.totalAllocated} className="type-ledger font-bold text-emerald-600 dark:text-emerald-400" /></span>
+                        <span>Unallocated: <CurrencyDisplay amount={summary.totalUnallocated} className="type-ledger font-bold text-slate-500" /></span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -149,7 +149,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
 
                   {isExpanded && (
                     <div className="pt-3 border-t border-border space-y-2">
-                      <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Allocations Breakdown</h4>
+                      <h4 className="type-section-label">Allocations Breakdown</h4>
                       {summary.allocationBreakdown.length === 0 ? (
                         <p className="text-xs text-muted-foreground py-2 italic">No category allocations set for this paycheck.</p>
                       ) : (
@@ -157,7 +157,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                           {summary.allocationBreakdown.map((item, idx) => (
                             <div key={idx} className="flex justify-between text-xs py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border/60">
                               <span className="font-semibold text-foreground">{item.label}</span>
-                              <CurrencyDisplay amount={item.amount} className="font-bold text-foreground" />
+                              <CurrencyDisplay amount={item.amount} className="type-ledger font-bold text-foreground" />
                             </div>
                           ))}
                         </div>

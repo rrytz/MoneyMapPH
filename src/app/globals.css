@@ -290,32 +290,6 @@
     }
   }
 
-  /* Compatibility aliases during the semantic sweep. */
-  .ledger-figure {
-    font-size: 2rem;
-    line-height: 1.15;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.025em;
-  }
-  @media (min-width: 640px) {
-    .ledger-figure {
-      font-size: 2.5rem;
-    }
-  }
-  .section-head {
-    font-size: 1.125rem;
-    line-height: 1.4;
-    font-weight: 500;
-  }
-  .caption {
-    font-size: 0.75rem;
-    line-height: 1.1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 400;
-    color: var(--color-muted-foreground);
-  }
 }
 
 /* ---- Auth screen motion ---- */

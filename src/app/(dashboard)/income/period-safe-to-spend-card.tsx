@@ -11,7 +11,7 @@ function BreakdownRow({ label, amount, accent }: { label: string; amount: number
   return (
     <div className="flex items-center justify-between text-xs">
       <span className="text-muted-foreground">{label}</span>
-      <CurrencyDisplay amount={amount} className={cn("font-semibold tabular-nums", accent)} />
+      <CurrencyDisplay amount={amount} className={cn("type-ledger font-semibold tabular-nums", accent)} />
     </div>
   );
 }
@@ -45,7 +45,7 @@ export function PeriodSafeToSpendCard({ status }: { status: SafeToSpendStatus })
                 amount={status.safeToSpend}
                 signed
                 className={cn(
-                  "text-2xl font-bold tracking-tight tabular-nums",
+                  "type-ledger text-2xl font-bold tracking-tight tabular-nums",
                   status.safeToSpend <= 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"
                 )}
               />
@@ -55,7 +55,7 @@ export function PeriodSafeToSpendCard({ status }: { status: SafeToSpendStatus })
               <BreakdownRow label="Incentives logged" amount={status.incentiveIncomeLogged} accent="text-emerald-600 dark:text-emerald-400" />
               <BreakdownRow label="Spent this cutoff" amount={status.spentThisPeriod} accent="text-rose-500" />
             </div>
-            <p className="text-[11px] text-muted-foreground">{status.daysRemaining} days left in this cutoff</p>
+            <p className="type-measurement text-[11px] text-muted-foreground">{status.daysRemaining} days left in this cutoff</p>
           </>
         )}
       </FintechCardContent>

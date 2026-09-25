@@ -150,7 +150,7 @@ export function BalanceBlock({
            here because silence would read as broken rather than calm. */
         <div className="space-y-5">
           <p className="type-character text-foreground">Wala pang datos</p>
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink">
+          <h2 className="type-character text-3xl font-semibold tracking-tight text-ink">
             Itikha muna ang iyong unang account.
           </h2>
           <p className="max-w-md text-sm leading-relaxed text-muted-foreground">

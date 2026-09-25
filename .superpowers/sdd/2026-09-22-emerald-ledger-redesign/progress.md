@@ -142,6 +142,57 @@ Gate per slice: 16 shots (4 surfaces × desktop 816×418 / mobile 390×844 × da
 - Ruling H: auth-shell `to-teal-50` counts as cyan-family (Rule A) → `to-emerald-50`.
 - Ruling I: The light probe compares computed backgrounds against the `--card`/`--background`
   CSS tokens, not literals, so it stays robust across future token edits.
+- Ruling T (S5a): The gauge/waterline ratio is derived from the service's OWN fields
+  (`safeToSpend` and `spentThisPeriod`), never from a re-derived income formula. A first
+  pass pro-rated `coreIncome` locally and read 0% while the service reported a positive
+  safe-to-spend — a second source of truth that silently disagreed. Same class as the
+  Savings Rate collision: consume the owner, don't recompute it.
+- Ruling U (S5a/S5b): Constraint 3 generalizes beyond the gauge. The shell anchor painted
+  `₱0.00` before its query resolved — a surface stating a fact it did not have. Fixed at
+  the root with a `loaded` flag; the readout renders `—` until it actually knows.
+- Ruling V (S5b): Probe (c) is scoped to the dense region, and a NEW assertion requires
+  exactly one dominant figure per surface. The 15px body scale pushed `text-5xl/6xl` past
+  the `ledger-figure` clamp; shrinking the balance block to satisfy a stale clamp would have
+  undone the slice, so the probe was corrected to measure both registers separately.
+
+## S5 sub-page composition — INVENTORY (follow-up pending device checks)
+
+All seven remaining sub-pages share ONE shape, hand-rolled per file (not a shared
+component — that duplication is the root cause of the uniform rhythm):
+
+`grid-cols-N` -> `FintechCard` -> `FintechCardContent p-6 space-y-3` ->
+icon tile (`p-2.5 rounded-md bg-<hue>`) + `Badge`/`caption` ->
+`caption block` + `ledger-figure` (or `text-xl font-bold`)
+
+| Page | File | Stat-row line | Leading figures (in order) |
+|---|---|---|---|
+| expenses | `expenses-page-client.tsx` | 161 | Monthly Spend (rose, dominant) / Top Category / Logged Items |
+| income | `income-page-client.tsx` | 168 | Total Monthly Earnings (emerald) / Total Payments / Active Month |
+| budgets | `budgets-page-client.tsx` | 153 | Total Actual Spending / Budgeted Spending / Targeted / No Target |
+| savings | `savings-page-client.tsx` | 381 | Total Saved Balance (emerald) / Overall Completion / ... |
+| forecasting | `forecasting-client.tsx` | 59 | Monthly Savings Velocity (emerald) / 1-Year Projected / Growth Rate |
+| simulator | `simulator-client.tsx` | 288 | 2-up then 3-up impact tiles |
+| transactions | `summary-view.tsx` | 79 | Monthly Savings Net (emerald) / Budget Used / ... |
+
+**Per-page dominant element to implement (each page answers ONE question first):**
+- **expenses** — Monthly Spend is already the loudest; keep it as the single dominant
+  figure, demote Top Category + Logged Items to a supporting row.
+- **income** — Total Monthly Earnings dominant; collapse the other two into one
+  supporting strip.
+- **budgets** — four equal cards collapse to: Spend vs Budget as the dominant pair
+  (spent / allowance), with Targeted + No Target as a small supporting line.
+- **savings** — Total Saved Balance dominant; completion becomes the gauge-adjacent
+  supporting figure rather than a peer card.
+- **forecasting** — 1-Year Projected Balance is the answer; it should lead, not sit
+  third behind Savings Velocity.
+- **simulator** — the impact visualizer is the point; the input form is secondary.
+- **transactions** — summary figures subordinate to the ledger itself.
+
+**BLOCKING DEPENDENCY:** the user is running real-device checks for transaction/expense
+density + card separation BEFORE this work starts. Expenses and Transactions are two of
+the seven, and R3 allows those two to stay tighter if looser density measurably hurts
+scanning. Do not recompose them before those results are in.
+
 
 ## Rulings (Slice 3 gate corrections)
 - Ruling J: Probe (e) must settle before sampling. `probe-run.mjs` removes `.dark` and

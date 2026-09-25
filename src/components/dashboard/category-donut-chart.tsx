@@ -79,7 +79,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
         <FintechCardContent>
           <EmptyState
             icon={<PieChartIcon className="h-6 w-6" />}
-            title="No expenses logged this month"
+            title="No expenses logged this calendar month"
             description="Track your spending categories by adding expenses."
             actionLabel="Add Expense"
             actionHref="/expenses"
@@ -96,7 +96,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
       <FintechCardHeader className="pb-2">
         <FintechCardTitle>Spending by Category</FintechCardTitle>
         <p className="text-xs text-muted-foreground">
-          {formatCurrency(totalSpending)} total this month · top {top5.length} {top5.length === 1 ? "category" : "categories"}
+          {formatCurrency(totalSpending)} calendar month total · top {top5.length} {top5.length === 1 ? "category" : "categories"}
         </p>
       </FintechCardHeader>
       <FintechCardContent className="flex flex-col gap-4">
@@ -105,7 +105,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
           <div className="relative w-full" style={{ height: 180 }}>
             {top5.length === 1 ? (
               <div className="flex h-full items-center justify-center">
-                <svg viewBox="0 0 100 100" className="h-[144px] w-[144px]" role="img" aria-label={`${top5[0].name} 100% of monthly spending`}>
+                <svg viewBox="0 0 100 100" className="h-[144px] w-[144px]" role="img" aria-label={`${top5[0].name} 100% of calendar-month spending`}>
                   <circle cx="50" cy="50" r="40" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="9" fill="transparent" />
                   <circle cx="50" cy="50" r="40" stroke={top5[0].color} strokeWidth="9" fill="transparent" />
                 </svg>

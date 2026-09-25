@@ -26,7 +26,7 @@ export function DashboardStatStrip({ stats }: { stats: DashboardStats }) {
         iconBgClass="bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400"
       />
       <KpiCard
-        title="Monthly Spending"
+        title="Calendar month spending"
         value={stats.monthlySpending}
         icon={TrendingDown}
         changePercent={stats.spendingDeltaPercent}

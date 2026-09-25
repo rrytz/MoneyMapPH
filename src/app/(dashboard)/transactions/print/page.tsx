@@ -88,7 +88,7 @@ export default async function PrintTransactionsPage(props: {
           <CurrencyDisplay amount={totalExpense} className="text-base font-black text-slate-900" />
         </div>
         <div>
-          <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Net Cash Flow</span>
+          <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Calendar month net cash flow</span>
           <CurrencyDisplay amount={netCashFlow} className={`text-base font-black ${netCashFlow >= 0 ? "text-emerald-700" : "text-rose-700"}`} />
         </div>
       </div>

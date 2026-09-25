@@ -12,7 +12,8 @@ import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/
 import { SAVINGS_RATE_LABEL } from "@/lib/utils/health-breakdown";
 import { getBillsDueWindow } from "@/lib/utils/bills";
 import { BalanceBlock } from "@/components/dashboard/balance-block";
-import { AttentionStrip } from "@/components/dashboard/attention-strip";import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
+import { AttentionStrip } from "@/components/dashboard/attention-strip";
+import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";

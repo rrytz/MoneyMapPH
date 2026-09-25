@@ -164,55 +164,49 @@ export function IncomePageClient({
         </TabsList>
 
         <TabsContent value="income" className="space-y-6">
-          {/* Top KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <FintechCard>
-              <FintechCardContent className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                    <DollarSign className="h-5 w-5" />
+          {/* The answer first: calendar-month earnings. Counts support the
+              figure instead of competing with it as peer cards. */}
+          <FintechCard>
+            <FintechCardContent className="p-0">
+              <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
+                <div className="p-6 sm:p-8">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                      <DollarSign className="h-5 w-5" />
+                    </div>
+                    <Badge variant="income">Calendar month</Badge>
                   </div>
-                  <Badge variant="income">Active Month</Badge>
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block">Total Monthly Earnings</span>
-                  <CurrencyDisplay amount={totalThisMonth} className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </FintechCardContent>
-            </FintechCard>
-
-            <FintechCard>
-              <FintechCardContent className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                    <Wallet className="h-5 w-5" />
+                  <div className="mt-6">
+                    <span className="text-xs font-medium text-muted-foreground block">Calendar month earnings</span>
+                    <CurrencyDisplay
+                      amount={totalThisMonth}
+                      className="text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
+                    />
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Logged Entries</span>
                 </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block">Total Payments</span>
-                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{optimisticMonthEntries.length}</p>
-                </div>
-              </FintechCardContent>
-            </FintechCard>
-
-            <FintechCard>
-              <FintechCardContent className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                    <Layers className="h-5 w-5" />
+                <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
+                  <div className="p-6">
+                    <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
+                      <Wallet className="h-5 w-5" />
+                    </div>
+                    <span className="mt-4 block text-xs text-muted-foreground">Logged entries</span>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                      {optimisticMonthEntries.length}
+                    </p>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Active Sources</span>
+                  <div className="border-l border-border p-6">
+                    <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
+                      <Layers className="h-5 w-5" />
+                    </div>
+                    <span className="mt-4 block text-xs text-muted-foreground">Income channels</span>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                      {Object.keys(sourceTotals).length}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block">Income Channels</span>
-                  <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">
-                    {Object.keys(sourceTotals).length}
-                  </p>
-                </div>
-              </FintechCardContent>
-            </FintechCard>
-          </div>
+              </div>
+            </FintechCardContent>
+          </FintechCard>
 
           {/* Income List Section */}
           <FintechCard className="p-0 overflow-hidden">
@@ -230,7 +224,7 @@ export function IncomePageClient({
                         : "bg-background text-foreground shadow-sm"
                     )}
                   >
-                    This Month
+                    Calendar month
                   </Link>
                   <Link
                     href="/income?view=all"
@@ -254,7 +248,7 @@ export function IncomePageClient({
                   description={
                     view === "all"
                       ? "Start tracking your salary, night differential, overtime, and incentives."
-                      : "No earnings logged for this month. Switch to All Entries to view older records."
+                      : "No earnings logged for this calendar month. Switch to All Entries to view older records."
                   }
                   actionLabel="Add First Income Entry"
                   onAction={handleAdd}

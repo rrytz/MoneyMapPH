@@ -55,55 +55,45 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
         description="Predict net savings trajectory and goal completion rates based on historical data"
       />
 
-      {/* Metrics Summary Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                <Zap className="h-5 w-5" />
+      {/* The page's answer is the one-year position. Pace and growth rate are
+          supporting measures of how that answer is reached. */}
+      <FintechCard>
+        <FintechCardContent className="p-0">
+          <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center justify-between gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <Wallet className="h-5 w-5" />
+                </div>
+                <span className="text-[11px] font-semibold text-slate-500">12-month target</span>
               </div>
-              <Badge variant="income">Projected Pace</Badge>
+              <span className="mt-6 block text-xs font-medium text-muted-foreground">1-year projected balance</span>
+              <CurrencyDisplay
+                amount={endBalance}
+                className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
+              />
             </div>
-            <div>
-              <span className="text-xs font-medium text-muted-foreground block">Monthly Savings Velocity</span>
-              <CurrencyDisplay amount={projectedMonthlyGrowth} className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-
-        <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                <Wallet className="h-5 w-5" />
+            <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
+              <div className="p-6">
+                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <Zap className="h-5 w-5" />
+                </div>
+                <span className="mt-4 block text-xs text-muted-foreground">Projected monthly savings pace</span>
+                <CurrencyDisplay amount={projectedMonthlyGrowth} className="mt-1 block text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400" />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500">12-Month Target</span>
-            </div>
-            <div>
-              <span className="text-xs font-medium text-muted-foreground block">1-Year Projected Balance</span>
-              <CurrencyDisplay amount={endBalance} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-
-        <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                <TrendingUp className="h-5 w-5" />
+              <div className="border-l border-border p-6">
+                <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <span className="mt-4 block text-xs text-muted-foreground">Projected monthly growth rate</span>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+                  +{projectedMonthlyGrowth > 0 && startBalance > 0 ? Math.round((projectedMonthlyGrowth / startBalance) * 100) : 0}%
+                </p>
               </div>
-              <Badge variant="warning">Growth Rate</Badge>
             </div>
-            <div>
-              <span className="text-xs font-medium text-muted-foreground block">Estimated Monthly Growth</span>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 tabular-nums">
-                +{projectedMonthlyGrowth > 0 && startBalance > 0 ? Math.round((projectedMonthlyGrowth / startBalance) * 100) : 0}%
-              </p>
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-      </div>
+          </div>
+        </FintechCardContent>
+      </FintechCard>
 
       {/* Forecast Line Area Chart */}
       <FintechCard className="flex flex-col">

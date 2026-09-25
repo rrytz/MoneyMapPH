@@ -86,7 +86,7 @@ export function SummaryView({
               <Badge variant="income">Net Surplus</Badge>
             </div>
             <div>
-              <span className="text-xs font-medium text-muted-foreground block">Monthly Savings Net</span>
+              <span className="text-xs font-medium text-muted-foreground block">Calendar month net</span>
               <CurrencyDisplay amount={summary.savingsAmount} className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
             </div>
           </FintechCardContent>
@@ -228,7 +228,7 @@ export function SummaryView({
           <FintechCardContent className="p-0 overflow-x-auto flex-1">
             {budgetStatuses.length === 0 ? (
               <p className="text-xs text-muted-foreground py-10 text-center italic">
-                No active budget configured for this month. Set up target limits on the Budgets page.
+                No active budget configured for this calendar month. Set up target limits on the Budgets page.
               </p>
             ) : (
               <table className="w-full text-left text-xs border-collapse">

@@ -104,7 +104,7 @@ export function SimulatorClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Simulator Form (1 Column) */}
-        <FintechCard className="h-fit">
+        <FintechCard className="order-2 h-fit lg:order-2">
           <FintechCardHeader className="pb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
@@ -165,7 +165,7 @@ export function SimulatorClient({
         </FintechCard>
 
         {/* Impact Visualizer Dashboard (2 Columns) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="order-1 space-y-6 lg:order-1 lg:col-span-2">
           {/* Emergency Fund Impact Card */}
           <FintechCard>
             <FintechCardHeader className="pb-4">
@@ -231,7 +231,7 @@ export function SimulatorClient({
                 <FintechCardTitle>Savings Goals Timeline Shift</FintechCardTitle>
               </div>
               <p className="text-xs text-muted-foreground">
-                Timeline shift for active goals when redirecting net savings (₱{monthlyNetSavings.toLocaleString()}/mo)
+                Using up to 6-month average net savings (₱{monthlyNetSavings.toLocaleString()}/mo)
               </p>
             </FintechCardHeader>
             <FintechCardContent className="p-0">

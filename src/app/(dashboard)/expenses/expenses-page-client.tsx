@@ -168,7 +168,7 @@ export function ExpensesPageClient({
               <Badge variant="expense">Total Outflow</Badge>
             </div>
             <div>
-              <span className="caption block">Monthly Spend</span>
+              <span className="caption block">Calendar month spend</span>
               <CurrencyDisplay amount={total} className="ledger-figure tabular-nums font-semibold text-rose-600 dark:text-rose-400" />
             </div>
           </FintechCardContent>

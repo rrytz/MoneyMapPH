@@ -45,7 +45,7 @@ interface TopbarProps {
   loaded: boolean;
 }
 
-function BalanceReadout({
+export function BalanceReadout({
   totalBalance,
   safeToSpend,
   accountCount,
@@ -80,7 +80,7 @@ function BalanceReadout({
                 negative ? "text-rose" : "text-ink"
               )}
             >
-              <CurrencyDisplay amount={totalBalance} />
+              <CurrencyDisplay amount={totalBalance} signed />
             </span>
           ) : (
             /* Not fetched yet. Painting 0.00 here would state a fact we do
@@ -174,7 +174,7 @@ export function Topbar({
                         Number(a.current_balance) < 0 ? "text-rose" : "text-ink"
                       )}
                     >
-                      <CurrencyDisplay amount={a.current_balance} />
+                      <CurrencyDisplay amount={a.current_balance} signed />
                     </span>
                   </span>
                 </DropdownMenuItem>

@@ -20,7 +20,6 @@ import { copyPreviousMonthBudget } from "./actions";
 import { addExpense } from "../expenses/actions";
 import { getCurrentMonthYear, getMonthName, toISODateString } from "@/lib/utils/date";
 import { computeBudgetStatus } from "@/lib/utils/budget-status";
-import { formatCompactAmount } from "@/lib/utils/currency";
 import { computeUnbudgetedSpent, computeRemainingBudget, buildUnbudgetedCategoryViews } from "@/lib/services/expense-aggregation.service";
 import { toast } from "sonner";
 import type { BudgetStatus, ExpenseCategory, MonthlyExpenseAggregation } from "@/lib/types";
@@ -148,80 +147,69 @@ export function BudgetsPageClient({
         </div>
       </PageHeader>
 
-      {/* Top Summary Cards */}
+      {/* Spend vs allowance is the page's answer. The two figures share one
+          surface; targeted and untargeted spending support that comparison
+          instead of reading as four unrelated KPI cards. */}
       {statuses.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <FintechCard>
-            <FintechCardContent className="p-6 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                  <Wallet className="h-5 w-5" />
+        <FintechCard>
+          <FintechCardContent className="p-0">
+            <div className="grid sm:grid-cols-2">
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                    <Wallet className="h-5 w-5" />
+                  </div>
+                  <Badge variant="income">Allowance</Badge>
                 </div>
-                <Badge variant="income">Total Target</Badge>
+                <span className="mt-6 block text-xs font-medium text-muted-foreground">Total budgeted</span>
+                <CurrencyDisplay
+                  amount={totalBudgeted}
+                  className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
+                />
               </div>
-              <div>
-                <span className="text-xs font-medium text-muted-foreground block">Total Budgeted</span>
-                <CurrencyDisplay amount={totalBudgeted} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
-              </div>
-            </FintechCardContent>
-          </FintechCard>
-
-          <FintechCard>
-            <FintechCardContent className="p-6 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="p-2.5 rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
-                  <TrendingDown className="h-5 w-5" />
+              <div className="border-t border-border p-6 sm:border-l sm:border-t-0 sm:p-8">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
+                    <TrendingDown className="h-5 w-5" />
+                  </div>
+                  <Badge variant="expense">Spent</Badge>
                 </div>
-                <Badge variant="expense">All Expenses</Badge>
+                <span className="mt-6 block text-xs font-medium text-muted-foreground">Calendar month spending</span>
+                <CurrencyDisplay
+                  amount={actualTotal}
+                  className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
+                />
               </div>
-              <div>
-                <span className="text-xs font-medium text-muted-foreground block">Total Actual Spending</span>
-                <CurrencyDisplay amount={actualTotal} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
+            </div>
+            <div className="grid gap-4 border-t border-border bg-muted/30 px-6 py-4 sm:grid-cols-3 sm:px-8">
+              <div className="flex items-center justify-between gap-3 sm:block">
+                <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <PieChart className="h-4 w-4" /> Targeted spending
+                </span>
+                <CurrencyDisplay amount={totalBudgetedSpent} className="mt-1 block text-lg font-semibold tabular-nums text-foreground" />
               </div>
-            </FintechCardContent>
-          </FintechCard>
-
-          <FintechCard>
-            <FintechCardContent className="p-6 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                  <PieChart className="h-5 w-5" />
-                </div>
-                <Badge variant="warning">Targeted</Badge>
+              <div className="flex items-center justify-between gap-3 sm:block">
+                <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Target className="h-4 w-4" /> No target
+                </span>
+                <CurrencyDisplay amount={totalUnbudgetedSpent} className="mt-1 block text-lg font-semibold tabular-nums text-foreground" />
               </div>
-              <div>
-                <span className="text-xs font-medium text-muted-foreground block">Budgeted Spending</span>
-                <CurrencyDisplay amount={totalBudgetedSpent} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
-                <p className="text-xs text-muted-foreground tabular-nums">
-                  {totalRemaining >= 0 ? `${formatCompactAmount(totalRemaining)} remaining allowance` : "Over allowance"}
-                </p>
+              <div className="flex items-center justify-between gap-3 sm:block">
+                <span className="text-xs text-muted-foreground">Budgeted remaining</span>
+                <span className={cn("mt-1 block text-lg font-semibold tabular-nums", totalRemaining < 0 ? "text-rose" : "text-foreground")}>
+                  <CurrencyDisplay amount={totalRemaining} signed />
+                </span>
               </div>
-            </FintechCardContent>
-          </FintechCard>
-
-          <FintechCard>
-            <FintechCardContent className="p-6 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                  <Target className="h-5 w-5" />
-                </div>
-                <Badge variant="info">No Target</Badge>
-              </div>
-              <div>
-                <span className="text-xs font-medium text-muted-foreground block">Unbudgeted Spending</span>
-                <CurrencyDisplay amount={totalUnbudgetedSpent} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
-                <p className="text-xs text-muted-foreground tabular-nums">categories without a budget target</p>
-              </div>
-            </FintechCardContent>
-          </FintechCard>
-        </div>
+            </div>
+          </FintechCardContent>
+        </FintechCard>
       )}
 
       {/* Main Budget Grid */}
       {statuses.length === 0 ? (
         <EmptyState
           icon={PieChart}
-          title="No budget configured for this month"
+          title="No budget configured for this calendar month"
           description="Create spending targets for categories to keep your expenses on track."
           actionLabel="Create Monthly Budget"
           onAction={() => setFormOpen(true)}
@@ -298,7 +286,7 @@ export function BudgetsPageClient({
           <div className="space-y-4 mt-8">
             <div>
               <h3 className="font-semibold text-base text-foreground">Unbudgeted Categories</h3>
-              <p className="text-xs text-muted-foreground">Spending in categories without a budget target this month.</p>
+              <p className="text-xs text-muted-foreground">Spending in categories without a budget target in this calendar month.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {unbudgetedViews.map((view) => (
@@ -360,7 +348,7 @@ export function BudgetsPageClient({
         </FintechCardHeader>
         <FintechCardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground max-w-md">
-            Open the purchase simulator to see how a big spend shifts your emergency reserve, savings-goal timelines, and monthly net savings.
+            Open the purchase simulator to see how a big spend shifts your emergency reserve, savings-goal timelines, and average net savings.
           </p>
           <Link
             href="/simulator"

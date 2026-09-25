@@ -89,7 +89,7 @@ export function BalanceBlock({
                 negative ? "text-rose" : "text-ink"
               )}
             >
-              <CurrencyDisplay amount={totalBalance} />
+              <CurrencyDisplay amount={totalBalance} signed />
             </p>
             {state !== "unmeasured" && (
               <p className="text-sm text-muted-foreground">{phaseLine[phase]}</p>
@@ -109,13 +109,19 @@ export function BalanceBlock({
           <div className="grid grid-cols-2 gap-6 border-t border-border pt-6 sm:grid-cols-3">
             <div>
               <p className="caption text-muted-foreground">Safe to spend</p>
-              <p className="mt-1 text-lg font-semibold tabular-nums text-ink">
+              <p
+                className={cn(
+                  "mt-1 text-lg font-semibold tabular-nums",
+                  remaining < 0 ? "text-rose" : "text-ink"
+                )}
+              >
                 {state === "unmeasured" ? (
                   <span className="text-base font-normal text-muted-foreground">
                     Set a payday to see this
                   </span>
                 ) : (
-                  <CurrencyDisplay amount={remaining} />
+                  /* Preserve the sign: a breached cutoff is not positive funds. */
+                  <CurrencyDisplay amount={remaining} signed />
                 )}
               </p>
             </div>
@@ -126,7 +132,7 @@ export function BalanceBlock({
               </p>
             </div>
             <div>
-              <p className="caption text-muted-foreground">This month</p>
+              <p className="caption text-muted-foreground">Calendar month net</p>
               <p
                 className={cn(
                   "mt-1 text-lg font-semibold tabular-nums",
@@ -134,7 +140,7 @@ export function BalanceBlock({
                 )}
               >
                 {net >= 0 ? "+" : ""}
-                <CurrencyDisplay amount={net} />
+                <CurrencyDisplay amount={net} signed />
               </p>
             </div>
           </div>

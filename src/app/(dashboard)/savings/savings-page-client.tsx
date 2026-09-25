@@ -325,6 +325,46 @@ export function SavingsPageClient({
         </Button>
       </PageHeader>
 
+      {/* The page's answer first: accumulated savings. Completion and target
+          context sit beside it as supporting readouts, not peer cards. */}
+      <FintechCard>
+        <FintechCardContent className="p-0">
+          <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center justify-between gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <PiggyBank className="h-5 w-5" />
+                </div>
+                <Badge variant="income">Accumulated</Badge>
+              </div>
+              <span className="mt-6 block text-xs font-medium text-muted-foreground">Total saved balance</span>
+              <CurrencyDisplay
+                amount={totalSaved}
+                className="text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
+              />
+            </div>
+            <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
+              <div className="p-6">
+                <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
+                  <Target className="h-5 w-5" />
+                </div>
+                <span className="mt-4 block text-xs text-muted-foreground">Overall completion</span>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                  {Math.round(overallProgress)}%
+                </p>
+              </div>
+              <div className="border-l border-border p-6">
+                <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
+                  <Wallet className="h-5 w-5" />
+                </div>
+                <span className="mt-4 block text-xs text-muted-foreground">Combined goal targets</span>
+                <CurrencyDisplay amount={totalTarget} className="mt-1 block text-2xl font-semibold tabular-nums text-foreground" />
+              </div>
+            </div>
+          </div>
+        </FintechCardContent>
+      </FintechCard>
+
       {/* Emergency Adequacy Alert Card */}
       {emergencyStatus.hasFund && (
         <FintechCard className="border-l-4 border-l-emerald-600 bg-card">
@@ -365,7 +405,7 @@ export function SavingsPageClient({
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
-                <span className="text-xs text-muted-foreground font-medium block">Avg Monthly Outflow</span>
+                <span className="text-xs text-muted-foreground font-medium block">Up to 6-month avg outflow</span>
                 <CurrencyDisplay amount={emergencyStatus.averageExpenses} className="text-xl font-bold text-foreground mt-0.5 block" />
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
@@ -376,54 +416,6 @@ export function SavingsPageClient({
           </FintechCardContent>
         </FintechCard>
       )}
-
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                <PiggyBank className="h-5 w-5" />
-              </div>
-              <Badge variant="income">Accumulated</Badge>
-            </div>
-            <div>
-              <span className="text-xs font-medium text-muted-foreground block">Total Saved Balance</span>
-              <CurrencyDisplay amount={totalSaved} className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-
-        <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                <Target className="h-5 w-5" />
-              </div>
-              <span className="text-[11px] font-semibold text-slate-500">Progress</span>
-            </div>
-            <div>
-              <span className="text-xs font-medium text-muted-foreground block">Overall Completion</span>
-              <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{Math.round(overallProgress)}%</p>
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-
-        <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                <Wallet className="h-5 w-5" />
-              </div>
-              <span className="text-[11px] font-semibold text-slate-500">Total Targets</span>
-            </div>
-            <div>
-              <span className="text-xs font-medium text-muted-foreground block">Combined Goal Targets</span>
-              <CurrencyDisplay amount={totalTarget} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-      </div>
 
       {/* Goals Grid */}
       {goals.length === 0 ? (

@@ -9,6 +9,7 @@ import {
   Settings,
   MoreHorizontal,
   Wallet,
+  Gauge,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,4 +24,5 @@ export const NAV_ICON_MAP: Record<string, LucideIcon> = {
   Settings,
   MoreHorizontal,
   Wallet,
+  Gauge,
 };

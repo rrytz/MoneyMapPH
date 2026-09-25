@@ -28,5 +28,6 @@ export const NAV_ITEMS = [
   { label: "Savings Goals", href: "/savings", icon: "PiggyBank", description: "Track targets like emergency & travel funds" },
   { label: "Transactions", href: "/transactions", icon: "History", description: "Searchable history of income and expenses" },
   { label: "Forecasting", href: "/forecasting", icon: "LineChart", description: "12-month projected net wealth" },
+  { label: "Simulator", href: "/simulator", icon: "Gauge", description: "Model a purchase against your safety net" },
   { label: "Settings", href: "/settings", icon: "Settings", description: "Profile, currency & app preferences" },
 ] as const;

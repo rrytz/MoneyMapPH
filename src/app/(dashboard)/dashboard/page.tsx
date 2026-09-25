@@ -11,9 +11,8 @@ import { calculateFinancialHealthReport } from "@/lib/services/health.service";
 import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/date";
 import { SAVINGS_RATE_LABEL } from "@/lib/utils/health-breakdown";
 import { getBillsDueWindow } from "@/lib/utils/bills";
-import { KpiCard } from "@/components/dashboard/kpi-card";
 import { SafeToSpendCard } from "@/components/dashboard/safe-to-spend-card";
-import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
+import { BalanceBlock } from "@/components/dashboard/balance-block";import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
@@ -125,49 +124,42 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Section: Health Hero Card + Top KPI Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-1">
+      {/* S5b — the dominant element. Everything below is subordinate. */}
+      <BalanceBlock
+        totalBalance={accountsView.totalLiquidity}
+        safeToSpend={safeToSpend}
+        hasAnyAccount={accountsView.accounts.length > 0}
+        monthIncome={summary.totalIncome}
+        monthExpenses={summary.totalExpenses}
+      />
+
+      {/* Supporting: the one Featured card (Financial Health) stays the sole
+          raised surface; safe-to-spend sits beside it at lower weight. */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <FinancialHealthHeroCard report={healthReport} />
         </div>
-        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <SafeToSpendCard status={safeToSpend} />
-          <KpiCard
-            title="Remaining Budget"
-            value={summary.remainingBudget}
-            icon={Wallet}
-            changePercent={incomeChange}
-            iconBgClass="bg-muted text-muted-foreground"
-          />
-          <KpiCard
-            title={SAVINGS_RATE_LABEL}
-            value={summary.savingsRate}
-            icon={PiggyBank}
-            isCurrency={false}
-            isPercentage={true}
-            badge="25% goal"
-            iconBgClass="bg-muted text-muted-foreground"
-          />
-        </div>
+        <SafeToSpendCard status={safeToSpend} />
       </div>
 
-      {/* Row 2: Compact Stat Strip */}
-      <DashboardStatStrip stats={stats} />
-
-      {/* Row 3: Performance Charts & Category Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <IncomeExpenseChart snapshots={snapshots} />
-        <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
-      </div>
-
-      {/* Row 4: Upcoming Bills & Debt Payments + Savings Goals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Attention — rendered only when something is actually due. */}
+      {billsDueBy.occurrences.length > 0 && (
         <UpcomingBillsCard
           billsDueBy={billsDueBy}
           debts={debtView.debts}
           payments={debtView.payments}
           todayIso={todayIso}
         />
+      )}
+
+      {/* Supporting detail, lower weight. */}
+      <DashboardStatStrip stats={stats} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <IncomeExpenseChart snapshots={snapshots} />
+        <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <FintechCard className="flex flex-col">
           <FintechCardHeader className="flex flex-row items-center justify-between pb-3">
             <div>

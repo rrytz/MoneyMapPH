@@ -102,25 +102,11 @@ export function AccountsClient({
         </div>
       </div>
 
-      {/* Summary KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Total Tracked Liquidity */}
-        <div className="rounded-2xl border border-border bg-card p-6 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="caption text-muted-foreground">Total Tracked Liquidity</span>
-            <div className="p-2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <Wallet className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="ledger-figure tabular-nums text-foreground">
-            <CurrencyDisplay amount={totalLiquidity} />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Sum of funds across {initialAccounts.length} active wallets.
-          </p>
-        </div>
-
-        {/* Card 2: Unassigned Context Notice */}
+      {/* S5b: no liquidity card here. The shell anchor already carries the
+          total on every page — repeating it would put two competing large
+          figures on one surface, which is the hierarchy this slice removes. */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Unassigned context — genuine supporting information. */}
         <div className="rounded-2xl border border-border bg-card p-6 space-y-2">
           <div className="flex items-center justify-between">
             <span className="caption text-muted-foreground">Unassigned Transactions</span>
@@ -136,12 +122,12 @@ export function AccountsClient({
           </p>
         </div>
 
-        {/* Card 3: Account Controls */}
-        <div className="rounded-2xl border border-border bg-card p-5 flex flex-col justify-between">
+        {/* Account controls */}
+        <div className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="caption text-muted-foreground">Active Accounts</span>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-              {initialAccounts.length} Active
+            <span className="caption text-muted-foreground">Accounts</span>
+            <span className="text-xs font-bold text-sulpot-deep bg-sulpot-tint px-2.5 py-1 rounded-full">
+              {initialAccounts.length} active
             </span>
           </div>
           <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer pt-4">
@@ -149,7 +135,7 @@ export function AccountsClient({
               type="checkbox"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
-              className="rounded border-input bg-card text-emerald-600 focus:ring-emerald-500"
+              className="rounded border-input bg-card text-sulpot focus:ring-sulpot"
             />
             Show Archived Accounts ({allAccountsWithArchived.length - initialAccounts.length})
           </label>

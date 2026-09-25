@@ -23,8 +23,8 @@ export interface TideGaugeProps {
   remainingRatio?: number;
   /** 0–1: where the cutoff sits on the scale. */
   cutoffRatio?: number;
-  /** Formatted peso figure shown at the cutoff notch. */
-  cutoffLabel?: string;
+  /** Rendered at the cutoff notch — the safe-to-spend figure. */
+  cutoffLabel?: React.ReactNode;
   phase?: TidePhase;
   className?: string;
 }

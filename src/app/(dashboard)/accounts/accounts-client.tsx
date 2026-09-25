@@ -82,7 +82,7 @@ export function AccountsClient({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="type-page-title text-foreground">
             Accounts & Wallets
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -109,7 +109,7 @@ export function AccountsClient({
         {/* Unassigned context — genuine supporting information. */}
         <div className="rounded-2xl border border-border bg-card p-6 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="caption text-muted-foreground">Unassigned Transactions</span>
+            <span className="type-section-label text-muted-foreground">Unassigned Transactions</span>
             <div className="p-2 rounded-md bg-muted text-muted-foreground">
               <Info className="h-4 w-4" />
             </div>
@@ -125,7 +125,7 @@ export function AccountsClient({
         {/* Account controls */}
         <div className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="caption text-muted-foreground">Accounts</span>
+            <span className="type-section-label text-muted-foreground">Accounts</span>
             <span className="text-xs font-bold text-sulpot-deep bg-sulpot-tint px-2.5 py-1 rounded-full">
               {initialAccounts.length} active
             </span>

@@ -38,8 +38,8 @@ function DonutTooltip({ active, payload }: { active?: boolean; payload?: Tooltip
   return (
     <div className="rounded-xl border border-border bg-card px-3 py-2 shadow-lg text-xs">
       <p className="font-semibold text-foreground">{item.name}</p>
-      <p className="text-muted-foreground tabular-nums">{formatCurrency(item.amount)}</p>
-      <p className="text-muted-foreground">{item.percentage.toFixed(1)}%</p>
+      <p className="type-ledger text-muted-foreground tabular-nums">{formatCurrency(item.amount)}</p>
+      <p className="type-measurement text-muted-foreground">{item.percentage.toFixed(1)}%</p>
     </div>
   );
 }
@@ -135,10 +135,10 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
             )}
             {top5.length === 1 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-black text-foreground tabular-nums">
+                <span className="type-measurement text-xl font-black text-foreground tabular-nums">
                   {top5[0].percentage.toFixed(0)}%
                 </span>
-                <span className="text-[10px] text-muted-foreground tabular-nums">
+                <span className="type-ledger text-[10px] text-muted-foreground tabular-nums">
                   {formatCurrency(top5[0].amount)}
                 </span>
               </div>
@@ -166,8 +166,8 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
                 <span className="text-xs font-semibold text-foreground truncate">{item.name}</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[10px] text-muted-foreground tabular-nums">{item.percentage.toFixed(0)}%</span>
-                <span className="text-xs font-bold text-foreground tabular-nums">
+                <span className="type-measurement text-[10px] text-muted-foreground tabular-nums">{item.percentage.toFixed(0)}%</span>
+                <span className="type-ledger text-xs font-bold text-foreground tabular-nums">
                   {formatCurrency(item.amount)}
                 </span>
               </div>

@@ -187,7 +187,7 @@ export function SimulatorClient({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-border">
                       <span className="text-xs text-muted-foreground font-medium block">Coverage Before</span>
-                      <span className="text-xl font-bold text-foreground tabular-nums block mt-0.5">
+                      <span className="type-measurement text-xl font-bold text-foreground tabular-nums block mt-0.5">
                         {impact.emergencyFundImpact.beforeMonthsCovered} Months
                       </span>
                       <Badge variant="income" className="mt-1 text-[9px] uppercase font-bold">
@@ -196,7 +196,7 @@ export function SimulatorClient({
                     </div>
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-emerald-200 dark:border-emerald-950">
                       <span className="text-xs text-muted-foreground font-medium block">Coverage After</span>
-                      <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block mt-0.5">
+                      <span className="type-measurement text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block mt-0.5">
                         {impact.emergencyFundImpact.afterMonthsCovered} Months
                       </span>
                       <Badge
@@ -308,7 +308,7 @@ export function SimulatorClient({
                   </div>
                   <div>
                     <span className="text-[10px] text-muted-foreground block font-medium">Estimated Amount</span>
-                    <CurrencyDisplay amount={Number(sim.amount)} className="text-lg font-bold text-foreground block" />
+                    <CurrencyDisplay amount={Number(sim.amount)} className="type-ledger text-lg font-bold text-foreground block" />
                   </div>
                 </div>
               ))}

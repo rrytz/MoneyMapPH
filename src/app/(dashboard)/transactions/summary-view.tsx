@@ -87,7 +87,7 @@ export function SummaryView({
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Calendar month net</span>
-              <CurrencyDisplay amount={summary.savingsAmount} className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
+              <CurrencyDisplay amount={summary.savingsAmount} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -103,7 +103,7 @@ export function SummaryView({
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Budget Used</span>
               <div className="flex items-center gap-3">
-                <p className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{summary.budgetUtilization}%</p>
+                <p className="type-measurement text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{summary.budgetUtilization}%</p>
                 <Progress value={summary.budgetUtilization} className="h-2 flex-1 [&>div]:bg-amber-500" />
               </div>
             </div>
@@ -120,7 +120,7 @@ export function SummaryView({
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Active Budget Ceilings</span>
-              <CurrencyDisplay amount={summary.totalBudget} className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
+              <CurrencyDisplay amount={summary.totalBudget} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -208,7 +208,7 @@ export function SummaryView({
                         </span>
                         <div className="min-w-0">
                           <span className="text-xs font-semibold text-foreground block truncate">{item.name}</span>
-                          <span className="text-[10px] text-muted-foreground">{pct.toFixed(1)}% of total</span>
+                          <span className="type-measurement text-[10px] text-muted-foreground">{pct.toFixed(1)}% of total</span>
                         </div>
                       </div>
                       <CurrencyDisplay amount={item.amount} className="text-xs font-bold shrink-0 text-foreground" />

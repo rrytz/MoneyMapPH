@@ -340,7 +340,7 @@ export function SavingsPageClient({
               <span className="mt-6 block text-xs font-medium text-muted-foreground">Total saved balance</span>
               <CurrencyDisplay
                 amount={totalSaved}
-                className="text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
+                className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
               />
             </div>
             <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
@@ -349,7 +349,7 @@ export function SavingsPageClient({
                   <Target className="h-5 w-5" />
                 </div>
                 <span className="mt-4 block text-xs text-muted-foreground">Overall completion</span>
-                <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                   {Math.round(overallProgress)}%
                 </p>
               </div>
@@ -358,7 +358,7 @@ export function SavingsPageClient({
                   <Wallet className="h-5 w-5" />
                 </div>
                 <span className="mt-4 block text-xs text-muted-foreground">Combined goal targets</span>
-                <CurrencyDisplay amount={totalTarget} className="mt-1 block text-2xl font-semibold tabular-nums text-foreground" />
+                <CurrencyDisplay amount={totalTarget} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-foreground" />
               </div>
             </div>
           </div>
@@ -400,17 +400,17 @@ export function SavingsPageClient({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
                 <span className="text-xs text-muted-foreground font-medium block">Coverage Horizon</span>
-                <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5 block">
+                <span className="type-measurement text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5 block">
                   {emergencyStatus.monthsCovered} Months
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
                 <span className="text-xs text-muted-foreground font-medium block">Up to 6-month avg outflow</span>
-                <CurrencyDisplay amount={emergencyStatus.averageExpenses} className="text-xl font-bold text-foreground mt-0.5 block" />
+                <CurrencyDisplay amount={emergencyStatus.averageExpenses} className="type-ledger text-xl font-bold text-foreground mt-0.5 block" />
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
                 <span className="text-xs text-muted-foreground font-medium block">Emergency Fund Balance</span>
-                <CurrencyDisplay amount={emergencyStatus.currentBalance} className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block" />
+                <CurrencyDisplay amount={emergencyStatus.currentBalance} className="type-ledger text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block" />
               </div>
             </div>
           </FintechCardContent>
@@ -476,11 +476,11 @@ export function SavingsPageClient({
                   <div className="flex justify-between items-baseline pt-1">
                     <div>
                       <span className="text-xs text-muted-foreground font-medium">Current Balance</span>
-                      <CurrencyDisplay amount={Number(goal.current_amount)} className="text-2xl font-bold block text-emerald-600 dark:text-emerald-400" />
+                      <CurrencyDisplay amount={Number(goal.current_amount)} className="type-ledger text-2xl font-bold block text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div className="text-right">
                       <span className="text-xs text-muted-foreground font-medium">Target Amount</span>
-                      <CurrencyDisplay amount={Number(goal.target_amount)} className="text-base font-semibold block text-muted-foreground" />
+                      <CurrencyDisplay amount={Number(goal.target_amount)} className="type-ledger text-base font-semibold block text-muted-foreground" />
                     </div>
                   </div>
 
@@ -577,11 +577,11 @@ export function SavingsPageClient({
                     <div className="flex justify-between items-baseline pt-1">
                       <div>
                         <span className="text-xs text-muted-foreground font-medium">Remaining Balance</span>
-                        <CurrencyDisplay amount={remaining} className="text-2xl font-bold block text-rose-600 dark:text-rose-400" />
+                        <CurrencyDisplay amount={remaining} className="type-ledger text-2xl font-bold block text-rose-600 dark:text-rose-400" />
                       </div>
                       <div className="text-right">
                         <span className="text-xs text-muted-foreground font-medium">Total Owed</span>
-                        <CurrencyDisplay amount={Number(debt.total_amount)} className="text-base font-semibold block text-muted-foreground" />
+                        <CurrencyDisplay amount={Number(debt.total_amount)} className="type-ledger text-base font-semibold block text-muted-foreground" />
                       </div>
                     </div>
 
@@ -600,7 +600,7 @@ export function SavingsPageClient({
                           <div key={p.id} className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground text-xs">{formatDate(p.paid_at, "MMM d, yyyy")}</span>
                             <span className="flex items-center gap-1 tabular-nums">
-                              <CurrencyDisplay amount={Number(p.amount)} className="font-semibold" />
+                              <CurrencyDisplay amount={Number(p.amount)} className="type-ledger font-semibold" />
                               <Button
                                 variant="ghost"
                                 size="icon"

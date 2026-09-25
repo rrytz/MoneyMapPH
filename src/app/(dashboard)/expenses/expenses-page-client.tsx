@@ -168,8 +168,8 @@ export function ExpensesPageClient({
               <Badge variant="expense">Total Outflow</Badge>
             </div>
             <div>
-              <span className="caption block">Calendar month spend</span>
-              <CurrencyDisplay amount={total} className="ledger-figure tabular-nums font-semibold text-rose-600 dark:text-rose-400" />
+              <span className="type-section-label block">Calendar month spend</span>
+              <CurrencyDisplay amount={total} className="type-ledger tabular-nums font-semibold text-rose-600 dark:text-rose-400" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -180,10 +180,10 @@ export function ExpensesPageClient({
               <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <PieChart className="h-5 w-5" />
               </div>
-              <span className="caption">Highest Spend</span>
+              <span className="type-section-label">Highest Spend</span>
             </div>
             <div>
-              <span className="caption block">Top Category</span>
+              <span className="type-section-label block">Top Category</span>
               <p className="text-xl font-bold tracking-tight text-foreground truncate">{topCategory.name}</p>
               <p className="text-xs text-muted-foreground tabular-nums">₱{topCategory.amount.toLocaleString()}</p>
             </div>
@@ -196,11 +196,11 @@ export function ExpensesPageClient({
               <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <Calendar className="h-5 w-5" />
               </div>
-              <span className="caption">Logged Items</span>
+              <span className="type-section-label">Logged Items</span>
             </div>
             <div>
-              <span className="caption block">Total Expenses</span>
-              <p className="ledger-figure tabular-nums text-foreground">{count}</p>
+              <span className="type-section-label block">Total Expenses</span>
+              <p className="type-measurement tabular-nums text-foreground">{count}</p>
             </div>
           </FintechCardContent>
         </FintechCard>

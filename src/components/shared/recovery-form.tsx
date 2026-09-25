@@ -20,7 +20,7 @@ export function RecoveryForm() {
     <div className="w-full">
       {state.success ? (
         <div className="text-center">
-          <h1 className="font-display text-2xl font-bold tracking-tight">
+          <h1 className="type-page-title text-foreground">
             Password reset
           </h1>
           <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -36,7 +36,7 @@ export function RecoveryForm() {
         </div>
       ) : (
         <>
-          <h1 className="font-display text-2xl font-bold tracking-tight">
+          <h1 className="type-page-title text-foreground">
             Recover access
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">

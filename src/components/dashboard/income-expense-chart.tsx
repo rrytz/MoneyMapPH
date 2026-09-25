@@ -71,7 +71,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
         </div>
       </FintechCardHeader>
 
-      <FintechCardContent className="h-[270px] w-full pt-2">
+      <FintechCardContent className="type-measurement h-[270px] w-full pt-2">
         {!isMounted ? (
           <div className="h-full w-full flex items-center justify-center">
             <div className="h-[240px] w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/40" />

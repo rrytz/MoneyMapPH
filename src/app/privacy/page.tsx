@@ -36,7 +36,7 @@ export default function PrivacyPage() {
         <div className="mb-8">
           <Logo size="md" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight mb-1">Privacy Policy</h1>
+        <h1 className="type-page-title text-foreground">Privacy Policy</h1>
         <p className="text-sm text-muted-foreground mb-8">Last updated: September 7, 2026</p>
         <div className="space-y-8">
           {sections.map((section) => (

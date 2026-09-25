@@ -59,8 +59,13 @@ export function KpiCard({
         </div>
 
         <div className="space-y-1">
-          <span className="caption">{title}</span>
-          <div className="ledger-figure tabular-nums text-foreground">
+          <span className="type-section-label">{title}</span>
+          <div
+            className={cn(
+              "tabular-nums text-foreground",
+              isPercentage || !isCurrency ? "type-measurement" : "type-ledger"
+            )}
+          >
             {isCurrency ? (
               <CurrencyDisplay amount={value} className={cn("font-semibold text-foreground", colorClass)} />
             ) : (
@@ -79,7 +84,7 @@ export function KpiCard({
                 trendFavorable ? "text-emerald-600" : changePercent < 0 ? "text-rose-500" : "text-slate-400"
               )}
             />
-            <span className="text-muted-foreground text-[11px]">
+            <span className="type-measurement text-muted-foreground">
               {Math.abs(changePercent).toFixed(1)}% from last month
             </span>
           </div>

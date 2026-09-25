@@ -164,7 +164,7 @@ export function BudgetsPageClient({
                 <span className="mt-6 block text-xs font-medium text-muted-foreground">Total budgeted</span>
                 <CurrencyDisplay
                   amount={totalBudgeted}
-                  className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
+                  className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
                 />
               </div>
               <div className="border-t border-border p-6 sm:border-l sm:border-t-0 sm:p-8">
@@ -177,7 +177,7 @@ export function BudgetsPageClient({
                 <span className="mt-6 block text-xs font-medium text-muted-foreground">Calendar month spending</span>
                 <CurrencyDisplay
                   amount={actualTotal}
-                  className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
+                  className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
                 />
               </div>
             </div>
@@ -186,17 +186,17 @@ export function BudgetsPageClient({
                 <span className="flex items-center gap-2 text-xs text-muted-foreground">
                   <PieChart className="h-4 w-4" /> Targeted spending
                 </span>
-                <CurrencyDisplay amount={totalBudgetedSpent} className="mt-1 block text-lg font-semibold tabular-nums text-foreground" />
+                <CurrencyDisplay amount={totalBudgetedSpent} className="type-ledger mt-1 block text-lg font-semibold tabular-nums text-foreground" />
               </div>
               <div className="flex items-center justify-between gap-3 sm:block">
                 <span className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Target className="h-4 w-4" /> No target
                 </span>
-                <CurrencyDisplay amount={totalUnbudgetedSpent} className="mt-1 block text-lg font-semibold tabular-nums text-foreground" />
+                <CurrencyDisplay amount={totalUnbudgetedSpent} className="type-ledger mt-1 block text-lg font-semibold tabular-nums text-foreground" />
               </div>
               <div className="flex items-center justify-between gap-3 sm:block">
                 <span className="text-xs text-muted-foreground">Budgeted remaining</span>
-                <span className={cn("mt-1 block text-lg font-semibold tabular-nums", totalRemaining < 0 ? "text-rose" : "text-foreground")}>
+                <span className={cn("type-ledger mt-1 block text-lg font-semibold tabular-nums", totalRemaining < 0 ? "text-rose" : "text-foreground")}>
                   <CurrencyDisplay amount={totalRemaining} signed />
                 </span>
               </div>

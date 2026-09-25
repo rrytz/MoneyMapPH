@@ -39,7 +39,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
               />
             </svg>
             <div className="absolute text-center flex flex-col items-center">
-              <span className="text-2xl font-black text-foreground tracking-tight">{score}</span>
+              <span className="type-measurement text-2xl font-black text-foreground tracking-tight">{score}</span>
               <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                 {report.grade}
               </span>
@@ -47,11 +47,11 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
           </div>
 
           <div className="space-y-1 min-w-0">
-            <span className="caption">
+            <span className="type-section-label">
               Financial Health Score
             </span>
             <div className="flex items-baseline gap-2">
-              <h2 className="text-xl font-bold text-foreground tracking-tight">{score} / 100</h2>
+              <h2 className="type-measurement text-xl font-bold text-foreground tracking-tight">{score} / 100</h2>
               <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/50">
                 {report.grade}
               </span>
@@ -67,7 +67,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
             <FintechCard key={key} variant="inset">
               <span className="text-[10px] text-muted-foreground block font-normal">{label}</span>
               <span
-                className={`text-xs font-bold ${
+                className={`type-measurement text-xs font-bold ${
                   pct >= 75
                     ? "text-emerald-600 dark:text-emerald-400"
                     : pct >= 50

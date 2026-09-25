@@ -48,7 +48,7 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
         <div className="rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-950 p-4 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium text-rose-700 dark:text-rose-300">Remaining balance</p>
-            <div className="ledger-figure tabular-nums text-rose-600 dark:text-rose-400 mt-0.5">
+            <div className="type-ledger tabular-nums text-rose-600 dark:text-rose-400 mt-0.5">
               <CurrencyDisplay amount={totalRemaining} />
             </div>
           </div>

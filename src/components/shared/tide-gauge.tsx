@@ -109,11 +109,11 @@ export function TideGauge({
           Desaturation belongs to the water and the track, never to the word
           itself, or "lean" reads as a disabled control rather than a state. */}
       <div className="mt-2.5 flex items-baseline justify-between gap-3">
-        <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-ink-muted">
+        <span className="type-measurement text-ink-muted">
           {unmeasured ? "HINDI PA NAKAKITA" : PHASE_LABEL[phase]}
         </span>
         {showCutoff && cutoffLabel && (
-          <span className="font-mono text-[10px] uppercase tracking-wider text-ink">
+          <span className="type-measurement text-ink">
             Cutoff {cutoffLabel}
           </span>
         )}

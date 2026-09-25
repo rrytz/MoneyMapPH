@@ -107,7 +107,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
 
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="caption text-muted-foreground">Current Derived Balance</span>
+          <span className="type-section-label text-muted-foreground">Current Derived Balance</span>
           {account.is_negative && (
             <TooltipProvider>
               <Tooltip>
@@ -125,7 +125,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           )}
         </div>
 
-        <div className="ledger-figure tabular-nums text-card-foreground">
+        <div className="type-ledger tabular-nums text-card-foreground">
           <CurrencyDisplay
             amount={account.current_balance}
             className={account.is_negative ? "font-semibold text-rose-400" : "font-semibold text-card-foreground"}

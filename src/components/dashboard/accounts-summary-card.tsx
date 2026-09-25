@@ -43,8 +43,8 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
       <FintechCardContent className="flex-1 flex flex-col gap-4">
         <div className="rounded-xl bg-slate-50 dark:bg-slate-900 border border-border/70 p-4 flex items-center justify-between gap-4">
           <div>
-            <p className="caption">Total Tracked Liquidity</p>
-            <div className="ledger-figure tabular-nums text-foreground mt-0.5">
+            <p className="type-section-label">Total Tracked Liquidity</p>
+            <div className="type-ledger tabular-nums text-foreground mt-0.5">
               <CurrencyDisplay amount={totalLiquidity} />
             </div>
           </div>

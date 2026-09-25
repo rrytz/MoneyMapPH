@@ -70,7 +70,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
               <span className="mt-6 block text-xs font-medium text-muted-foreground">1-year projected balance</span>
               <CurrencyDisplay
                 amount={endBalance}
-                className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
+                className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
               />
             </div>
             <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
@@ -79,14 +79,14 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                   <Zap className="h-5 w-5" />
                 </div>
                 <span className="mt-4 block text-xs text-muted-foreground">Projected monthly savings pace</span>
-                <CurrencyDisplay amount={projectedMonthlyGrowth} className="mt-1 block text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400" />
+                <CurrencyDisplay amount={projectedMonthlyGrowth} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="border-l border-border p-6">
                 <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <span className="mt-4 block text-xs text-muted-foreground">Projected monthly growth rate</span>
-                <p className="mt-1 text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+                <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
                   +{projectedMonthlyGrowth > 0 && startBalance > 0 ? Math.round((projectedMonthlyGrowth / startBalance) * 100) : 0}%
                 </p>
               </div>
@@ -203,7 +203,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                   
                   <div className="flex items-center gap-2 shrink-0">
                     <Goal className="h-4 w-4 text-emerald-600" />
-                    <span className="text-sm font-bold text-foreground">
+                    <span className="type-measurement text-sm font-bold text-foreground">
                       {goal.monthsToReach === 0 ? (
                         <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5"><Sparkles className="h-3.5 w-3.5" /> Achieved</span>
                       ) : goal.monthsToReach === "infinite" ? (

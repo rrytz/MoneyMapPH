@@ -76,7 +76,7 @@ export function BalanceReadout({
           {loaded ? (
             <span
               className={cn(
-                "text-sm font-semibold tabular-nums leading-none",
+                "type-ledger text-sm font-semibold tabular-nums leading-none",
                 negative ? "text-rose" : "text-ink"
               )}
             >
@@ -87,7 +87,7 @@ export function BalanceReadout({
                not know — the same violation the tide gauge avoids. */
             <span className="text-sm font-semibold leading-none text-ink-faint">&mdash;</span>
           )}
-          <span className="text-[10px] uppercase tracking-wider text-ink-faint">
+          <span className="type-measurement text-[10px] text-ink-faint">
             {loaded ? `${accountCount} ${accountCount === 1 ? "account" : "accounts"}` : ""}
           </span>
         </div>
@@ -170,7 +170,7 @@ export function Topbar({
                     <span className="truncate">{a.name}</span>
                     <span
                       className={cn(
-                        "tabular-nums",
+                        "type-ledger tabular-nums",
                         Number(a.current_balance) < 0 ? "text-rose" : "text-ink"
                       )}
                     >

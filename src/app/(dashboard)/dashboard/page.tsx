@@ -212,13 +212,13 @@ export default async function DashboardPage() {
                           fill="transparent"
                         />
                       </svg>
-                      <span className="absolute text-[10px] font-bold text-foreground tabular-nums">
+                      <span className="type-measurement absolute text-[10px] font-bold text-foreground tabular-nums">
                         {progress}%
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-xs font-bold text-foreground truncate">{goal.name}</h4>
-                      <p className="text-[11px] text-muted-foreground tabular-nums">
+                      <p className="type-measurement text-[11px] text-muted-foreground tabular-nums">
                         ₱{current.toLocaleString()} of {formatCompactAmount(target)}
                       </p>
                     </div>

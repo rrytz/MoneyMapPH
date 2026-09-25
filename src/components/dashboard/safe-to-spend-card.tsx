@@ -18,8 +18,8 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
             </div>
           </div>
           <div className="space-y-1">
-            <span className="caption">Safe to Spend</span>
-            <div className="ledger-figure tabular-nums text-foreground">—</div>
+            <span className="type-section-label">Safe to Spend</span>
+            <div className="type-ledger tabular-nums text-foreground">—</div>
             <p className="text-[11px] text-muted-foreground">Log your paycheck to unlock safe-to-spend.</p>
           </div>
         </FintechCardContent>
@@ -67,8 +67,8 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
         </div>
 
         <div className="space-y-1">
-          <span className="caption">Safe to Spend</span>
-          <CurrencyDisplay amount={status.safeToSpend} signed className={cn("ledger-figure tabular-nums font-semibold", state.color)} />
+          <span className="type-section-label">Safe to Spend</span>
+          <CurrencyDisplay amount={status.safeToSpend} signed className={cn("type-ledger tabular-nums font-semibold", state.color)} />
           <p className="text-[11px] text-muted-foreground">
             this cutoff · ends {formatDate(status.periodEnd, "MMM d")}
           </p>

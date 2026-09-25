@@ -170,7 +170,7 @@ export function AuthForm() {
         <div ref={contentRef} key={mode + (success ? "-ok" : "")}>
           {success ? (
             <div key="success" className={`${entrance} text-center`} style={anim(0.04)}>
-              <h1 className="font-display text-2xl font-bold tracking-tight">Check your email</h1>
+              <h1 className="type-page-title text-foreground">Check your email</h1>
               <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
                 We sent a confirmation link to <strong className="text-foreground">{email}</strong>.
                 Click it to activate your account.
@@ -186,7 +186,7 @@ export function AuthForm() {
           ) : (
             <>
               <div className={`${entrance} mb-7`} style={anim(0.04)}>
-                <h1 className="font-display text-2xl font-bold tracking-tight">
+                <h1 className="type-page-title text-foreground">
                   {isSignin ? "Welcome back" : "Create your account"}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">

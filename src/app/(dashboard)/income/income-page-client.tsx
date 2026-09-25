@@ -180,7 +180,7 @@ export function IncomePageClient({
                     <span className="text-xs font-medium text-muted-foreground block">Calendar month earnings</span>
                     <CurrencyDisplay
                       amount={totalThisMonth}
-                      className="text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
+                      className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
                     />
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export function IncomePageClient({
                       <Wallet className="h-5 w-5" />
                     </div>
                     <span className="mt-4 block text-xs text-muted-foreground">Logged entries</span>
-                    <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                       {optimisticMonthEntries.length}
                     </p>
                   </div>
@@ -199,7 +199,7 @@ export function IncomePageClient({
                       <Layers className="h-5 w-5" />
                     </div>
                     <span className="mt-4 block text-xs text-muted-foreground">Income channels</span>
-                    <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                       {Object.keys(sourceTotals).length}
                     </p>
                   </div>

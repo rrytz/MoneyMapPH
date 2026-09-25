@@ -99,7 +99,7 @@ export function SettingsClient({
     setSelectedCategory(null);
     setCategoryName("");
     setCategoryIcon(FALLBACK_ICON_KEY);
-    setCategoryColor(CATEGORY_COLOR_PALETTE.slate);
+    setCategoryColor(CATEGORY_COLOR_PALETTE.channel);
     setCategoryModalOpen(true);
   }
 

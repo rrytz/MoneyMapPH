@@ -7,8 +7,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* S5a type roles: --font-sans = Instrument Sans (function),
+     --font-display = Bricolage Grotesque (identity),
+     --font-mono = Martian Mono (measurement only). */
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
   --font-display: var(--font-display);
   --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -40,81 +43,146 @@
   --color-danger: var(--danger);
   --color-income: var(--income);
   --color-expense: var(--expense);
+  /* Tide water tokens, exposed as utilities for the gauge + phase language */
+  --color-sulpot: var(--sulpot);
+  --color-sulpot-bright: var(--sulpot-bright);
+  --color-sulpot-deep: var(--sulpot-deep);
+  --color-sulpot-tint: var(--sulpot-tint);
+  --color-agosto: var(--agosto);
+  --color-agosto-deep: var(--agosto-deep);
+  --color-agosto-tint: var(--agosto-tint);
+  --color-water: #1e5f8c;
+  --color-channel: #14496b;
+  /* S5a radius ladder: sm 6 / md 8 / lg 12 / xl 16 / 2xl 24 / 3xl 32 */
   --radius-sm: calc(var(--radius) * 0.375);
   --radius-md: calc(var(--radius) * 0.5);
   --radius-lg: calc(var(--radius) * 0.75);
   --radius-xl: calc(var(--radius) * 1);
-  --radius-2xl: calc(var(--radius) * 1.25);
-  --radius-3xl: calc(var(--radius) * 1.75);
+  --radius-2xl: calc(var(--radius) * 1.5);
+  --radius-3xl: calc(var(--radius) * 2);
 }
 
+/* ============================================================
+   TIDE (S5a) — wet-stone neutrals + water.
+   Chroma encodes water level: sulpot is the only saturated color
+   in the phase vocabulary; agosto drains to desaturated stone so a
+   lean month can never read as failure.
+   ============================================================ */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
+  /* neutrals — green-cast stone, deliberately NOT cream (R−B within 1) */
+  --paper: #f1f4f0;
+  --surface: #fafbf9;
+  --inset: #e8ede7;
+  --hairline: #dce3db;
+  --ink: #1b211c;
+  --ink-muted: #667063;
+  --ink-faint: #98a396;
+
+  /* water — the tide */
+  --sulpot: #0b8f45;
+  --sulpot-bright: #12a85a;
+  --sulpot-deep: #076a34;
+  --sulpot-tint: #ddf1e3;
+  --agosto: #a8ac9e;
+  --agosto-deep: #858a7d;
+  --agosto-tint: #eaeee9;
+
+  /* semantic — data only, never interactive */
+  --rose: #e0455b;
+  --amber: #c97a0a;
+  --indigo: #4b4bc4;
+
+  /* shadcn semantic slots, mapped onto the Tide ramp */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #059669;
+  --popover-foreground: var(--ink);
+  --primary: var(--sulpot);
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #f43f5e;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #059669;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #f43f5e;
-  --income: #059669;
-  --expense: #f43f5e;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #059669;
+  --secondary: var(--inset);
+  --secondary-foreground: var(--ink);
+  --muted: var(--inset);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--inset);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose);
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --ring: var(--sulpot);
+  --success: var(--sulpot);
+  --warning: var(--amber);
+  --danger: var(--rose);
+  --income: var(--sulpot);
+  --expense: var(--rose);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--sulpot);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #059669;
+  --sidebar-accent: var(--inset);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--hairline);
+  --sidebar-ring: var(--sulpot);
+
+  /* S5a radius ladder: 6 / 8 / 12 / 16 / 24 / 32 */
   --radius: 1rem;
 }
 
 .dark {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
-  --popover: #0f172a;
-  --popover-foreground: #f8fafc;
-  --primary: #10b981;
-  --primary-foreground: #020617;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #1e293b;
-  --accent-foreground: #f8fafc;
-  --destructive: #f43f5e;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #10b981;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #f43f5e;
-  --income: #10b981;
-  --expense: #f43f5e;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #10b981;
-  --sidebar-primary-foreground: #020617;
-  --sidebar-accent: #1e293b;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #1e293b;
-  --sidebar-ring: #10b981;
+  /* deep water, not cold slate. The chroma rule inverts: sulpot is brighter
+     and more saturated, agosto stays dim and desaturated. */
+  --paper: #0e1410;
+  --surface: #141b16;
+  --inset: #1a221c;
+  --hairline: #263029;
+  --ink: #e8ede7;
+  --ink-muted: #98a396;
+  --ink-faint: #667063;
+
+  --sulpot: #17b963;
+  --sulpot-bright: #2ed07a;
+  --sulpot-deep: #0b8f45;
+  --sulpot-tint: #12301f;
+  --agosto: #5a6357;
+  --agosto-deep: #454d43;
+  --agosto-tint: #182019;
+
+  --rose: #f06274;
+  --amber: #d99213;
+  --indigo: #6b6bdd;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--sulpot);
+  --primary-foreground: #0e1410;
+  --secondary: var(--inset);
+  --secondary-foreground: var(--ink);
+  --muted: var(--inset);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--inset);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose);
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --ring: var(--sulpot);
+  --success: var(--sulpot);
+  --warning: var(--amber);
+  --danger: var(--rose);
+  --income: var(--sulpot);
+  --expense: var(--rose);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--sulpot);
+  --sidebar-primary-foreground: #0e1410;
+  --sidebar-accent: var(--inset);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--hairline);
+  --sidebar-ring: var(--sulpot);
 }
 
 @layer base {
@@ -132,6 +200,11 @@
   }
   html {
     @apply font-sans;
+    /* S5a density loosening: 14px -> 15px body. S1 made the app dense as a
+       fintech-aesthetic choice; S5a trades some of that for warmth. The
+       transaction list + expense log are flagged for a real-device scanning
+       re-check after S5b (spec R3) — density need not be uniform. */
+    font-size: 15px;
     /* Prevent iOS Safari text autosizing / Android font boosting from inflating
        text past fixed-height tracks (topbar, nav, badges, chart heights). */
     -webkit-text-size-adjust: 100%;

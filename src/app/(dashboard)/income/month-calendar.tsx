@@ -53,7 +53,7 @@ export function MonthCalendar({
 
   return (
     <FintechCard>
-      <FintechCardContent className="p-5 space-y-4">
+      <FintechCardContent className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-slate-400" /> Bills calendar

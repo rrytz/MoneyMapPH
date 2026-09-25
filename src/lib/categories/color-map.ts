@@ -17,35 +17,35 @@
  */
 
 export const CATEGORY_COLOR_PALETTE = {
-  emerald: "#059669",
-  indigo: "#4f46e5",
-  amber: "#f59e0b",
-  rose: "#f43f5e",
-  slate: "#64748b",
-  slateDeep: "#334155",
+  sulpot: "#0b8f45",
+  indigo: "#4b4bc4",
+  amber: "#c97a0a",
+  rose: "#e0455b",
+  water: "#1e5f8c",
+  channel: "#14496b",
 } as const;
 
 export type PaletteKey = keyof typeof CATEGORY_COLOR_PALETTE;
 export const PALETTE_KEYS: PaletteKey[] = [
-  "emerald",
+  "sulpot",
   "indigo",
   "amber",
   "rose",
-  "slate",
-  "slateDeep",
+  "water",
+  "channel",
 ];
 
 /** Human labels for the Settings swatch picker. */
 export const PALETTE_LABELS: Record<PaletteKey, string> = {
-  emerald: "Emerald",
+  sulpot: "Sulpot",
   indigo: "Indigo",
   amber: "Amber",
   rose: "Rose",
-  slate: "Slate",
-  slateDeep: "Slate (deep)",
+  water: "Water",
+  channel: "Channel",
 };
 
-const NEUTRAL = CATEGORY_COLOR_PALETTE.slate;
+const NEUTRAL = CATEGORY_COLOR_PALETTE.channel;
 
 /**
  * Legacy seed hexes -> governed tint.
@@ -54,18 +54,22 @@ const NEUTRAL = CATEGORY_COLOR_PALETTE.slate;
  */
 export const SEED_COLOR_OVERRIDES: Record<string, string> = {
   // --- cyan family (the three that must stop painting cyan) ---
-  "#14b8a6": CATEGORY_COLOR_PALETTE.emerald, // Savings          (teal-500)
-  "#06b6d4": CATEGORY_COLOR_PALETTE.emerald, // Emergency Fund   (cyan-500)
-  "#0ea5e9": CATEGORY_COLOR_PALETTE.emerald, // Motorcycle Fund  (sky-500)
+  "#14b8a6": CATEGORY_COLOR_PALETTE.sulpot, // Savings          (teal-500)
+  "#06b6d4": CATEGORY_COLOR_PALETTE.sulpot, // Emergency Fund   (cyan-500)
+  "#0ea5e9": CATEGORY_COLOR_PALETTE.sulpot, // Motorcycle Fund  (sky-500)
   // --- rainbow seeds folded onto the governed tints ---
-  "#8b5cf6": CATEGORY_COLOR_PALETTE.emerald, // Groceries        (violet)
-  "#a855f7": CATEGORY_COLOR_PALETTE.slate, // Supplements      (purple)
+  "#8b5cf6": CATEGORY_COLOR_PALETTE.sulpot, // Groceries        (violet)
+  "#a855f7": CATEGORY_COLOR_PALETTE.channel, // Supplements      (purple)
   "#d946ef": CATEGORY_COLOR_PALETTE.amber, // Eating Out       (fuchsia)
-  "#ec4899": CATEGORY_COLOR_PALETTE.indigo, // Utilities        (pink)
-  "#6366f1": CATEGORY_COLOR_PALETTE.indigo, // Transportation   (indigo)
-  "#f97316": CATEGORY_COLOR_PALETTE.slate, // Internet         (orange)
-  // #f43f5e (Rent) and #64748b (Misc) are already governed palette hexes and
-  // therefore deliberately absent here — see the precedence note above.
+  "#ec4899": CATEGORY_COLOR_PALETTE.water, // Utilities        (pink)
+  "#6366f1": CATEGORY_COLOR_PALETTE.water, // Transportation   (indigo)
+  "#f97316": CATEGORY_COLOR_PALETTE.channel, // Internet         (orange)
+  // S5a resolves the Ruling P collision. The old palette's rose was #f43f5e —
+  // identical to Rent's seed hex — which forced "an explicit pick always wins"
+  // to render Rent rose. The Tide palette rose is #e0455b, so the collision is
+  // gone and Rent can take the tint the original S4 table always specified.
+  "#f43f5e": CATEGORY_COLOR_PALETTE.water, // Rent             (rose seed -> indigo role)
+  "#64748b": CATEGORY_COLOR_PALETTE.channel, // Miscellaneous   (slate seed -> quiet neutral)
 };
 
 /** The 11 seeded categories and their original stored hex (for tests/docs). */

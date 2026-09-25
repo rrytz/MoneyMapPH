@@ -20,7 +20,9 @@ interface ThemeSnapshot {
   systemTheme: ResolvedTheme;
 }
 
-const SERVER_SNAPSHOT: ThemeSnapshot = { theme: "system", systemTheme: "dark" };
+// S5a light-first: a fresh visit resolves to light unless the user has
+// explicitly stored a choice. Before S5a this was dark.
+const SERVER_SNAPSHOT: ThemeSnapshot = { theme: "system", systemTheme: "light" };
 
 let snapshot: ThemeSnapshot = { ...SERVER_SNAPSHOT };
 const listeners = new Set<() => void>();

@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { cn } from "@/lib/utils";
 
 type FintechCardVariant = "surface" | "featured" | "inset";
@@ -6,10 +6,11 @@ type FintechCardVariant = "surface" | "featured" | "inset";
 const variantClasses: Record<FintechCardVariant, string> = {
   // Workhorse: flat hairline card for structure (KPI cards, account cards,
   // settings tiles, list panels). Never raises a shadow at rest.
-  surface: "rounded-xl border border-border bg-card text-card-foreground p-5",
+  // S5a radius ladder: cards live at 2xl (24px); the hero alone at 3xl (32px).
+  surface: "rounded-2xl border border-border bg-card text-card-foreground p-6",
   // The one resting raised card — the Financial Health hero only.
   featured:
-    "rounded-3xl border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-200 p-5",
+    "rounded-3xl border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-200 p-6",
   // Flat tonal layer boxed INSIDE a card: no border, no shadow of its own.
   inset: "rounded-lg bg-muted/30 border-transparent p-4",
 };

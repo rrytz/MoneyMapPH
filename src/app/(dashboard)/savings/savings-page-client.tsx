@@ -380,7 +380,7 @@ export function SavingsPageClient({
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <FintechCard>
-          <FintechCardContent className="p-5 space-y-3">
+          <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
                 <PiggyBank className="h-5 w-5" />
@@ -395,7 +395,7 @@ export function SavingsPageClient({
         </FintechCard>
 
         <FintechCard>
-          <FintechCardContent className="p-5 space-y-3">
+          <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <Target className="h-5 w-5" />
@@ -410,7 +410,7 @@ export function SavingsPageClient({
         </FintechCard>
 
         <FintechCard>
-          <FintechCardContent className="p-5 space-y-3">
+          <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <Wallet className="h-5 w-5" />
@@ -449,7 +449,7 @@ export function SavingsPageClient({
                   isEmergencyGoal && "border-emerald-500/40 ring-1 ring-emerald-500/20"
                 )}
               >
-                <FintechCardContent className="p-5 space-y-4">
+                <FintechCardContent className="p-6 space-y-4">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
@@ -552,7 +552,7 @@ export function SavingsPageClient({
                   key={debt.id}
                   className="relative overflow-hidden transition-all duration-200 border-rose-200/70 dark:border-rose-900/40"
                 >
-                  <FintechCardContent className="p-5 space-y-4">
+                  <FintechCardContent className="p-6 space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2">

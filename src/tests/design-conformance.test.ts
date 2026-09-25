@@ -173,6 +173,42 @@ describe("design-conformance — accent + light-world regression guard", () => {
         }
       });
     }
+
+    // Tide (S5a): the neutral ramp is now app-specific, so a raw neutral hex IS
+    // a theming bypass by definition — it cannot respond to the light/dark
+    // world. Neutral values must arrive via a token or a semantic class.
+    // Water + semantic hexes stay legal: they are already-sanctioned data
+    // identity (category colors, chart fills, status pills).
+    const BANNED_NEUTRALS = [
+      "1B211C", // --ink
+      "0E1410", // --paper (dark)
+      "141B16", // --surface (dark)
+      "1A221C", // --inset (dark)
+      "263029", // --hairline (dark)
+      "E8EDE7", // --ink (dark world)
+      "98A396", // --ink-muted
+    ];
+    // The token definitions and the governed category palette are where these
+    // values legitimately live.
+    const NEUTRAL_EXEMPT = new Set([
+      "app/globals.css",
+      "lib/categories/color-map.ts",
+      "tests/design-conformance.test.ts",
+    ]);
+    for (const file of files) {
+      const short = rel(file);
+      if (NEUTRAL_EXEMPT.has(short)) continue;
+      const lines = readFileSync(file, "utf8").split("\n");
+      lines.forEach((line, i) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return;
+        for (const hex of BANNED_NEUTRALS) {
+          if (new RegExp(`#${hex}\\b`, "i").test(line)) {
+            violations.push({ file: short, line: i + 1, token: `#${hex}` });
+          }
+        }
+      });
+    }
     expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
   });
 

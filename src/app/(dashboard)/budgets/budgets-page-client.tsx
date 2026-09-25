@@ -152,7 +152,7 @@ export function BudgetsPageClient({
       {statuses.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <FintechCard>
-            <FintechCardContent className="p-5 space-y-3">
+            <FintechCardContent className="p-6 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
                   <Wallet className="h-5 w-5" />
@@ -167,7 +167,7 @@ export function BudgetsPageClient({
           </FintechCard>
 
           <FintechCard>
-            <FintechCardContent className="p-5 space-y-3">
+            <FintechCardContent className="p-6 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
                   <TrendingDown className="h-5 w-5" />
@@ -182,7 +182,7 @@ export function BudgetsPageClient({
           </FintechCard>
 
           <FintechCard>
-            <FintechCardContent className="p-5 space-y-3">
+            <FintechCardContent className="p-6 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                   <PieChart className="h-5 w-5" />
@@ -200,7 +200,7 @@ export function BudgetsPageClient({
           </FintechCard>
 
           <FintechCard>
-            <FintechCardContent className="p-5 space-y-3">
+            <FintechCardContent className="p-6 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                   <Target className="h-5 w-5" />
@@ -237,7 +237,7 @@ export function BudgetsPageClient({
 
             return (
               <FintechCard key={status.categoryId} className="space-y-4">
-                <FintechCardContent className="p-5 space-y-4">
+                <FintechCardContent className="p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div
@@ -303,7 +303,7 @@ export function BudgetsPageClient({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {unbudgetedViews.map((view) => (
                 <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
-                  <FintechCardContent className="p-5 space-y-4">
+                  <FintechCardContent className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <div

@@ -1,19 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora } from "next/font/google";
+import { Bricolage_Grotesque, Instrument_Sans, Martian_Mono } from "next/font/google";
 import Script from "next/script";
 import { SerwistProvider } from "@serwist/turbopack/react";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 
-const inter = Inter({
+// S5a type split — three roles, mirroring the language split:
+// characterful where identity speaks, plain where function speaks,
+// mono strictly where a real measurement is shown.
+const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
 
-const sora = Sora({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700", "800"],
+});
+
+const martianMono = Martian_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -35,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#020617",
+  themeColor: "#f1f4f0",
   // Required for env(safe-area-inset-*) to resolve to real values in standalone
   // (without viewport-fit=cover the insets are all 0 and content runs under the
   // notch/Dynamic Island and home indicator).
@@ -69,7 +77,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${sora.variable} font-sans antialiased`}>
+      <body className={`${instrumentSans.variable} ${bricolage.variable} ${martianMono.variable} font-sans antialiased`}>
         <ThemeProvider>
           <SerwistProvider
             swUrl="/serwist/sw.js"

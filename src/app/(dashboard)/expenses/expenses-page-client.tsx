@@ -160,7 +160,7 @@ export function ExpensesPageClient({
       {/* Top KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <FintechCard>
-          <FintechCardContent className="p-5 space-y-3">
+          <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-md bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
                 <TrendingDown className="h-5 w-5" />
@@ -175,7 +175,7 @@ export function ExpensesPageClient({
         </FintechCard>
 
         <FintechCard>
-          <FintechCardContent className="p-5 space-y-3">
+          <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <PieChart className="h-5 w-5" />
@@ -191,7 +191,7 @@ export function ExpensesPageClient({
         </FintechCard>
 
         <FintechCard>
-          <FintechCardContent className="p-5 space-y-3">
+          <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <Calendar className="h-5 w-5" />

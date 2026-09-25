@@ -105,7 +105,7 @@ export function AccountsClient({
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Total Tracked Liquidity */}
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-2">
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-2">
           <div className="flex items-center justify-between">
             <span className="caption text-muted-foreground">Total Tracked Liquidity</span>
             <div className="p-2 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -121,7 +121,7 @@ export function AccountsClient({
         </div>
 
         {/* Card 2: Unassigned Context Notice */}
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-2">
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-2">
           <div className="flex items-center justify-between">
             <span className="caption text-muted-foreground">Unassigned Transactions</span>
             <div className="p-2 rounded-md bg-muted text-muted-foreground">

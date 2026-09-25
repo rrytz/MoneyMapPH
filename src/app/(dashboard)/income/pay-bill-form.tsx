@@ -59,7 +59,7 @@ export function PayBillForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <form className="w-full max-w-sm rounded-2xl bg-background p-5 space-y-4" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
+      <form className="w-full max-w-sm rounded-2xl bg-background p-6 space-y-4" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
         <div>
           <h3 className="text-sm font-semibold">
             {unpay ? `Unpay ${occurrence.billName}` : `Pay ${occurrence.billName}`}

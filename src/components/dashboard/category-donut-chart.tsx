@@ -18,12 +18,12 @@ interface CategoryDonutChartProps {
 // Governed 6-tint palette. Replaces the old rainbow fallback, which carried
 // banned cyan (#3b82f6, #06b6d4) and an off-palette orange.
 const FALLBACK_COLORS: string[] = [
-  CATEGORY_COLOR_PALETTE.emerald,
-  CATEGORY_COLOR_PALETTE.indigo,
+  CATEGORY_COLOR_PALETTE.sulpot,
+  CATEGORY_COLOR_PALETTE.water,
   CATEGORY_COLOR_PALETTE.amber,
   CATEGORY_COLOR_PALETTE.rose,
-  CATEGORY_COLOR_PALETTE.slate,
-  CATEGORY_COLOR_PALETTE.slateDeep,
+  CATEGORY_COLOR_PALETTE.channel,
+  CATEGORY_COLOR_PALETTE.indigo,
 ];
 
 interface TooltipPayload {

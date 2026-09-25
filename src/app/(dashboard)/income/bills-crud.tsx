@@ -49,7 +49,7 @@ export function BillsCrud({ bills, categories }: { bills: Bill[]; categories: Ex
 
   return (
     <FintechCard>
-      <FintechCardContent className="p-5 space-y-4">
+      <FintechCardContent className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Bills</h3>
           <Button size="sm" variant="outline" onClick={adding ? () => setAdding(false) : startAdd}>

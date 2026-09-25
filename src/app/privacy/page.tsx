@@ -34,7 +34,7 @@ export default function PrivacyPage() {
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
         <div className="mb-8">
-          <Logo size="md" showTagline />
+          <Logo size="md" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight mb-1">Privacy Policy</h1>
         <p className="text-sm text-muted-foreground mb-8">Last updated: September 7, 2026</p>

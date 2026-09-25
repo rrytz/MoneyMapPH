@@ -33,7 +33,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
 
           <div className="relative z-10">
             <Link href="/" className="inline-flex auth-animate-rise">
-              <Logo size="md" showTagline />
+              <Logo size="md" />
             </Link>
           </div>
 

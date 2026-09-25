@@ -35,6 +35,7 @@ The implementation will expose named role classes rather than relying on
 page-local Tailwind utilities:
 
 ```text
+.type-identity
 .type-page-title
 .type-nav
 .type-nav-group
@@ -49,7 +50,8 @@ Sizes follow the role. They do not define the role.
 ### Required scale relationships
 
 - `.type-page-title` is the page-level identity voice and is the only H1 role.
-- The home hero figure is the only identity-sized financial figure.
+- The home hero figure is the only identity-sized financial figure and uses
+  `.type-identity`; page H1s use `.type-page-title`.
 - Page-dominant financial figures use the ledger family at a deliberate larger
   step; supporting ledger figures use the canonical ledger step.
 - Counts, percentages, chart ticks, and ratios use the measurement role even

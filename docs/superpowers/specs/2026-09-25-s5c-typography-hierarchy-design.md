@@ -66,7 +66,7 @@ The typography change does not leave the existing nav fragility unnamed.
 | Viewport | Treatment |
 |---|---|
 | `≥1280px` | Full grouped navigation: group labels plus all nine destinations in one row |
-| `1024–1279px` | Compact navigation: all nine destinations remain available, group labels are hidden, and the row may scroll horizontally as a safety fallback; it never wraps |
+| `1024–1279px` | Compact navigation: all nine destinations remain available, group labels are hidden, and the row may scroll horizontally as a safety fallback; it never wraps. A visible right-edge fade/scroll affordance makes the overflow discoverable, and a 1100px probe must reach all nine destinations. |
 | `<1024px` | Existing bottom navigation remains the sole primary navigation; desktop nav is hidden |
 
 This slice does not introduce a new More surface at the narrow desktop width.
@@ -123,7 +123,9 @@ chart, and optional `Plan • Track • Grow` tagline. It is replaced by:
 - existing size/tone flexibility where useful.
 
 Auth, legal, offline, and print surfaces are updated because the old mark is
-not limited to the dashboard shell.
+not limited to the dashboard shell. The tagline dies **everywhere** — topbar,
+auth, legal, offline, and print — because it is pre-Tide branding and would
+create inconsistent branding if it survived outside the shell.
 
 ## Migration scope
 

@@ -114,6 +114,63 @@ function sourceUsesRole(source: string, role: string): boolean {
   return sourceUsesClass(withoutComments(source), role);
 }
 
+/**
+ * Opening tags of an element whose className declares a multi-column grid.
+ * Group 1 is the declared track count, group 2 the whole tag.
+ *
+ * Matches responsive prefixes (`lg:grid-cols-2`) because the defect appears at
+ * that breakpoint, and arbitrary-value tracks (`lg:grid-cols-[1.15fr_0.85fr]`),
+ * which are just as capable of leaving a hole and are used in three files.
+ * Single-track values (`grid-cols-1`, `grid-cols-[1fr]`) are not multi-column.
+ */
+const GRID_OPEN_RE =
+  /<([A-Za-z][\w.]*)\b((?:[^<>"']|"[^"]*"|'[^']*')*?\b(?:[a-z]+:)?grid-cols-(?:(\d+)|\[([^\]]*)\])(?:[^<>"']|"[^"]*"|'[^']*')*?)>/g;
+
+/** Any JSX tag, including fragments, with its self-closing flag. */
+const JSX_TAG_RE = /<(\/?)(>|[A-Za-z][\w.]*)((?:[^<>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
+
+/** How many column tracks a grid-cols declaration asks for. */
+function declaredTrackCount(numeric: string | undefined, arbitrary: string | undefined): number {
+  if (numeric !== undefined) return Number(numeric);
+  if (arbitrary === undefined) return 1;
+  return arbitrary.split("_").filter(Boolean).length;
+}
+
+/**
+ * Count the direct element children of the element whose opening tag ends at
+ * `afterOpenTag`, returning -1 if the element is never closed (which means the
+ * scan cannot be trusted, and the rule should stay quiet rather than guess).
+ *
+ * Children inside JSX expression containers count, because they do render as
+ * children: `{cond && <div/>}` is one child, and `{items.map(...)}` is one
+ * child in source that becomes many at runtime — both mean the grid is not
+ * lone. A JSX comment is not a child and is not counted.
+ */
+function directElementChildCount(source: string, afterOpenTag: number): number {
+  const scanner = new RegExp(JSX_TAG_RE.source, "g");
+  scanner.lastIndex = afterOpenTag;
+  let depth = 0;
+  let children = 0;
+  let match: RegExpExecArray | null;
+  while ((match = scanner.exec(source))) {
+    const [, closing, , , selfClose] = match;
+    if (closing) {
+      // A closing tag seen while depth is 0 is this element's own close. It must
+      // be recognised *before* decrementing, or depth goes to -1, the equality
+      // test below never fires, and the scan runs on into the rest of the file
+      // returning a meaningless count.
+      if (depth === 0) return children;
+      depth -= 1;
+    } else if (selfClose) {
+      if (depth === 0) children += 1;
+    } else {
+      if (depth === 0) children += 1;
+      depth += 1;
+    }
+  }
+  return -1;
+}
+
 const LOGO_CALLER_FILES = [
   "components/shared/auth-shell.tsx",
   "app/privacy/page.tsx",
@@ -534,6 +591,99 @@ describe("S5c typography hierarchy detector", () => {
     const source = read("components/dashboard/balance-block.tsx");
     const characterUses = (source.match(/type-character/g) || []).length;
     expect(characterUses).toBeGreaterThanOrEqual(2);
+  });
+
+  it("has no multi-column grid holding exactly one child", () => {
+    // Composition defect, and the one rule in this file that is about layout
+    // rather than type. A grid-cols-N (N > 1) wrapper with a single child
+    // leaves N-1 columns empty: the child takes one column and the rest of the
+    // row is a hole. Either the block should be full width (drop the grid) or
+    // it should be paired with a neighbour (the composition pass).
+    //
+    // No allowlist, for the same reason the stock-neutral rule has none: a
+    // multi-column grid with one child is never what anyone meant. The variant
+    // where the lone child carries col-span-N is also flagged, because that is
+    // a one-column grid wearing a two-column grid's markup.
+    //
+    // This is a *declared* shape, not a measured one - the runtime check lives
+    // in the DOM probe, which confirms the rendered column count. This rule
+    // catches the declaration, which is where the defect is introduced.
+    //
+    // Status, stated plainly so this is not over-read: the codebase currently
+    // satisfies this rule. It reports zero offenders. It was written expecting
+    // to catch live defects on /forecasting and /accounts and it caught
+    // neither - those screens have lone full-width *blocks* (orphans), which
+    // is a different defect this rule cannot see.
+    //
+    // So the honest justification is the modest one: it pins a property the
+    // codebase already holds, at zero cost, with no exemptions, and it cannot
+    // start failing quietly. Not "it fixed two screens." An overstated
+    // justification is how a rule loses trust, and it is also how a rule that
+    // fires on correct code ends up allowlisted instead of deleted.
+    const offenders: string[] = [];
+    for (const file of TSX_FILES) {
+      const source = withoutComments(readFileSync(file, "utf8"));
+      for (const match of source.matchAll(GRID_OPEN_RE)) {
+        const tracks = declaredTrackCount(match[3], match[4]);
+        if (tracks < 2) continue; // one track is not a multi-column grid
+        const children = directElementChildCount(source, match.index + match[0].length);
+        if (children === 1) {
+          const line = source.slice(0, match.index).split("\n").length;
+          // A lone child that spans the whole row is a one-column grid wearing
+          // a two-column grid's markup: same visual result, redundant wrapper.
+          const inner = source.slice(match.index, match.index + 600);
+          const spans = new RegExp(`\\b(?:[a-z]+:)?col-span-(?:${tracks}|full)\\b`).test(inner);
+          offenders.push(
+            `${rel(file)}:${line} — ${match[0].match(/className="[^"]*"/)?.[0] ?? match[0].slice(0, 60)}` +
+              (spans ? "  (lone child spans the row: a one-column grid in disguise)" : "")
+          );
+        }
+      }
+    }
+    expect(
+      offenders,
+      `Multi-column grids holding exactly one child:\n  ${offenders.join("\n  ")}`
+    ).toEqual([]);
+  });
+
+  it("counts grid children correctly, so the lone-child rule can fail", () => {
+    // A rule that cannot go red is worse than no rule: it reports "clean" for
+    // the wrong reason. These fixtures pin the scanner's counting, including
+    // the off-by-one that once made the rule silently vacuous.
+    const count = (fragment: string) => {
+      const open = fragment.match(/<div\b[^>]*>/)![0];
+      return directElementChildCount(fragment, fragment.indexOf(open) + open.length);
+    };
+
+    // One child: the defect.
+    expect(count(`<div className="grid lg:grid-cols-2"><Card /></div>`)).toBe(1);
+    expect(
+      count(`<div className="grid lg:grid-cols-2">
+        <FintechCard>
+          <div className="p-6"><span>deep</span></div>
+        </FintechCard>
+      </div>`)
+    ).toBe(1);
+
+    // Two children: fine, and the case the broken scanner got wrong.
+    expect(count(`<div className="grid lg:grid-cols-2"><A /><B /></div>`)).toBe(2);
+    expect(count(`<div className="grid lg:grid-cols-2"><A /><B /></div><div>after</div>`)).toBe(2);
+
+    // A .map() is one child in source and many at runtime — not lone.
+    expect(
+      count(`<div className="grid md:grid-cols-2 lg:grid-cols-3">{items.map((i) => (
+        <Card key={i} />
+      ))}</div>`)
+    ).toBe(1);
+
+    // A conditional child is a child.
+    expect(count(`<div className="grid lg:grid-cols-2">{ok && <Card />}</div>`)).toBe(1);
+
+    // Track counting, including the arbitrary-value form.
+    expect(declaredTrackCount("2", undefined)).toBe(2);
+    expect(declaredTrackCount("1", undefined)).toBe(1);
+    expect(declaredTrackCount(undefined, "1.15fr_0.85fr")).toBe(2);
+    expect(declaredTrackCount(undefined, "1fr")).toBe(1);
   });
 
   it("uses TideMark without the old logo or tagline contract", () => {

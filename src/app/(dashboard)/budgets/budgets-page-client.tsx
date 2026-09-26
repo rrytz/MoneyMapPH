@@ -181,26 +181,6 @@ export function BudgetsPageClient({
                 />
               </div>
             </div>
-            <div className="grid gap-4 border-t border-border bg-muted/30 px-6 py-4 sm:grid-cols-3 sm:px-8">
-              <div className="flex items-center justify-between gap-3 sm:block">
-                <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <PieChart className="h-4 w-4" /> Targeted spending
-                </span>
-                <CurrencyDisplay amount={totalBudgetedSpent} className="type-ledger mt-1 block text-lg font-semibold tabular-nums text-foreground" />
-              </div>
-              <div className="flex items-center justify-between gap-3 sm:block">
-                <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Target className="h-4 w-4" /> No target
-                </span>
-                <CurrencyDisplay amount={totalUnbudgetedSpent} className="type-ledger mt-1 block text-lg font-semibold tabular-nums text-foreground" />
-              </div>
-              <div className="flex items-center justify-between gap-3 sm:block">
-                <span className="text-xs text-muted-foreground">Budgeted remaining</span>
-                <span className={cn("mt-1 block text-lg font-semibold tabular-nums", totalRemaining < 0 ? "text-rose" : "text-foreground")}>
-                  <CurrencyDisplay amount={totalRemaining} signed className="figure-inline" />
-                </span>
-              </div>
-            </div>
           </FintechCardContent>
         </FintechCard>
       )}
@@ -301,12 +281,50 @@ export function BudgetsPageClient({
           })}
         </div>
 
-        {unbudgetedViews.length > 0 && (
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-base text-foreground">Unbudgeted Categories</h3>
-              <p className="text-xs text-muted-foreground">Spending in categories without a budget target in this calendar month.</p>
+        {/* The right column carries its own heading, and that is the whole fix.
+            It previously had none, so it inherited "Unbudgeted Categories" from
+            its first child and anything placed here read as unbudgeted
+            spending. That is what disqualified the affordance CTA from this
+            column - not the layout. With its own meaning, both the breakdown
+            strip and the unbudgeted cards are correct here by construction,
+            which is the semantic fix rather than a layout workaround. */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold text-base text-foreground">Beyond category budgets</h3>
+            <p className="text-xs text-muted-foreground">Budget-level figures, and spending in categories without a target this month.</p>
+          </div>
+
+          {/* The allowance breakdown, moved out of the allowance card. It is 84px
+              the card no longer carries, and the row does not grow to take it
+              back because this column has slack - which is how moving a block
+              into spare room shortens the stack by that block's full height.
+
+              Stacked rather than 3-up: 468px of column leaves ~150px per track,
+              too narrow for these labels. The existing `sm:block` markup already
+              renders label-left / figure-right when narrow, so dropping the 3-up
+              is all this needs. */}
+          <div className="grid gap-3 rounded-2xl border border-border bg-muted/30 px-5 py-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                <PieChart className="h-4 w-4" /> Targeted spending
+              </span>
+              <CurrencyDisplay amount={totalBudgetedSpent} className="type-ledger text-lg font-semibold tabular-nums text-foreground" />
             </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Target className="h-4 w-4" /> No target
+              </span>
+              <CurrencyDisplay amount={totalUnbudgetedSpent} className="type-ledger text-lg font-semibold tabular-nums text-foreground" />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground">Budgeted remaining</span>
+              <span className={cn("text-lg font-semibold tabular-nums", totalRemaining < 0 ? "text-rose" : "text-foreground")}>
+                <CurrencyDisplay amount={totalRemaining} signed className="figure-inline" />
+              </span>
+            </div>
+          </div>
+
+          {unbudgetedViews.length > 0 && (
             <div className="grid grid-cols-1 gap-5">
               {unbudgetedViews.map((view) => (
                 <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
@@ -348,9 +366,9 @@ export function BudgetsPageClient({
                 </FintechCard>
               ))}
             </div>
-          </div>
-        )}
+          )}
         </div>
+      </div>
         </>
       )}
 

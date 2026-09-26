@@ -48,6 +48,17 @@ next-env.d.ts
 .next-dev.log*
 .superpowers/
 
+# verification: the gate is infrastructure and stays TRACKED (it is the thing
+# catching regressions); the output it produces is evidence and stays untracked.
+# The original blanket carve-out for verification/ predates the gate living
+# there — it was written when the directory held only artifacts, which are
+# ephemeral and safe to lose. A `git clean -fdx` must not delete the
+# assertions, and they must be reviewable in a diff.
+/verification/evidence/
+/verification/screenshot-prep/node_modules/
+# transient auth handoff written by mint.mjs / cookie-bridge.mjs
+/verification/screenshot-prep/*.tmp
+
 # impeccable-ignore-start
 # Ephemeral output, runtime state, and per-dev overrides.
 # Unanchored: .impeccable may sit at the repo root or under a nested

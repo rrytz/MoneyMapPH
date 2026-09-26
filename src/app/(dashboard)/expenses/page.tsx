@@ -15,7 +15,13 @@ export default async function ExpensesPage() {
 
   const { month, year } = getCurrentMonthYear();
   const [{ data: entries }, categories, aggregation, accountsResult] = await Promise.all([
-    getExpenses(supabase, user.id, { month, year, limit: 50 }),
+    // limit 10_000, not 50, matching /transactions. At 50 this was a ceiling
+    // rather than a page size: a user with more than 50 expenses in a month had
+    // entries that could not be reached at all, and the pager added last slice
+    // would have shown an empty page 4 rather than admitting one. Fetch broadly
+    // and let the client's 15-per-page pager do the narrowing, which is what
+    // its sibling already does.
+    getExpenses(supabase, user.id, { month, year, limit: 10_000 }),
     getExpenseCategories(supabase, user.id),
     getExpenseAggregation(supabase, user.id, month, year),
     getAccountsWithBalances(supabase, user.id, false).catch(() => ({ accounts: [], unassigned: { unassignedIncome: 0, unassignedExpenses: 0 }, totalLiquidity: 0 })),

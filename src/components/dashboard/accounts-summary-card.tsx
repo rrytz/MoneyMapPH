@@ -44,8 +44,8 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
         <div className="rounded-xl bg-slate-50 dark:bg-slate-900 border border-border/70 p-4 flex items-center justify-between gap-4">
           <div>
             <p className="type-section-label">Total Tracked Liquidity</p>
-            <div className="type-ledger tabular-nums text-foreground mt-0.5">
-              <CurrencyDisplay amount={totalLiquidity} />
+            <div className="tabular-nums text-foreground mt-0.5">
+              <CurrencyDisplay amount={totalLiquidity} className="type-ledger" />
             </div>
           </div>
           <div className="p-2.5 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
@@ -103,7 +103,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
                       : "text-foreground"
                   )}
                 >
-                  <CurrencyDisplay amount={account.current_balance} />
+                  <CurrencyDisplay amount={account.current_balance} className="figure-inline" />
                 </div>
               </div>
             ))}
@@ -120,13 +120,13 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
             <p className="flex items-center justify-between">
               <span>Unassigned income</span>
               <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                <CurrencyDisplay amount={unassigned.unassignedIncome} />
+                <CurrencyDisplay amount={unassigned.unassignedIncome} className="figure-inline" />
               </span>
             </p>
             <p className="flex items-center justify-between">
               <span>Unassigned expenses</span>
               <span className="font-semibold text-rose-600 dark:text-rose-400 tabular-nums">
-                <CurrencyDisplay amount={unassigned.unassignedExpenses} />
+                <CurrencyDisplay amount={unassigned.unassignedExpenses} className="figure-inline" />
               </span>
             </p>
           </div>

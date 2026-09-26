@@ -62,9 +62,9 @@ export function AllocationEditor({
 
       <div className="space-y-2">
         <div className="flex justify-between text-xs">
-          <span>Allocated: <CurrencyDisplay amount={totalAllocated} /></span>
+          <span>Allocated: <CurrencyDisplay amount={totalAllocated} className="figure-inline" /></span>
           <span className={remaining < 0 ? "text-danger font-semibold" : "text-muted-foreground"}>
-            Unallocated: <CurrencyDisplay amount={remaining} />
+            Unallocated: <CurrencyDisplay amount={remaining} className="figure-inline" />
           </span>
         </div>
         <div className="w-full bg-muted h-2 rounded-full overflow-hidden">

@@ -68,15 +68,15 @@ export function BillsSummaryCard({
         <div className="grid grid-cols-3 gap-3">
           <div>
             <p className="text-[11px] text-muted-foreground">Paid this cutoff</p>
-            <CurrencyDisplay amount={paidTotal} className={cn("text-sm font-semibold")} />
+            <CurrencyDisplay amount={paidTotal} className={cn("type-ledger", cn("text-sm font-semibold"))} />
           </div>
           <div>
             <p className="text-[11px] text-muted-foreground">Upcoming</p>
-            <CurrencyDisplay amount={upcomingTotal} className={cn("text-sm font-semibold", v.color)} />
+            <CurrencyDisplay amount={upcomingTotal} className={cn("type-ledger", cn("text-sm font-semibold", v.color))} />
           </div>
           <div>
             <p className="text-[11px] text-muted-foreground">Total</p>
-            <CurrencyDisplay amount={totalDue} className="text-sm font-semibold" />
+            <CurrencyDisplay amount={totalDue} className="type-ledger text-sm font-semibold" />
           </div>
         </div>
 

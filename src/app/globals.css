@@ -280,6 +280,14 @@
     font-weight: 600;
     letter-spacing: -0.01em;
   }
+  /* The documented inline boundary. A figure that is part of a row or a
+     sentence stays at body scale in the function face — it does not compete
+     for attention, so it must not borrow the hero scale. Stated explicitly so
+     "small" is a decision on the element rather than an accident of nesting. */
+  .figure-inline {
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
 
   @media (min-width: 640px) {
     .type-page-title {

@@ -61,13 +61,17 @@ export function KpiCard({
         <div className="space-y-1">
           <span className="type-section-label">{title}</span>
           <div
-            className={cn(
-              "tabular-nums text-foreground",
-              isPercentage || !isCurrency ? "type-measurement" : "type-ledger"
-            )}
+            className="tabular-nums text-foreground"
           >
             {isCurrency ? (
-              <CurrencyDisplay amount={value} className={cn("font-semibold text-foreground", colorClass)} />
+              <CurrencyDisplay
+                amount={value}
+                className={cn(
+                  "font-semibold text-foreground",
+                  isPercentage || !isCurrency ? "type-measurement" : "type-ledger",
+                  colorClass
+                )}
+              />
             ) : (
               <span className={cn("font-semibold text-foreground tabular-nums", colorClass)}>
                 {isPercentage ? `${value.toFixed(1)}%` : value}

@@ -196,8 +196,8 @@ export function BudgetsPageClient({
               </div>
               <div className="flex items-center justify-between gap-3 sm:block">
                 <span className="text-xs text-muted-foreground">Budgeted remaining</span>
-                <span className={cn("type-ledger mt-1 block text-lg font-semibold tabular-nums", totalRemaining < 0 ? "text-rose" : "text-foreground")}>
-                  <CurrencyDisplay amount={totalRemaining} signed />
+                <span className={cn("mt-1 block text-lg font-semibold tabular-nums", totalRemaining < 0 ? "text-rose" : "text-foreground")}>
+                  <CurrencyDisplay amount={totalRemaining} signed className="figure-inline" />
                 </span>
               </div>
             </div>
@@ -315,7 +315,7 @@ export function BudgetsPageClient({
 
                     <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
                       <span className="text-muted-foreground">
-                        Spent: <CurrencyDisplay amount={view.spent} className="font-bold text-foreground" />
+                        Spent: <CurrencyDisplay amount={view.spent} className="figure-inline font-bold text-foreground" />
                       </span>
                       <Button
                         onClick={() => setFormOpen(true)}

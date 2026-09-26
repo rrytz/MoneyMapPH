@@ -48,8 +48,8 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
         <div className="rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-950 p-4 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium text-rose-700 dark:text-rose-300">Remaining balance</p>
-            <div className="type-ledger tabular-nums text-rose-600 dark:text-rose-400 mt-0.5">
-              <CurrencyDisplay amount={totalRemaining} />
+            <div className="tabular-nums text-rose-600 dark:text-rose-400 mt-0.5">
+              <CurrencyDisplay amount={totalRemaining} className="type-ledger" />
             </div>
           </div>
           <div className="p-2.5 rounded-md bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400">
@@ -94,7 +94,7 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
                   </p>
                 </div>
                 <div className="text-xs font-bold tabular-nums text-rose-600 dark:text-rose-400">
-                  <CurrencyDisplay amount={remaining} />
+                  <CurrencyDisplay amount={remaining} className="figure-inline" />
                 </div>
               </div>
             ))}

@@ -72,6 +72,25 @@ Currency is never mono merely because it is numeric. Controls and English
 functional copy never receive the character voice. The committed typography
 conformance test is the enforcement point for these roles.
 
+### The figure boundary
+
+Every currency figure declares its role on the element itself. The rule:
+
+> A figure that competes for attention gets the ledger role; a figure that's
+> part of a row or a sentence doesn't.
+
+- `type-ledger` — the answer to the question the surface asks
+- `type-measurement` — a dominant %, ratio, or count
+- `figure-inline` — an amount inside a row, cell, pill, or sentence
+- `type-identity` — the home hero, which is deliberately not tabular currency
+
+The marker is required rather than inherited. `CurrencyDisplay` sets no
+`font-family`, so an un-marked instance silently inherits whatever face its
+ancestor happens to set — the same component could render in Instrument Sans in
+one row and Bricolage in another. Declaring the role on the element removes the
+guesswork. The source detector proves the declaration exists; the runtime probe
+proves it resolves to the intended face.
+
 ## Navigation and identity mark
 
 - `≥1280px`: full grouped desktop navigation

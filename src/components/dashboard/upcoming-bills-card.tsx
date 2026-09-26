@@ -68,7 +68,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
           <FintechCardTitle>Upcoming Bills &amp; Debt Payments</FintechCardTitle>
           <p className="text-xs text-muted-foreground">
             Due through {formatDate(billsDueBy.horizonDate, "MMM d")} ·{" "}
-            <CurrencyDisplay amount={billTotal} /> bills + <CurrencyDisplay amount={debtTotal} /> debts
+            <CurrencyDisplay amount={billTotal} className="figure-inline" /> bills + <CurrencyDisplay amount={debtTotal} className="figure-inline" /> debts
           </p>
         </div>
         <Link
@@ -113,7 +113,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
                     </p>
                   </div>
                   <div className="text-xs font-bold tabular-nums text-foreground">
-                    <CurrencyDisplay amount={item.amount} />
+                    <CurrencyDisplay amount={item.amount} className="figure-inline" />
                   </div>
                 </div>
               );

@@ -81,15 +81,18 @@ export default async function PrintTransactionsPage(props: {
       <div className="grid grid-cols-3 gap-4 border border-slate-200 rounded-lg p-4 bg-slate-50/50">
         <div>
           <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Total Income</span>
-          <CurrencyDisplay amount={totalIncome} className="text-base font-black text-slate-900" />
+          <CurrencyDisplay amount={totalIncome} className="type-ledger text-base font-black text-slate-900" />
         </div>
         <div>
           <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Total Expenses</span>
-          <CurrencyDisplay amount={totalExpense} className="text-base font-black text-slate-900" />
+          <CurrencyDisplay amount={totalExpense} className="type-ledger text-base font-black text-slate-900" />
         </div>
         <div>
           <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Calendar month net cash flow</span>
-          <CurrencyDisplay amount={netCashFlow} className={`text-base font-black ${netCashFlow >= 0 ? "text-emerald-700" : "text-rose-700"}`} />
+          <CurrencyDisplay
+            amount={netCashFlow}
+            className={`type-ledger text-base font-black ${netCashFlow >= 0 ? "text-emerald-700" : "text-rose-700"}`}
+          />
         </div>
       </div>
 

@@ -398,19 +398,19 @@ export function SavingsPageClient({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
-                <span className="text-xs text-muted-foreground font-medium block">Coverage Horizon</span>
-                <span className="type-measurement text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5 block">
+              <div className="rounded-lg bg-muted/30 border-transparent p-4">
+                <span className="type-section-label block">Coverage Horizon</span>
+                <span className="type-measurement text-2xl font-bold text-sulpot-deep dark:text-sulpot-bright tabular-nums mt-0.5 block">
                   {emergencyStatus.monthsCovered} Months
                 </span>
               </div>
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
-                <span className="text-xs text-muted-foreground font-medium block">Up to 6-month avg outflow</span>
+              <div className="rounded-lg bg-muted/30 border-transparent p-4">
+                <span className="type-section-label block">Up to 6-month avg outflow</span>
                 <CurrencyDisplay amount={emergencyStatus.averageExpenses} className="type-ledger text-xl font-bold text-foreground mt-0.5 block" />
               </div>
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border">
-                <span className="text-xs text-muted-foreground font-medium block">Emergency Fund Balance</span>
-                <CurrencyDisplay amount={emergencyStatus.currentBalance} className="type-ledger text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block" />
+              <div className="rounded-lg bg-muted/30 border-transparent p-4">
+                <span className="type-section-label block">Emergency Fund Balance</span>
+                <CurrencyDisplay amount={emergencyStatus.currentBalance} className="type-ledger text-xl font-bold text-sulpot-deep dark:text-sulpot-bright mt-0.5 block" />
               </div>
             </div>
           </FintechCardContent>

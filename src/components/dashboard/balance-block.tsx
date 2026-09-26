@@ -89,7 +89,7 @@ export function BalanceBlock({
                 negative ? "text-rose" : "text-ink"
               )}
             >
-              <CurrencyDisplay amount={totalBalance} signed />
+              <CurrencyDisplay amount={totalBalance} signed className="type-identity" />
             </p>
             {state !== "unmeasured" && (
               <p className="type-character text-foreground">{phaseLine[phase]}</p>
@@ -101,7 +101,11 @@ export function BalanceBlock({
               state={state}
               remainingRatio={remainingRatio}
               cutoffRatio={cutoffRatio}
-              cutoffLabel={state === "unmeasured" ? undefined : <CurrencyDisplay amount={remaining} />}
+              cutoffLabel={
+                state === "unmeasured" ? undefined : (
+                  <CurrencyDisplay amount={remaining} className="figure-inline" />
+                )
+              }
               phase={phase}
             />
           </div>
@@ -121,26 +125,26 @@ export function BalanceBlock({
                   </span>
                 ) : (
                   /* Preserve the sign: a breached cutoff is not positive funds. */
-                  <CurrencyDisplay amount={remaining} signed />
+                  <CurrencyDisplay amount={remaining} signed className="figure-inline" />
                 )}
               </p>
             </div>
             <div>
               <p className="type-section-label text-muted-foreground">Spent this period</p>
-              <p className="type-ledger mt-1 text-lg font-semibold tabular-nums text-ink">
-                <CurrencyDisplay amount={spent} />
+              <p className="mt-1 text-lg font-semibold tabular-nums text-ink">
+                <CurrencyDisplay amount={spent} className="figure-inline" />
               </p>
             </div>
             <div>
               <p className="type-section-label text-muted-foreground">Calendar month net</p>
               <p
                 className={cn(
-                  "type-ledger mt-1 text-lg font-semibold tabular-nums",
+                  "mt-1 text-lg font-semibold tabular-nums",
                   net >= 0 ? "text-sulpot" : "text-rose"
                 )}
               >
                 {net >= 0 ? "+" : ""}
-                <CurrencyDisplay amount={net} signed />
+                <CurrencyDisplay amount={net} signed className="figure-inline" />
               </p>
             </div>
           </div>

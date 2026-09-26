@@ -211,7 +211,7 @@ export function SummaryView({
                           <span className="type-measurement text-[10px] text-muted-foreground">{pct.toFixed(1)}% of total</span>
                         </div>
                       </div>
-                      <CurrencyDisplay amount={item.amount} className="text-xs font-bold shrink-0 text-foreground" />
+                      <CurrencyDisplay amount={item.amount} className="figure-inline text-xs font-bold shrink-0 text-foreground" />
                     </div>
                   );
                 })}
@@ -251,14 +251,14 @@ export function SummaryView({
                         </div>
                       </td>
                       <td className="py-3.5 px-4 text-right tabular-nums font-semibold text-foreground">
-                        <CurrencyDisplay amount={b.budgeted} />
+                        <CurrencyDisplay amount={b.budgeted} className="figure-inline" />
                       </td>
                       <td className="py-3.5 px-4 text-right tabular-nums font-semibold text-rose-600 dark:text-rose-400">
-                        <CurrencyDisplay amount={b.spent} />
+                        <CurrencyDisplay amount={b.spent} className="figure-inline" />
                       </td>
                       <td className={`py-3.5 px-4 text-right tabular-nums font-bold ${b.remaining >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                         {b.remaining >= 0 ? "+" : ""}
-                        <CurrencyDisplay amount={b.remaining} />
+                        <CurrencyDisplay amount={b.remaining} className="figure-inline" />
                       </td>
                       <td className="py-3.5 px-5 text-right font-semibold">
                         {b.status === "under" ? (

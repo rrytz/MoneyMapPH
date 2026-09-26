@@ -69,7 +69,7 @@ export function AttentionStrip({
               <>
                 Spending is{" "}
                 <span className="font-semibold tabular-nums text-rose">
-                  <CurrencyDisplay amount={Math.abs(remaining)} />
+                  <CurrencyDisplay amount={Math.abs(remaining)} className="figure-inline" />
                 </span>{" "}
                 past the line. It is information, not a verdict — lean months happen.
               </>

@@ -25,8 +25,8 @@ export function LeanStatusChip({ status }: { status: LeanStatus }) {
         className="bg-rose-100 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/50 dark:text-rose-300"
         title={`Paycheck income only. Based on ${status.periodsUsed} logged cutoffs. Ratio vs median: ${Math.round((ratio ?? 0) * 100)}%.`}
       >
-        Lean cutoff · <CurrencyDisplay amount={targetIncome} /> vs typical{" "}
-        <CurrencyDisplay amount={Math.round(median)} /> (−{drop}%)
+        Lean cutoff · <CurrencyDisplay amount={targetIncome} className="figure-inline" /> vs typical{" "}
+        <CurrencyDisplay amount={Math.round(median)} className="figure-inline" /> (−{drop}%)
       </Badge>
     );
   }
@@ -36,8 +36,8 @@ export function LeanStatusChip({ status }: { status: LeanStatus }) {
       variant="income"
       title={`Paycheck income only. Based on ${status.periodsUsed} logged cutoffs.`}
     >
-      On track · <CurrencyDisplay amount={targetIncome} /> vs typical{" "}
-      <CurrencyDisplay amount={Math.round(median)} />
+      On track · <CurrencyDisplay amount={targetIncome} className="figure-inline" /> vs typical{" "}
+      <CurrencyDisplay amount={Math.round(median)} className="figure-inline" />
     </Badge>
   );
 }

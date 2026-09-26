@@ -66,7 +66,7 @@ export function PayBillForm({
           </h3>
           <p className="text-[11px] text-muted-foreground">
             Due {formatDate(occurrence.dueDate, "MMM d, yyyy")} · expected{" "}
-            <CurrencyDisplay amount={occurrence.expectedAmount} className="inline font-semibold" />
+            <CurrencyDisplay amount={occurrence.expectedAmount} className="figure-inline inline font-semibold" />
           </p>
         </div>
 

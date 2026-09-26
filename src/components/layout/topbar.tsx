@@ -76,11 +76,11 @@ export function BalanceReadout({
           {loaded ? (
             <span
               className={cn(
-                "type-ledger text-sm font-semibold tabular-nums leading-none",
+                "text-sm font-semibold tabular-nums leading-none",
                 negative ? "text-rose" : "text-ink"
               )}
             >
-              <CurrencyDisplay amount={totalBalance} signed />
+              <CurrencyDisplay amount={totalBalance} signed className="figure-inline" />
             </span>
           ) : (
             /* Not fetched yet. Painting 0.00 here would state a fact we do
@@ -170,11 +170,11 @@ export function Topbar({
                     <span className="truncate">{a.name}</span>
                     <span
                       className={cn(
-                        "type-ledger tabular-nums",
+                        "tabular-nums",
                         Number(a.current_balance) < 0 ? "text-rose" : "text-ink"
                       )}
                     >
-                      <CurrencyDisplay amount={a.current_balance} signed />
+                      <CurrencyDisplay amount={a.current_balance} signed className="figure-inline" />
                     </span>
                   </span>
                 </DropdownMenuItem>

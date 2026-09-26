@@ -27,7 +27,48 @@ const REQUIRED_ROLES = [
   "type-ledger",
   "type-measurement",
   "type-character",
+  "figure-inline",
 ] as const;
+
+/**
+ * The explicit figure markers. Every <CurrencyDisplay> must declare exactly one.
+ *
+ * Why this rule exists: CurrencyDisplay sets no font-family, so an un-marked
+ * instance silently inherits whatever face its ancestor happens to set. That
+ * made the rendered face nondeterministic — the same component could come out
+ * in Instrument Sans in one row and Bricolage in another — and left the figure
+ * without a governed scale. Declaring the marker on the element itself removes
+ * the ancestry guesswork entirely.
+ *
+ * The boundary the markers encode:
+ *   type-ledger      a figure that competes for attention (the answer)
+ *   type-measurement a dominant measurement (%, ratio, count)
+ *   figure-inline    a figure that is part of a row or a sentence
+ *   type-identity    the home hero, which is deliberately not tabular currency
+ */
+const FIGURE_MARKERS = ["type-ledger", "type-measurement", "figure-inline", "type-identity"] as const;
+
+/**
+ * True when the figure resolves to exactly one role.
+ *
+ * A single marker is the normal case. The exception is a genuine either/or,
+ * where each branch of a ternary names one role and no branch is undecided —
+ * e.g. KpiCard renders a percentage as type-measurement and an amount as
+ * type-ledger. Two markers inside one string literal, or a marker plus an
+ * undecided branch, is a contradiction and fails.
+ */
+function isSingleDeclaration(tag: string, declared: readonly string[]): boolean {
+  if (declared.length === 1) return true;
+  if (declared.length < 2) return false;
+  const value = tag.match(/\bclassName\s*=\s*(\{[\s\S]*?\}|"[^"]*")/)?.[1] ?? "";
+  if (!value.includes("?")) return false;
+  const branches = [...value.matchAll(/([?:])\s*"([^"]*)"/g)].map((m) => m[2]);
+  if (branches.length < 2) return false;
+  return branches.every((branch) => {
+    const found = FIGURE_MARKERS.filter((marker) => new RegExp(`\\b${marker}\\b`).test(branch));
+    return found.length === 1;
+  });
+}
 
 const ROLE_CONTRACTS = [
   ["components/dashboard/balance-block.tsx", ["type-identity", "type-ledger", "type-character"]],
@@ -129,6 +170,37 @@ describe("S5c typography hierarchy detector", () => {
   it("rejects the retired typography escape hatches in CSS", () => {
     const globals = readFileSync(join(ROOT, "src/app/globals.css"), "utf8");
     expect(globals).not.toMatch(/\.(caption|ledger-figure)\s*\{/);
+  });
+
+  it("requires every currency figure to declare exactly one explicit figure role", () => {
+    const violations: string[] = [];
+    let total = 0;
+    for (const file of TSX_FILES) {
+      const source = readFileSync(file, "utf8");
+      for (const match of source.matchAll(/<CurrencyDisplay\b[\s\S]*?\/>/g)) {
+        total++;
+        const declared = FIGURE_MARKERS.filter((marker) => classAttributeContains(match[0], marker));
+        if (!isSingleDeclaration(match[0], declared)) {
+          const line = source.slice(0, match.index).split("\n").length;
+          violations.push(
+            `${rel(file)}:${line} declares ${declared.length === 0 ? "none" : declared.join("+")}`
+          );
+        }
+      }
+    }
+    expect(violations, `Currency figures without exactly one explicit role:\n  ${violations.join("\n  ")}`).toEqual([]);
+    expect(total, "expected to find CurrencyDisplay call sites").toBeGreaterThan(50);
+  });
+
+  it("keeps the Emergency Reserve tiles on the governed inset surface", () => {
+    const source = read("app/(dashboard)/savings/savings-page-client.tsx");
+    // The pre-Tide tiles were `bg-slate-50 dark:bg-slate-900` with a border:
+    // a near-black, blue-cast legacy slate that is not a Tide token. Nested
+    // tonal layers use the inset treatment (rounded-lg, bg-muted/30, no border).
+    expect(source).not.toMatch(/bg-slate-50 dark:bg-slate-900 border/);
+    expect(source).toContain("rounded-lg bg-muted/30 border-transparent");
+    // Tile labels are section labels, not sentence-case small print.
+    expect(source).toContain('type-section-label block">Coverage Horizon');
   });
 
   it("requires the shared role contracts", () => {

@@ -45,7 +45,7 @@ export function TransferList({ transfers, onEdit, onDelete }: TransferListProps)
           <div className="flex items-center gap-4">
             <div className="text-right">
               <div className="font-semibold text-foreground text-sm">
-                <CurrencyDisplay amount={tr.amount} />
+                <CurrencyDisplay amount={tr.amount} className="figure-inline" />
               </div>
               {tr.transfer_fee > 0 && (
                 <div className="text-[11px] text-amber-400 font-medium">

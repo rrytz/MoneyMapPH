@@ -126,7 +126,7 @@ export function BillsCrud({ bills, categories }: { bills: Bill[]; categories: Ex
                       <div className="text-[11px] text-muted-foreground">
                         {profile.missing.length === 0 ? (
                           <>
-                            Due day {b.day_of_month} · <CurrencyDisplay amount={Number(b.expected_amount)} className="inline font-semibold" />
+                            Due day {b.day_of_month} · <CurrencyDisplay amount={Number(b.expected_amount)} className="figure-inline inline font-semibold" />
                           </>
                         ) : (
                           <>Set {profile.missing.join(" and ")} to activate</>

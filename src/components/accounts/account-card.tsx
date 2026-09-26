@@ -2,6 +2,7 @@
 
 import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
+import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -125,17 +126,20 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           )}
         </div>
 
-        <div className="type-ledger tabular-nums text-card-foreground">
+        <div className="tabular-nums text-card-foreground">
           <CurrencyDisplay
             amount={account.current_balance}
-            className={account.is_negative ? "font-semibold text-rose-400" : "font-semibold text-card-foreground"}
+            className={cn(
+              "type-ledger",
+              account.is_negative ? "font-semibold text-rose-400" : "font-semibold text-card-foreground"
+            )}
           />
         </div>
       </div>
 
       <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
         <span>Starting Balance</span>
-        <CurrencyDisplay amount={account.initial_balance} className="font-medium text-muted-foreground" />
+        <CurrencyDisplay amount={account.initial_balance} className="figure-inline font-medium text-muted-foreground" />
       </div>
     </div>
   );

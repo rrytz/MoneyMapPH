@@ -84,7 +84,7 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
           </div>
           {status.incentiveIncomeLogged > 0 && (
             <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
-              + <CurrencyDisplay amount={status.incentiveIncomeLogged} /> incentives logged this cutoff
+              + <CurrencyDisplay amount={status.incentiveIncomeLogged} className="figure-inline" /> incentives logged this cutoff
             </p>
           )}
         </div>

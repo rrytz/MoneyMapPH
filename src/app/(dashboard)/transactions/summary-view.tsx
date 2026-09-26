@@ -146,7 +146,7 @@ export function SummaryView({
             <div className="h-[300px] w-full mt-2">
               {!isMounted ? (
                 <div className="h-full w-full flex items-center justify-center">
-                  <div className="h-[260px] w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/40" />
+                  <div className="h-[260px] w-full animate-pulse rounded-xl bg-muted/40" />
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -198,7 +198,7 @@ export function SummaryView({
                 {categorySummaryList.map((item) => {
                   const pct = totalSpending > 0 ? (item.amount / totalSpending) * 100 : 0;
                   return (
-                    <div key={item.id} className="p-3.5 px-5 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                    <div key={item.id} className="p-3.5 px-5 flex items-center justify-between gap-3 hover:bg-muted/50 transition-colors">
                       <div className="min-w-0 flex items-center gap-2.5">
                         <span
                           className="h-8 w-8 rounded-lg shrink-0 flex items-center justify-center"
@@ -233,7 +233,7 @@ export function SummaryView({
             ) : (
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-slate-50/50 dark:bg-slate-900/50 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                  <tr className="border-b border-border bg-muted/30 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
                     <th className="py-3 px-5">Category</th>
                     <th className="py-3 px-4 text-right">Budgeted</th>
                     <th className="py-3 px-4 text-right">Spent</th>
@@ -243,7 +243,7 @@ export function SummaryView({
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {budgetStatuses.map((b) => (
-                    <tr key={b.categoryId} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                    <tr key={b.categoryId} className="hover:bg-muted/50 transition-colors">
                       <td className="py-3.5 px-5 font-semibold text-foreground">
                         <div className="flex items-center gap-2">
                           {b.categoryIcon && <span className="text-sm shrink-0">{b.categoryIcon}</span>}

@@ -211,7 +211,7 @@ export function SettingsClient({
       />
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="bg-slate-100 dark:bg-slate-900 p-1 rounded-md">
+        <TabsList className="p-1 rounded-md">
           <TabsTrigger value="profile" className="flex items-center gap-1.5 text-xs font-normal rounded-md">
             <User className="h-4 w-4" /> Profile Preferences
           </TabsTrigger>
@@ -303,7 +303,7 @@ export function SettingsClient({
             <FintechCardContent className="p-0">
               <div className="divide-y divide-border">
                 {categories.map((cat) => (
-                  <div key={cat.id} className="p-3.5 px-6 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                  <div key={cat.id} className="p-3.5 px-6 flex items-center justify-between gap-3 hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <CategoryIcon
                         icon={cat.icon}
@@ -313,7 +313,7 @@ export function SettingsClient({
                       <div>
                         <span className="text-xs font-bold text-foreground block">{cat.name}</span>
                         {cat.is_default && (
-                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[9px] font-normal text-muted-foreground">
+                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-muted text-[9px] font-normal text-muted-foreground">
                             Default Category
                           </span>
                         )}
@@ -352,13 +352,13 @@ export function SettingsClient({
             <FintechCardContent className="p-0">
               <div className="divide-y divide-border">
                 {sources.map((src) => (
-                  <div key={src.id} className="p-3.5 px-6 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                  <div key={src.id} className="p-3.5 px-6 flex items-center justify-between gap-3 hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <HandCoins className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <div>
                         <span className="text-xs font-bold text-foreground block">{src.name}</span>
                         {src.is_default && (
-                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[9px] font-normal text-muted-foreground">
+                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-muted text-[9px] font-normal text-muted-foreground">
                             Default Source
                           </span>
                         )}

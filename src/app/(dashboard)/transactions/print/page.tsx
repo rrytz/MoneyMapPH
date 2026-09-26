@@ -111,7 +111,7 @@ export default async function PrintTransactionsPage(props: {
           </thead>
           <tbody>
             {transactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-slate-150 last:border-0 hover:bg-slate-50/30">
+              <tr key={tx.id} className="border-b border-slate-200 last:border-0 hover:bg-slate-50/30">
                 <td className="p-2 border-r border-slate-200 whitespace-nowrap">{formatDate(tx.date, "MMM dd, yyyy")}</td>
                 <td className="p-2 border-r border-slate-200 capitalize font-medium">{tx.type}</td>
                 <td className="p-2 border-r border-slate-200 font-medium">{tx.categoryName}</td>

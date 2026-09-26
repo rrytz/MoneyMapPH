@@ -81,7 +81,7 @@ export function MonthCalendar({
               key={cell.date}
               className={cn(
                 "min-h-16 rounded-lg border p-1.5 text-xs",
-                cell.isInMonth ? "bg-slate-50 dark:bg-slate-900" : "bg-transparent opacity-40",
+                cell.isInMonth ? "bg-muted/30" : "bg-transparent opacity-40",
                 cell.isToday && "ring-2 ring-emerald-500/60"
               )}
             >
@@ -101,7 +101,7 @@ export function MonthCalendar({
                         ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 opacity-70"
                         : occ.overdue
                           ? "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400"
-                          : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                          : "bg-muted text-muted-foreground"
                     )}
                   >
                     <span className="truncate">{occ.billName}</span>

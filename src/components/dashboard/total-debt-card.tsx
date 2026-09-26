@@ -58,7 +58,7 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
         </div>
 
         {outstanding.length === 0 ? (
-          <div className="flex items-center gap-3 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70">
+          <div className="flex items-center gap-3 p-3.5 rounded-lg bg-muted/30 border border-border/70">
             <div className="p-2 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
               <BadgeDollarSign className="h-4 w-4" />
             </div>
@@ -74,14 +74,14 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
             {top.map(({ debt, remaining, overdue }) => (
               <div
                 key={debt.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-rose-200 transition-colors"
+                className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/70 hover:border-rose-200 transition-colors"
               >
                 <div
                   className={cn(
                     "p-2 rounded-md shrink-0",
                     overdue
                       ? "bg-rose-50 text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"
-                      : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                      : "bg-muted text-muted-foreground"
                   )}
                 >
                   {overdue ? <CalendarClock className="h-3.5 w-3.5" /> : <BadgeDollarSign className="h-3.5 w-3.5" />}

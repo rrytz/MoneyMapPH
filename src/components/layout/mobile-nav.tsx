@@ -87,7 +87,7 @@ export function MobileNav() {
                       "flex items-center gap-3 p-3 rounded-2xl border border-border text-xs font-semibold transition-colors",
                       highlighted
                         ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/50"
-                        : "bg-slate-50 dark:bg-slate-900 text-foreground hover:bg-slate-100"
+                        : "bg-muted/30 text-foreground hover:bg-muted/70"
                     )}
                   >
                     {Icon && <Icon className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />}

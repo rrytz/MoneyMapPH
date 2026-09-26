@@ -250,7 +250,7 @@ export function ExpensesPageClient({
           </div>
           <div className="divide-y divide-border">
             {filteredEntries.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+              <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-muted/50 transition-colors">
                 <div className="flex-1 min-w-0 pr-4">
                   <div className="flex items-center gap-2.5 mb-1 min-w-0">
                     <span className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{entry.title}</span>

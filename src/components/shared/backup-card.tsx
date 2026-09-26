@@ -112,7 +112,7 @@ export function BackupCard() {
               accept="application/json,.json"
               required
               disabled={pending}
-              className="block w-full min-w-0 text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-foreground dark:file:bg-slate-800 cursor-pointer"
+              className="block w-full min-w-0 text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-foreground cursor-pointer"
             />
             <Button
               type="submit"

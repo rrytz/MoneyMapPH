@@ -17,7 +17,7 @@ export function FinancialPulse({ budgetUtilization }: FinancialPulseProps) {
         : "bg-emerald-500";
 
   return (
-    <div className="h-1 w-full overflow-hidden bg-slate-100 dark:bg-slate-800/60 rounded-full">
+    <div className="h-1 w-full overflow-hidden bg-muted/60 rounded-full">
       <div
         className={cn("h-full transition-all duration-500 rounded-full", pulseColor)}
         style={{ width: `${Math.min(100, Math.max(3, safeUtilization))}%` }}

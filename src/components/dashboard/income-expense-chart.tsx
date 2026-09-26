@@ -66,7 +66,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Income
           </span>
           <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-700" /> Expenses
+            <span className="h-2.5 w-2.5 rounded-full bg-agosto" /> Expenses
           </span>
         </div>
       </FintechCardHeader>
@@ -74,7 +74,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
       <FintechCardContent className="type-measurement h-[270px] w-full pt-2">
         {!isMounted ? (
           <div className="h-full w-full flex items-center justify-center">
-            <div className="h-[240px] w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/40" />
+            <div className="h-[240px] w-full animate-pulse rounded-xl bg-muted/40" />
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -85,8 +85,8 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
               </linearGradient>
               <linearGradient id="expensesAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.22} />
-                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.0} />
+                <stop offset="5%" stopColor="var(--color-agosto)" stopOpacity={0.22} />
+                <stop offset="95%" stopColor="var(--color-agosto)" stopOpacity={0.0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.6} />
@@ -120,7 +120,10 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
             <Area
               type="monotone"
               dataKey="Expenses"
-              stroke="#94a3b8"
+              // Matches the `bg-agosto` legend swatch. This was a hardcoded
+              // #94a3b8 that did not adapt per theme, so the swatch and the
+              // line it labelled disagreed once the swatch moved to a token.
+              stroke="var(--color-agosto)"
               strokeWidth={2}
               strokeDasharray="4 4"
               fillOpacity={1}

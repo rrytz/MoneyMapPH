@@ -130,7 +130,7 @@ export function TransactionsClient({
       </PageHeader>
 
       <Tabs defaultValue="transactions" className="space-y-6">
-        <TabsList className="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+        <TabsList className="p-1 rounded-xl">
           <TabsTrigger value="transactions" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
             <History className="h-4 w-4" /> All Transactions
           </TabsTrigger>
@@ -255,7 +255,7 @@ export function TransactionsClient({
           ) : (
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-border bg-slate-50/50 dark:bg-slate-900/50 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                <tr className="border-b border-border bg-muted/30 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
                   <th className="py-3.5 px-5">Date</th>
                   <th className="py-3.5 px-4">Type</th>
                   <th className="py-3.5 px-4">Category/Source</th>
@@ -267,7 +267,7 @@ export function TransactionsClient({
                 {paginated.map((tx) => {
                   const isIncome = tx.type === "income";
                   return (
-                    <tr key={tx.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                    <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
                       <td className="py-3.5 px-5 font-medium text-muted-foreground whitespace-nowrap">
                         {formatDate(tx.date, "MMM dd, yyyy")}
                       </td>

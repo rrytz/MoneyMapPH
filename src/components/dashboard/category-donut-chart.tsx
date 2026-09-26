@@ -106,7 +106,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
             {top5.length === 1 ? (
               <div className="flex h-full items-center justify-center">
                 <svg viewBox="0 0 100 100" className="h-[144px] w-[144px]" role="img" aria-label={`${top5[0].name} 100% of calendar-month spending`}>
-                  <circle cx="50" cy="50" r="40" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="9" fill="transparent" />
+                  <circle cx="50" cy="50" r="40" className="stroke-border" strokeWidth="9" fill="transparent" />
                   <circle cx="50" cy="50" r="40" stroke={top5[0].color} strokeWidth="9" fill="transparent" />
                 </svg>
               </div>
@@ -145,7 +145,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
             )}
           </div>
         ) : (
-          <div className="w-full rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse" style={{ height: 180 }} />
+          <div className="w-full rounded-2xl bg-muted animate-pulse" style={{ height: 180 }} />
         )}
 
         {/* Legend */}

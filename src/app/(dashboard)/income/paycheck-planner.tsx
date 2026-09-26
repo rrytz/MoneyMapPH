@@ -138,7 +138,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                   </div>
                 </FintechCardHeader>
                 <FintechCardContent className="pt-0">
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-4">
+                  <div className="w-full bg-muted h-2 rounded-full overflow-hidden mb-4">
                     <div
                       className="bg-emerald-500 h-full transition-all duration-500"
                       style={{
@@ -155,7 +155,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                       ) : (
                         <div className="space-y-1.5">
                           {summary.allocationBreakdown.map((item, idx) => (
-                            <div key={idx} className="flex justify-between text-xs py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-border/60">
+                            <div key={idx} className="flex justify-between text-xs py-1.5 px-3 rounded-xl bg-muted/30 border border-border/60">
                               <span className="font-semibold text-foreground">{item.label}</span>
                               <CurrencyDisplay amount={item.amount} className="type-ledger font-bold text-foreground" />
                             </div>

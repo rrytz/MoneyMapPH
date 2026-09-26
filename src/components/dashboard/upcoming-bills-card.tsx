@@ -92,7 +92,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
               return (
                 <div
                   key={item.key}
-                  className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-emerald-200 transition-colors"
+                  className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/70 hover:border-emerald-200 transition-colors"
                 >
                   <div
                     className={cn(

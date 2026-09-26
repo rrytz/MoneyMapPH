@@ -13,7 +13,7 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
       <FintechCard className="relative">
         <FintechCardContent className="p-5 flex flex-col justify-between h-full space-y-4">
           <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-md bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+            <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
               <Gauge className="h-4.5 w-4.5" />
             </div>
           </div>
@@ -79,7 +79,7 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
             <span className="text-muted-foreground text-[11px]">{status.daysRemaining} days left in this cutoff</span>
             <span className="text-muted-foreground text-[11px] tabular-nums">{pct}% elapsed</span>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
             <div className={cn("h-full rounded-full", state.bar)} style={{ width: `${pct}%` }} />
           </div>
           {status.incentiveIncomeLogged > 0 && (

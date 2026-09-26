@@ -105,7 +105,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
           <div className="h-[340px] w-full mt-2">
             {!isMounted ? (
               <div className="h-full w-full flex items-center justify-center">
-                <div className="h-[300px] w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800/40" />
+                <div className="h-[300px] w-full animate-pulse rounded-xl bg-muted/40" />
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -163,7 +163,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
               </ResponsiveContainer>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-border">
+          <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground bg-muted/30 p-3 rounded-xl border border-border">
             <Info className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>
               <strong>How it works:</strong> The engine aggregates income, expenses, and budgets to establish a monthly net savings speed. Future projections assume a constant savings speed.
@@ -186,7 +186,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
           ) : (
             <div className="divide-y divide-border">
               {goalForecasts.map((goal) => (
-                <div key={goal.id} className="p-4 px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                <div key={goal.id} className="p-4 px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/50 transition-colors">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sm text-foreground">{goal.name}</span>

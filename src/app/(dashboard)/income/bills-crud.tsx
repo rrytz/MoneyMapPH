@@ -14,7 +14,7 @@ import type { Bill, ExpenseCategory } from "@/lib/types";
 
 const STATUS_STYLE: Record<string, string> = {
   Incomplete: "bg-muted/60 text-amber-700 border-amber-200/60 dark:text-amber-400",
-  Paused: "bg-slate-100 text-slate-500 border-slate-200/60 dark:bg-slate-800 dark:text-slate-400",
+  Paused: "bg-muted text-muted-foreground border-border/60",
 };
 
 export function BillsCrud({ bills, categories }: { bills: Bill[]; categories: ExpenseCategory[] }) {

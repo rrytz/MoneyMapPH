@@ -62,7 +62,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
         </div>
         <Link
           href="/transactions"
-          className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 border border-border px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-900 transition-colors"
+          className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 border border-border px-3 py-1 rounded-xl bg-muted/30 transition-colors"
         >
           View all
         </Link>
@@ -71,7 +71,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       <FintechCardContent className="p-0 overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-border bg-slate-50/50 dark:bg-slate-900/50 text-[10px] uppercase font-normal text-muted-foreground tracking-wider">
+            <tr className="border-b border-border bg-muted/30 text-[10px] uppercase font-normal text-muted-foreground tracking-wider">
               <th className="py-3 px-5">Description</th>
               <th className="py-3 px-4">Category</th>
               <th className="py-3 px-4">Date</th>
@@ -86,11 +86,11 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
               return (
                 <tr
                   key={tx.id}
-                  className="hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors duration-150"
+                  className="hover:bg-muted/50 transition-colors duration-150"
                 >
                   <td className="py-3.5 px-5">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-md bg-slate-100 dark:bg-slate-800 shrink-0">
+                      <div className="p-2 rounded-md bg-muted shrink-0">
                         {getIconForTitle(tx.title, tx.type)}
                       </div>
                       <span className="font-semibold text-foreground text-xs">{tx.title}</span>

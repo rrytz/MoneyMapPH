@@ -22,7 +22,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
                 cx="50"
                 cy="50"
                 r="40"
-                className="stroke-slate-100 dark:stroke-slate-800"
+                className="stroke-border"
                 strokeWidth="9"
                 fill="transparent"
               />

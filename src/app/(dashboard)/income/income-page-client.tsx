@@ -151,7 +151,7 @@ export function IncomePageClient({
       </PageHeader>
 
       <Tabs defaultValue={initialActiveTab} className="space-y-6">
-        <TabsList className="bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+        <TabsList className="p-1 rounded-xl">
           <TabsTrigger value="income" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
             <TrendingUp className="h-4 w-4" /> Log Income
           </TabsTrigger>
@@ -214,7 +214,7 @@ export function IncomePageClient({
               <h3 className="font-semibold text-base text-foreground">Income Transactions</h3>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-muted-foreground">{optimisticEntries.length} items logged</span>
-                <div className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-900 p-0.5">
+                <div className="inline-flex items-center rounded-lg bg-muted p-0.5">
                   <Link
                     href="/income"
                     className={cn(
@@ -257,7 +257,7 @@ export function IncomePageClient({
             ) : (
               <div className="divide-y divide-border">
                 {optimisticEntries.map((entry) => (
-                  <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                  <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-muted/50 transition-colors">
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold text-sm text-foreground">

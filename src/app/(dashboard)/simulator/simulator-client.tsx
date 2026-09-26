@@ -185,7 +185,7 @@ export function SimulatorClient({
               ) : (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3.5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-border">
+                    <div className="p-3.5 bg-muted/30 rounded-2xl border border-border">
                       <span className="text-xs text-muted-foreground font-medium block">Coverage Before</span>
                       <span className="type-measurement text-xl font-bold text-foreground tabular-nums block mt-0.5">
                         {impact.emergencyFundImpact.beforeMonthsCovered} Months
@@ -194,7 +194,7 @@ export function SimulatorClient({
                         {impact.emergencyFundImpact.beforeStatus}
                       </Badge>
                     </div>
-                    <div className="p-3.5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-emerald-200 dark:border-emerald-950">
+                    <div className="p-3.5 bg-muted/30 rounded-2xl border border-emerald-200 dark:border-emerald-950">
                       <span className="text-xs text-muted-foreground font-medium block">Coverage After</span>
                       <span className="type-measurement text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block mt-0.5">
                         {impact.emergencyFundImpact.afterMonthsCovered} Months
@@ -242,7 +242,7 @@ export function SimulatorClient({
               ) : (
                 <div className="divide-y divide-border">
                   {impact.goalsImpact.map((item) => (
-                    <div key={item.id} className="p-4 px-6 flex items-center justify-between gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                    <div key={item.id} className="p-4 px-6 flex items-center justify-between gap-4 hover:bg-muted/50 transition-colors">
                       <div>
                         <span className="text-xs font-semibold text-foreground block">{item.name}</span>
                         <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
@@ -287,7 +287,7 @@ export function SimulatorClient({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {simulations.map((sim) => (
-                <div key={sim.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border space-y-3">
+                <div key={sim.id} className="p-4 rounded-2xl bg-muted/30 border border-border space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="font-bold text-sm text-foreground block truncate max-w-[150px]">{sim.name}</span>

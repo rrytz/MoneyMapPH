@@ -232,9 +232,7 @@ describe("S5c typography hierarchy detector", () => {
     // A card that renders on the governed FintechCard surface but paints its
     // inner rows on legacy slate reads as a different app. The dashboard goal
     // card shipped this way: near-black `dark:bg-slate-900` rows with borders
-    // and slate ring tracks. Scoped to this card deliberately — the wider
-    // legacy-slate sweep across forecasting/income/settings/simulator is a
-    // separate slice, tracked rather than silently bundled here.
+    // and slate ring tracks.
     const source = read("app/(dashboard)/dashboard/page.tsx");
     expect(source, "goal rows still on legacy slate").not.toMatch(
       /bg-slate-\d+(?:\/\d+)?\s+dark:bg-slate-\d+(?:\/\d+)?/
@@ -243,6 +241,61 @@ describe("S5c typography hierarchy detector", () => {
     // Nested tonal layers are borderless by contract (the inset treatment).
     expect(source, "goal rows still carry a border").not.toMatch(/rounded-lg bg-muted\/30 border/);
     expect(source, "goal rows missing the inset treatment").toContain("rounded-lg bg-muted/30");
+  });
+
+  it("carries no legacy slate surface or ring-track colour", () => {
+    // Flat ban, with one named exclusion. The dashboard goal card shipped with
+    // `dark:bg-slate-900` rows and slate ring tracks; the same pattern ran
+    // through 20 more files. An allowlist for "deliberate" slate is what let
+    // the gap spread, so the rule stays absolute and the single exception is
+    // written down with its reason.
+    //
+    // SLATE_EXCLUSIONS — the print statement is a document, not the app. It is
+    // deliberately theme-independent: design tokens resolve from the active
+    // theme, so migrating it would emit dark-on-dark on paper whenever the app
+    // is in dark mode. That is a regression disguised as consistency. It keeps
+    // explicit light values for that reason, not by oversight.
+    const SLATE_EXCLUSIONS = new Set(["app/(dashboard)/transactions/print/page.tsx"]);
+
+    const surfaces: string[] = [];
+    const strokes: string[] = [];
+    for (const file of TSX_FILES) {
+      const key = rel(file);
+      if (SLATE_EXCLUSIONS.has(key)) continue;
+      const source = withoutComments(readFileSync(file, "utf8"));
+      for (const match of source.matchAll(/(?:dark:)?(?:hover:)?(?:bg|stroke)-slate-\d+(?:\/\d+)?/g)) {
+        surfaces.push(`${key}:${source.slice(0, match.index).split("\n").length} ${match[0]}`);
+      }
+    }
+    expect(surfaces, `Legacy slate surfaces (use a Tide token):\n  ${surfaces.join("\n  ")}`).toEqual([]);
+    expect(strokes, `Slate ring/track strokes (use stroke-border):\n  ${strokes.join("\n  ")}`).toEqual([]);
+  });
+
+  it("encodes the neutral chart series with a governed token", () => {
+    // The Expenses series was slate-as-data-colour. It now uses agosto, the
+    // desaturated neutral the Tide vocabulary already reserves for "the other
+    // series" — so the neutral reads as data, not as a surface, and the flat
+    // slate ban needs no allowlist.
+    const source = read("components/dashboard/income-expense-chart.tsx");
+    expect(source, "neutral series still on slate").not.toMatch(/bg-slate-\d+/);
+    expect(source, "neutral series missing the agosto token").toContain("bg-agosto");
+  });
+
+  it("uses only real Tailwind colour steps", () => {
+    // `border-slate-150` is not a Tailwind class, so it silently rendered as no
+    // border at all. A dead utility looks identical to an intentional one in a
+    // screenshot, which is why it survived the sweep.
+    const dead: string[] = [];
+    const STEPS = new Set(["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"]);
+    for (const file of TSX_FILES) {
+      const source = readFileSync(file, "utf8");
+      for (const match of source.matchAll(/(?:border|bg|text|stroke|from|to|via|ring|fill)-slate-(\d+)/g)) {
+        if (!STEPS.has(match[1])) {
+          dead.push(`${rel(file)}:${source.slice(0, match.index).split("\n").length} ${match[0]}`);
+        }
+      }
+    }
+    expect(dead, `Invented Tailwind colour steps (render as no-op):\n  ${dead.join("\n  ")}`).toEqual([]);
   });
 
   it("requires the shared role contracts", () => {

@@ -7,13 +7,10 @@ import { cachedGetPaychecks as getPaychecks } from "@/lib/cache/shared-queries";
 import { cachedGetSafeToSpend as getSafeToSpend } from "@/lib/cache/shared-queries";
 import { cachedGetDebts as getDebts, cachedGetBillsDueBy as getBillsDueBy } from "@/lib/cache/shared-queries";
 import { cachedGetAccountsWithBalances as getAccounts } from "@/lib/cache/shared-queries";
-import { calculateFinancialHealthReport } from "@/lib/services/health.service";
 import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/date";
-import { SAVINGS_RATE_LABEL } from "@/lib/utils/health-breakdown";
 import { getBillsDueWindow } from "@/lib/utils/bills";
 import { BalanceBlock } from "@/components/dashboard/balance-block";
 import { AttentionStrip } from "@/components/dashboard/attention-strip";
-import { FinancialHealthHeroCard } from "@/components/dashboard/health-hero-card";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
@@ -75,14 +72,15 @@ export default async function DashboardPage() {
     getBillsDueBy(supabase, user.id, fromISO, toISO),
   ]);
 
-  const healthReport = await calculateFinancialHealthReport(supabase, user.id, {
-    summary,
-    goals,
-    snapshots,
-    budgetStatuses,
-    paychecks,
-  });
-
+  // calculateFinancialHealthReport is gone from this path. The Financial Health
+  // rollup card was removed from the dashboard: its four sub-scores are binary
+  // 0%/100% figures, so a 50/100 headline does not visibly reconcile with them,
+  // and its guidance line was generic. The four metrics it rolled up are each
+  // already visible where they are actionable. Only the rollup was lost, not
+  // the data - and the rollup can live somewhere cheaper if it is ever missed.
+  //
+  // This also removes a sequential database round-trip from the dashboard's
+  // render, since it was awaited outside the Promise.all above.
   const stats = computeDashboardStats({
     summary,
     snapshots,
@@ -141,10 +139,6 @@ export default async function DashboardPage() {
           The old SafeToSpendCard restated the balance block's numbers at
           ledger-figure weight, putting two loud figures on one surface. */}
       <AttentionStrip safeToSpend={safeToSpend} />
-
-      {/* Supporting: the one Featured card (Financial Health), now the only
-          large surface below the balance block. */}
-      <FinancialHealthHeroCard report={healthReport} />
 
       {/* Attention — rendered only when something is actually due. */}
       {billsDueBy.occurrences.length > 0 && (

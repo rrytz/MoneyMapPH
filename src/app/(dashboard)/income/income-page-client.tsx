@@ -257,7 +257,12 @@ export function IncomePageClient({
             ) : (
               <div className="divide-y divide-border">
                 {optimisticEntries.map((entry) => (
-                  <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-muted/50 transition-colors">
+                  <div key={entry.id} className="flex items-center justify-between py-2 px-6 hover:bg-muted/50 transition-colors">
+                  {/* py-2, not p-4. This ledger was the last one still on the old
+                      60px row while /transactions and /expenses both sit at 46px.
+                      One entry today, so 14px - the argument is idiom, not the
+                      pixels, because it multiplies with every entry added. Five
+                      ledgers, one row height. */}
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold text-sm text-foreground">

@@ -45,4 +45,16 @@ describe("gridTracksFor", () => {
     expect(gridTracksFor(0, 0)).toBe(1);
     expect(gridTracksFor(5, 1)).toBe(1);
   });
+
+  it("takes occupied tracks, not a child count", () => {
+    // The precondition, pinned. /simulator's grid is lg:grid-cols-3 holding two
+    // children: a one-column form and a results panel with lg:col-span-2. The
+    // children cover three tracks and there is no hole, so the grid must stay
+    // at 3. Handed a child count of 2 it would return 2, and a two-track grid
+    // whose second child claims two tracks overflows - so this is not a near
+    // miss, it is a broken layout. Occupied tracks are 3, and 3 stays 3.
+    expect(gridTracksFor(3, 3)).toBe(3);
+    // The same grid if it held only the form: one track occupied, no hole.
+    expect(gridTracksFor(1, 3)).toBe(1);
+  });
 });

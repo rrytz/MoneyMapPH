@@ -1,5 +1,6 @@
 /**
- * How many tracks a card grid should use for `count` items, given a maximum.
+ * How many tracks a card grid should use, given how many tracks its items
+ * currently occupy and the most it is allowed.
  *
  * A fixed column count meeting a variable item count leaves a hole: three
  * tracks and two items is one empty column. Measured on /accounts, that was a
@@ -8,27 +9,49 @@
  *
  * So: pick the track count that wastes the fewest slots *without adding a row*.
  * Adding a row is never worth it, which is why the rule declines some grids
- * outright - five items in a two-up stays two-up, because one-up would be five
- * rows instead of three. The hole is the cheaper problem.
+ * outright rather than pretending to help.
  *
- *   2 items, max 3 -> 2   (was 3: one empty column, same single row)
- *   1 item,  max 3 -> 1   (was 3: two empty columns)
- *   4 items, max 3 -> 2   (was 3: two empty slots, same two rows)
- *   6 items, max 3 -> 3   (already exact)
- *   5 items, max 2 -> 2   (declined: one-up would be five rows, not three)
- *   7 items, max 3 -> 3   (declined: two-up would be four rows, not three)
+ *   2 occupied, max 3 -> 2   closes the /accounts hole; cards 402px -> 610px
+ *   1 occupied, max 3 -> 1   two empty columns become none
+ *   4 occupied, max 3 -> 2   two empty slots become none, same two rows
+ *   6 occupied, max 3 -> 3   already exact
+ *   5 occupied, max 2 -> 2   DECLINED: one track would be five rows, not three
+ *   7 occupied, max 3 -> 3   DECLINED: two tracks would be four rows, not three
+ *
+ * ---------------------------------------------------------------------------
+ * PRECONDITION: the first argument is OCCUPIED TRACKS, not a child count.
+ *
+ * Those are the same number only for a grid of uniform children. They differ
+ * the moment a child spans more than one track, and passing a child count
+ * there is not a near miss - it breaks the layout.
+ *
+ * /simulator is the worked example, and the reason this note exists. Its grid
+ * is `lg:grid-cols-3` holding two children: a one-column form, and a results
+ * panel with `lg:col-span-2`. Measured, the children cover 1 + 2 = 3 tracks
+ * and there is no hole at all. Handed a child count of 2 this function returns
+ * 2, and a two-track grid whose second child claims two tracks overflows its
+ * row. So: a probe that compares child count against track count reports a
+ * hole that is not there, and this function would "fix" it into a broken one.
+ *
+ * Counting children is how that false positive was found. The child count was
+ * the number; the occupied tracks were the fact.
+ *
+ * For a uniform grid - every child one track - the child count IS the occupied
+ * count, which is why the two call sites can pass it straight through. Both
+ * were checked: no col-span in either.
+ * ---------------------------------------------------------------------------
  */
-export function gridTracksFor(count: number, maxTracks: number): number {
+export function gridTracksFor(occupiedTracks: number, maxTracks: number): number {
   if (maxTracks < 1) return 1;
-  if (count <= 0) return maxTracks;
+  if (occupiedTracks <= 0) return maxTracks;
 
-  const rowsAtMax = Math.ceil(count / maxTracks);
+  const rowsAtMax = Math.ceil(occupiedTracks / maxTracks);
   let best = maxTracks;
-  let bestWaste = Math.ceil(count / maxTracks) * maxTracks - count;
+  let bestWaste = Math.ceil(occupiedTracks / maxTracks) * maxTracks - occupiedTracks;
 
   for (let tracks = maxTracks - 1; tracks >= 1; tracks -= 1) {
-    if (Math.ceil(count / tracks) > rowsAtMax) continue; // would add a row
-    const waste = Math.ceil(count / tracks) * tracks - count;
+    if (Math.ceil(occupiedTracks / tracks) > rowsAtMax) continue; // would add a row
+    const waste = Math.ceil(occupiedTracks / tracks) * tracks - occupiedTracks;
     if (waste < bestWaste) {
       best = tracks;
       bestWaste = waste;

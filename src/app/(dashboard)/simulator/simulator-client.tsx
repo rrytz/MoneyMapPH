@@ -242,7 +242,9 @@ export function SimulatorClient({
               ) : (
                 <div className="divide-y divide-border">
                   {impact.goalsImpact.map((item) => (
-                    <div key={item.id} className="p-4 px-6 flex items-center justify-between gap-4 hover:bg-muted/50 transition-colors">
+                    <div key={item.id} className="py-2 px-6 flex items-center justify-between gap-4 hover:bg-muted/50 transition-colors">
+                  {/* py-2, not p-4 - the same row idiom the ledgers use, so a
+                      result list and a ledger stop being two heights. */}
                       <div>
                         <span className="text-xs font-semibold text-foreground block">{item.name}</span>
                         <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">

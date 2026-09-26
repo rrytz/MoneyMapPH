@@ -58,7 +58,7 @@ export function KpiCard({
           )}
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <span className="type-section-label">{title}</span>
           <div
             className="tabular-nums text-foreground"

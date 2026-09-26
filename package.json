@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "gate:types": "tsc --noEmit",
+    "gate:typography": "vitest run src/tests/typography-conformance.test.ts",
+    "gate:dom": "node verification/screenshot-prep/probe-run.mjs",
+    "gate:nav": "node verification/screenshot-prep/nav-check.mjs",
+    "gate:captures": "node verification/screenshot-prep/capture-desktop.mjs && node verification/screenshot-prep/capture-mobile.mjs && node verification/screenshot-prep/capture-wide.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

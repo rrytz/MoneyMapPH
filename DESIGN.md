@@ -103,6 +103,27 @@ proves it resolves to the intended face.
 - `1024–1279px`: compact single row, group labels hidden, horizontal overflow with a visible edge affordance when needed
 - `<1024px`: existing bottom navigation
 
+The tier switch is pure CSS — the desktop nav is `hidden … lg:flex`, the bottom
+nav is `lg:hidden`, on the same viewport. There is no JavaScript breakpoint in
+the shell, so the two navs are strictly complementary and cannot both paint.
+The gate asserts exactly one nav renders, that the nav row sits below the
+topbar rather than on it, and that no width introduces horizontal scroll.
+
+### Two non-bugs — do not chase
+
+A top nav at `≥1024px` is **correct**, not a regression. Two situations produce
+it legitimately:
+
+- **iOS Safari "Request Desktop Website"** forces a desktop viewport, so a
+  phone renders the desktop layout. That is the user asking for it.
+- **A tablet in landscape** reaches ≥1024px and gets the top nav by design.
+
+Both mean the user requested the desktop layout at a desktop width. If a
+screenshot shows the top nav on a narrow screen, check the reported viewport
+before investigating the code — a desktop-browser emulator that leaves the CSS
+viewport at desktop width will show the top nav regardless of the device frame
+it draws. Confirm against `window.innerWidth` or device toolbar width.
+
 The logo is an unboxed TideMark plus Bricolage wordmark. The old gradient/glow
 mark and `Plan • Track • Grow` tagline are retired everywhere: shell, auth,
 legal, offline, and print.

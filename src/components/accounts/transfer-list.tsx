@@ -66,7 +66,14 @@ export function TransferList({ transfers, onEdit, onDelete }: TransferListProps)
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-rose-400"
+                // Matches the sibling edit button. Pre-migration this was
+        // `text-slate-400` against the edit button's `text-slate-500` — delete
+        // was the LIGHTER of the pair. Mapping slate-400 to --ink-faint and
+        // slate-500 to --ink-muted inverted that in the dark world, leaving the
+        // destructive control a full step dimmer than the control beside it.
+        // A destructive action should not read as quieter than a neutral one;
+        // the destructive signal stays on hover, where it belongs.
+        className="h-8 w-8 text-ink-muted hover:text-rose-400"
                 onClick={() => onDelete(tr.id)}
               >
                 <Trash2 className="h-3.5 w-3.5" />

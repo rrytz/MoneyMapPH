@@ -98,7 +98,7 @@ export function SummaryView({
               <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <TrendingDown className="h-5 w-5" />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500">Utilization Rate</span>
+              <span className="text-[11px] font-semibold text-ink-muted">Utilization Rate</span>
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Budget Used</span>
@@ -116,7 +116,7 @@ export function SummaryView({
               <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <PieChart className="h-5 w-5" />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500">Combined Limit</span>
+              <span className="text-[11px] font-semibold text-ink-muted">Combined Limit</span>
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Active Budget Ceilings</span>

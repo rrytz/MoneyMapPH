@@ -85,7 +85,7 @@ export function KpiCard({
             <TrendIcon
               className={cn(
                 "h-3.5 w-3.5",
-                trendFavorable ? "text-sulpot-deep" : changePercent < 0 ? "text-rose-500" : "text-slate-400"
+                trendFavorable ? "text-sulpot-deep" : changePercent < 0 ? "text-rose-500" : "text-ink-faint"
               )}
             />
             <span className="type-measurement text-muted-foreground">

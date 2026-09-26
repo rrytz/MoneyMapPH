@@ -488,6 +488,37 @@ describe("S5c typography hierarchy detector", () => {
     // through the ramp, which the completeness check above guarantees.
   });
 
+  it("owns the neutrals: no stock neutral family in text position", () => {
+    // The surface ban above covers bg-/stroke-slate-*; this covers the other
+    // side of the same problem. `text-slate-500` on captions and icons was
+    // Tailwind's stock #64748b sitting one hex away from Tide's --ink-muted
+    // (#667063) — close enough that nothing ever flagged it, and far enough
+    // that the app was not actually one system.
+    //
+    // Scoped to NEUTRAL families only. Tide owns the neutrals outright
+    // (--ink, --ink-muted, --ink-faint), so a stock neutral step is always a
+    // bypass. Chromatic families are deliberately not touched: indigo on a
+    // category icon, violet on an "Incentive" type pill and the info badge on
+    // "Fully Funded" are data semantics drawn from the category vocabulary, and
+    // banning them would be a rule reaching past its mandate.
+    //
+    // No allowlist needed: the mandate is "Tide owns the neutrals", which is a
+    // property of the design system rather than a per-site exemption.
+    const NEUTRALS = new Set(["slate", "gray", "zinc", "neutral", "stone"]);
+    const offenders: string[] = [];
+    const pattern = /(?:dark:)?(?:hover:)?(?:text|decoration|caret|placeholder:text)-([a-z]+)-\d+/g;
+    for (const file of TSX_FILES) {
+      const key = rel(file);
+      if (key === "app/(dashboard)/transactions/print/page.tsx") continue;
+      const source = withoutComments(readFileSync(file, "utf8"));
+      for (const match of source.matchAll(pattern)) {
+        if (!NEUTRALS.has(match[1])) continue;
+        offenders.push(`${key}:${source.slice(0, match.index).split("\n").length} ${match[0]}`);
+      }
+    }
+    expect(offenders, `Stock neutral steps in text position (use --ink / --ink-muted / --ink-faint):\n  ${offenders.join("\n  ")}`).toEqual([]);
+  });
+
   it("requires the shared role contracts", () => {
     const missing: string[] = [];
     for (const [file, roles] of ROLE_CONTRACTS) {

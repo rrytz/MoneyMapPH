@@ -53,7 +53,7 @@ export function BillsSummaryCard({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-sm font-semibold flex items-center gap-2">
-              <ReceiptText className="h-4 w-4 text-slate-400" />
+              <ReceiptText className="h-4 w-4 text-ink-faint" />
               Bills before next paycheck
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">

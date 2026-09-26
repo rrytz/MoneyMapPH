@@ -8,7 +8,13 @@ import { join } from "node:path";
 import { createHash, randomBytes } from "node:crypto";
 
 function loadEnv() {
-  const p = join(process.cwd(), ".env.local");
+  // Resolved from this script's location, not process.cwd(). Reading
+  // .env.local relative to the working directory meant this only worked when
+  // invoked from the repo root — the same cwd-dependency the capture scripts
+  // had. A verification script that silently finds no env from another
+  // directory fails as "env missing", which reads like a config problem
+  // rather than a path problem.
+  const p = join(import.meta.dirname, "..", "..", ".env.local");
   if (!existsSync(p)) return;
   const raw = readFileSync(p, "utf8").split(/\r?\n/);
   for (const line of raw) {

@@ -92,7 +92,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
                 <SelectItem value="credit">Credit Line (Ledger Only)</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-faint">
               Note: Credit type is for visual categorization. Its balance uses standard ledger math.
             </p>
           </div>

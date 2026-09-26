@@ -320,7 +320,7 @@ export function SettingsClient({
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEditCategoryModal(cat)} className="h-8 w-8 text-slate-500">
+                      <Button variant="ghost" size="icon" onClick={() => openEditCategoryModal(cat)} className="h-8 w-8 text-ink-muted">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       {!cat.is_default && (
@@ -370,7 +370,7 @@ export function SettingsClient({
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEditSourceModal(src)} className="h-8 w-8 text-slate-500">
+                      <Button variant="ghost" size="icon" onClick={() => openEditSourceModal(src)} className="h-8 w-8 text-ink-muted">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       {!src.is_default && (

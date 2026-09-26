@@ -27,7 +27,7 @@ function getIconForTitle(title: string, type: "income" | "expense") {
   const lower = title.toLowerCase();
   if (lower.includes("starbucks") || lower.includes("food") || lower.includes("coffee")) return <Coffee className="h-4 w-4 text-rose-500" />;
   if (lower.includes("meralco") || lower.includes("bill") || lower.includes("utility")) return <Zap className="h-4 w-4 text-indigo-500" />;
-  return <ShieldCheck className="h-4 w-4 text-slate-500" />;
+  return <ShieldCheck className="h-4 w-4 text-ink-muted" />;
 }
 
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
@@ -62,7 +62,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
         </div>
         <Link
           href="/transactions"
-          className="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sulpot-deep border border-border px-3 py-1 rounded-xl bg-muted/30 transition-colors"
+          className="text-xs font-semibold text-ink-muted hover:text-sulpot-deep border border-border px-3 py-1 rounded-xl bg-muted/30 transition-colors"
         >
           View all
         </Link>

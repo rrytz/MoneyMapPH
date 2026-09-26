@@ -247,7 +247,7 @@ export function SimulatorClient({
                         <span className="text-xs font-semibold text-foreground block">{item.name}</span>
                         <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
                           <span>Original: {item.beforeMonthsToReach === 0 ? "Achieved" : item.beforeMonthsToReach === "infinite" ? "No progress" : `${item.beforeMonthsToReach} mo`}</span>
-                          <ArrowRight className="h-3 w-3 text-slate-400" />
+                          <ArrowRight className="h-3 w-3 text-ink-faint" />
                           <span className="font-semibold text-foreground">
                             Projected: {item.afterMonthsToReach === 0 ? "Achieved" : item.afterMonthsToReach === "infinite" ? "No progress" : `${item.afterMonthsToReach} mo`}
                           </span>

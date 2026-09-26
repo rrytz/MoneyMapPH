@@ -464,7 +464,7 @@ export function SavingsPageClient({
                       )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEditGoalModal(goal)} className="h-8 w-8 text-slate-500">
+                      <Button variant="ghost" size="icon" onClick={() => openEditGoalModal(goal)} className="h-8 w-8 text-ink-muted">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => setDeleteId(goal.id)} className="h-8 w-8 text-rose-500">
@@ -565,7 +565,7 @@ export function SavingsPageClient({
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEditDebtModal(debt)} className="h-8 w-8 text-slate-500">
+                        <Button variant="ghost" size="icon" onClick={() => openEditDebtModal(debt)} className="h-8 w-8 text-ink-muted">
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => setDebtDeleteId(debt.id)} className="h-8 w-8 text-rose-500">
@@ -604,7 +604,7 @@ export function SavingsPageClient({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-slate-500 hover:text-rose-600"
+                                className="h-6 w-6 text-ink-muted hover:text-rose-600"
                                 title="Undo payment"
                                 onClick={() => handleUnpay(p.id)}
                               >

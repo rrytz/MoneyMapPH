@@ -65,7 +65,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
           <span className="flex items-center gap-1.5 text-sulpot-deep dark:text-sulpot-bright">
             <span className="h-2.5 w-2.5 rounded-full bg-sulpot" /> Income
           </span>
-          <span className="flex items-center gap-1.5 text-slate-400">
+          <span className="flex items-center gap-1.5 text-ink-faint">
             <span className="h-2.5 w-2.5 rounded-full bg-agosto" /> Expenses
           </span>
         </div>

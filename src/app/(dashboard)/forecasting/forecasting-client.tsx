@@ -65,7 +65,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                 <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                   <Wallet className="h-5 w-5" />
                 </div>
-                <span className="text-[11px] font-semibold text-slate-500">12-month target</span>
+                <span className="text-[11px] font-semibold text-ink-muted">12-month target</span>
               </div>
               <span className="mt-6 block text-xs font-medium text-muted-foreground">1-year projected balance</span>
               <CurrencyDisplay

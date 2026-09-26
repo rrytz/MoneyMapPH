@@ -75,7 +75,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
               <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <Calendar className="h-5 w-5" />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500">Scheduled</span>
+              <span className="text-[11px] font-semibold text-ink-muted">Scheduled</span>
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Paychecks Recorded</span>
@@ -114,7 +114,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 font-medium">
                         <span>Total: <CurrencyDisplay amount={Number(paycheck.amount)} className="type-ledger font-bold text-foreground" /></span>
                         <span>Allocated: <CurrencyDisplay amount={summary.totalAllocated} className="type-ledger font-bold text-sulpot-deep dark:text-sulpot-bright" /></span>
-                        <span>Unallocated: <CurrencyDisplay amount={summary.totalUnallocated} className="type-ledger font-bold text-slate-500" /></span>
+                        <span>Unallocated: <CurrencyDisplay amount={summary.totalUnallocated} className="type-ledger font-bold text-ink-muted" /></span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -122,7 +122,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                         variant="ghost"
                         size="icon"
                         onClick={() => setExpandedId(isExpanded ? null : paycheck.id)}
-                        className="h-8 w-8 text-slate-500"
+                        className="h-8 w-8 text-ink-muted"
                       >
                         {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </Button>

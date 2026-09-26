@@ -55,7 +55,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
 
         {accounts.length === 0 ? (
           <div className="flex items-center gap-3 p-3.5 rounded-lg bg-muted/30 border border-border/70">
-            <div className="p-2 rounded-md bg-muted text-slate-400">
+            <div className="p-2 rounded-md bg-muted text-ink-faint">
               <AlertTriangle className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">

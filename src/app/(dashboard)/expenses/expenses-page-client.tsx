@@ -269,7 +269,7 @@ export function ExpensesPageClient({
                 <div className="flex items-center gap-4 shrink-0">
                   <CurrencyDisplay amount={Number(entry.amount)} className="figure-inline text-sm font-bold text-rose-600 dark:text-rose-400" />
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-foreground" onClick={() => handleEdit(entry)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-ink-muted hover:text-foreground" onClick={() => handleEdit(entry)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 hover:text-rose-600" onClick={() => setDeleteId(entry.id)}>

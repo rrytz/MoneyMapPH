@@ -298,6 +298,57 @@ describe("S5c typography hierarchy detector", () => {
     expect(dead, `Invented Tailwind colour steps (render as no-op):\n  ${dead.join("\n  ")}`).toEqual([]);
   });
 
+  it("carries no slate-family hex in a presentation value", () => {
+    // The class ban cannot see this shape. `stroke="#e2e8f0"` is exactly as
+    // wrong as `bg-slate-200`, and the agosto swap proved it: the legend swatch
+    // moved to a token while the line it labelled stayed a hardcoded #94a3b8
+    // that did not even adapt per theme. Caught by looking, not by the class
+    // detector — so the class detector was not sufficient and this closes it.
+    //
+    // Scoped to the exact Tailwind slate palette rather than "any hex", because
+    // a rule that fires on correct code gets allowlisted, and an allowlist is
+    // the escape hatch this system just spent two slices removing. That means
+    // legitimate hex elsewhere is untouched by construction:
+    //   - Google brand fills in auth-forms        (not slate)
+    //   - the category palette + its fixtures     (exempt by path, below)
+    const SLATE_HEX = new Set([
+      "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b",
+      "#475569", "#334155", "#1e293b", "#0f172a", "#020617",
+    ]);
+
+    // Each exemption is a real reason, not a convenience.
+    const exempt = (key: string) =>
+      // The palette source of truth: these hexes DEFINE the tokens.
+      key === "app/globals.css" ||
+      // Category colour seeds, translated to governed tokens at resolve time.
+      // e.g. "#64748b" -> CATEGORY_COLOR_PALETTE.channel, a quiet neutral that
+      // is legitimately data, not a surface.
+      key.startsWith("lib/categories/") ||
+      key.endsWith(".test.ts") ||
+      // PWA theme_color for the manifest, not a rendered surface.
+      key === "app/manifest.ts";
+
+    // Both shapes need covering. SVG/chart attributes use `name="#hex"`; style
+    // objects (Recharts `contentStyle`) use `name: "#hex"`. Six slate literals
+    // live in the Tooltip contentStyle, so a rule that only read attributes
+    // would leave them behind a green detector — the exact failure this slice
+    // exists to prevent.
+    const PRESENTATION = /(?:stroke|fill|stopColor|backgroundColor|borderColor|color)\s*[=:]\s*"(#[0-9a-fA-F]{3,8})"/g;
+
+    const offenders: string[] = [];
+    for (const file of TSX_FILES) {
+      const key = rel(file);
+      if (exempt(key)) continue;
+      const source = withoutComments(readFileSync(file, "utf8"));
+      for (const match of source.matchAll(PRESENTATION)) {
+        if (SLATE_HEX.has(match[1].toLowerCase())) {
+          offenders.push(`${key}:${source.slice(0, match.index).split("\n").length} ${match[1]}`);
+        }
+      }
+    }
+    expect(offenders, `Slate hex in a presentation value (use var(--color-*)):\n  ${offenders.join("\n  ")}`).toEqual([]);
+  });
+
   it("requires the shared role contracts", () => {
     const missing: string[] = [];
     for (const [file, roles] of ROLE_CONTRACTS) {

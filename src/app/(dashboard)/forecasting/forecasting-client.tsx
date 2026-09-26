@@ -120,20 +120,20 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                       <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.5} />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: "#64748b", fontFamily: "Instrument Sans, ui-sans-serif, sans-serif" }}
+                    tick={{ fontSize: 11, fill: "var(--color-muted-foreground)", fontFamily: "Instrument Sans, ui-sans-serif, sans-serif" }}
                     tickFormatter={(v) => `₱${(v / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#0f172a",
-                      borderColor: "#1e293b",
+                      backgroundColor: "var(--popover)",
+                      borderColor: "var(--color-border)",
                       borderRadius: "0.75rem",
-                      color: "#ffffff",
+                      color: "var(--color-popover-foreground)",
                       fontSize: "12px",
                       boxShadow: "0 10px 15px -3px rgba(0,0,0,0.3)",
                     }}

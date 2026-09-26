@@ -83,13 +83,17 @@ export function BalanceBlock({
         <div className="space-y-8">
           <div className="space-y-3">
             <p className="type-section-label text-muted-foreground">Total across your accounts</p>
+            {/* The hero is the largest ledger figure, not an identity moment.
+                Currency is Instrument everywhere so the eye reads one voice
+                across the hero and the rows below it. The Bricolage moment on
+                this surface is the character line underneath. */}
             <p
               className={cn(
-                "type-identity text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl",
+                "text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl",
                 negative ? "text-rose" : "text-ink"
               )}
             >
-              <CurrencyDisplay amount={totalBalance} signed className="type-identity" />
+              <CurrencyDisplay amount={totalBalance} signed className="type-ledger text-5xl sm:text-6xl" />
             </p>
             {state !== "unmeasured" && (
               <p className="type-character text-foreground">{phaseLine[phase]}</p>

@@ -82,7 +82,13 @@ Every currency figure declares its role on the element itself. The rule:
 - `type-ledger` — the answer to the question the surface asks
 - `type-measurement` — a dominant %, ratio, or count
 - `figure-inline` — an amount inside a row, cell, pill, or sentence
-- `type-identity` — the home hero, which is deliberately not tabular currency
+
+**Currency is never Bricolage.** The identity face is reserved for H1s, the
+wordmark, and the character voice. This includes the home hero: it is the
+largest *ledger* figure, not an identity moment. A Bricolage peso beside
+Instrument peso rows is individually correct per role and still reads as two
+different apps on one screen, so the constraint is page-level coherence, not
+per-component correctness — money speaks one voice everywhere.
 
 The marker is required rather than inherited. `CurrencyDisplay` sets no
 `font-family`, so an un-marked instance silently inherits whatever face its

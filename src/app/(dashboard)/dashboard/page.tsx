@@ -193,18 +193,23 @@ export default async function DashboardPage() {
                 const ringDashoffset = ringDasharray - (ringDasharray * progress) / 100;
 
                 return (
+                  /* Borderless inset row on the Tide surface. This row
+                     previously painted a near-black, blue-cast legacy panel
+                     inside a Tide card, so the card read as a different app
+                     from the ones above it. */
                   <div
                     key={goal.id}
-                    className="flex items-center gap-4 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-border/70 hover:border-emerald-200 transition-colors"
+                    className="flex items-center gap-4 p-3.5 rounded-lg bg-muted/30 transition-colors hover:bg-muted/50"
                   >
                     <div className="relative h-12 w-12 flex items-center justify-center shrink-0">
                       <svg className="h-full w-full transform -rotate-90" viewBox="0 0 40 40" aria-hidden="true">
-                        <circle cx="20" cy="20" r="16" className="stroke-slate-200 dark:stroke-slate-800" strokeWidth="4" fill="transparent" />
+                        {/* Track is chrome, not data — a Tide neutral, never slate. */}
+                        <circle cx="20" cy="20" r="16" className="stroke-border" strokeWidth="4" fill="transparent" />
                         <circle
                           cx="20"
                           cy="20"
                           r="16"
-                          className="stroke-emerald-500 transition-all duration-700"
+                          className="stroke-sulpot transition-all duration-700"
                           strokeWidth="4"
                           strokeDasharray={ringDasharray}
                           strokeDashoffset={ringDashoffset}
@@ -217,8 +222,13 @@ export default async function DashboardPage() {
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-foreground truncate">{goal.name}</h4>
-                      <p className="type-measurement text-[11px] text-muted-foreground tabular-nums">
+                      <h4 className="type-section-label truncate normal-case tracking-normal text-foreground">
+                        {goal.name}
+                      </h4>
+                      {/* Currency, not a measurement: this is a peso amount, so
+                          it stays in the function face. Only the ring's % and
+                          the axis ticks take Martian. */}
+                      <p className="figure-inline text-[11px] text-muted-foreground tabular-nums">
                         ₱{current.toLocaleString()} of {formatCompactAmount(target)}
                       </p>
                     </div>

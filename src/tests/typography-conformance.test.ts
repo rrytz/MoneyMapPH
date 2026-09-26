@@ -44,9 +44,14 @@ const REQUIRED_ROLES = [
  *   type-ledger      a figure that competes for attention (the answer)
  *   type-measurement a dominant measurement (%, ratio, count)
  *   figure-inline    a figure that is part of a row or a sentence
- *   type-identity    the home hero, which is deliberately not tabular currency
+ *
+ * type-identity is deliberately NOT a figure marker. Currency never renders in
+ * the identity face: a Bricolage hero beside Instrument row figures reads as
+ * two different apps on one screen. The identity moment belongs to H1s, the
+ * wordmark, and the character voice — never to the numbers. Money reads the
+ * same everywhere, so every currency figure is Instrument.
  */
-const FIGURE_MARKERS = ["type-ledger", "type-measurement", "figure-inline", "type-identity"] as const;
+const FIGURE_MARKERS = ["type-ledger", "type-measurement", "figure-inline"] as const;
 
 /**
  * True when the figure resolves to exactly one role.
@@ -71,7 +76,9 @@ function isSingleDeclaration(tag: string, declared: readonly string[]): boolean 
 }
 
 const ROLE_CONTRACTS = [
-  ["components/dashboard/balance-block.tsx", ["type-identity", "type-ledger", "type-character"]],
+  // Identity is the character voice only on this surface — the hero is the
+  // largest ledger figure, so currency stays in Instrument.
+  ["components/dashboard/balance-block.tsx", ["type-ledger", "type-character"]],
   ["components/dashboard/kpi-card.tsx", ["type-section-label", "type-ledger"]],
   ["components/shared/page-header.tsx", ["type-page-title"]],
   ["components/layout/desktop-nav.tsx", ["type-nav", "type-nav-group"]],
@@ -201,6 +208,41 @@ describe("S5c typography hierarchy detector", () => {
     expect(source).toContain("rounded-lg bg-muted/30 border-transparent");
     // Tile labels are section labels, not sentence-case small print.
     expect(source).toContain('type-section-label block">Coverage Horizon');
+  });
+
+  it("never renders a currency figure in the identity face", () => {
+    // Same class of failure the role-system gate missed: both the hero and the
+    // rows were individually correct, but a Bricolage hero beside Instrument
+    // row figures reads as two apps on one screen. Money reads the same
+    // everywhere, so the identity face is off-limits to currency.
+    const violations: string[] = [];
+    for (const file of TSX_FILES) {
+      const source = readFileSync(file, "utf8");
+      for (const match of source.matchAll(/<CurrencyDisplay\b[\s\S]*?\/>/g)) {
+        if (classAttributeContains(match[0], "type-identity")) {
+          const line = source.slice(0, match.index).split("\n").length;
+          violations.push(`${rel(file)}:${line}`);
+        }
+      }
+    }
+    expect(violations, `Currency figures using the identity face:\n  ${violations.join("\n  ")}`).toEqual([]);
+  });
+
+  it("keeps the dashboard goal rows on the Tide surface", () => {
+    // A card that renders on the governed FintechCard surface but paints its
+    // inner rows on legacy slate reads as a different app. The dashboard goal
+    // card shipped this way: near-black `dark:bg-slate-900` rows with borders
+    // and slate ring tracks. Scoped to this card deliberately — the wider
+    // legacy-slate sweep across forecasting/income/settings/simulator is a
+    // separate slice, tracked rather than silently bundled here.
+    const source = read("app/(dashboard)/dashboard/page.tsx");
+    expect(source, "goal rows still on legacy slate").not.toMatch(
+      /bg-slate-\d+(?:\/\d+)?\s+dark:bg-slate-\d+(?:\/\d+)?/
+    );
+    expect(source, "goal ring track still on slate").not.toMatch(/stroke-slate-\d+/);
+    // Nested tonal layers are borderless by contract (the inset treatment).
+    expect(source, "goal rows still carry a border").not.toMatch(/rounded-lg bg-muted\/30 border/);
+    expect(source, "goal rows missing the inset treatment").toContain("rounded-lg bg-muted/30");
   });
 
   it("requires the shared role contracts", () => {

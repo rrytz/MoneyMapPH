@@ -216,7 +216,20 @@ export function BudgetsPageClient({
         />
       ) : (
         <>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Budgeted and unbudgeted are a partition of one question - what is
+            covered, and what is not - so they read as one row rather than two
+            full-width bands separated by a page break, which made them look
+            unrelated. The saving is the hole: 755 + 289 + a 32px top margin
+            becomes one row.
+
+            The split is asymmetric on purpose. An even 2 columns would give the
+            budgeted group a 608px column, and because responsive breakpoints
+            read the viewport rather than the container, its own 2-up grid
+            inside would then halve every category card to ~290px. 1.6fr keeps
+            them at ~360px, and stacks unbudgeted 1-up in the narrower column
+            where two 220px cards would not have held a Set Limit button. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {optimisticStatuses.map((status) => {
             const isOver = status.status === "over";
             const isNear = status.status === "near";
@@ -289,12 +302,12 @@ export function BudgetsPageClient({
         </div>
 
         {unbudgetedViews.length > 0 && (
-          <div className="space-y-4 mt-8">
+          <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-base text-foreground">Unbudgeted Categories</h3>
               <p className="text-xs text-muted-foreground">Spending in categories without a budget target in this calendar month.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-5">
               {unbudgetedViews.map((view) => (
                 <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
                   <FintechCardContent className="p-6 space-y-4">
@@ -337,6 +350,7 @@ export function BudgetsPageClient({
             </div>
           </div>
         )}
+        </div>
         </>
       )}
 

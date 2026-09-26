@@ -53,6 +53,32 @@
      indistinguishable from a token that does not exist. */
   --color-rose: var(--rose);
   --color-amber: var(--amber);
+  /* Tide's rose/amber ramps, overriding Tailwind's default palette. Declaring
+     them here is what makes the 201 existing `text-rose-500` / `bg-amber-200`
+     call sites resolve to Tide values with no edits — and means any step
+     added later lands on a governed colour rather than the stock palette. */
+  --color-rose-50: var(--rose-50);
+  --color-rose-100: var(--rose-100);
+  --color-rose-200: var(--rose-200);
+  --color-rose-300: var(--rose-300);
+  --color-rose-400: var(--rose-400);
+  --color-rose-500: var(--rose-500);
+  --color-rose-600: var(--rose-600);
+  --color-rose-700: var(--rose-700);
+  --color-rose-800: var(--rose-800);
+  --color-rose-900: var(--rose-900);
+  --color-rose-950: var(--rose-950);
+  --color-amber-50: var(--amber-50);
+  --color-amber-100: var(--amber-100);
+  --color-amber-200: var(--amber-200);
+  --color-amber-300: var(--amber-300);
+  --color-amber-400: var(--amber-400);
+  --color-amber-500: var(--amber-500);
+  --color-amber-600: var(--amber-600);
+  --color-amber-700: var(--amber-700);
+  --color-amber-800: var(--amber-800);
+  --color-amber-900: var(--amber-900);
+  --color-amber-950: var(--amber-950);
   /* Same omission for the Tide neutrals: --ink, --ink-muted, --ink-faint,
      --inset and --paper were all defined in :root/.dark but never exposed, so
      `text-ink-faint`, `text-ink-muted`, `bg-inset` and `bg-paper` generated no
@@ -111,9 +137,51 @@
   --agosto-deep: #858a7d;
   --agosto-tint: #eaeee9;
 
+  /* ---- Semantic ramps (S5c) --------------------------------
+     `text-rose-500` and friends were resolving to Tailwind's stock palette,
+     so the app carried two live roses: the Tide token (--rose) and the
+     default ramp. 167 rose and 34 amber call sites used the stock steps,
+     and no rule could flag them because they were all valid classes.
+
+     These ramps OVERRIDE Tailwind's defaults, so every existing call site
+     becomes correct by construction rather than by 200 edits — and a step
+     missed anywhere still lands on a Tide colour. The numbered steps carry
+     intensity (a subtle warning vs a hard negative), which is why they are
+     ramped rather than collapsed onto the single token.
+
+     Step 500 is the canonical value and the bare token derives from it, so
+     `text-rose` and `text-rose-500` can never drift apart. Only 500 is
+     re-declared for the dark world (brighter, as a dark surface needs);
+     the other steps stay theme-invariant and dark surfaces pick the lighter
+     steps via `dark:` variants, which is how the call sites already read. */
+  --rose-50: #fdf3f4;
+  --rose-100: #fbe6e8;
+  --rose-200: #f7d0d5;
+  --rose-300: #f1acb5;
+  --rose-400: #e97d8b;
+  --rose-500: #e0455b;
+  --rose-600: #c5384b;
+  --rose-700: #a62c3d;
+  --rose-800: #862330;
+  --rose-900: #661b25;
+  --rose-950: #3a0d13;
+
+  --amber-50: #fdf8ed;
+  --amber-100: #faf0d4;
+  --amber-200: #f4dfaa;
+  --amber-300: #eccb7c;
+  --amber-400: #ddb055;
+  --amber-500: #c97a0a;
+  --amber-600: #ad6808;
+  --amber-700: #8d5407;
+  --amber-800: #6d4006;
+  --amber-900: #4d2d04;
+  --amber-950: #2b1902;
+
   /* semantic — data only, never interactive */
-  --rose: #e0455b;
-  --amber: #c97a0a;
+  /* Bare tokens derive from step 500 so they can never drift from the ramp. */
+  --rose: var(--rose-500);
+  --amber: var(--amber-500);
   --indigo: #4b4bc4;
 
   /* shadcn semantic slots, mapped onto the Tide ramp */
@@ -172,8 +240,12 @@
   --agosto-deep: #454d43;
   --agosto-tint: #182019;
 
-  --rose: #f06274;
-  --amber: #d99213;
+  /* A dark surface needs a brighter 500; the other steps stay as declared in
+     :root and dark call sites pick lighter steps explicitly. */
+  --rose-500: #f06274;
+  --amber-500: #d99213;
+  --rose: var(--rose-500);
+  --amber: var(--amber-500);
   --indigo: #6b6bdd;
 
   --background: var(--paper);

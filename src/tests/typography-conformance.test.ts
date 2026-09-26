@@ -445,6 +445,49 @@ describe("S5c typography hierarchy detector", () => {
     expect(dead, `Colour utilities whose token is defined but not exposed (render as no-op):\n  ${dead.join("\n  ")}`).toEqual([]);
   });
 
+  it("keeps the rose and amber ramps complete and Tide-owned", () => {
+    // `text-rose-500` was resolving to Tailwind's default palette while the app
+    // also defined its own --rose, so the app carried two live roses: 167 rose
+    // and 34 amber call sites on stock values, none flaggable, because every
+    // one of those classes is perfectly valid.
+    //
+    // The fix is a ramp override in @theme, not 201 edits, so a step added
+    // later also lands on a governed colour. That only holds while the ladder
+    // is whole: a family counts as ramped only if EVERY step is exposed, and a
+    // partial ramp puts a hole exactly where the next call site would land.
+    //
+    // Scoped to the two families the app actually ramps. Stock slate in *text*
+    // position is a separate open question — the surface ban covered
+    // bg-/stroke-, not text-slate-500 on captions and icons — and folding it
+    // in here would be scope creep dressed as thoroughness.
+    const globals = readFileSync(join(ROOT, "src/app/globals.css"), "utf8");
+    const STEPS = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
+    const RAMPED = ["rose", "amber"];
+
+    const missing: string[] = [];
+    for (const family of RAMPED) {
+      for (const step of STEPS) {
+        if (!new RegExp(`--color-${family}-${step}\\s*:`).test(globals)) missing.push(`--color-${family}-${step}`);
+      }
+    }
+    expect(missing, `Ramped families missing a step:\n  ${missing.join("\n  ")}`).toEqual([]);
+
+    // The bare token must derive from step 500, not sit beside it. `--rose`
+    // and `--rose-500` are both live utilities; if they were declared as
+    // independent literals they would drift, and the app would be back to two
+    // roses wearing the same name.
+    for (const family of RAMPED) {
+      expect(globals, `--${family} must derive from --${family}-500`).toMatch(
+        new RegExp(`--${family}:\\s*var\\(--${family}-500\\)`)
+      );
+    }
+
+    // Nothing may reach for a stock step of a ramped family's *siblings* in a
+    // way that reintroduces a second palette silently: rose and amber are the
+    // only families the app owns, so any bare `text-rose`/`bg-amber` must go
+    // through the ramp, which the completeness check above guarantees.
+  });
+
   it("requires the shared role contracts", () => {
     const missing: string[] = [];
     for (const [file, roles] of ROLE_CONTRACTS) {

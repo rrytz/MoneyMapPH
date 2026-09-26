@@ -43,6 +43,14 @@ export function ExpensesPageClient({
   const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  // Paginated at 15 to match /transactions. This ledger rendered every entry,
+  // so 28 rows made the page 2.87 folds while its sibling showed 15 behind a
+  // pager - two ledgers doing one job in two ways. The cap is defensible here
+  // rather than on a dashboard card because this is a dedicated ledger with
+  // its own search and category filter: a page of results is the same job,
+  // not a reduced one. Every entry stays reachable.
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
   const [, startTransition] = useTransition();
 
   const [optimisticEntries, addOptimisticEntry] = useOptimistic(
@@ -141,6 +149,14 @@ export function ExpensesPageClient({
     return matchesSearch && matchesCategory;
   });
 
+  const totalItems = filteredEntries.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  // A filter that shrinks the result set can leave the current page past the
+  // end, so clamp rather than render an empty list.
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * itemsPerPage;
+  const paginatedEntries = filteredEntries.slice(startIndex, startIndex + itemsPerPage);
+
   const sortedCategories = Object.entries(categoryTotals)
     .map(([categoryId, amount]) => {
       const cName = categories.find((c) => c.id === categoryId)?.name || "Uncategorized";
@@ -213,11 +229,11 @@ export function ExpensesPageClient({
           <Input
             placeholder="Search expense titles..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
             className="pl-9.5 h-10 rounded-md bg-card border-border text-xs"
           />
         </div>
-        <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val || "all")}>
+        <Select value={selectedCategory} onValueChange={(val) => { setSelectedCategory(val || "all"); setCurrentPage(1); }}>
           <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-md bg-card border-border text-xs">
             <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
             <SelectValue placeholder="All Categories" />
@@ -246,11 +262,16 @@ export function ExpensesPageClient({
         <FintechCard className="p-0 overflow-hidden">
           <div className="px-6 py-4 border-b border-border flex items-center justify-between">
             <h3 className="font-semibold text-base text-foreground">Expense Log</h3>
-            <span className="text-xs text-muted-foreground">{filteredEntries.length} items</span>
+            <span className="text-xs text-muted-foreground">{totalItems} items</span>
           </div>
           <div className="divide-y divide-border">
-            {filteredEntries.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between p-4 px-6 hover:bg-muted/50 transition-colors">
+            {paginatedEntries.map((entry) => (
+              /* py-2, not p-4. The row was 61px and the h-8 icon buttons (30px)
+                 were setting that, not the text - 15px of padding either side of
+                 a 30px control. At py-2 the row is 46px, the same height the
+                 dashboard's ledger and /transactions both land on, so three
+                 ledgers now share one row instead of three heights. */
+              <div key={entry.id} className="flex items-center justify-between py-2 px-6 hover:bg-muted/50 transition-colors">
                 <div className="flex-1 min-w-0 pr-4">
                   <div className="flex items-center gap-2.5 mb-1 min-w-0">
                     <span className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{entry.title}</span>
@@ -280,6 +301,34 @@ export function ExpensesPageClient({
               </div>
             ))}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 py-3 border-t border-border">
+              <span className="type-measurement text-xs text-muted-foreground">
+                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} items
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="h-8 text-xs rounded-lg border-border cursor-pointer"
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="h-8 text-xs rounded-lg border-border cursor-pointer"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </FintechCard>
       )}
 

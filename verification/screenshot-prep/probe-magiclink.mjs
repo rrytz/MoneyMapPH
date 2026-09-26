@@ -11,7 +11,11 @@ import { join } from "node:path";
 import { createHash, randomBytes } from "node:crypto";
 
 function loadEnv() {
-  const p = join(process.cwd(), ".env.local");
+  // Anchored to this script, not the working directory. Resolving .env.local
+  // from process.cwd() meant this only ran from the repo root and otherwise
+  // threw "env missing", which reads as a config problem rather than a path
+  // problem. Enforced by src/tests/gate-hygiene.test.ts.
+  const p = join(import.meta.dirname, "..", "..", ".env.local");
   if (!existsSync(p)) return;
   const raw = readFileSync(p, "utf8").split(/\r?\n/);
   for (const line of raw) {

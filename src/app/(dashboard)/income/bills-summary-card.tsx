@@ -14,8 +14,8 @@ const VERDICT: Record<
 > = {
   covered: {
     label: "Covered",
-    pill: "text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/50",
-    color: "text-emerald-600 dark:text-emerald-400",
+    pill: "text-sulpot-deep dark:text-sulpot-bright bg-sulpot-tint dark:bg-sulpot-tint dark:text-sulpot-bright border-sulpot/30",
+    color: "text-sulpot-deep dark:text-sulpot-bright",
   },
   tight: {
     label: "Tight this cutoff",

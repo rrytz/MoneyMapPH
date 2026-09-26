@@ -38,7 +38,7 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
         </div>
         <Link
           href="/savings"
-          className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+          className="text-xs font-semibold text-sulpot-deep dark:text-sulpot-bright hover:underline flex items-center gap-1"
         >
           Track <ArrowRight className="h-3 w-3" />
         </Link>
@@ -59,7 +59,7 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
 
         {outstanding.length === 0 ? (
           <div className="flex items-center gap-3 p-3.5 rounded-lg bg-muted/30 border border-border/70">
-            <div className="p-2 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <div className="p-2 rounded-md bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
               <BadgeDollarSign className="h-4 w-4" />
             </div>
             <div>
@@ -100,7 +100,7 @@ export function TotalDebtCard({ debts, payments, todayIso }: TotalDebtCardProps)
             ))}
             {outstanding.length > 3 && (
               <p className="text-[11px] text-muted-foreground text-center pt-0.5">
-                +{outstanding.length - 3} more · <Link href="/savings" className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">view all</Link>
+                +{outstanding.length - 3} more · <Link href="/savings" className="text-sulpot-deep dark:text-sulpot-bright hover:underline font-semibold">view all</Link>
               </p>
             )}
           </div>

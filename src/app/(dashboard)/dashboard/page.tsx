@@ -169,7 +169,7 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/savings"
-              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-sulpot-deep dark:text-sulpot-bright hover:underline flex items-center gap-1"
             >
               <Plus className="h-3.5 w-3.5" /> New Goal
             </Link>

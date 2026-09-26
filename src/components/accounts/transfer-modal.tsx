@@ -182,7 +182,7 @@ export function TransferModal({
                 <span>Source ({sourceAccount.name}) impact:</span>
                 <span>-₱{totalDeduction.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="flex justify-between font-medium text-emerald-400">
+              <div className="flex justify-between font-medium text-sulpot-bright">
                 <span>Destination ({destAccount.name}) impact:</span>
                 <span>+₱{numAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
               </div>

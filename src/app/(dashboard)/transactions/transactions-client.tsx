@@ -214,7 +214,7 @@ export function TransactionsClient({
 
           <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border/60 text-xs">
             <span className="text-muted-foreground flex items-center gap-1 font-medium">
-              <Calendar className="h-3.5 w-3.5 text-emerald-600" /> Filter Date Range:
+              <Calendar className="h-3.5 w-3.5 text-sulpot-deep" /> Filter Date Range:
             </span>
             <div className="flex items-center gap-2">
               <Input
@@ -287,7 +287,7 @@ export function TransactionsClient({
                         {tx.notes && <span className="text-[10px] text-muted-foreground block truncate max-w-[280px]">&quot;{tx.notes}&quot;</span>}
                       </td>
                       <td className="py-3.5 px-5 text-right font-bold tabular-nums text-xs">
-                        <span className={isIncome ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
+                        <span className={isIncome ? "text-sulpot-deep dark:text-sulpot-bright" : "text-rose-600 dark:text-rose-400"}>
                           {isIncome ? "+" : "-"}<CurrencyDisplay amount={tx.amount} className="type-ledger inline font-bold" />
                         </span>
                       </td>

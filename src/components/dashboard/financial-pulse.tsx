@@ -14,7 +14,7 @@ export function FinancialPulse({ budgetUtilization }: FinancialPulseProps) {
       ? "bg-rose-500"
       : safeUtilization >= 75
         ? "bg-amber-500"
-        : "bg-emerald-500";
+        : "bg-sulpot";
 
   return (
     <div className="h-1 w-full overflow-hidden bg-muted/60 rounded-full">

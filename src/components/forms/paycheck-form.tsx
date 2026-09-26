@@ -119,7 +119,7 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
               name="cutoff"
               value={cutoff}
               onChange={(e) => setOverridePeriodEnd(e.target.value)}
-              className="flex h-10 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
+              className="flex h-10 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-sulpot outline-none"
             >
               {cutoffOptions.map((opt) => (
                 <option key={opt} value={opt}>

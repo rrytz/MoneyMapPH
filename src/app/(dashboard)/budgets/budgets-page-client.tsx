@@ -135,12 +135,12 @@ export function BudgetsPageClient({
               <Button variant="outline" onClick={handleCopy} disabled={copying} className="rounded-xl border-border h-9 text-xs">
                 <Copy className="mr-1.5 h-4 w-4" /> Copy Previous
               </Button>
-              <Button onClick={() => setFormOpen(true)} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white h-9 text-xs">
+              <Button onClick={() => setFormOpen(true)} className="rounded-xl bg-primary hover:bg-primary/80 text-white h-9 text-xs">
                 <Plus className="mr-1.5 h-4 w-4" /> Create Budget
               </Button>
             </div>
           ) : (
-            <Button onClick={() => setFormOpen(true)} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white h-9 text-xs">
+            <Button onClick={() => setFormOpen(true)} className="rounded-xl bg-primary hover:bg-primary/80 text-white h-9 text-xs">
               <Plus className="mr-1.5 h-4 w-4" /> Edit Limits
             </Button>
           )}
@@ -156,7 +156,7 @@ export function BudgetsPageClient({
             <div className="grid sm:grid-cols-2">
               <div className="p-6 sm:p-8">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                     <Wallet className="h-5 w-5" />
                   </div>
                   <Badge variant="income">Allowance</Badge>
@@ -257,7 +257,7 @@ export function BudgetsPageClient({
                         ? "[&>div>div]:bg-rose-500"
                         : isNear
                           ? "[&>div>div]:bg-amber-500"
-                          : "[&>div>div]:bg-emerald-500"
+                          : "[&>div>div]:bg-sulpot"
                     )}
                   />
 
@@ -272,7 +272,7 @@ export function BudgetsPageClient({
 
                   <Button
                     onClick={() => setExpenseForm(status)}
-                    className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white h-9 text-xs w-full cursor-pointer"
+                    className="rounded-xl bg-primary hover:bg-primary/80 text-white h-9 text-xs w-full cursor-pointer"
                   >
                     <Plus className="mr-1.5 h-4 w-4" /> Add Expense
                   </Button>
@@ -337,7 +337,7 @@ export function BudgetsPageClient({
       <FintechCard>
         <FintechCardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
               <Calculator className="h-4 w-4" />
             </div>
             <div>

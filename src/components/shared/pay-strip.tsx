@@ -64,7 +64,7 @@ export function PayStrip() {
                 className={`w-full overflow-hidden rounded-t-[5px] ${
                   isLean
                     ? "bg-gradient-to-t from-amber-500/20 to-amber-400"
-                    : "bg-gradient-to-t from-emerald-600/20 to-emerald-500"
+                    : "bg-gradient-to-t from-sulpot/20 to-sulpot"
                 } transition-[filter] duration-200 group-hover:brightness-110 ${
                   visible ? "auth-bar" : "opacity-0"
                 }`}
@@ -81,7 +81,7 @@ export function PayStrip() {
       </div>
       <div className="mt-4 flex gap-5 text-[11px] text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <i className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <i className="h-1.5 w-1.5 rounded-full bg-sulpot" />
           Income
         </span>
         <span className="flex items-center gap-1.5">

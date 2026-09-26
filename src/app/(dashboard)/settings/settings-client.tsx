@@ -231,7 +231,7 @@ export function SettingsClient({
           <FintechCard className="max-w-xl">
             <FintechCardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <div className="p-2 rounded-md bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                   <Globe className="h-4 w-4" />
                 </div>
                 <FintechCardTitle>Profile & Preferences</FintechCardTitle>
@@ -278,7 +278,7 @@ export function SettingsClient({
                   </div>
                 </div>
                 <div className="pt-3 border-t border-border flex justify-end">
-                  <Button type="submit" disabled={isPending} className="rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
+                  <Button type="submit" disabled={isPending} className="rounded-md bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer">
                     {isPending ? "Saving..." : "Save Preferences"}
                   </Button>
                 </div>
@@ -294,7 +294,7 @@ export function SettingsClient({
               <h3 className="section-head text-foreground">Expense Categories</h3>
               <p className="text-xs text-muted-foreground">Manage your custom spending category mappings</p>
             </div>
-            <Button onClick={openNewCategoryModal} className="rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
+            <Button onClick={openNewCategoryModal} className="rounded-md bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer">
               <Plus className="mr-1.5 h-4 w-4" /> Add Category
             </Button>
           </div>
@@ -343,7 +343,7 @@ export function SettingsClient({
               <h3 className="section-head text-foreground">Income Sources</h3>
               <p className="text-xs text-muted-foreground">Configure sources generating income streams</p>
             </div>
-            <Button onClick={openNewSourceModal} className="rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer">
+            <Button onClick={openNewSourceModal} className="rounded-md bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer">
               <Plus className="mr-1.5 h-4 w-4" /> Add Source
             </Button>
           </div>
@@ -354,7 +354,7 @@ export function SettingsClient({
                 {sources.map((src) => (
                   <div key={src.id} className="p-3.5 px-6 flex items-center justify-between gap-3 hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <HandCoins className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <HandCoins className="h-4 w-4 shrink-0 text-sulpot-deep dark:text-sulpot-bright" />
                       <div>
                         <span className="text-xs font-bold text-foreground block">{src.name}</span>
                         {src.is_default && (
@@ -430,7 +430,7 @@ export function SettingsClient({
                       onClick={() => setCategoryIcon(key)}
                       className={`flex h-9 w-9 items-center justify-center rounded-md border transition ${
                         selected
-                          ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                          ? "border-sulpot bg-sulpot/10 text-sulpot-deep dark:text-sulpot-bright dark:text-sulpot-bright"
                           : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
@@ -460,7 +460,7 @@ export function SettingsClient({
                       title={PALETTE_LABELS[paletteKey]}
                       onClick={() => setCategoryColor(hex)}
                       className={`h-9 w-9 rounded-lg border-2 transition ${
-                        selected ? "border-emerald-600 ring-2 ring-emerald-500/30" : "border-border hover:border-foreground/30"
+                        selected ? "border-sulpot ring-2 ring-sulpot/30" : "border-border hover:border-foreground/30"
                       }`}
                       style={{ backgroundColor: hex }}
                     />
@@ -472,7 +472,7 @@ export function SettingsClient({
               <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
                 {selectedCategory ? "Save Changes" : "Add Category"}
               </Button>
             </DialogFooter>
@@ -517,7 +517,7 @@ export function SettingsClient({
               <Button type="button" variant="outline" onClick={() => setSourceModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
                 {selectedSource ? "Save Changes" : "Add Source"}
               </Button>
             </DialogFooter>

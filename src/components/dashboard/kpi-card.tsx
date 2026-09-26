@@ -52,7 +52,7 @@ export function KpiCard({
             <Icon className="h-4.5 w-4.5" />
           </div>
           {badge && (
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-200/50">
+            <span className="text-[11px] font-semibold text-sulpot-deep dark:text-sulpot-bright bg-sulpot-tint dark:bg-sulpot-tint dark:text-sulpot-bright px-2.5 py-0.5 rounded-full border border-sulpot/30">
               {badge}
             </span>
           )}
@@ -85,7 +85,7 @@ export function KpiCard({
             <TrendIcon
               className={cn(
                 "h-3.5 w-3.5",
-                trendFavorable ? "text-emerald-600" : changePercent < 0 ? "text-rose-500" : "text-slate-400"
+                trendFavorable ? "text-sulpot-deep" : changePercent < 0 ? "text-rose-500" : "text-slate-400"
               )}
             />
             <span className="type-measurement text-muted-foreground">

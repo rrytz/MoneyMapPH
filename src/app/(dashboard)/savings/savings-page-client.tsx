@@ -320,7 +320,7 @@ export function SavingsPageClient({
         title="Goals Dashboard"
         description="Set goals, track emergency adequacy, and build long-term wealth"
       >
-        <Button onClick={openNewGoalModal} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
+        <Button onClick={openNewGoalModal} className="rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs px-4 h-9 cursor-pointer">
           <Plus className="mr-1.5 h-4 w-4" /> Create Goal
         </Button>
       </PageHeader>
@@ -332,7 +332,7 @@ export function SavingsPageClient({
           <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-6 sm:p-8">
               <div className="flex items-center justify-between gap-3">
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                   <PiggyBank className="h-5 w-5" />
                 </div>
                 <Badge variant="income">Accumulated</Badge>
@@ -340,7 +340,7 @@ export function SavingsPageClient({
               <span className="mt-6 block text-xs font-medium text-muted-foreground">Total saved balance</span>
               <CurrencyDisplay
                 amount={totalSaved}
-                className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
+                className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-sulpot-deep dark:text-sulpot-bright"
               />
             </div>
             <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
@@ -367,11 +367,11 @@ export function SavingsPageClient({
 
       {/* Emergency Adequacy Alert Card */}
       {emergencyStatus.hasFund && (
-        <FintechCard className="border-l-4 border-l-emerald-600 bg-card">
+        <FintechCard className="border-l-4 border-l-sulpot bg-card">
           <FintechCardContent className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                   <Shield className="h-5 w-5" />
                 </div>
                 <div>
@@ -438,7 +438,7 @@ export function SavingsPageClient({
                 key={goal.id}
                 className={cn(
                   "relative overflow-hidden transition-all duration-200",
-                  isEmergencyGoal && "border-emerald-500/40 ring-1 ring-emerald-500/20"
+                  isEmergencyGoal && "border-sulpot/40 ring-1 ring-sulpot/20"
                 )}
               >
                 <FintechCardContent className="p-6 space-y-4">
@@ -476,7 +476,7 @@ export function SavingsPageClient({
                   <div className="flex justify-between items-baseline pt-1">
                     <div>
                       <span className="text-xs text-muted-foreground font-medium">Current Balance</span>
-                      <CurrencyDisplay amount={Number(goal.current_amount)} className="type-ledger text-2xl font-bold block text-emerald-600 dark:text-emerald-400" />
+                      <CurrencyDisplay amount={Number(goal.current_amount)} className="type-ledger text-2xl font-bold block text-sulpot-deep dark:text-sulpot-bright" />
                     </div>
                     <div className="text-right">
                       <span className="text-xs text-muted-foreground font-medium">Target Amount</span>
@@ -489,12 +489,12 @@ export function SavingsPageClient({
                       <span>Funded</span>
                       <span className="font-bold text-foreground tabular-nums">{Math.round(goalProgress)}%</span>
                     </div>
-                    <Progress value={goalProgress} className="h-2 rounded-full [&>div]:bg-emerald-500" />
+                    <Progress value={goalProgress} className="h-2 rounded-full [&>div]:bg-sulpot" />
                   </div>
 
                   <Button
                     onClick={() => openContributionModal(goal)}
-                    className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 shadow-xs cursor-pointer"
+                    className="w-full rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 shadow-xs cursor-pointer"
                   >
                     <ArrowUpRight className="h-4 w-4 mr-1.5" /> Contribute Funds
                   </Button>
@@ -688,7 +688,7 @@ export function SavingsPageClient({
                 type="checkbox"
                 checked={isEmergency}
                 onChange={(e) => setIsEmergency(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                className="h-4 w-4 rounded border-gray-300 text-sulpot-deep focus:ring-sulpot"
               />
               <Label htmlFor="goal-emergency" className="cursor-pointer select-none">
                 Mark as primary Emergency Fund
@@ -698,7 +698,7 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setGoalModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
                 {selectedGoal ? "Save Changes" : "Create Goal"}
               </Button>
             </DialogFooter>
@@ -766,7 +766,7 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setContributionModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
                 Record Contribution
               </Button>
             </DialogFooter>

@@ -9,7 +9,7 @@ export function DashboardStatStrip({ stats }: { stats: DashboardStats }) {
         title="Total Accounts Balance"
         value={stats.accountsBalance}
         icon={Wallet}
-        iconBgClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+        iconBgClass="bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright"
       />
       <KpiCard
         title="Savings"

@@ -145,7 +145,7 @@ export function IncomePageClient({
   return (
     <div className="space-y-6">
       <PageHeader title="Income Command Center" description="Track salary, night differential, overtime, incentives, and variable earnings">
-        <Button onClick={handleAdd} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
+        <Button onClick={handleAdd} className="rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs px-4 h-9 cursor-pointer">
           <Plus className="mr-1.5 h-4 w-4" /> Add Income
         </Button>
       </PageHeader>
@@ -171,7 +171,7 @@ export function IncomePageClient({
               <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
                 <div className="p-6 sm:p-8">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                    <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                       <DollarSign className="h-5 w-5" />
                     </div>
                     <Badge variant="income">Calendar month</Badge>
@@ -180,7 +180,7 @@ export function IncomePageClient({
                     <span className="text-xs font-medium text-muted-foreground block">Calendar month earnings</span>
                     <CurrencyDisplay
                       amount={totalThisMonth}
-                      className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400"
+                      className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-sulpot-deep dark:text-sulpot-bright"
                     />
                   </div>
                 </div>
@@ -272,7 +272,7 @@ export function IncomePageClient({
                       )}
                     </div>
                     <div className="flex items-center gap-4">
-                      <CurrencyDisplay amount={Number(entry.amount)} className="figure-inline text-sm font-bold text-emerald-600 dark:text-emerald-400" />
+                      <CurrencyDisplay amount={Number(entry.amount)} className="figure-inline text-sm font-bold text-sulpot-deep dark:text-sulpot-bright" />
                       <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-foreground" onClick={() => handleEdit(entry)}>
                           <Pencil className="h-3.5 w-3.5" />

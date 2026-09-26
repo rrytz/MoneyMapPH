@@ -11,12 +11,12 @@ const STATS = [
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-muted/40 px-4 py-8 sm:py-12 flex items-start sm:items-center justify-center dark:bg-background">
-      <div className="auth-animate-rise w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-emerald-950/[0.06] dark:border-border dark:shadow-black/40 lg:grid lg:grid-cols-[1.15fr_1fr]">
+      <div className="auth-animate-rise w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-black/[0.06] dark:border-border dark:shadow-black/40 lg:grid lg:grid-cols-[1.15fr_1fr]">
         {/* Story panel */}
-        <div className="relative hidden min-w-0 lg:flex flex-col justify-between overflow-hidden border-b border-border bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-10 xl:p-12 dark:from-emerald-950/50 dark:via-card dark:to-background lg:border-b-0 lg:border-r">
+        <div className="relative hidden min-w-0 lg:flex flex-col justify-between overflow-hidden border-b border-border bg-gradient-to-br from-sulpot-tint via-white to-sulpot-tint p-10 xl:p-12 dark:from-sulpot-tint/50 dark:via-card dark:to-background lg:border-b-0 lg:border-r">
           <div
             aria-hidden
-            className="auth-glow pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full bg-emerald-300/30 blur-3xl dark:bg-emerald-500/20"
+            className="auth-glow pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full bg-sulpot-tint blur-3xl dark:bg-sulpot/20"
           />
           <div
             aria-hidden
@@ -40,7 +40,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           <div className="relative z-10 -mt-6 mb-4">
             <h2 className="auth-animate-rise font-display text-[2rem] xl:text-[2.35rem] font-bold leading-[1.15] tracking-tight text-foreground">
               You work hard for it.{" "}
-              <span className="text-emerald-600 dark:text-emerald-400">Make it work for you.</span>
+              <span className="text-sulpot-deep dark:text-sulpot-bright">Make it work for you.</span>
             </h2>
             <p
               className="auth-animate-rise mt-4 max-w-[34ch] text-sm leading-relaxed text-muted-foreground"

@@ -120,7 +120,7 @@ export function RecoveryForm() {
             Remembered it?{" "}
             <Link
               href="/login"
-              className="font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+              className="font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
             >
               Sign in
             </Link>

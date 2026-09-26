@@ -34,7 +34,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
         </div>
         <Link
           href="/accounts"
-          className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+          className="text-xs font-semibold text-sulpot-deep dark:text-sulpot-bright hover:underline flex items-center gap-1"
         >
           Manage <ArrowRight className="h-3 w-3" />
         </Link>
@@ -48,7 +48,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
               <CurrencyDisplay amount={totalLiquidity} className="type-ledger" />
             </div>
           </div>
-          <div className="p-2.5 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+          <div className="p-2.5 rounded-md bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
             <Wallet className="h-5 w-5" />
           </div>
         </div>
@@ -66,7 +66,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
             </div>
             <Link
               href="/accounts"
-              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
+              className="text-xs font-semibold text-sulpot-deep dark:text-sulpot-bright hover:underline shrink-0"
             >
               Add Account
             </Link>
@@ -76,7 +76,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
             {visible.map((account) => (
               <div
                 key={account.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/70 hover:border-emerald-200 transition-colors"
+                className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/70 hover:border-sulpot/30 transition-colors"
               >
                 <div
                   className={cn(
@@ -109,7 +109,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
             ))}
             {extraCount > 0 && (
               <p className="text-[11px] text-muted-foreground text-center pt-0.5">
-                +{extraCount} more wallet{extraCount === 1 ? "" : "s"} · <Link href="/accounts" className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">view all</Link>
+                +{extraCount} more wallet{extraCount === 1 ? "" : "s"} · <Link href="/accounts" className="text-sulpot-deep dark:text-sulpot-bright hover:underline font-semibold">view all</Link>
               </p>
             )}
           </div>
@@ -119,7 +119,7 @@ export function AccountsSummaryCard({ accounts, unassigned, totalLiquidity }: Ac
           <div className="pt-2 border-t border-border/60 text-[11px] text-muted-foreground space-y-1">
             <p className="flex items-center justify-between">
               <span>Unassigned income</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              <span className="font-semibold text-sulpot-deep dark:text-sulpot-bright tabular-nums">
                 <CurrencyDisplay amount={unassigned.unassignedIncome} className="figure-inline" />
               </span>
             </p>

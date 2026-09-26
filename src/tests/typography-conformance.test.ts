@@ -282,20 +282,40 @@ describe("S5c typography hierarchy detector", () => {
   });
 
   it("uses only real Tailwind colour steps", () => {
-    // `border-slate-150` is not a Tailwind class, so it silently rendered as no
-    // border at all. A dead utility looks identical to an intentional one in a
-    // screenshot, which is why it survived the sweep.
-    const dead: string[] = [];
+    // Two ways a colour utility silently renders nothing:
+    //
+    //  1. An invented step. `border-slate-150` is not a Tailwind class, so that
+    //     row has been rendering with no bottom border at all.
+    //  2. A truncated token. The emerald migration listed `bg-emerald-50`
+    //     before `bg-emerald-500`, so the shorter pattern matched as a prefix
+    //     and left the trailing digit behind: `bg-sulpot-tint0`. That contains
+    //     a real token name, so it reads as plausible in review, and it cost 8
+    //     elements their background. Found by rendering, not by a rule.
+    //
+    // Both are the same shape: a colour name plus a step that cannot resolve.
+    // Dead utilities are invisible in a screenshot and invisible to the class
+    // ban, so they get their own check.
     const STEPS = new Set(["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"]);
+    // Tailwind families plus the Tide token names, so a stray digit after
+    // either is caught.
+    const FAMILIES =
+      "slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose" +
+      "|sulpot(?:-bright|-deep|-tint)?|agosto(?:-deep|-tint)?|ink(?:-muted|-faint)?|inset|paper";
+
+    const dead: string[] = [];
+    const pattern = new RegExp(
+      `(?:border|bg|text|stroke|from|to|via|ring|fill|shadow|divide|outline|accent)-(?:${FAMILIES})-(\\d+)`,
+      "g"
+    );
     for (const file of TSX_FILES) {
       const source = readFileSync(file, "utf8");
-      for (const match of source.matchAll(/(?:border|bg|text|stroke|from|to|via|ring|fill)-slate-(\d+)/g)) {
+      for (const match of source.matchAll(pattern)) {
         if (!STEPS.has(match[1])) {
           dead.push(`${rel(file)}:${source.slice(0, match.index).split("\n").length} ${match[0]}`);
         }
       }
     }
-    expect(dead, `Invented Tailwind colour steps (render as no-op):\n  ${dead.join("\n  ")}`).toEqual([]);
+    expect(dead, `Unresolvable colour utilities (render as no-op):\n  ${dead.join("\n  ")}`).toEqual([]);
   });
 
   it("carries no slate-family hex in a presentation value", () => {
@@ -347,6 +367,82 @@ describe("S5c typography hierarchy detector", () => {
       }
     }
     expect(offenders, `Slate hex in a presentation value (use var(--color-*)):\n  ${offenders.join("\n  ")}`).toEqual([]);
+  });
+
+  it("carries no emerald utility", () => {
+    // The token layer migrated; the component layer did not. --primary,
+    // --success and --income all resolve to var(--sulpot), and ui/button.tsx's
+    // primary variant is `bg-primary`, so the governed path exists — 35 feature
+    // components were bypassing it with raw emerald utilities instead. A
+    // governed default that call sites route around is the same shape as
+    // CurrencyDisplay inheriting its face from whatever ancestor it landed in.
+    //
+    // The print statement keeps its palette for the reason given in
+    // SLATE_EXCLUSIONS above.
+    const offenders: string[] = [];
+    for (const file of TSX_FILES) {
+      const key = rel(file);
+      if (key === "app/(dashboard)/transactions/print/page.tsx") continue;
+      const source = withoutComments(readFileSync(file, "utf8"));
+      for (const match of source.matchAll(/(?:dark:)?(?:hover:)?[a-z-]*emerald-\d+/g)) {
+        offenders.push(`${key}:${source.slice(0, match.index).split("\n").length} ${match[0]}`);
+      }
+    }
+    expect(offenders, `Raw emerald utilities (use a sulpot/primary token):\n  ${offenders.join("\n  ")}`).toEqual([]);
+  });
+
+  it("uses no colour utility whose token is defined but never exposed", () => {
+    // A dead utility is the worst kind of bug: correct in source, renders as
+    // nothing. `--rose`, `--amber`, `--ink`, `--ink-muted`, `--ink-faint`,
+    // `--inset` and `--paper` were all defined in :root/.dark but never exposed
+    // as `--color-*`, so `text-rose`, `text-ink-faint`, `bg-inset` and friends
+    // generated no rule at all and fell back to inherited ink.
+    //
+    // Measured consequences:
+    //   text-rose       computed to rgb(27,33,28) = body ink, so every
+    //                   negative-balance signal (balance hero, topbar readout,
+    //                   account menu, budget remaining, attention strip)
+    //                   rendered as ordinary text. "You are overdrawn" was
+    //                   not showing.
+    //   text-ink-faint  --ink-faint is #98a396 light / #667063 dark, but the
+    //                   dead class rendered it at full body-ink strength, so
+    //                   faint labels were rendering at full contrast.
+    //   text-ink        coincidentally harmless: --ink equals the body colour.
+    //                   Correct by accident, not by design.
+    //
+    // The rule cross-references the stylesheet rather than pattern-matching a
+    // palette list: a bare `text-<name>` is dead exactly when the app defines
+    // `--<name>` but exposes no `--color-<name>`. An earlier version keyed off
+    // Tailwind family names and wrongly flagged text-foreground / bg-card /
+    // border-border, which are legitimate precisely because those tokens ARE
+    // exposed — a rule that fires on correct code gets allowlisted.
+    const globals = readFileSync(join(ROOT, "src/app/globals.css"), "utf8");
+    const exposed = new Set([...globals.matchAll(/--color-([a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+    // Custom properties declared in :root / .dark, keeping only those whose
+    // value is colour-shaped. Without this filter `--radius: 1rem` counts as a
+    // defined token and `border-radius` in sonner.tsx gets flagged as a dead
+    // colour class.
+    const COLOUR_VALUE = /^(#|rgba?\(|hsla?\(|oklch\(|oklab\(|lab\(|lch\(|color\(|var\()/;
+    const defined = new Set(
+      [...globals.matchAll(/^\s{2}(--[a-z0-9-]+)\s*:\s*([^;]+);/gm)]
+        .filter((m) => COLOUR_VALUE.test(m[2].trim()))
+        .map((m) => m[1].slice(2))
+    );
+
+    const dead: string[] = [];
+    const BARE = /(?:dark:)?(?:hover:)?(?:text|bg|border|ring|stroke|fill|shadow)-([a-z][a-z0-9-]*)(?![\w-])/g;
+    for (const file of TSX_FILES) {
+      const key = rel(file);
+      if (key === "app/(dashboard)/transactions/print/page.tsx") continue;
+      const source = withoutComments(readFileSync(file, "utf8"));
+      for (const match of source.matchAll(BARE)) {
+        const name = match[1];
+        if (!defined.has(name)) continue; // not a colour this app defines
+        if (exposed.has(name)) continue; // and it IS exposed, so the class is live
+        dead.push(`${key}:${source.slice(0, match.index).split("\n").length} ${match[0]}`);
+      }
+    }
+    expect(dead, `Colour utilities whose token is defined but not exposed (render as no-op):\n  ${dead.join("\n  ")}`).toEqual([]);
   });
 
   it("requires the shared role contracts", () => {

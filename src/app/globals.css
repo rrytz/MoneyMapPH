@@ -43,6 +43,30 @@
   --color-danger: var(--danger);
   --color-income: var(--income);
   --color-expense: var(--expense);
+  /* --rose and --amber were defined in :root/.dark but never exposed here, so
+     `text-rose` and `text-amber` generated no rule at all and silently fell
+     back to body ink. Measured: text-rose computed to rgb(27,33,28), identical
+     to the body colour. Nine call sites relied on it — including every
+     negative-balance signal in the balance hero, the topbar readout, the
+     account menu, budget remaining and the attention strip — so "you are
+     overdrawn" was rendering in normal ink. A token that is not exposed is
+     indistinguishable from a token that does not exist. */
+  --color-rose: var(--rose);
+  --color-amber: var(--amber);
+  /* Same omission for the Tide neutrals: --ink, --ink-muted, --ink-faint,
+     --inset and --paper were all defined in :root/.dark but never exposed, so
+     `text-ink-faint`, `text-ink-muted`, `bg-inset` and `bg-paper` generated no
+     rule and fell back to inherited ink. `text-ink-faint` was the harmful
+     case: --ink-faint is #98a396 light / #667063 dark, but the dead class
+     rendered it at full body-ink strength in both themes, so faint labels
+     were rendering at full contrast. `text-ink` happened to be harmless
+     because --ink equals the body colour — correct by coincidence, not by
+     design. */
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-inset: var(--inset);
+  --color-paper: var(--paper);
   /* Tide water tokens, exposed as utilities for the gauge + phase language */
   --color-sulpot: var(--sulpot);
   --color-sulpot-bright: var(--sulpot-bright);

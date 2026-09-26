@@ -28,7 +28,7 @@ export function AccountSelect({
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
+        className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition focus:border-sulpot focus:outline-none focus:ring-1 focus:ring-sulpot disabled:opacity-50"
       >
         <option value="">None / Unassigned</option>
         {activeAccounts.map((acc) => (

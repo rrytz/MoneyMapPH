@@ -47,7 +47,7 @@ export function MobileNav() {
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 flex-1 py-1 text-[11px] font-medium transition-colors",
-                highlighted ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-muted-foreground hover:text-foreground"
+                highlighted ? "text-sulpot-deep dark:text-sulpot-bright font-semibold" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {Icon && <Icon className="h-5 w-5 shrink-0" />}
@@ -61,7 +61,7 @@ export function MobileNav() {
             <span
               className={cn(
                 "flex flex-col items-center gap-1",
-                isMoreActive && "text-emerald-600 dark:text-emerald-400 font-semibold"
+                isMoreActive && "text-sulpot-deep dark:text-sulpot-bright font-semibold"
               )}
             >
               {MoreIcon && <MoreIcon className="h-5 w-5 shrink-0" />}
@@ -86,11 +86,11 @@ export function MobileNav() {
                     className={cn(
                       "flex items-center gap-3 p-3 rounded-2xl border border-border text-xs font-semibold transition-colors",
                       highlighted
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/50"
+                        ? "bg-sulpot-tint text-sulpot-deep dark:text-sulpot-bright dark:bg-sulpot-tint dark:text-sulpot-bright border-sulpot/30"
                         : "bg-muted/30 text-foreground hover:bg-muted/70"
                     )}
                   >
-                    {Icon && <Icon className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />}
+                    {Icon && <Icon className="h-4.5 w-4.5 text-sulpot-deep dark:text-sulpot-bright shrink-0" />}
                     <span className="truncate">{item.label}</span>
                   </Link>
                 );

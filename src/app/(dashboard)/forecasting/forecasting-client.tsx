@@ -62,7 +62,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
           <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-6 sm:p-8">
               <div className="flex items-center justify-between gap-3">
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                   <Wallet className="h-5 w-5" />
                 </div>
                 <span className="text-[11px] font-semibold text-slate-500">12-month target</span>
@@ -75,18 +75,18 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
             </div>
             <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
               <div className="p-6">
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                   <Zap className="h-5 w-5" />
                 </div>
                 <span className="mt-4 block text-xs text-muted-foreground">Projected monthly savings pace</span>
-                <CurrencyDisplay amount={projectedMonthlyGrowth} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400" />
+                <CurrencyDisplay amount={projectedMonthlyGrowth} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright" />
               </div>
               <div className="border-l border-border p-6">
                 <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <span className="mt-4 block text-xs text-muted-foreground">Projected monthly growth rate</span>
-                <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+                <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright">
                   +{projectedMonthlyGrowth > 0 && startBalance > 0 ? Math.round((projectedMonthlyGrowth / startBalance) * 100) : 0}%
                 </p>
               </div>
@@ -164,7 +164,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
             )}
           </div>
           <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground bg-muted/30 p-3 rounded-xl border border-border">
-            <Info className="h-4 w-4 text-emerald-600 shrink-0" />
+            <Info className="h-4 w-4 text-sulpot-deep shrink-0" />
             <span>
               <strong>How it works:</strong> The engine aggregates income, expenses, and budgets to establish a monthly net savings speed. Future projections assume a constant savings speed.
             </span>
@@ -202,14 +202,14 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                   </div>
                   
                   <div className="flex items-center gap-2 shrink-0">
-                    <Goal className="h-4 w-4 text-emerald-600" />
+                    <Goal className="h-4 w-4 text-sulpot-deep" />
                     <span className="type-measurement text-sm font-bold text-foreground">
                       {goal.monthsToReach === 0 ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5"><Sparkles className="h-3.5 w-3.5" /> Achieved</span>
+                        <span className="text-sulpot-deep dark:text-sulpot-bright flex items-center gap-0.5"><Sparkles className="h-3.5 w-3.5" /> Achieved</span>
                       ) : goal.monthsToReach === "infinite" ? (
                         <span className="text-rose-500">Needs Savings Stream</span>
                       ) : (
-                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                        <span className="text-sulpot-deep dark:text-sulpot-bright flex items-center gap-1 font-bold">
                           <Calendar className="h-3.5 w-3.5" /> ~{goal.monthsToReach} months
                         </span>
                       )}

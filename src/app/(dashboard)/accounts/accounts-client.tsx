@@ -147,7 +147,7 @@ export function AccountsClient({
         <h2 className="text-lg font-semibold text-foreground">Your Wallets & Accounts</h2>
         {displayedAccounts.length === 0 ? (
           <div className="rounded-2xl border border-border bg-card/60 p-12 text-center space-y-4">
-            <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-sulpot/10 text-sulpot-deep dark:text-sulpot-bright flex items-center justify-center">
               <Wallet className="h-6 w-6" />
             </div>
             <div>
@@ -184,7 +184,7 @@ export function AccountsClient({
             variant="ghost"
             size="sm"
             onClick={() => handleOpenTransfer()}
-            className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500"
+            className="text-xs text-sulpot-deep dark:text-sulpot-bright hover:text-sulpot"
           >
             + Log New Transfer
           </Button>

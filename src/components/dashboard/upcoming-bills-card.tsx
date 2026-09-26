@@ -73,7 +73,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
         </div>
         <Link
           href="/income"
-          className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+          className="text-xs font-semibold text-sulpot-deep dark:text-sulpot-bright hover:underline flex items-center gap-1"
         >
           Plan <ArrowRight className="h-3 w-3" />
         </Link>
@@ -92,7 +92,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
               return (
                 <div
                   key={item.key}
-                  className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/70 hover:border-emerald-200 transition-colors"
+                  className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/70 hover:border-sulpot/30 transition-colors"
                 >
                   <div
                     className={cn(

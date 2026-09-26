@@ -48,7 +48,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
           <h3 className="font-semibold text-base text-foreground">Paycheck Allocation Planner</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Allocate each paycheck to specific bills, savings, or categories</p>
         </div>
-        <Button onClick={() => setFormOpen(true)} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs px-4 h-9 cursor-pointer">
+        <Button onClick={() => setFormOpen(true)} className="rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs px-4 h-9 cursor-pointer">
           <Plus className="mr-1.5 h-4 w-4" /> Plan Paycheck
         </Button>
       </div>
@@ -57,14 +57,14 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
         <FintechCard>
           <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+              <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                 <Wallet className="h-5 w-5" />
               </div>
               <Badge variant="income">Planned</Badge>
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Total Paycheck Income</span>
-              <CurrencyDisplay amount={totalPaycheckIncome} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
+              <CurrencyDisplay amount={totalPaycheckIncome} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-sulpot-deep dark:text-sulpot-bright" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -113,7 +113,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 font-medium">
                         <span>Total: <CurrencyDisplay amount={Number(paycheck.amount)} className="type-ledger font-bold text-foreground" /></span>
-                        <span>Allocated: <CurrencyDisplay amount={summary.totalAllocated} className="type-ledger font-bold text-emerald-600 dark:text-emerald-400" /></span>
+                        <span>Allocated: <CurrencyDisplay amount={summary.totalAllocated} className="type-ledger font-bold text-sulpot-deep dark:text-sulpot-bright" /></span>
                         <span>Unallocated: <CurrencyDisplay amount={summary.totalUnallocated} className="type-ledger font-bold text-slate-500" /></span>
                       </div>
                     </div>
@@ -140,7 +140,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                 <FintechCardContent className="pt-0">
                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden mb-4">
                     <div
-                      className="bg-emerald-500 h-full transition-all duration-500"
+                      className="bg-sulpot h-full transition-all duration-500"
                       style={{
                         width: `${Math.min((summary.totalAllocated / Number(paycheck.amount)) * 100, 100)}%`,
                       }}

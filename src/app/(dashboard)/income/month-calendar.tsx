@@ -82,12 +82,12 @@ export function MonthCalendar({
               className={cn(
                 "min-h-16 rounded-lg border p-1.5 text-xs",
                 cell.isInMonth ? "bg-muted/30" : "bg-transparent opacity-40",
-                cell.isToday && "ring-2 ring-emerald-500/60"
+                cell.isToday && "ring-2 ring-sulpot/60"
               )}
             >
               <div className="flex items-center justify-between">
                 <span className="type-measurement text-[10px] font-medium">{Number(cell.date.slice(8, 10))}</span>
-                {cell.isCutoffAnchor && <span className="h-1 w-1 rounded-full bg-emerald-500" title="Cutoff anchor" />}
+                {cell.isCutoffAnchor && <span className="h-1 w-1 rounded-full bg-sulpot" title="Cutoff anchor" />}
               </div>
               <div className="space-y-1 mt-1">
                 {cell.occurrences.slice(0, 3).map((occ) => (
@@ -98,7 +98,7 @@ export function MonthCalendar({
                     className={cn(
                       "flex w-full items-center justify-between rounded px-1 py-0.5 text-left text-[10px] leading-tight",
                       occ.paid
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 opacity-70"
+                        ? "bg-sulpot-tint text-sulpot-deep dark:text-sulpot-bright dark:bg-sulpot-tint dark:text-sulpot-bright opacity-70"
                         : occ.overdue
                           ? "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400"
                           : "bg-muted text-muted-foreground"

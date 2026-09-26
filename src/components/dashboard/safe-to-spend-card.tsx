@@ -46,11 +46,11 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
             pill: "text-amber-700 bg-muted/60 dark:text-amber-400 border-amber-200/50",
           }
         : {
-            color: "text-emerald-600 dark:text-emerald-400",
-            bar: "bg-emerald-500",
+            color: "text-sulpot-deep dark:text-sulpot-bright",
+            bar: "bg-sulpot",
             label: "Safe to spend this cutoff",
-            chip: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
-            pill: "text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/50",
+            chip: "bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright",
+            pill: "text-sulpot-deep dark:text-sulpot-bright bg-sulpot-tint dark:bg-sulpot-tint dark:text-sulpot-bright border-sulpot/30",
           };
   const pct = Math.min(100, Math.round(status.fractionElapsed * 100));
 
@@ -83,7 +83,7 @@ export function SafeToSpendCard({ status }: { status: SafeToSpendStatus }) {
             <div className={cn("h-full rounded-full", state.bar)} style={{ width: `${pct}%` }} />
           </div>
           {status.incentiveIncomeLogged > 0 && (
-            <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
+            <p className="text-[11px] text-sulpot-deep dark:text-sulpot-bright">
               + <CurrencyDisplay amount={status.incentiveIncomeLogged} className="figure-inline" /> incentives logged this cutoff
             </p>
           )}

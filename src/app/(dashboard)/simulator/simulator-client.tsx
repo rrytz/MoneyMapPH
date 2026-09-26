@@ -107,7 +107,7 @@ export function SimulatorClient({
         <FintechCard className="order-2 h-fit lg:order-2">
           <FintechCardHeader className="pb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+              <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                 <Calculator className="h-4 w-4" />
               </div>
               <FintechCardTitle>Simulate Purchase</FintechCardTitle>
@@ -157,7 +157,7 @@ export function SimulatorClient({
                   rows={2}
                 />
               </div>
-              <Button type="submit" disabled={isPending} className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9.5 shadow-xs cursor-pointer">
+              <Button type="submit" disabled={isPending} className="w-full rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9.5 shadow-xs cursor-pointer">
                 Save Simulation
               </Button>
             </FintechCardContent>
@@ -194,9 +194,9 @@ export function SimulatorClient({
                         {impact.emergencyFundImpact.beforeStatus}
                       </Badge>
                     </div>
-                    <div className="p-3.5 bg-muted/30 rounded-2xl border border-emerald-200 dark:border-emerald-950">
+                    <div className="p-3.5 bg-muted/30 rounded-2xl border border-sulpot/30 dark:border-sulpot-deep">
                       <span className="text-xs text-muted-foreground font-medium block">Coverage After</span>
-                      <span className="type-measurement text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block mt-0.5">
+                      <span className="type-measurement text-xl font-bold text-sulpot-deep dark:text-sulpot-bright tabular-nums block mt-0.5">
                         {impact.emergencyFundImpact.afterMonthsCovered} Months
                       </span>
                       <Badge

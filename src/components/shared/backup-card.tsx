@@ -54,7 +54,7 @@ export function BackupCard() {
     <FintechCard className="max-w-xl">
       <FintechCardHeader className="pb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+          <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
             <ShieldCheck className="h-4 w-4" />
           </div>
           <FintechCardTitle>Backup & Restore</FintechCardTitle>
@@ -75,7 +75,7 @@ export function BackupCard() {
             type="button"
             onClick={handleExport}
             disabled={exporting}
-            className="shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer"
+            className="shrink-0 rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer"
           >
             <Download className="mr-1.5 h-4 w-4" />
             {exporting ? "Exporting..." : "Export"}
@@ -100,7 +100,7 @@ export function BackupCard() {
             </div>
           )}
           {state.success && (
-            <div className="rounded-lg border border-emerald-600/20 bg-emerald-600/10 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-400">
+            <div className="rounded-lg border border-sulpot/20 bg-primary/10 px-3 py-2 text-xs text-sulpot-deep dark:text-sulpot-bright dark:text-sulpot-bright">
               Backup restored — {state.imported ?? 0} rows merged.
             </div>
           )}
@@ -117,7 +117,7 @@ export function BackupCard() {
             <Button
               type="submit"
               disabled={pending}
-              className="shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-9 px-4 cursor-pointer"
+              className="shrink-0 rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer"
             >
               <Upload className="mr-1.5 h-4 w-4" />
               {pending ? "Restoring..." : "Restore"}

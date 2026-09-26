@@ -80,14 +80,14 @@ export function SummaryView({
         <FintechCard>
           <FintechCardContent className="p-6 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+              <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                 <TrendingUp className="h-5 w-5" />
               </div>
               <Badge variant="income">Net Surplus</Badge>
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Calendar month net</span>
-              <CurrencyDisplay amount={summary.savingsAmount} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400" />
+              <CurrencyDisplay amount={summary.savingsAmount} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-sulpot-deep dark:text-sulpot-bright" />
             </div>
           </FintechCardContent>
         </FintechCard>
@@ -130,7 +130,7 @@ export function SummaryView({
       <FintechCard className="flex flex-col">
         <FintechCardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
               <BarChart3 className="h-4 w-4" />
             </div>
             <FintechCardTitle>Cash Flow History</FintechCardTitle>
@@ -172,7 +172,7 @@ export function SummaryView({
                     />
                     <Legend verticalAlign="top" height={36} />
                     <Bar dataKey="Income" fill="var(--color-sulpot)" radius={[4, 4, 0, 0]} name="Total Income" />
-                    <Bar dataKey="Expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} name="Total Expenses" />
+                    <Bar dataKey="Expenses" fill="var(--color-rose)" radius={[4, 4, 0, 0]} name="Total Expenses" />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -256,7 +256,7 @@ export function SummaryView({
                       <td className="py-3.5 px-4 text-right tabular-nums font-semibold text-rose-600 dark:text-rose-400">
                         <CurrencyDisplay amount={b.spent} className="figure-inline" />
                       </td>
-                      <td className={`py-3.5 px-4 text-right tabular-nums font-bold ${b.remaining >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                      <td className={`py-3.5 px-4 text-right tabular-nums font-bold ${b.remaining >= 0 ? "text-sulpot-deep dark:text-sulpot-bright" : "text-rose-600 dark:text-rose-400"}`}>
                         {b.remaining >= 0 ? "+" : ""}
                         <CurrencyDisplay amount={b.remaining} className="figure-inline" />
                       </td>

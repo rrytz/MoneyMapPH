@@ -52,7 +52,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           <div className={`p-2.5 rounded-md ${
             account.is_negative
               ? "bg-rose-500/10 text-rose-400"
-              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              : "bg-sulpot/10 text-sulpot-deep dark:text-sulpot-bright"
           }`}>
             <Icon className="h-5 w-5" />
           </div>

@@ -21,7 +21,7 @@ export function PeriodSafeToSpendCard({ status }: { status: SafeToSpendStatus })
     <FintechCard>
       <FintechCardHeader className="pb-2">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+          <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
             <CalendarRange className="h-4 w-4" />
           </div>
           <div>
@@ -46,13 +46,13 @@ export function PeriodSafeToSpendCard({ status }: { status: SafeToSpendStatus })
                 signed
                 className={cn(
                   "type-ledger text-2xl font-bold tracking-tight tabular-nums",
-                  status.safeToSpend <= 0 ? "text-rose-500" : "text-emerald-600 dark:text-emerald-400"
+                  status.safeToSpend <= 0 ? "text-rose-500" : "text-sulpot-deep dark:text-sulpot-bright"
                 )}
               />
             </div>
             <div className="space-y-1.5 pt-2 border-t border-border/60">
               <BreakdownRow label="Core income" amount={status.coreIncome} />
-              <BreakdownRow label="Incentives logged" amount={status.incentiveIncomeLogged} accent="text-emerald-600 dark:text-emerald-400" />
+              <BreakdownRow label="Incentives logged" amount={status.incentiveIncomeLogged} accent="text-sulpot-deep dark:text-sulpot-bright" />
               <BreakdownRow label="Spent this cutoff" amount={status.spentThisPeriod} accent="text-rose-500" />
             </div>
             <p className="type-measurement text-[11px] text-muted-foreground">{status.daysRemaining} days left in this cutoff</p>

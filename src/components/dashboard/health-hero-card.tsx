@@ -30,7 +30,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
                 cx="50"
                 cy="50"
                 r="40"
-                className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                className="stroke-sulpot transition-all duration-1000 ease-out"
                 strokeWidth="9"
                 strokeDasharray={strokeDasharray}
                 strokeDashoffset={strokeDashoffset}
@@ -40,7 +40,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
             </svg>
             <div className="absolute text-center flex flex-col items-center">
               <span className="type-measurement text-2xl font-black text-foreground tracking-tight">{score}</span>
-              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+              <span className="text-[9px] font-bold text-sulpot-deep dark:text-sulpot-bright uppercase tracking-wider">
                 {report.grade}
               </span>
             </div>
@@ -52,7 +52,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
             </span>
             <div className="flex items-baseline gap-2">
               <h2 className="type-measurement text-xl font-bold text-foreground tracking-tight">{score} / 100</h2>
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/50">
+              <span className="text-xs font-semibold text-sulpot-deep dark:text-sulpot-bright bg-sulpot-tint dark:bg-sulpot-tint px-2 py-0.5 rounded-full border border-sulpot/30">
                 {report.grade}
               </span>
             </div>
@@ -69,7 +69,7 @@ export function FinancialHealthHeroCard({ report }: HealthHeroCardProps) {
               <span
                 className={`type-measurement text-xs font-bold ${
                   pct >= 75
-                    ? "text-emerald-600 dark:text-emerald-400"
+                    ? "text-sulpot-deep dark:text-sulpot-bright"
                     : pct >= 50
                       ? "text-amber-600 dark:text-amber-400"
                       : "text-rose-600 dark:text-rose-400"

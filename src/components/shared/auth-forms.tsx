@@ -139,7 +139,7 @@ export function AuthForm() {
       >
         <span
           aria-hidden
-          className={`pointer-events-none absolute inset-y-1 w-[calc(50%-4px)] rounded-lg bg-emerald-600 shadow-sm transition-[left,background-color] duration-300 ease-out dark:bg-emerald-500 ${
+          className={`pointer-events-none absolute inset-y-1 w-[calc(50%-4px)] rounded-lg bg-primary shadow-sm transition-[left,background-color] duration-300 ease-out dark:bg-sulpot ${
             mode === "signup" ? "left-1/2" : "left-1"
           }`}
         />
@@ -152,7 +152,11 @@ export function AuthForm() {
             onClick={() => switchMode(m)}
             className={`relative z-10 whitespace-nowrap rounded-lg py-2 text-center text-[13px] font-semibold transition-colors duration-200 ${
               mode === m
-                ? "text-white dark:text-emerald-950"
+                ? /* The indicator is a solid sulpot fill in BOTH themes
+                     (bg-primary, dark:bg-sulpot), so the active label stays
+                     white in both. A dark: override put dark green on bright
+                     green — caught as low contrast in the auth screenshot. */
+                  "text-white"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -178,7 +182,7 @@ export function AuthForm() {
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
-                className="mt-6 text-sm font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+                className="mt-6 text-sm font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
               >
                 Back to sign in
               </button>
@@ -328,7 +332,7 @@ export function AuthForm() {
                     Don&apos;t have an account?{" "}
                     <Link
                       href="/signup"
-                      className="font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+                      className="font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
                     >
                       Sign up
                     </Link>
@@ -338,7 +342,7 @@ export function AuthForm() {
                     Already have an account?{" "}
                     <Link
                       href="/login"
-                      className="font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+                      className="font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
                     >
                       Sign in
                     </Link>

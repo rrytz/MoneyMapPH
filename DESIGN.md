@@ -228,6 +228,75 @@ never on buttons, never tinting a tile or chip background.
 **The Instrument Rule.** A component may not state what it does not know. The
 gauge shows the water only when there is water.
 
+**The Composition Rule.** A full-width block is only an orphan if something of
+comparable *meaning* could sit beside it. Most lone blocks are the only instance
+of their kind, and pairing one with an unrelated neighbour is worse than leaving
+it full width. Height is not the test — a 541px chart and a 133px CTA are both
+full width because they are the only one of their kind, not because they are
+unpaired.
+
+**The Surface Rule.** A control group spanning more than one row wears a
+surface; a single-row group does not. `/transactions` filters with 8 controls
+across 2 rows and earns its card; `/expenses` filters with 3 controls in one row
+and correctly has none. Same rule, different answers, each correct — the
+surfaces are proportionate to their content, not divergent. Do not "unify" them
+by adding a boundary that 3 loose controls do not need, or by stripping one that
+8 controls do.
+
+## Composition
+
+Six patterns. A screen is a stack of these, and the stack is the design.
+
+- **Hero** — exactly one per screen: the answer to the question the surface
+  asks. Stands alone, full width.
+- **Signal row** — 2–5 equal figures at one size. The scan layer. A figure here
+  is never louder than its neighbours.
+- **Attention** — conditional, full width, above the fold, and only when
+  something is genuinely due.
+- **Pair** — two blocks of comparable *meaning* side by side.
+- **Ledger** — the long list. Capped, full width, the screen's terminus.
+- **Workbench** — form beside output, 2-up at a fixed proportion.
+
+Three levers remove height, and they are not interchangeable:
+
+1. **Trim** — shorten a block. Smallest, and the first thing reached for.
+2. **Remove** — take a block out of the stack entirely.
+3. **Absorb** — move a block into a column that has slack. The source shrinks
+   and the destination does not grow, so the stack loses the block's full
+   height. This is why the `/budgets` sidebar could take 84px out of the
+   allowance card without the row growing to take it back.
+
+Trimming alone is usually not enough. `/dashboard` lost 72px to density and
+553px to composition, on the same screen.
+
+### What this found, and what it did not
+
+Classifying all eight screens produced five real defects and three screens with
+no defect at all. The three are as useful as the five, because they are what
+made the rules precise:
+
+| Screen | Verdict | What it took |
+|---|---|---|
+| `/dashboard` | fixed | Savings Goals paired with Recent Transactions; one block fewer |
+| `/budgets` | fixed | the right column given its own meaning; a 84px strip absorbed into it |
+| `/transactions` | fixed | row treatment — 70px to 35px rows, ledger figure role corrected |
+| `/expenses` | fixed | pagination at 15, matching its sibling; row treatment |
+| `/accounts` | fixed | count-aware tracks, closing a 402px empty column |
+| `/forecasting` | **no defect** | three self-contained cards; the first states its own intent in a comment |
+| `/income` | **no defect** | under one fold; no orphan, no hole |
+| `/simulator` | **no defect** | a `col-span-2` child that fills its row — 1 + 2 of 3 tracks |
+
+Four pairing proposals were raised and all four were withdrawn, because the
+blocks were height-matched and meaning-mismatched. That is what the Composition
+Rule now says, in the words it needed to say.
+
+`gridTracksFor` picks a card grid's track count from its **occupied tracks**,
+not its child count. Those differ as soon as a child spans more than one track,
+and passing a child count there breaks the layout — `/simulator` is the worked
+example. It also *declines*: five items in a two-up stays two-up, because
+dropping to one track would cost two rows, and a taller grid is worse than a
+hole.
+
 ## Do's and Don'ts
 
 - **Do** let saturation carry the tide, and let type carry the register —
@@ -241,8 +310,12 @@ gauge shows the water only when there is water.
 - **Don't** put rose or amber on a phase, ever.
 - **Don't** render a raw emoji as category identity, and don't reintroduce a
   free-text emoji or free-color field.
-- **Don't** hard-code a neutral hex on a content surface — it cannot theme.
+- **Don't** hard-code a neutral hex on a content surface - it cannot theme.
 - **Don't** make a full meter out of missing data.
+- **Don't** pair two blocks because they are close in height. Ask what they
+  *mean* first; if the answer is "nothing in common," leave both full width.
+- **Don't** cap a ledger's rows to save space without saying so. Capping
+  changes what the card is for, and that is a product decision.
 
 ## Radius ladder
 

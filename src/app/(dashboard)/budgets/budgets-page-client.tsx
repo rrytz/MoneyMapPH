@@ -261,12 +261,18 @@ export function BudgetsPageClient({
                     )}
                   />
 
+                  {/* `figure-inline`, not `type-ledger`. This is a two-figure
+                      row inside a card that is one of several; at 2rem each
+                      figure competes for attention the row doesn't need. The
+                      unbudgeted card's identical row (below) already used
+                      `figure-inline`, so this was the odd one out rather than
+                      a deliberate difference. */}
                   <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
                     <span className="text-muted-foreground">
-                      Spent: <CurrencyDisplay amount={status.spent} className="type-ledger font-bold text-foreground" />
+                      Spent: <CurrencyDisplay amount={status.spent} className="figure-inline font-bold text-foreground" />
                     </span>
                     <span className="text-muted-foreground">
-                      Target: <CurrencyDisplay amount={status.budgeted} className="type-ledger font-bold text-foreground" />
+                      Target: <CurrencyDisplay amount={status.budgeted} className="figure-inline font-bold text-foreground" />
                     </span>
                   </div>
 

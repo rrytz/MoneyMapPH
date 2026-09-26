@@ -451,8 +451,14 @@ export function SavingsPageClient({
                             <Shield className="h-2.5 w-2.5 mr-0.5" /> Emergency Fund
                           </Badge>
                         )}
+                        {/* `income`, not `info`. `info` is for state that is
+                            neither positive nor negative (Archived,
+                            Scheduled); an achievement is positive, and
+                            "Emergency Fund" beside it already wears
+                            `income`. Two achievements in two colours read as
+                            two categories rather than one kind of badge. */}
                         {isCompleted && (
-                          <Badge variant="info" className="text-[10px]">
+                          <Badge variant="income" className="text-[10px]">
                             <Sparkles className="h-2.5 w-2.5 mr-0.5" /> Fully Funded
                           </Badge>
                         )}
@@ -549,8 +555,11 @@ export function SavingsPageClient({
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="text-base font-bold text-foreground truncate max-w-[200px]">{debt.name}</h4>
+                          {/* See the note on the "Fully Funded" badge: an
+                              achievement is positive, so it wears `income`.
+                              "Overdue" beside it is the `expense` opposite. */}
                           {paidOff && (
-                            <Badge variant="info" className="text-[10px]">
+                            <Badge variant="income" className="text-[10px]">
                               <Sparkles className="h-2.5 w-2.5 mr-0.5" /> Paid Off
                             </Badge>
                           )}

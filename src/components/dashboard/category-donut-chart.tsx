@@ -95,7 +95,10 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
     <FintechCard className="flex flex-col">
       <FintechCardHeader className="pb-2">
         <FintechCardTitle>Spending by Category</FintechCardTitle>
-        <p className="text-xs text-muted-foreground">
+        {/* figure-inline: this is a sentence with a peso amount in it, not a
+            standalone figure. Same treatment as the dashboard's scale-bar
+            line, which is the precedent for a figure inside running text. */}
+        <p className="figure-inline text-xs text-muted-foreground tabular-nums">
           {formatCurrency(totalSpending)} calendar month total · top {top5.length} {top5.length === 1 ? "category" : "categories"}
         </p>
       </FintechCardHeader>

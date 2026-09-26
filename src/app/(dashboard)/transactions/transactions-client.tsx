@@ -256,39 +256,50 @@ export function TransactionsClient({
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-border bg-muted/30 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                  <th className="py-3.5 px-5">Date</th>
-                  <th className="py-3.5 px-4">Type</th>
-                  <th className="py-3.5 px-4">Category/Source</th>
-                  <th className="py-3.5 px-5">Description</th>
-                  <th className="py-3.5 px-5 text-right">Amount</th>
+                  <th className="py-2.5 px-5">Date</th>
+                  <th className="py-2.5 px-4">Type</th>
+                  <th className="py-2.5 px-4">Category/Source</th>
+                  <th className="py-2.5 px-5">Description</th>
+                  <th className="py-2.5 px-5 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
+                {/* py-2, not py-3.5, and figure-inline on the amount. This ledger
+                    was the last surface still using a 70px row with a 32px
+                    type-ledger figure inside it, so the amount was the loudest
+                    thing in every row of a transaction list. The dashboard's
+                    Recent Transactions already runs py-2 rows with figure-inline
+                    amounts; this makes the two ledgers one idiom instead of two.
+
+                    It is also where most of this screen's height was, and unlike
+                    the two compositions that were rendered and rejected, nothing
+                    is removed to get it: the pager, the type/category/date
+                    filters and the Type badge all stay. */}
                 {paginated.map((tx) => {
                   const isIncome = tx.type === "income";
                   return (
                     <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
-                      <td className="py-3.5 px-5 font-medium text-muted-foreground whitespace-nowrap">
+                      <td className="py-2 px-5 font-medium text-muted-foreground whitespace-nowrap">
                         {formatDate(tx.date, "MMM dd, yyyy")}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-2 px-4">
                         <Badge variant={isIncome ? "income" : "expense"} className="text-[10px] uppercase font-bold px-2 py-0.5">
                           {tx.type}
                         </Badge>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-2 px-4">
                         <div className="flex items-center gap-1.5">
                           {tx.categoryIcon && <span className="text-sm shrink-0">{tx.categoryIcon}</span>}
                           <span className="font-semibold text-foreground truncate max-w-[140px]">{tx.categoryName}</span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-5">
+                      <td className="py-2 px-5">
                         <span className="font-semibold text-foreground block">{tx.title}</span>
                         {tx.notes && <span className="text-[10px] text-muted-foreground block truncate max-w-[280px]">&quot;{tx.notes}&quot;</span>}
                       </td>
-                      <td className="py-3.5 px-5 text-right font-bold tabular-nums text-xs">
+                      <td className="py-2 px-5 text-right font-bold tabular-nums text-xs">
                         <span className={isIncome ? "text-sulpot-deep dark:text-sulpot-bright" : "text-rose-600 dark:text-rose-400"}>
-                          {isIncome ? "+" : "-"}<CurrencyDisplay amount={tx.amount} className="type-ledger inline font-bold" />
+                          {isIncome ? "+" : "-"}<CurrencyDisplay amount={tx.amount} className="figure-inline inline font-bold" />
                         </span>
                       </td>
                     </tr>

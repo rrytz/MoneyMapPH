@@ -87,7 +87,12 @@ const ROLE_CONTRACTS = [
   ["components/dashboard/income-expense-chart.tsx", ["type-measurement"]],
   ["app/(dashboard)/income/paycheck-planner.tsx", ["type-ledger", "type-measurement"]],
   ["app/(dashboard)/budgets/budgets-page-client.tsx", ["type-ledger", "type-measurement"]],
-  ["app/(dashboard)/transactions/transactions-client.tsx", ["type-ledger", "type-measurement"]],
+  // A ledger has no hero figure. Every amount on this screen sits inside a row,
+  // so figure-inline is the honest role for all of them and type-ledger was
+  // never right here - it made the amount the loudest thing in every row of a
+  // transaction list. type-measurement still applies to the "showing 1 to 15 of
+  // 29" count, which is a measurement rather than money.
+  ["app/(dashboard)/transactions/transactions-client.tsx", ["figure-inline", "type-measurement"]],
   ["app/(dashboard)/income/month-calendar.tsx", ["type-measurement"]],
 ] as const;
 
@@ -128,6 +133,22 @@ const GRID_OPEN_RE =
 
 /** Any JSX tag, including fragments, with its self-closing flag. */
 const JSX_TAG_RE = /<(\/?)(>|[A-Za-z][\w.]*)((?:[^<>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
+
+/**
+ * True when the innermost JSX element enclosing `at` declares a figure role.
+ * Walks back to the nearest opening tag before `at` and reads its className, so
+ * the answer belongs to the element the figure actually renders inside.
+ */
+function declaresFigureRole(source: string, at: number): boolean {
+  const before = source.slice(0, at);
+  const open = [...before.matchAll(/<([A-Za-z][\w.]*)\b((?:[^<>"']|"[^"]*"|'[^']*')*?)>/g)].pop();
+  if (!open || open.index === undefined) return false;
+  const cls = open[2].match(/className\s*=\s*(?:"([^"]*)"|'([^']*)'|\{([^}]*)\})/);
+  const value = cls?.[1] ?? cls?.[2] ?? cls?.[3] ?? "";
+  return FIGURE_MARKERS.some((m) =>
+    new RegExp(`(?:^|[\\s"'])${m}(?:$|[\\s"'])`).test(value)
+  );
+}
 
 /** How many column tracks a grid-cols declaration asks for. */
 function declaredTrackCount(numeric: string | undefined, arbitrary: string | undefined): number {
@@ -684,6 +705,56 @@ describe("S5c typography hierarchy detector", () => {
     expect(declaredTrackCount("1", undefined)).toBe(1);
     expect(declaredTrackCount(undefined, "1.15fr_0.85fr")).toBe(2);
     expect(declaredTrackCount(undefined, "1fr")).toBe(1);
+  });
+
+  it("requires every currency figure to declare a role, including outside CurrencyDisplay", () => {
+    // The marker rule above governs <CurrencyDisplay>. But currency can also be
+    // formatted straight into JSX with formatCurrency(...), and that path had
+    // no rule at all - which made the marker rule bypassable rather than
+    // enforced. Five sites were living in that gap.
+    //
+    // A currency figure always has a role, so this is allowlist-free for the
+    // same reason the CurrencyDisplay rule is: there is no legitimate case of a
+    // peso amount on screen that is deliberately unclassified.
+    //
+    // Scoped to JSX expression position, which is where a rendered figure lives.
+    // formatCurrency used inside a helper (CurrencyDisplay itself) or inside a
+    // className string is not a figure and is not flagged.
+    const offenders: string[] = [];
+    for (const file of TSX_FILES) {
+      // Scanned unstripped on purpose: withoutComments() deletes lines, which
+      // shifts every line number and makes the rule report the wrong line. The
+      // only cost is that a formatCurrency() mentioned inside a comment would
+      // be flagged, and that is a fair thing for the rule to ask about.
+      const source = readFileSync(file, "utf8");
+      if (file.endsWith("currency-display.tsx")) continue; // the component itself
+      // A rendered figure: formatCurrency( inside a { } JSX expression.
+      for (const match of source.matchAll(/\{([^{}]*?)formatCurrency\(([^)]*)\)([^{}]*?)\}/g)) {
+        const whole = match[0];
+        // CurrencyDisplay carries its own role contract; exempt it here and let
+        // the dedicated rule police it.
+        if (/CurrencyDisplay/.test(whole)) continue;
+        // Attribute position is a prop, not a rendered child. Recharts
+        // `formatter={(v) => formatCurrency(v)}` hands a string to the library,
+        // which renders it inside its own element with its own styling - there
+        // is no element here to put a role on. Scoping the rule to JSX children
+        // keeps it to cases where a role is actually declarable, and keeps it
+        // free of named exceptions.
+        const before = source.slice(0, match.index).replace(/\s+$/, "");
+        if (before.endsWith("=")) continue;
+        // The role lives on the element the figure sits in, so read that
+        // element's className rather than scanning a window of characters
+        // around the match. A window flags correct code, and a rule that fires
+        // on correct code is a rule that ends up allowlisted.
+        if (declaresFigureRole(source, match.index)) continue;
+        const line = source.slice(0, match.index).split("\n").length;
+        offenders.push(`${rel(file)}:${line} — formatCurrency() rendered with no figure role`);
+      }
+    }
+    expect(
+      offenders,
+      `Currency figures formatted outside <CurrencyDisplay> with no declared role:\n  ${offenders.join("\n  ")}`
+    ).toEqual([]);
   });
 
   it("uses TideMark without the old logo or tagline contract", () => {

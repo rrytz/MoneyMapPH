@@ -120,9 +120,12 @@ export function RecentTransactions({ transactions, hideDate = false }: RecentTra
                       {formatDate(tx.date, "MMM d, yyyy")}
                     </td>
                   )}
+                  {/* figure-inline: the amount is a figure inside a row, not the
+                      row's own figure. The transaction ledger was formatting it
+                      with a bare formatCurrency, so it carried no role at all. */}
                   <td
                     className={cn(
-                      "py-2 px-5 text-right font-bold tabular-nums text-xs",
+                      "py-2 px-5 text-right font-bold tabular-nums text-xs figure-inline",
                       isIncome ? "text-sulpot-deep dark:text-sulpot-bright" : "text-rose-600 dark:text-rose-400"
                     )}
                   >

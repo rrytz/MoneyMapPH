@@ -20,7 +20,7 @@ import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, History } from "lucide-react";
 import { SummaryView } from "./summary-view";
-import { formatDate } from "@/lib/utils/date";
+import { formatDate, getMonthDateRange } from "@/lib/utils/date";
 import type { UnifiedTransaction, ExpenseCategory, IncomeSource, MonthlySummary, BudgetStatus, MonthlySnapshot } from "@/lib/types";
 
 interface TransactionsClientProps {
@@ -121,8 +121,15 @@ export function TransactionsClient({
     if (search) q.set("search", search);
     if (type !== "all") q.set("type", type);
     if (filterCategory !== "all") q.set("category", filterCategory);
-    if (startDate) q.set("startDate", startDate);
-    if (endDate) q.set("endDate", endDate);
+    // The viewed month, unless the filter inputs say otherwise. Without this
+    // the print sheet fell back to "All History" - so printing from a month view
+    // exported every transaction ever while the screen beside it showed one
+    // month, and the printed total silently disagreed with "Filtered Results".
+    // The sheet labels its own range, so it was never lying; it was answering a
+    // different question from the one the screen was showing.
+    const monthRange = getMonthDateRange(month, year);
+    q.set("startDate", startDate || monthRange.start);
+    q.set("endDate", endDate || monthRange.end);
 
     window.open(`/transactions/print?${q.toString()}`, "_blank");
   }

@@ -4,6 +4,22 @@
 // runs, so CSS transitions (cards carry `transition-all`) are still tweening
 // toward the light world's values. Sampling mid-tween reports the dark world's
 // computed colors. Wait the transitions out before reading anything.
+//
+// Two traps this probe exists to avoid, both learned by hitting them:
+//
+// 1. Skip visually-hidden accessibility nodes when checking for overflow. Base
+//    UI renders screen-reader-only spans with `role="presentation"`,
+//    `clip-path: inset(50%)` and a 1x1px box - Progress emits one per bar
+//    containing the accessible value, so a page with five progress bars
+//    reports five "clipped" elements that are not clipped at all. Filter on
+//    `role="presentation"` or on the clip-path before believing an overflow
+//    finding.
+//
+// 2. Grid children that come from a .map() are many in source and can still be
+//    one at runtime. A source rule cannot see this, so a lone-child check here
+//    is the only thing that catches a 5-item 2-up grid rendering 3 rows with a
+//    hole in the last one. Measure `children.length` on the live element; do
+//    not infer it from the class list.
 (async () => {
   await new Promise((r) => setTimeout(r, 250));
   const out = { width: innerWidth, height: innerHeight };

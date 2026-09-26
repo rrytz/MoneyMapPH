@@ -636,6 +636,13 @@ describe("S5c typography hierarchy detector", () => {
     // neither - those screens have lone full-width *blocks* (orphans), which
     // is a different defect this rule cannot see.
     //
+    // A green result here is a statement about SOURCE, and only about source.
+    // A grid whose children come from a .map() reads as many children here and
+    // can still render one: /budgets has five budgeted categories in a 2-up
+    // grid, which is 3 rows with a lone card in the last one, and this rule
+    // cannot see it. Runtime holes are the DOM probe's job, not this rule's.
+    // Do not read a pass here as "the grids are correct."
+    //
     // So the honest justification is the modest one: it pins a property the
     // codebase already holds, at zero cost, with no exemptions, and it cannot
     // start failing quietly. Not "it fixed two screens." An overstated

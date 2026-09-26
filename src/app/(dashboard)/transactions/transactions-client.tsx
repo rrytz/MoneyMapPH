@@ -243,7 +243,14 @@ export function TransactionsClient({
 
       {/* Transaction Table */}
       <FintechCard className="p-0 overflow-hidden">
-        <FintechCardHeader className="px-6 py-4 border-b border-border flex items-center justify-between">
+        {/* flex-row, explicitly. The header's base is flex-col, so a caller who
+            writes `flex items-center justify-between` and forgets the direction
+            gets a COLUMN: items-center then means horizontal centring, and the
+            title and subtitle end up stacked in the middle of the card looking
+            almost deliberate. 20 of the 28 call sites want the column and say
+            nothing, so the default is right; this one wants a row and has to
+            ask. */}
+        <FintechCardHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between">
           <FintechCardTitle>Filtered Results ({totalItems})</FintechCardTitle>
           <span className="text-xs text-muted-foreground">Showing logs based on filter criteria</span>
         </FintechCardHeader>

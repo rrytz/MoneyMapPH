@@ -62,8 +62,8 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
           <p className="text-xs text-muted-foreground">Trailing 6 months performance</p>
         </div>
         <div className="flex items-center gap-4 text-xs font-normal">
-          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Income
+          <span className="flex items-center gap-1.5 text-sulpot-deep dark:text-sulpot-bright">
+            <span className="h-2.5 w-2.5 rounded-full bg-sulpot" /> Income
           </span>
           <span className="flex items-center gap-1.5 text-slate-400">
             <span className="h-2.5 w-2.5 rounded-full bg-agosto" /> Expenses
@@ -81,8 +81,8 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="incomeAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                <stop offset="5%" stopColor="var(--color-sulpot)" stopOpacity={0.35} />
+                <stop offset="95%" stopColor="var(--color-sulpot)" stopOpacity={0.0} />
               </linearGradient>
               <linearGradient id="expensesAreaGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="var(--color-agosto)" stopOpacity={0.22} />
@@ -112,7 +112,7 @@ export function IncomeExpenseChart({ snapshots }: IncomeExpenseChartProps) {
             <Area
               type="monotone"
               dataKey="Income"
-              stroke="#10b981"
+              stroke="var(--color-sulpot)"
               strokeWidth={3}
               fillOpacity={1}
               fill="url(#incomeAreaGradient)"

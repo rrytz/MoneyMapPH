@@ -112,12 +112,12 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                 <AreaChart data={forecastData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#059669" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#059669" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="var(--color-sulpot-deep)" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="var(--color-sulpot-deep)" stopOpacity={0.0} />
                     </linearGradient>
                     <linearGradient id="colorHistorical" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="var(--color-sulpot)" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="var(--color-sulpot)" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" opacity={0.5} />
@@ -144,7 +144,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                     type="monotone"
                     dataKey="forecasted"
                     name="Forecasted Net Savings"
-                    stroke="#059669"
+                    stroke="var(--color-sulpot-deep)"
                     strokeWidth={3}
                     strokeDasharray="5 5"
                     fillOpacity={1}
@@ -154,7 +154,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                     type="monotone"
                     dataKey="historical"
                     name="Historical Balance"
-                    stroke="#10b981"
+                    stroke="var(--color-sulpot)"
                     strokeWidth={3}
                     fillOpacity={1}
                     fill="url(#colorHistorical)"

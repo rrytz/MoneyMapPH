@@ -171,7 +171,7 @@ export function SummaryView({
                       formatter={(value: unknown) => formatCurrency(Number(value) || 0)}
                     />
                     <Legend verticalAlign="top" height={36} />
-                    <Bar dataKey="Income" fill="#10b981" radius={[4, 4, 0, 0]} name="Total Income" />
+                    <Bar dataKey="Income" fill="var(--color-sulpot)" radius={[4, 4, 0, 0]} name="Total Income" />
                     <Bar dataKey="Expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} name="Total Expenses" />
                   </BarChart>
                 </ResponsiveContainer>

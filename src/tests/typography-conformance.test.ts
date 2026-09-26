@@ -757,6 +757,70 @@ describe("S5c typography hierarchy detector", () => {
     ).toEqual([]);
   });
 
+  it("never puts a JSX comment container in expression position", () => {
+    // Four occurrences in this arc, all the same mistake, all reported by tsc as
+    // something unrelated ("'}' expected", "JSX expressions must have one parent
+    // element") so the real cause stayed hidden until the error was traced by
+    // hand.
+    //
+    // The cause: `{/* ... */}` is valid in JSX *children* position, where a
+    // comment-only expression container is an allowed child. It is NOT valid in
+    // *expression* position - the inside of `return (`, an arrow `=> (`, or a
+    // ternary branch - where a bare `{` opens a real expression and `/* ... */`
+    // leaves it empty. Every one of the four was a comment placed at the root of
+    // a return or a ternary branch instead of inside the element.
+    //
+    // Scoped to the first token after the opening paren, because that is the
+    // only place this is ever written by accident. Comments before a sibling
+    // element further in are a different (also invalid, also loud) mistake and
+    // need no help from us.
+    const OPENERS = /(?:return|=>|\?|:)\s*\(\s*/g;
+    const offenders: string[] = [];
+    for (const file of TSX_FILES) {
+      const source = readFileSync(file, "utf8");
+      for (const match of source.matchAll(OPENERS)) {
+        const rest = source.slice(match.index + match[0].length);
+        const bad = rest.match(/^\{\s*\/\*/);
+        if (!bad) continue;
+        const line = source.slice(0, match.index).split("\n").length;
+        offenders.push(
+          `${rel(file)}:${line} — a JSX comment cannot open an expression. ` +
+            `Move it inside the element, or above the return.`
+        );
+      }
+    }
+    expect(
+      offenders,
+      `JSX comment containers in expression position:\n  ${offenders.join("\n  ")}`
+    ).toEqual([]);
+  });
+
+  it("distinguishes an illegal expression-position comment from a legal child comment", () => {
+    // Pins the rule against both directions. Verified by planting the mistake in
+    // a scratch file first: all three planted forms were caught, and the legal
+    // form was not. Without this, the rule is only known to be silent, and a
+    // silent rule is indistinguishable from a broken one.
+    const flags = (fragment: string) => {
+      const out: string[] = [];
+      for (const match of fragment.matchAll(/(?:return|=>|\?|:)\s*\(\s*/g)) {
+        const rest = fragment.slice(match.index + match[0].length);
+        if (/^\{\s*\/\*/.test(rest)) out.push(match[0].trim());
+      }
+      return out.length;
+    };
+
+    // Illegal: a comment opening a return, an arrow body or a ternary branch.
+    expect(flags(`return (\n  {/* why */}\n  <div />\n);`)).toBe(1);
+    expect(flags(`const f = () => (\n  {/* why */}\n  <span />\n);`)).toBe(1);
+    expect(flags(`{ok ? (\n  {/* why */}\n  <a />\n) : (\n  <b />\n)}`)).toBe(1);
+
+    // Legal: the same comment inside an element's children.
+    expect(flags(`return (\n  <div>\n    {/* why */}\n    <span />\n  </div>\n);`)).toBe(0);
+
+    // Legal: an ordinary JS comment in expression position, which is the fix.
+    expect(flags(`return (\n  // why\n  <div />\n);`)).toBe(0);
+  });
+
   it("uses TideMark without the old logo or tagline contract", () => {
     const logo = read("components/shared/logo.tsx");
     expect(logo).toContain("TideMark");

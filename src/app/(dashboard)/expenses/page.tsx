@@ -6,14 +6,24 @@ import {
   cachedGetMonthlyExpenseAggregation as getExpenseAggregation,
 } from "@/lib/cache/shared-queries";
 import { getCurrentMonthYear } from "@/lib/utils/date";
+import { resolveViewMonth } from "@/lib/utils/view-month";
 import { ExpensesPageClient } from "./expenses-page-client";
 
-export default async function ExpensesPage() {
+interface ExpensesPageProps {
+  searchParams: Promise<{ month?: string; year?: string }>;
+}
+
+// The query was already month-scoped but the month was hardcoded to the current
+// one, so the log could not be moved off September. The URL now drives it, the
+// same idiom /budgets uses, which means this screen and its sibling agree about
+// what period they are showing.
+export default async function ExpensesPage({ searchParams }: ExpensesPageProps) {
   const supabase = await createClient();
   const user = await getUser();
   if (!user) return null;
 
-  const { month, year } = getCurrentMonthYear();
+  const params = await searchParams;
+  const { month, year } = resolveViewMonth(params.month, params.year, getCurrentMonthYear());
   const [{ data: entries }, categories, aggregation, accountsResult] = await Promise.all([
     // limit 10_000, not 50, matching /transactions. At 50 this was a ceiling
     // rather than a page size: a user with more than 50 expenses in a month had
@@ -29,6 +39,7 @@ export default async function ExpensesPage() {
 
   return (
     <ExpensesPageClient
+      key={`${month}-${year}`}
       initialEntries={entries}
       categories={categories}
       totalThisMonth={aggregation.totalExpenses}

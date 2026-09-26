@@ -32,6 +32,8 @@ interface SummaryViewProps {
   snapshots: MonthlySnapshot[];
   categories: ExpenseCategory[];
   budgetStatuses: BudgetStatus[];
+  month: number;
+  year: number;
 }
 
 export function SummaryView({
@@ -39,6 +41,8 @@ export function SummaryView({
   snapshots,
   categories,
   budgetStatuses,
+  month,
+  year,
 }: SummaryViewProps) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -86,7 +90,9 @@ export function SummaryView({
               <Badge variant="income">Net Surplus</Badge>
             </div>
             <div>
-              <span className="text-xs font-medium text-muted-foreground block">Calendar month net</span>
+              {/* Names the viewed month rather than saying "calendar month", which
+            became wrong the moment the navigator could move off the current one. */}
+        <span className="text-xs font-medium text-muted-foreground block">{getMonthName(month)} {year} net</span>
               <CurrencyDisplay amount={summary.savingsAmount} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-sulpot-deep dark:text-sulpot-bright" />
             </div>
           </FintechCardContent>
@@ -135,7 +141,7 @@ export function SummaryView({
             </div>
             <FintechCardTitle>Cash Flow History</FintechCardTitle>
           </div>
-          <p className="text-xs text-muted-foreground">Income vs Expense comparisons across historical monthly snapshots</p>
+          <p className="text-xs text-muted-foreground">Income vs Expense across the last 12 months. This chart is context and does not follow the month selector — the figures above it are {getMonthName(month)} {year}.</p>
         </FintechCardHeader>
         <FintechCardContent className="type-measurement p-5 pt-0">
           {cashFlowData.length === 0 ? (

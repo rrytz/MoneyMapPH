@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useOptimistic, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { MonthYearPicker } from "@/components/shared/month-year-picker";
 import { Plus, Pencil, Trash2, TrendingDown, Search, Filter, PieChart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +15,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ExpenseForm } from "@/components/forms/expense-form";
 import { removeExpense, addExpense } from "./actions";
-import { formatDate } from "@/lib/utils/date";
+import { formatDate, getMonthName } from "@/lib/utils/date";
 import { CategoryIcon } from "@/components/shared/category-icon";
 import { toast } from "sonner";
 import type { Expense, ExpenseCategory, Account } from "@/lib/types";
@@ -35,6 +37,8 @@ export function ExpensesPageClient({
   totalThisMonth: initialTotal,
   expenseCount: initialCount,
   categoryTotals: initialCategoryTotals,
+  currentMonth,
+  currentYear,
   accounts,
 }: ExpensesPageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
@@ -52,6 +56,14 @@ export function ExpensesPageClient({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
   const [, startTransition] = useTransition();
+
+  // The URL is the source of truth for the viewed month, the same idiom
+  // /budgets uses. router.replace rather than push, so the arrows do not fill
+  // the back button with month after month.
+  const router = useRouter();
+  function navigateToMonth(m: number, y: number) {
+    router.replace(`/expenses?month=${m}&year=${y}`, { scroll: false });
+  }
 
   const [optimisticEntries, addOptimisticEntry] = useOptimistic(
     initialEntries,
@@ -168,9 +180,16 @@ export function ExpensesPageClient({
   return (
     <div className="space-y-6">
       <PageHeader title="Spending Intelligence" description="Monitor expenses, category allocations, and daily outflow">
-        <Button onClick={handleAdd} className="rounded-md font-medium text-xs px-4 h-9 cursor-pointer">
-          <Plus className="mr-1.5 h-4 w-4" /> Add Expense
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* The period control. The query was already month-scoped but pinned to
+              the current month, so this log could not be moved off it. The key on
+              the client in page.tsx remounts this component on navigation, which
+              is what resets the pager and the filters. */}
+          <MonthYearPicker month={currentMonth} year={currentYear} onChange={navigateToMonth} />
+          <Button onClick={handleAdd} className="rounded-md font-medium text-xs px-4 h-9 cursor-pointer">
+            <Plus className="mr-1.5 h-4 w-4" /> Add Expense
+          </Button>
+        </div>
       </PageHeader>
 
       {/* Top KPI Cards */}
@@ -184,7 +203,11 @@ export function ExpensesPageClient({
               <Badge variant="expense">Total Outflow</Badge>
             </div>
             <div>
-              <span className="type-section-label block">Calendar month spend</span>
+              {/* Names the viewed month, not "calendar month". With a navigator
+                  in the header the old label became actively wrong: paging back
+                  to August left a card reading "Calendar month spend" beside a
+                  picker saying August. The label states what it is showing. */}
+              <span className="type-section-label block">{getMonthName(currentMonth)} {currentYear} spend</span>
               <CurrencyDisplay amount={total} className="type-ledger tabular-nums font-semibold text-rose-600 dark:text-rose-400" />
             </div>
           </FintechCardContent>

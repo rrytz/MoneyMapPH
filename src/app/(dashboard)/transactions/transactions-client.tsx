@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { MonthYearPicker } from "@/components/shared/month-year-picker";
 import {
   Search,
   FileDown,
@@ -28,6 +30,8 @@ interface TransactionsClientProps {
   summary: MonthlySummary;
   snapshots: MonthlySnapshot[];
   budgetStatuses: BudgetStatus[];
+  month: number;
+  year: number;
 }
 
 export function TransactionsClient({
@@ -37,6 +41,8 @@ export function TransactionsClient({
   summary,
   snapshots,
   budgetStatuses,
+  month,
+  year,
 }: TransactionsClientProps) {
   const [search, setSearch] = useState("");
   const [type, setType] = useState<"all" | "income" | "expense">("all");
@@ -46,6 +52,14 @@ export function TransactionsClient({
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+
+  // The URL is the source of truth for the viewed month, the same idiom
+  // /budgets uses. router.replace rather than push, so the arrows do not fill
+  // the back button with month after month.
+  const router = useRouter();
+  function navigateToMonth(m: number, y: number) {
+    router.replace(`/transactions?month=${m}&year=${y}`, { scroll: false });
+  }
 
   const filtered = initialTransactions.filter((tx) => {
     if (search) {
@@ -119,7 +133,13 @@ export function TransactionsClient({
         title="Transaction History"
         description="Unified historical logs of all financial movements, allocations, and expenditures"
       >
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* The period control. Before this the screen carried three periods at
+              once - the ledger showed all history, the summary one month, the
+              chart twelve - and nothing said so. The key on the client in page.tsx
+              remounts this component on navigation, which is what resets the
+              pager, the filters and the tab back to their defaults. */}
+          <MonthYearPicker month={month} year={year} onChange={navigateToMonth} />
           <Button variant="outline" size="sm" onClick={handlePrintPDF} className="h-9 rounded-xl border-border text-xs flex items-center gap-1.5 cursor-pointer">
             <Printer className="h-4 w-4" /> Print PDF
           </Button>
@@ -353,6 +373,8 @@ export function TransactionsClient({
             snapshots={snapshots}
             categories={categories}
             budgetStatuses={budgetStatuses}
+            month={month}
+            year={year}
           />
         </TabsContent>
       </Tabs>

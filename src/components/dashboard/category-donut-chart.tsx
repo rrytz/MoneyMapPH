@@ -99,10 +99,16 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
           {formatCurrency(totalSpending)} calendar month total · top {top5.length} {top5.length === 1 ? "category" : "categories"}
         </p>
       </FintechCardHeader>
+      {/* Donut and legend side by side rather than stacked. Stacked, this card
+          was 45 pad + 51 header + 180 donut + 16 gap + 162 legend = 454, and
+          it was that 454 — not the neighbouring line chart, which needs only
+          373 and was being stretched to match — that set the height of the
+          whole chart row. Beside, the body is max(180, 162) = 180. */}
       <FintechCardContent className="flex flex-col gap-4">
+        <div className="flex items-start gap-4">
         {/* Recharts Donut */}
         {isMounted ? (
-          <div className="relative w-full" style={{ height: 180 }}>
+          <div className="relative w-[180px] shrink-0" style={{ height: 180 }}>
             {top5.length === 1 ? (
               <div className="flex h-full items-center justify-center">
                 <svg viewBox="0 0 100 100" className="h-[144px] w-[144px]" role="img" aria-label={`${top5[0].name} 100% of calendar-month spending`}>
@@ -145,18 +151,18 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
             )}
           </div>
         ) : (
-          <div className="w-full rounded-2xl bg-muted animate-pulse" style={{ height: 180 }} />
+          <div className="w-[180px] shrink-0 rounded-2xl bg-muted animate-pulse" style={{ height: 180 }} />
         )}
 
-        {/* Legend */}
-        <div className="space-y-2">
+        {/* Legend. The 10px colour dot is gone: the icon chip beside the name
+            is already tinted with the category colour, and the donut arc shows
+            it too. Two indicators for one fact is double-signalling. The chip
+            is the tallest thing in the row, so dropping the dot saved no
+            height — it is here for the coherence, not the density. */}
+        <div className="flex-1 min-w-0 space-y-2 self-center">
           {top5.map((item) => (
             <div key={item.id || item.name} className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 min-w-0">
-                <div
-                  className="h-2.5 w-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: item.color }}
-                />
                 <div
                   className="h-7 w-7 rounded-lg flex items-center justify-center text-xs shrink-0"
                   style={{ backgroundColor: `${item.color}18`, color: item.color }}
@@ -173,6 +179,7 @@ export function CategoryDonutChart({ categorySpending, categories }: CategoryDon
               </div>
             </div>
           ))}
+        </div>
         </div>
       </FintechCardContent>
     </FintechCard>

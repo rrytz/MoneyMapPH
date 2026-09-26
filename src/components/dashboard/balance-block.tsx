@@ -80,7 +80,12 @@ export function BalanceBlock({
       aria-label="Your balance"
     >
       {hasAnyAccount ? (
-        <div className="space-y-8">
+        <div className="space-y-5">
+          {/* space-y-5, not space-y-8. 30px of gap twice over is 60px of a
+              327px block, and this block has very little to give: 111 of its
+              267 is the label, the hero figure and the subtitle, and the
+              figure has to stay dominant. This is the whole of what is
+              available here. */}
           <div className="space-y-3">
             <p className="type-section-label text-muted-foreground">Total across your accounts</p>
             {/* The hero is the largest ledger figure, not an identity moment.
@@ -114,7 +119,7 @@ export function BalanceBlock({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 border-t border-border pt-6 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-6 border-t border-border pt-4 sm:grid-cols-3">
             <div>
               <p className="type-section-label text-muted-foreground">Safe to spend</p>
               <p

@@ -20,6 +20,14 @@ interface Transaction {
 
 interface RecentTransactionsProps {
   transactions: Transaction[];
+  /**
+   * Drops the Date column. Set when this card shares a two-column row, because
+   * the table is a real <table> inside `overflow-x-auto`: at half width it does
+   * not reflow, it degrades to a horizontal scroll *inside the card*, which is
+   * worse than a tall card. Date is the least load-bearing column here — the
+   * same value is on the full transactions page behind "View all".
+   */
+  hideDate?: boolean;
 }
 
 function getIconForTitle(title: string, type: "income" | "expense") {
@@ -30,7 +38,7 @@ function getIconForTitle(title: string, type: "income" | "expense") {
   return <ShieldCheck className="h-4 w-4 text-ink-muted" />;
 }
 
-export function RecentTransactions({ transactions }: RecentTransactionsProps) {
+export function RecentTransactions({ transactions, hideDate = false }: RecentTransactionsProps) {
   if (!transactions || transactions.length === 0) {
     return (
       <FintechCard>
@@ -72,10 +80,10 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-border bg-muted/30 text-[10px] uppercase font-normal text-muted-foreground tracking-wider">
-              <th className="py-3 px-5">Description</th>
-              <th className="py-3 px-4">Category</th>
-              <th className="py-3 px-4">Date</th>
-              <th className="py-3 px-5 text-right">Amount</th>
+              <th className="py-2.5 px-5">Description</th>
+              <th className="py-2.5 px-4">Category</th>
+              {!hideDate && <th className="py-2.5 px-4">Date</th>}
+              <th className="py-2.5 px-5 text-right">Amount</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
@@ -88,7 +96,10 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                   key={tx.id}
                   className="hover:bg-muted/50 transition-colors duration-150"
                 >
-                  <td className="py-3.5 px-5">
+                  {/* py-2, not py-3.5. A 57px row is 26px of padding around
+                      31px of content; 46px is an ordinary table row and the
+                      icon chip still sets the height. */}
+                  <td className="py-2 px-5">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-md bg-muted shrink-0">
                         {getIconForTitle(tx.title, tx.type)}
@@ -96,7 +107,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                       <span className="font-semibold text-foreground text-xs">{tx.title}</span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-2 px-4">
                     <Badge
                       variant={isIncome ? "income" : "expense"}
                       className="text-[10px] uppercase px-2 py-0.5 tracking-wider font-bold"
@@ -104,12 +115,14 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                       {categoryLabel}
                     </Badge>
                   </td>
-                  <td className="py-3.5 px-4 text-muted-foreground font-medium">
-                    {formatDate(tx.date, "MMM d, yyyy")}
-                  </td>
+                  {!hideDate && (
+                    <td className="py-2 px-4 text-muted-foreground font-medium">
+                      {formatDate(tx.date, "MMM d, yyyy")}
+                    </td>
+                  )}
                   <td
                     className={cn(
-                      "py-3.5 px-5 text-right font-bold tabular-nums text-xs",
+                      "py-2 px-5 text-right font-bold tabular-nums text-xs",
                       isIncome ? "text-sulpot-deep dark:text-sulpot-bright" : "text-rose-600 dark:text-rose-400"
                     )}
                   >

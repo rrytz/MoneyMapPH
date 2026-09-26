@@ -163,10 +163,12 @@ export default async function DashboardPage() {
         <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
       </div>
 
-      {/* Was `grid lg:grid-cols-2` holding exactly one child, so the savings
-          card took the left column and the right half was an empty hole. The
-          card is now full width and the wrapper is gone. */}
-      <FintechCard className="flex flex-col">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">
+        {/* Goals, whose rows are 2-up. Stacked, three rows cost 3 x 71px; side
+            by side they cost one row. The card is half width now anyway, so
+            two rows across it is the same density the full-width version was
+            reaching for with wasted space. */}
+        <FintechCard className="flex flex-col">
         <FintechCardHeader className="flex flex-row items-center justify-between pb-2">
           <div>
             <FintechCardTitle>Savings Goals</FintechCardTitle>
@@ -179,7 +181,7 @@ export default async function DashboardPage() {
             <Plus className="h-3.5 w-3.5" /> New Goal
           </Link>
         </FintechCardHeader>
-        <FintechCardContent className="space-y-4 flex-1">
+        <FintechCardContent className="pt-0">
           {goals.length === 0 ? (
             <EmptyState
               icon={<Target className="h-6 w-6" />}
@@ -189,7 +191,8 @@ export default async function DashboardPage() {
               actionHref="/savings"
             />
           ) : (
-            goals.slice(0, 3).map((goal) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {goals.slice(0, 3).map((goal) => {
               const target = Number(goal.target_amount);
               const current = Number(goal.current_amount);
               const progress = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
@@ -238,17 +241,21 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                 </div>
-              );
-            })
+            );
+            })}
+            </div>
           )}
         </FintechCardContent>
       </FintechCard>
 
-      {/* Row 5: Recent Activity */}
-      {/* Was `grid lg:grid-cols-2` wrapping a single `lg:col-span-2` child —
-          a two-column grid whose only child spanned both columns, which is a
-          one-column grid with extra markup. */}
-      <RecentTransactions transactions={transactions} />
+        {/* Recent Activity, sharing the row with Savings Goals. A two-up row
+            does not shorten a block, it takes the block out of the stack:
+            255 + 484 + a gap became one 418px row. Date is hidden because the
+            table is a real <table> in an overflow-x-auto and would otherwise
+            scroll sideways inside the card — see RecentTransactions' hideDate.
+            items-start keeps the shorter goals card from stretching. */}
+        <RecentTransactions transactions={transactions} hideDate />
+      </div>
     </div>
   );
 }

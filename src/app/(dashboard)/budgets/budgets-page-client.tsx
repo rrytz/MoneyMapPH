@@ -24,6 +24,7 @@ import { computeUnbudgetedSpent, computeRemainingBudget, buildUnbudgetedCategory
 import { toast } from "sonner";
 import type { BudgetStatus, ExpenseCategory, MonthlyExpenseAggregation } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { gridTracksFor } from "@/lib/utils/grid-tracks";
 
 interface BudgetsPageClientProps {
   statuses: BudgetStatus[];
@@ -71,6 +72,7 @@ export function BudgetsPageClient({
       })
   );
 
+  const budgetTracks = gridTracksFor(optimisticStatuses.length, 2);
   const totalBudgeted = optimisticStatuses.reduce((sum, s) => sum + s.budgeted, 0);
   const totalBudgetedSpent = optimisticStatuses.reduce((sum, s) => sum + s.spent, 0);
   const [actualTotal, setActualTotal] = useState(aggregation.totalExpenses);
@@ -209,7 +211,14 @@ export function BudgetsPageClient({
             them at ~360px, and stacks unbudgeted 1-up in the narrower column
             where two 220px cards would not have held a Set Limit button. */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5 items-start">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {/* Count-aware tracks, which decline here and that is the point. Five
+            budgeted categories in a two-up is three rows with one lone card in
+            the last. Dropping to one track would fill every row but cost five
+            rows instead of three, and a taller grid is worse than a hole. So
+            this stays two-up and the lone card stays - the same content
+            question the /accounts grid has to answer, decided the other way
+            because the arithmetic differs. */}
+        <div className={cn("grid grid-cols-1 gap-5", `sm:grid-cols-${budgetTracks}`)}>
           {optimisticStatuses.map((status) => {
             const isOver = status.status === "over";
             const isNear = status.status === "near";

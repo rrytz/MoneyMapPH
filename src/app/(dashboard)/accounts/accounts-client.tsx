@@ -7,6 +7,8 @@ import { AccountModal } from "@/components/accounts/account-modal";
 import { TransferModal } from "@/components/accounts/transfer-modal";
 import { TransferList } from "@/components/accounts/transfer-list";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
+import { gridTracksFor } from "@/lib/utils/grid-tracks";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeftRight, Wallet, Info } from "lucide-react";
 import { toggleArchiveAccount, removeTransfer } from "@/app/(dashboard)/accounts/actions";
@@ -35,6 +37,7 @@ export function AccountsClient({
   const [defaultSourceAccId, setDefaultSourceAccId] = useState<string | undefined>(undefined);
 
   const displayedAccounts = showArchived ? allAccountsWithArchived : initialAccounts;
+  const accountTracks = gridTracksFor(displayedAccounts.length, 3);
 
   function handleCreateAccount() {
     setEditingAccount(null);
@@ -162,7 +165,12 @@ export function AccountsClient({
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={cn("grid grid-cols-1 gap-4 md:grid-cols-2", `lg:grid-cols-${accountTracks}`)}>
+            {/* Count-aware tracks. At a fixed lg:grid-cols-3, two accounts left a
+                402px empty column - 97,284 px^2 of hole, which was more dead
+                space than the column slack the /budgets pass just removed. Two
+                tracks fill the same single row exactly, so the cards get wider
+                and the hole closes. */}
             {displayedAccounts.map((acc) => (
               <AccountCard
                 key={acc.id}

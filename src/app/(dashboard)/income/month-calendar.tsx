@@ -54,11 +54,12 @@ export function MonthCalendar({
 
   const todayISO = formatDate(new Date(), "yyyy-MM-dd");
 
-  // Which bills are one-time, resolved ONCE from the same predicate that styles
-  // the chip below. Driving the filter and the visual from one predicate is the
-  // point: a chip that says "one-time" and a rule that hides it are the same
-  // fact, and if they ever disagree the surface is lying in one direction.
-  const oneTimeIds = new Set(bills.filter(isOneTimeBill).map((b) => b.id));
+  // Which occurrences are PAID, for the "has this occurrence been settled"
+  // question. Whether an occurrence is one-time is NOT resolved here - it
+  // arrives on the occurrence itself, computed once where the occurrence is
+  // built. The calendar used to derive its own set of one-time bill ids for the
+  // filter and use the same predicate for the chip; both now read one field, so
+  // they cannot disagree.
   const paidKeys = new Set(payments.map((p) => `${p.bill_id}|${p.due_date}`));
 
   // OCCURRENCES FOR THE MONTH BEING VIEWED, not the month the page was served.
@@ -85,7 +86,7 @@ export function MonthCalendar({
   // its tick. The rule and its two directions live in visibleCalendarOccurrences
   // so they can be pinned in tests; the payment record survives in the Paid
   // list either way.
-  const visibleOccurrences = visibleCalendarOccurrences(monthOccurrences, oneTimeIds, paidKeys);
+  const visibleOccurrences = visibleCalendarOccurrences(monthOccurrences, paidKeys);
 
   const cells = buildCalendarCells(viewYear, viewMonth, visibleOccurrences, payments, todayISO);
 
@@ -304,7 +305,9 @@ export function MonthCalendar({
               </div>
               <div className="space-y-1 mt-1">
                 {cell.occurrences.slice(0, 3).map((occ) => {
-                  const oneTime = oneTimeIds.has(occ.bill_id);
+                  // The same field the filter above reads, so a chip cannot say
+                  // "one-time" while the rule that removes paid ones disagrees.
+                  const oneTime = occ.oneTime;
                   return (
                     <button
                       key={`${occ.bill_id}-${occ.dueDate}`}

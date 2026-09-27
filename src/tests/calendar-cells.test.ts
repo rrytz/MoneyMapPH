@@ -3,8 +3,8 @@ import { buildCalendarCells } from "@/lib/utils/calendar-cells";
 import type { BillOccurrence, BillPayment } from "@/lib/types";
 
 const occurrences: BillOccurrence[] = [
-  { bill_id: "b1", billName: "Rent", dueDate: "2026-09-01", expectedAmount: 12000, cutoffPeriodEnd: "2026-09-13" },
-  { bill_id: "b2", billName: "Electric", dueDate: "2026-09-20", expectedAmount: 1500, cutoffPeriodEnd: "2026-09-28" },
+  { bill_id: "b1", billName: "Rent", dueDate: "2026-09-01", expectedAmount: 12000, cutoffPeriodEnd: "2026-09-13", oneTime: false },
+  { bill_id: "b2", billName: "Electric", dueDate: "2026-09-20", expectedAmount: 1500, cutoffPeriodEnd: "2026-09-28", oneTime: false },
 ];
 
 const paidRent: BillPayment = {

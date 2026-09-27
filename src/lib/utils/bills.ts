@@ -35,14 +35,19 @@ export function isOneTimeBill(
  * come round again. Those two are deliberately not treated alike, which is why
  * this is a named function with both cases pinned in tests rather than an
  * inline filter that only ever gets exercised one way.
+ *
+ * It reads `occurrence.oneTime` rather than taking a set of one-time bill ids,
+ * so the rule that HIDES a chip and the rule that STYLES it are the same
+ * field. They were two derivations of one fact, one of which could be changed
+ * without the other, which is how a chip ends up claiming "one-time" while the
+ * filter that should have removed it never fires.
  */
 export function visibleCalendarOccurrences(
   occurrences: BillOccurrence[],
-  oneTimeBillIds: ReadonlySet<string>,
   paidKeys: ReadonlySet<string>
 ): BillOccurrence[] {
   return occurrences.filter((o) => {
-    if (!oneTimeBillIds.has(o.bill_id)) return true;
+    if (!o.oneTime) return true;
     return !paidKeys.has(`${o.bill_id}|${o.dueDate}`);
   });
 }
@@ -71,6 +76,9 @@ function toOccurrence(bill: Bill, dueDate: Date): BillOccurrence {
     dueDate: iso,
     expectedAmount: Number(bill.expected_amount ?? 0),
     cutoffPeriodEnd: bucketCutoff(dueDate),
+    // Resolved HERE, once, so no consumer re-derives it from the bill. The
+    // occurrence already knows what kind of obligation produced it.
+    oneTime: isOneTimeBill(bill),
   };
 }
 

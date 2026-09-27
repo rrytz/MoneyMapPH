@@ -139,14 +139,15 @@ describe("one-time bills", () => {
   it("a paid ONE-TIME bill leaves the calendar; a paid RECURRING one stays", () => {
     const oneTimeId = "one";
     const recurringId = "rec";
+    // The occurrence carries its own kind. Nothing downstream re-derives it from
+    // the bill, which is the whole point of putting it here.
     const occs: BillOccurrence[] = [
-      { bill_id: oneTimeId, billName: "Repair", dueDate: "2026-10-05", expectedAmount: 500, cutoffPeriodEnd: "2026-10-15" },
-      { bill_id: recurringId, billName: "Rent", dueDate: "2026-10-05", expectedAmount: 12000, cutoffPeriodEnd: "2026-10-15" },
+      { bill_id: oneTimeId, billName: "Repair", dueDate: "2026-10-05", expectedAmount: 500, cutoffPeriodEnd: "2026-10-15", oneTime: true },
+      { bill_id: recurringId, billName: "Rent", dueDate: "2026-10-05", expectedAmount: 12000, cutoffPeriodEnd: "2026-10-15", oneTime: false },
     ];
-    const oneTimeIds = new Set([oneTimeId]);
     const paidBoth = new Set([`${oneTimeId}|2026-10-05`, `${recurringId}|2026-10-05`]);
 
-    const afterPaying = visibleCalendarOccurrences(occs, oneTimeIds, paidBoth);
+    const afterPaying = visibleCalendarOccurrences(occs, paidBoth);
     // The one-time bill is gone...
     expect(afterPaying.map((o) => o.bill_id)).toEqual([recurringId]);
     // ...and the recurring one is still there, so its tick can render. Same
@@ -154,7 +155,7 @@ describe("one-time bills", () => {
     expect(afterPaying[0].billName).toBe("Rent");
 
     // Unpaid: both show.
-    expect(visibleCalendarOccurrences(occs, oneTimeIds, new Set())).toHaveLength(2);
+    expect(visibleCalendarOccurrences(occs, new Set())).toHaveLength(2);
   });
 
   it("a one-time bill paid under a DIFFERENT date is not treated as paid", () => {
@@ -162,9 +163,27 @@ describe("one-time bills", () => {
     // this is nearly impossible in practice - but it is the shape that would
     // make a bill vanish for a payment that was never its own.
     const occs: BillOccurrence[] = [
-      { bill_id: "one", billName: "Repair", dueDate: "2026-10-05", expectedAmount: 500, cutoffPeriodEnd: "2026-10-15" },
+      { bill_id: "one", billName: "Repair", dueDate: "2026-10-05", expectedAmount: 500, cutoffPeriodEnd: "2026-10-15", oneTime: true },
     ];
-    const paidOtherDate = visibleCalendarOccurrences(occs, new Set(["one"]), new Set(["one|2026-11-05"]));
+    const paidOtherDate = visibleCalendarOccurrences(occs, new Set(["one|2026-11-05"]));
     expect(paidOtherDate).toHaveLength(1);
+  });
+
+  it("every occurrence states its own kind, from the bill it came from", () => {
+    // The centralisation, pinned. One-time is computed once in toOccurrence and
+    // travels with the occurrence, so a surface cannot render "one-time" from a
+    // different derivation than the one the filter uses.
+    const oneTime = listBillOccurrences(
+      [bill({ id: "o", day_of_month: null, due_date: "2026-10-05" })],
+      oct(1), oct(31)
+    );
+    const recurring = listBillOccurrences(
+      [bill({ id: "r", day_of_month: 5, due_date: null })],
+      oct(1), oct(31)
+    );
+    expect(oneTime[0].oneTime).toBe(true);
+    expect(recurring[0].oneTime).toBe(false);
+    // A template is not on the surfaces at all, so it never produces one.
+    expect(listBillOccurrences([bill({ day_of_month: null, due_date: null })], oct(1), oct(31))).toHaveLength(0);
   });
 });

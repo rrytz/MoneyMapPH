@@ -42,6 +42,8 @@ type UpcomingItem = {
   dueDate: string;
   amount: number;
   overdue: boolean;
+  /** Carried from the occurrence, never re-derived here. See BillOccurrence. */
+  oneTime: boolean;
 };
 
 export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: UpcomingBillsCardProps) {
@@ -52,6 +54,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
     dueDate: o.dueDate,
     amount: o.expectedAmount,
     overdue: o.dueDate < todayIso,
+    oneTime: o.oneTime,
   }));
 
   const debtItems: UpcomingItem[] = debts
@@ -72,6 +75,10 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
       dueDate: r.debt.due_date,
       amount: r.remaining,
       overdue: isDebtOverdue(r.debt, r.paid, todayIso),
+      // A debt is never "one-time" - it is either paid off or it recurs, and
+      // that is not this card's question. Kept explicit so the type stays
+      // honest rather than leaving `undefined` to mean "no" somewhere else.
+      oneTime: false,
     }));
 
   const allItems = [...billItems, ...debtItems].sort((a, b) =>
@@ -79,6 +86,15 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
   );
   const items = allItems.slice(0, UPCOMING_LIMIT);
   const hiddenCount = allItems.length - items.length;
+
+  // The count of hidden items is disclosed, but not WHAT is hidden - and here
+  // that is not a formality. The list is ordered soonest-first, and a one-time
+  // bill is by nature a specific FUTURE date, so it is systematically the kind
+  // of item that falls past a cap of six. The specific commitments, which are
+  // the ones a person is budgeting against, are the ones reliably pushed off
+  // the bottom. So the disclosure says when the hidden set contains any, rather
+  // than leaving the reader to notice that "6 of 9" is doing a lot of work.
+  const hiddenOneTime = allItems.slice(UPCOMING_LIMIT).filter((i) => i.oneTime).length;
 
   const billTotal = billItems.reduce((sum, item) => sum + item.amount, 0);
   const debtTotal = debtItems.reduce((sum, item) => sum + item.amount, 0);
@@ -96,6 +112,14 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
                 <span className="font-semibold text-foreground">
                   {items.length} of {allItems.length}
                 </span>
+                {hiddenOneTime > 0 && (
+                  <>
+                    {" · "}
+                    <span className="font-semibold text-foreground">
+                      {hiddenOneTime} one-time not shown
+                    </span>
+                  </>
+                )}
               </>
             )}
             {" · "}
@@ -123,14 +147,27 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
               return (
                 <div
                   key={item.key}
-                  className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/70 hover:border-sulpot/30 transition-colors"
+                  className={cn(
+                    "flex items-center gap-3 p-2.5 rounded-lg border transition-colors",
+                    // Same treatment as the calendar chip and the list badge:
+                    // a dashed outline means "this happens once". The filled row
+                    // means "and again next month", and on the dashboard that
+                    // difference is the entire planning question - an unmarked
+                    // one-time bill here is one a person budgets for in
+                    // November and never receives.
+                    item.oneTime
+                      ? "border border-dashed border-sulpot/40 bg-transparent hover:border-sulpot/60"
+                      : "bg-muted/30 border border-border/70 hover:border-sulpot/30"
+                  )}
                 >
                   <div
                     className={cn(
                       "p-2 rounded-md shrink-0",
                       item.kind === "debt"
                         ? "bg-rose-50 text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"
-                        : "bg-muted text-muted-foreground"
+                        : item.oneTime
+                          ? "bg-transparent text-sulpot-deep dark:text-sulpot-bright"
+                          : "bg-muted text-muted-foreground"
                     )}
                   >
                     {item.kind === "debt" ? <HandCoins className="h-3.5 w-3.5" /> : <ReceiptText className="h-3.5 w-3.5" />}
@@ -140,7 +177,11 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
                     <p className={cn("text-[11px]", item.overdue ? "text-rose-500 font-semibold" : "text-muted-foreground")}>
                       {item.overdue ? "Overdue · " : "Due "}
                       {formatDate(item.dueDate, "MMM d")}
-                      {item.kind === "debt" ? " · debt payment" : " · bill"}
+                      {item.kind === "debt"
+                        ? " · debt payment"
+                        : item.oneTime
+                          ? " · one-time bill"
+                          : " · bill"}
                     </p>
                   </div>
                   <div className="text-xs font-bold tabular-nums text-foreground">

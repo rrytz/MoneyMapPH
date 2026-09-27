@@ -335,6 +335,11 @@ export interface Bill {
    * specific date" and "recurs on a day" are the same two states the model
    * already had, with the first one simply unexpressible before. NULL is
    * precisely what "recurring" already meant, so no backfill is needed.
+   *
+   * Consumers should not read this column to answer "is this one-time" - that
+   * re-derivation is what went wrong in five places during the roll-out. It is
+   * pre-joined onto BillOccurrence as `oneTime`, which is the only shape a UI
+   * should read.
    */
   due_date: string | null;
   active: boolean;
@@ -360,6 +365,21 @@ export interface BillOccurrence {
   dueDate: string;
   expectedAmount: number;
   cutoffPeriodEnd: string;
+  /**
+   * Whether this occurrence comes from a ONE-TIME bill, pre-joined here on
+   * purpose.
+   *
+   * Every surface that shows an occurrence needs to answer "will this come
+   * back?", and the wrong way to answer it is to re-derive from the bill's
+   * `day_of_month == null`. That re-derivation is exactly what went wrong while
+   * this distinction was being rolled out - the calendar filter, the bill
+   * profile, `pay_bill`, `getBillDueDate`, and the schema refine each carried
+   * their own copy of the rule and one of them was wrong. So the answer is
+   * computed once, where the occurrence is built, and travels with it.
+   *
+   * A UI should read this field and nothing else.
+   */
+  oneTime: boolean;
 }
 
 export interface BillView {

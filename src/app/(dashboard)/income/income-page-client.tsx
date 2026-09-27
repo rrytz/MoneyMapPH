@@ -370,6 +370,7 @@ export function IncomePageClient({
               <BillsCrud
                 bills={billView.bills}
                 categories={categories}
+                payments={billView.payments}
               />
             </div>
           ) : (

@@ -25,6 +25,29 @@ export function isOneTimeBill(
 }
 
 /**
+ * Which occurrences a month's calendar should show.
+ *
+ * A PAID one-time bill is dropped. It is no longer upcoming, it will never
+ * recur, and leaving it on the calendar with a tick would claim "settled, next
+ * month is coming" - which is exactly false for a bill that has no next month.
+ *
+ * A paid RECURRING bill is kept, tick and all, because that one really does
+ * come round again. Those two are deliberately not treated alike, which is why
+ * this is a named function with both cases pinned in tests rather than an
+ * inline filter that only ever gets exercised one way.
+ */
+export function visibleCalendarOccurrences(
+  occurrences: BillOccurrence[],
+  oneTimeBillIds: ReadonlySet<string>,
+  paidKeys: ReadonlySet<string>
+): BillOccurrence[] {
+  return occurrences.filter((o) => {
+    if (!oneTimeBillIds.has(o.bill_id)) return true;
+    return !paidKeys.has(`${o.bill_id}|${o.dueDate}`);
+  });
+}
+
+/**
  * The due date for a RECURRING bill in a given month.
  *
  * Only ever called with a number. `getBillDueDate(null, ...)` does not fail

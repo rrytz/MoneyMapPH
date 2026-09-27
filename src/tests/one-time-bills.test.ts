@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { listBillOccurrences, isBillOnMoneySurfaces, isOneTimeBill, getBillDueDate } from "@/lib/utils/bills";
+import { listBillOccurrences, isBillOnMoneySurfaces, isOneTimeBill, getBillDueDate, visibleCalendarOccurrences } from "@/lib/utils/bills";
 import { billInputSchema } from "@/lib/utils/validators";
-import type { Bill } from "@/lib/types";
+import type { Bill, BillOccurrence } from "@/lib/types";
 
 const bill = (over: Partial<Bill> = {}): Bill => ({
   id: "b1",
@@ -86,5 +86,40 @@ describe("one-time bills", () => {
   it("an inactive or amount-less bill stays off the surfaces, whichever kind it is", () => {
     expect(isBillOnMoneySurfaces(bill({ day_of_month: null, due_date: "2026-10-05", active: false }))).toBe(false);
     expect(isBillOnMoneySurfaces(bill({ day_of_month: null, due_date: "2026-10-05", expected_amount: null }))).toBe(false);
+  });
+
+  // Both directions, because the rule only means something if it distinguishes
+  // the two kinds. A filter that dropped every paid bill would pass a test that
+  // only checked "paid one-time disappears".
+  it("a paid ONE-TIME bill leaves the calendar; a paid RECURRING one stays", () => {
+    const oneTimeId = "one";
+    const recurringId = "rec";
+    const occs: BillOccurrence[] = [
+      { bill_id: oneTimeId, billName: "Repair", dueDate: "2026-10-05", expectedAmount: 500, cutoffPeriodEnd: "2026-10-15" },
+      { bill_id: recurringId, billName: "Rent", dueDate: "2026-10-05", expectedAmount: 12000, cutoffPeriodEnd: "2026-10-15" },
+    ];
+    const oneTimeIds = new Set([oneTimeId]);
+    const paidBoth = new Set([`${oneTimeId}|2026-10-05`, `${recurringId}|2026-10-05`]);
+
+    const afterPaying = visibleCalendarOccurrences(occs, oneTimeIds, paidBoth);
+    // The one-time bill is gone...
+    expect(afterPaying.map((o) => o.bill_id)).toEqual([recurringId]);
+    // ...and the recurring one is still there, so its tick can render. Same
+    // payment state, different outcome, decided only by which kind of bill it is.
+    expect(afterPaying[0].billName).toBe("Rent");
+
+    // Unpaid: both show.
+    expect(visibleCalendarOccurrences(occs, oneTimeIds, new Set())).toHaveLength(2);
+  });
+
+  it("a one-time bill paid under a DIFFERENT date is not treated as paid", () => {
+    // The key is bill_id|due_date, and a one-time bill has exactly one date, so
+    // this is nearly impossible in practice - but it is the shape that would
+    // make a bill vanish for a payment that was never its own.
+    const occs: BillOccurrence[] = [
+      { bill_id: "one", billName: "Repair", dueDate: "2026-10-05", expectedAmount: 500, cutoffPeriodEnd: "2026-10-15" },
+    ];
+    const paidOtherDate = visibleCalendarOccurrences(occs, new Set(["one"]), new Set(["one|2026-11-05"]));
+    expect(paidOtherDate).toHaveLength(1);
   });
 });

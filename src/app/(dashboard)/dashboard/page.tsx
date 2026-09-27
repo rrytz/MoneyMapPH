@@ -166,15 +166,45 @@ export default async function DashboardPage() {
       )}
 
       {/* Supporting detail, lower weight. */}
-      <DashboardStatStrip stats={stats} />
-      <ChartPair
-        trends={<IncomeExpenseChart snapshots={snapshots} />}
-        categories={
-          <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
-        }
-      />
+      {/* MOBILE COMPOSITION. These four are DESKTOP blocks and they are not on
+          the phone at all.
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">
+          Each has a home that already exists: the charts live on Forecasting,
+          transactions on /transactions, goals on /savings, and the three
+          figures the stat strip carries are on /savings and /expenses. None is
+          exclusive to the dashboard, so cutting them loses no information - only
+          proximity.
+
+          That is the whole argument for cutting rather than compressing. The
+          desktop dashboard carries seven blocks because they fit two-up at a
+          desk. A phone answers one question: am I okay, and what is coming. So
+          mobile is the hero, the gauge, safe-to-spend, the alert and Upcoming -
+          measured at about 993px, 1.5 folds, against 5.28 before any of this.
+
+          The risk is real and accepted: with nothing due, the mobile dashboard
+          is very short. Short is the goal, not a failure mode.
+
+          hidden lg:block rather than a conditional, so the server render and the
+          client tree stay identical - the alternative is a viewport check, which
+          is a hydration bug waiting for a rotation. */}
+
+      <div className="hidden lg:block">
+        <DashboardStatStrip stats={stats} />
+      </div>
+      <div className="hidden lg:block">
+        <ChartPair
+          trends={<IncomeExpenseChart snapshots={snapshots} />}
+          categories={
+            <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
+          }
+        />
+      </div>
+
+      {/* Goals and Recent Transactions share a two-up row on desktop, which is
+          the densest pair on the page - and on mobile that row is the single
+          largest remaining block (322px + 250px). Both have a screen of their
+          own, so the whole row goes rather than either half. */}
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
         {/* Goals, whose rows are 2-up. Stacked, three rows cost 3 x 71px; side
             by side they cost one row. The card is half width now anyway, so
             two rows across it is the same density the full-width version was

@@ -41,6 +41,32 @@
  * were checked: no col-span in either.
  * ---------------------------------------------------------------------------
  */
+/**
+ * The Tailwind class for a track count, as a LITERAL.
+ *
+ * This exists because `grid-cols-${tracks}` compiles to nothing when the value
+ * is not in Tailwind's scanned set, and the failure is silent: the grid falls
+ * back to one column and looks deliberate. A class assembled by interpolation
+ * is a class that is allowed to not exist, with no error to say so.
+ *
+ * So the two track counts `gridTracksFor` can return are spelled out, and an
+ * unrecognised value throws rather than rendering a single column.
+ */
+export function gridTracksClass(tracks: number, prefix = "sm"): string {
+  const literal: Record<number, string> = {
+    1: "",
+    2: `${prefix}:grid-cols-2`,
+  };
+  const cls = literal[tracks];
+  if (cls === undefined) {
+    throw new Error(
+      `gridTracksClass: no literal class for ${tracks} tracks. ` +
+        `Add it to the map, or Tailwind will silently render one column.`
+    );
+  }
+  return cls;
+}
+
 export function gridTracksFor(occupiedTracks: number, maxTracks: number): number {
   if (maxTracks < 1) return 1;
   if (occupiedTracks <= 0) return maxTracks;

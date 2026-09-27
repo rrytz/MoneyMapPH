@@ -24,7 +24,7 @@ import { computeUnbudgetedSpent, computeRemainingBudget, buildUnbudgetedCategory
 import { toast } from "sonner";
 import type { BudgetStatus, ExpenseCategory, MonthlyExpenseAggregation } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { gridTracksFor } from "@/lib/utils/grid-tracks";
+import { gridTracksFor, gridTracksClass } from "@/lib/utils/grid-tracks";
 
 interface BudgetsPageClientProps {
   statuses: BudgetStatus[];
@@ -76,6 +76,26 @@ export function BudgetsPageClient({
   );
 
   const budgetTracks = gridTracksFor(optimisticStatuses.length, 2);
+ const budgetTracksClass = gridTracksClass(budgetTracks);
+
+ // The mobile cap, and why the list is CAPPED rather than merely compressed.
+ //
+ // This grid had no ceiling. Below `sm` it is one column, so every budget track
+ // was a full-width card and the page grew linearly with the number of
+ // categories the user happened to have: 7 tracks = 4.58 folds at 375, 15
+ // tracks = about 7. Unlike the dashboard, which was a fixed composition that
+ // was too tall, this was a list with no ceiling - so adding a category made
+ // the screen worse for everyone, and nothing on it was truncated, so nothing
+ // on it was disclosed either.
+ //
+ // The cap is per-breakpoint and the disclosure is per-breakpoint with it: at
+ // `sm` and above every track is shown and no disclosure renders at all, so
+ // the count can never describe a state the reader is not in. "Showing 4 of 7"
+ // on a phone and no line at all on a desk are the same fact, told honestly at
+ // each size.
+ const MOBILE_TRACK_CAP = 4;
+ const [showAllTracks, setShowAllTracks] = useState(false);
+ const hiddenTrackCount = Math.max(0, optimisticStatuses.length - MOBILE_TRACK_CAP);
   const totalBudgeted = optimisticStatuses.reduce((sum, s) => sum + s.budgeted, 0);
   const totalBudgetedSpent = optimisticStatuses.reduce((sum, s) => sum + s.spent, 0);
   const [actualTotal, setActualTotal] = useState(aggregation.totalExpenses);
@@ -234,15 +254,24 @@ export function BudgetsPageClient({
             this stays two-up and the lone card stays - the same content
             question the /accounts grid has to answer, decided the other way
             because the arithmetic differs. */}
-        <div className={cn("grid grid-cols-1 gap-5", `sm:grid-cols-${budgetTracks}`)}>
-          {optimisticStatuses.map((status) => {
+        <div className={cn("grid grid-cols-1 gap-5", budgetTracksClass)}>
+          {optimisticStatuses.map((status, trackIndex) => {
             const isOver = status.status === "over";
             const isNear = status.status === "near";
             const statusLabel = isOver ? "Over Budget" : isNear ? "Watch" : "On Track";
             const statusVariant = isOver ? "expense" : isNear ? "warning" : "income";
 
             return (
-              <FintechCard key={status.categoryId} className="space-y-4">
+              <FintechCard
+                key={status.categoryId}
+                className={cn(
+                  "space-y-4",
+                  // Hidden on a phone past the cap, shown from `sm` up where the
+                  // cap does not apply. CSS rather than a slice, so the reveal is
+                  // instant and the desktop DOM is complete either way.
+                  trackIndex >= MOBILE_TRACK_CAP && !showAllTracks && "hidden sm:block"
+                )}
+              >
                 <FintechCardContent className="p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -304,6 +333,29 @@ export function BudgetsPageClient({
               </FintechCard>
             );
           })}
+
+          {/* The disclosure, and it names the count it is actually hiding.
+              "View all" without a number is a claim that something is hidden
+              without saying how much, which is how a list ends up reading as
+              complete. `sm:hidden` because at `sm` and above the cap does not
+              apply - so on a desk this line does not exist, and the reader is
+              never told about tracks they are already looking at.
+
+              An inline toggle, not a link. A "view all" affordance that
+              navigates to a mutation surface is the day-cell bug: the label
+              says read, the destination edits. This reveals in place, and
+              "Edit Limits" in the header remains the only thing that writes. */}
+          {hiddenTrackCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowAllTracks((v) => !v)}
+              className="sm:hidden w-full rounded-xl border border-dashed border-border py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors cursor-pointer"
+            >
+              {showAllTracks
+                ? "Show fewer"
+                : `Show all ${optimisticStatuses.length} categories · ${hiddenTrackCount} hidden`}
+            </button>
+          )}
         </div>
 
         {/* The right column carries its own heading, and that is the whole fix.
@@ -349,8 +401,22 @@ export function BudgetsPageClient({
             </div>
           </div>
 
+          {/* Two-up on a phone, one-up from `lg`.
+                Same meaning in both, so R2 pairs them: two cards with no budget
+                configured, identical shape, nothing to tell them apart but the
+                row they sit on.
+
+                The 1-up at `lg` is the pre-existing decision and it stands - at
+                `lg` this sits in the narrow right column, where the footer row
+                below had no room for a Set Limit button beside a figure.
+
+                The footer stacks below `sm` as a CONSEQUENCE of the pairing, not
+                as a design call: a 170px card cannot hold the Spent figure and
+                a 94px Set Limit button on one line, so the button takes its own
+                line. At `sm` and up the cards are full width again and the row
+                is inline, exactly as it was. */}
           {unbudgetedViews.length > 0 && (
-            <div className="grid grid-cols-1 gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-5">
               {unbudgetedViews.map((view) => (
                 <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
                   <FintechCardContent className="p-6 space-y-4">
@@ -372,10 +438,18 @@ export function BudgetsPageClient({
                           </span>
                         </div>
                       </div>
-                      <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">Unbudgeted</Badge>
+                      {/* The badge is gone below `sm`, and that is the pairing's
+                          doing, not a preference. At two-up this header is ~170px
+                          and the badge was measured clipping mid-word - "UNBU" -
+                          against the card edge. Nothing is lost by dropping it at
+                          that width: the dashed border and the "No budget
+                          configured" line under the name both say it, so the badge
+                          is a third statement of a fact already on screen. It
+                          returns from `sm`, where the cards are full width. */}
+                      <Badge variant="outline" className="hidden sm:inline-flex text-[10px] uppercase font-bold tracking-wider">Unbudgeted</Badge>
                     </div>
 
-                    <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
+                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:items-center text-xs pt-1 border-t border-border/50">
                       <span className="text-muted-foreground">
                         Spent: <CurrencyDisplay amount={view.spent} className="figure-inline font-bold text-foreground" />
                       </span>
@@ -397,7 +471,17 @@ export function BudgetsPageClient({
         </>
       )}
 
-      <FintechCard>
+      {/* Off the phone, because it is a desk tool.
+          The page's question on a phone is "am I on track", and the allowance
+          card and the category tracks above already answer it. This is a
+          planning affordance: a button that navigates to /simulator, where the
+          real work happens. 208px of a 667px screen spent on a doorway to
+          another page is a worse use of the fold than any block that was cut.
+
+          It is not hidden on mobile in the sense of removed - `hidden lg:block`
+          keeps it in the DOM and reachable by resize, and /simulator remains a
+          normal destination. It is simply not what a phone is holding. */}
+      <FintechCard className="hidden lg:block">
         <FintechCardHeader className="pb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">

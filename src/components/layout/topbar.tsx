@@ -137,7 +137,11 @@ export function Topbar({
   const ThemeIcon = themeIcon;
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-4 border-b border-border bg-paper/90 px-4 backdrop-blur-md sm:px-6">
+    // h-14 on mobile, h-16 from lg. The bar was one height at every width,
+    // which is a desktop toolbar measured in a phone's budget: measured at
+    // 390px, the labelled Accounts button alone spent 95px - a quarter of the
+    // viewport - to say one word. Desktop is untouched.
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-4 border-b border-border bg-paper/90 px-4 backdrop-blur-md sm:px-6 lg:h-16">
       <Link href="/dashboard" className="shrink-0" aria-label="MoneyMap PH home">
         <Logo iconOnly size="sm" />
       </Link>
@@ -155,9 +159,15 @@ export function Topbar({
         {/* Account switcher — accounts stay reachable without a page. */}
         {accounts.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-xs font-medium text-ink transition-colors hover:bg-inset">
+            // One trigger, two densities. The label is the whole cost on a
+            // phone, so it is dropped below lg rather than the control being
+            // duplicated - the dropdown and its items are identical either way.
+            <DropdownMenuTrigger
+              className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-border px-2.5 text-xs font-medium text-ink transition-colors hover:bg-inset lg:rounded-lg lg:px-3"
+              aria-label="Accounts"
+            >
               <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="max-w-28 truncate">Accounts</span>
+              <span className="hidden max-w-28 truncate lg:inline">Accounts</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -196,7 +206,10 @@ export function Topbar({
         <NotificationsDrawer notifications={notifications} />
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-ink transition-colors hover:bg-inset">
+          <DropdownMenuTrigger
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border text-ink transition-colors hover:bg-inset lg:rounded-lg"
+            aria-label="Theme"
+          >
             <ThemeIcon className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -213,7 +226,7 @@ export function Topbar({
         </DropdownMenu>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="rounded-full">
+          <DropdownMenuTrigger className="shrink-0 rounded-full" aria-label="Account menu">
             <Avatar className="h-9 w-9 border border-border">
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
               <AvatarFallback className="bg-sulpot-tint text-xs font-semibold text-sulpot-deep">

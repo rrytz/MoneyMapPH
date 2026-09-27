@@ -13,7 +13,15 @@ import { FinancialPulse } from "@/components/dashboard/financial-pulse";
 import { Toaster } from "@/components/ui/sonner";
 import { getAccountsWithBalances } from "@/lib/services/account.service";
 import { getSafeToSpend } from "@/lib/services/safe-to-spend.service";
-import type { AccountWithBalance, Profile, SafeToSpendStatus } from "@/lib/types";
+import { getExpenseCategories, getIncomeSources } from "@/lib/services/category.service";
+import { QuickAdd } from "@/components/shared/quick-add-sheet";
+import type {
+  AccountWithBalance,
+  ExpenseCategory,
+  IncomeSource,
+  Profile,
+  SafeToSpendStatus,
+} from "@/lib/types";
 import type { NotificationItem } from "@/lib/services/notification.service";
 
 const CHROME_TTL_MS = 60_000;
@@ -26,6 +34,19 @@ interface ChromeData {
   totalBalance: number;
   safeToSpend: SafeToSpendStatus | null;
   accounts: AccountWithBalance[];
+  /**
+   * Reference data for the mobile quick-add sheet, fetched here rather than on
+   * tap. The alternative was a server action firing on the first press of "+",
+   * which would make a primary control wait on a round trip every cold start.
+   * These join the same Promise.all the other four chrome queries already use
+   * and share its 60s TTL, so the cost is two small reference-table reads per
+   * chrome refresh - the same idiom already in use, not a second one.
+   *
+   * Empty is a real state, not "not loaded": a user with no expense categories
+   * genuinely has none, and the sheet says so rather than hanging.
+   */
+  expenseCategories: ExpenseCategory[];
+  incomeSources: IncomeSource[];
   /**
    * Distinguishes "we have not fetched yet" from "the balance is genuinely
    * zero". Without this the shell anchor paints ₱0.00 before the query
@@ -68,6 +89,8 @@ const DEFAULT_CHROME: ChromeData = {
   totalBalance: 0,
   safeToSpend: null,
   accounts: [],
+  expenseCategories: [],
+  incomeSources: [],
   loaded: false,
 };
 
@@ -83,12 +106,22 @@ async function refreshChrome(cacheKey: string, month: number, year: number) {
       if (!user) return;
 
       const dismissedIds = (user.user_metadata?.dismissed_notification_ids as string[]) || [];
-      const [profileResult, summary, notifications, wallet, safeToSpend] = await Promise.all([
+      const [
+        profileResult,
+        summary,
+        notifications,
+        wallet,
+        safeToSpend,
+        expenseCategories,
+        incomeSources,
+      ] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         getMonthlySummary(supabase, user.id, month, year).catch(() => null),
         getDynamicNotifications(supabase, user.id, dismissedIds).catch(() => []),
         getAccountsWithBalances(supabase, user.id).catch(() => null),
         getSafeToSpend(supabase, user.id).catch(() => null),
+        getExpenseCategories(supabase, user.id).catch(() => []),
+        getIncomeSources(supabase, user.id).catch(() => []),
       ]);
 
       updateChrome(cacheKey, {
@@ -98,6 +131,8 @@ async function refreshChrome(cacheKey: string, month: number, year: number) {
         totalBalance: wallet?.totalLiquidity ?? 0,
         safeToSpend,
         accounts: wallet?.accounts ?? [],
+        expenseCategories,
+        incomeSources,
         loaded: true,
       });
     } catch {
@@ -140,6 +175,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     totalBalance,
     safeToSpend,
     accounts,
+    expenseCategories,
+    incomeSources,
     loaded,
   } = useChromeData();
   const pathname = usePathname();
@@ -158,11 +195,20 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <DesktopNav />
         <main
           key={pathname}
-          className="page-enter-anim flex-1 overflow-y-auto px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:pb-8"
+          // 5rem cleared the nav alone. The floating "+" sits 4rem + inset +
+          // 0.75rem up with a 3.5rem body, so mobile clearance is 8.5rem +
+          // inset. lg:pb-8 is untouched: neither the nav nor the button exists
+          // at that width.
+          className="page-enter-anim flex-1 overflow-y-auto px-4 pb-[calc(8.5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:pb-8"
         >
           {children}
         </main>
         <MobileNav />
+        <QuickAdd
+          accounts={accounts}
+          categories={expenseCategories}
+          sources={incomeSources}
+        />
       </div>
       <Toaster />
       <FinancialPulse budgetUtilization={budgetUtilization} />

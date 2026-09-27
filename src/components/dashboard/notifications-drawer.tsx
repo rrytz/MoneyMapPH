@@ -119,7 +119,14 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger className="relative inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 w-9 cursor-pointer">
+      {/* Circular and bordered on mobile so the four right-hand controls read as
+          one set; lg:border-0 and lg:rounded-md keep the desktop row exactly as
+          it was. Three different radii in a row was part of what made the bar
+          feel like a toolbar rather than a set of icon buttons. */}
+      <SheetTrigger
+        className="relative inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground lg:rounded-md lg:border-0"
+        aria-label="Notifications"
+      >
         <Bell className="h-4 w-4" />
         {warningCount > 0 && (
           <span className="absolute top-1.5 right-1.5 flex h-2 w-2">

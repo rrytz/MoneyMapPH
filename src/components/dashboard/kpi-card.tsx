@@ -14,6 +14,8 @@ interface KpiCardProps {
   badge?: string;
   iconBgClass?: string;
   favorableWhenDown?: boolean;
+  /** Lets a grid place the card - e.g. span a column when the count is odd. */
+  className?: string;
 }
 
 export function KpiCard({
@@ -27,6 +29,7 @@ export function KpiCard({
   colorClass,
   iconBgClass = "bg-muted text-muted-foreground",
   favorableWhenDown = false,
+  className,
 }: KpiCardProps) {
   const TrendIcon =
     changePercent === null || changePercent === undefined
@@ -45,7 +48,7 @@ export function KpiCard({
       : false;
 
   return (
-    <FintechCard className="relative">
+    <FintechCard className={cn("relative", className)}>
       <FintechCardContent className="p-5 flex flex-col justify-between h-full space-y-4">
         <div className="flex items-center justify-between">
           <div className={cn("p-2.5 rounded-md shrink-0", iconBgClass)}>

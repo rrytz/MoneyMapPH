@@ -96,6 +96,16 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
   // than leaving the reader to notice that "6 of 9" is doing a lot of work.
   const hiddenOneTime = allItems.slice(UPCOMING_LIMIT).filter((i) => i.oneTime).length;
 
+  // MOBILE SHOWS FEWER, SO MOBILE MUST SAY FEWER. Rows past the second are
+  // hidden below lg (see the row className), which would make "showing 6 of 9"
+  // a fresh lie on a phone that renders two. Hiding the rows without this would
+  // trade one untrue claim for another in the other direction - and a
+  // disclosure that is wrong on the device people actually use is worse than no
+  // disclosure at all, because it is the one they trust.
+  const mobileLimit = 2;
+  const mobileShown = Math.min(items.length, mobileLimit);
+  const mobileHiddenOneTime = allItems.slice(mobileLimit).filter((i) => i.oneTime).length;
+
   const billTotal = billItems.reduce((sum, item) => sum + item.amount, 0);
   const debtTotal = debtItems.reduce((sum, item) => sum + item.amount, 0);
 
@@ -108,18 +118,38 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
             Due through {formatDate(billsDueBy.horizonDate, "MMM d")}
             {hiddenCount > 0 && (
               <>
-                {" · showing "}
-                <span className="font-semibold text-foreground">
-                  {items.length} of {allItems.length}
+                {" · "}
+                {/* Two disclosures, one per breakpoint, because the two
+                    breakpoints RENDER different numbers of rows. Same source
+                    data, two honest statements. */}
+                <span className="lg:hidden">
+                  showing{" "}
+                  <span className="font-semibold text-foreground">
+                    {mobileShown} of {allItems.length}
+                  </span>
+                  {mobileHiddenOneTime > 0 && (
+                    <>
+                      {" · "}
+                      <span className="font-semibold text-foreground">
+                        {mobileHiddenOneTime} one-time not shown
+                      </span>
+                    </>
+                  )}
                 </span>
-                {hiddenOneTime > 0 && (
-                  <>
-                    {" · "}
-                    <span className="font-semibold text-foreground">
-                      {hiddenOneTime} one-time not shown
-                    </span>
-                  </>
-                )}
+                <span className="hidden lg:inline">
+                  showing{" "}
+                  <span className="font-semibold text-foreground">
+                    {items.length} of {allItems.length}
+                  </span>
+                  {hiddenOneTime > 0 && (
+                    <>
+                      {" · "}
+                      <span className="font-semibold text-foreground">
+                        {hiddenOneTime} one-time not shown
+                      </span>
+                    </>
+                  )}
+                </span>
               </>
             )}
             {" · "}
@@ -143,7 +173,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
           />
         ) : (
           <div className="space-y-2">
-            {items.map((item) => {
+            {items.map((item, i) => {
               return (
                 <div
                   key={item.key}
@@ -157,7 +187,15 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
                     // November and never receives.
                     item.oneTime
                       ? "border border-dashed border-sulpot/40 bg-transparent hover:border-sulpot/60"
-                      : "bg-muted/30 border border-border/70 hover:border-sulpot/30"
+                      : "bg-muted/30 border border-border/70 hover:border-sulpot/30",
+                    // MOBILE WEIGHT, not desktop. The first two rows are the
+                    // soonest, which is the whole point of an "upcoming" card;
+                    // past that it is a list, and a list belongs on its own
+                    // screen. Below lg only the first two show, which takes this
+                    // card from 408px to about 150px. One render rather than
+                    // two, and the "N more" disclosure stays truthful because
+                    // it is computed from the whole set, not from what showed.
+                    i >= 2 && "hidden lg:flex"
                   )}
                 >
                   <div

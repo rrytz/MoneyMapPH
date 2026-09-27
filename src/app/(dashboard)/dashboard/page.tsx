@@ -11,11 +11,11 @@ import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/
 import { getBillsDueWindow } from "@/lib/utils/bills";
 import { BalanceBlock } from "@/components/dashboard/balance-block";
 import { AttentionStrip } from "@/components/dashboard/attention-strip";
-import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
-import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
+import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { UpcomingBillsCard } from "@/components/dashboard/upcoming-bills-card";
 import { DashboardStatStrip } from "@/components/dashboard/dashboard-stat-strip";
+import { ChartPair } from "@/components/dashboard/chart-pair";
 import { computeDashboardStats } from "@/lib/services/dashboard-stats";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -167,10 +167,12 @@ export default async function DashboardPage() {
 
       {/* Supporting detail, lower weight. */}
       <DashboardStatStrip stats={stats} />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <IncomeExpenseChart snapshots={snapshots} />
-        <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
-      </div>
+      <ChartPair
+        trends={<IncomeExpenseChart snapshots={snapshots} />}
+        categories={
+          <CategoryDonutChart categorySpending={summary.categorySpending} categories={categories} />
+        }
+      />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">
         {/* Goals, whose rows are 2-up. Stacked, three rows cost 3 x 71px; side

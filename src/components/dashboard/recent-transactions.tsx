@@ -87,14 +87,23 @@ export function RecentTransactions({ transactions, hideDate = false }: RecentTra
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {transactions.map((tx) => {
+            {transactions.map((tx, i) => {
               const isIncome = tx.type === "income";
               const categoryLabel = tx.category || (isIncome ? "INCOME" : "EXPENSE");
 
               return (
                 <tr
                   key={tx.id}
-                  className="hover:bg-muted/50 transition-colors duration-150"
+                  className={cn(
+                    "hover:bg-muted/50 transition-colors duration-150",
+                    // Four rows on a phone, six at lg. This is a PREVIEW - the
+                    // card's own job is "what just happened", and the full
+                    // list is one tap away on /transactions. Six rows is
+                    // 413px of scroll for a summary, and on the device people
+                    // actually use that is a third of the fold budget spent on
+                    // the least important thing on the card.
+                    i >= 4 && "hidden lg:table-row"
+                  )}
                 >
                   {/* py-2, not py-3.5. A 57px row is 26px of padding around
                       31px of content; 46px is an ordinary table row and the

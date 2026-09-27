@@ -129,6 +129,17 @@ export type ReminderSchemaType = z.infer<typeof reminderSchema>;
 export type CategorySchemaType = z.infer<typeof categorySchema>;
 export type SourceSchemaType = z.infer<typeof sourceSchema>;
 
+/**
+ * Whether an optional form field is actually FILLED IN.
+ *
+ * Every optional field on these schemas accepts `""` as its absent sentinel, and
+ * a controlled <input> sends `""` for a field the user never touched - it does
+ * not omit the key. So `!= null` is the wrong test: `"" != null` is `true`, and
+ * a null-check quietly treats every empty field as present.
+ */
+const isSet = (v: string | number | undefined | null): boolean =>
+  v !== undefined && v !== null && v !== "";
+
 export const billInputSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
   expected_amount: z.coerce.number().positive("Amount must be greater than 0").optional().or(z.literal("")),
@@ -153,7 +164,19 @@ export const billInputSchema = z.object({
   // would mean a specific date and a monthly recurrence fighting over the same
   // bill, and the service already nulls one of them; this is the check that
   // says so in the one place a caller can see it.
-  (b) => !(b.due_date != null && b.day_of_month != null),
+  //
+  // "SET" MUST MEAN NON-EMPTY, NOT NON-NULL. Every field above accepts
+  // z.literal("") as its absent sentinel, and the form sends those empty
+  // strings explicitly - it is a controlled <input>, so the untouched field
+  // arrives as "" rather than as an omitted key. In JavaScript `"" != null` is
+  // TRUE, so a `!= null` test here saw an empty day as PRESENT and refused
+  // every one-time bill the UI tried to create, with a message claiming the
+  // bill was scheduled two ways at once.
+  //
+  // It shipped green because the test omitted `day_of_month` instead of
+  // sending "", so it exercised the function but not the call. A schema test
+  // has to use the payload the real caller sends.
+  (b) => !(isSet(b.due_date) && isSet(b.day_of_month)),
   "A bill is either a one-time date or a monthly repeat, not both"
 );
 

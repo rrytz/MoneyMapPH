@@ -83,6 +83,51 @@ describe("one-time bills", () => {
     expect(both.success).toBe(false);
   });
 
+  // The regression. These payloads are COPIED FROM WHAT THE FORM SENDS, with
+  // the empty strings the controlled inputs produce. The tests above omit the
+  // unused key instead, and that difference is the entire bug: every optional
+  // field takes z.literal("") as its absent sentinel, so the refine has to
+  // treat "" as absent. It tested `!= null`, and `"" != null` is true - so it
+  // saw an empty day_of_month as a schedule and refused every one-time bill the
+  // UI tried to create, with a message about being scheduled two ways at once.
+  //
+  // A schema test that tidies its input away from the real caller's shape will
+  // pass while the feature is broken.
+  it("accepts the EXACT payload a one-time bill form sends", () => {
+    const res = billInputSchema.safeParse({
+      name: "ZZ d2 onetime",
+      expected_amount: 275,
+      category_id: "",
+      day_of_month: "",
+      due_date: "2026-09-22",
+    });
+    expect(res.success, res.success ? "" : JSON.stringify(res.error.issues)).toBe(true);
+    // And the parsed value keeps the sentinel as a string, which the action
+    // then converts to null.
+    expect(res.success && res.data.day_of_month).toBe("");
+    expect(res.success && res.data.due_date).toBe("2026-09-22");
+  });
+
+  it("accepts the EXACT payload a recurring bill form sends", () => {
+    const res = billInputSchema.safeParse({
+      name: "Rent",
+      expected_amount: 12000,
+      category_id: "",
+      day_of_month: 5,
+      due_date: "",
+    });
+    expect(res.success, res.success ? "" : JSON.stringify(res.error.issues)).toBe(true);
+  });
+
+  it("still refuses a bill whose TWO schedules are both genuinely filled in", () => {
+    // The fix must not weaken the rule into uselessness: two real values is
+    // still a contradiction, and "" is the only thing that counts as absent.
+    const both = billInputSchema.safeParse({
+      name: "Confused", category_id: "", day_of_month: 5, due_date: "2026-10-05",
+    });
+    expect(both.success).toBe(false);
+  });
+
   it("an inactive or amount-less bill stays off the surfaces, whichever kind it is", () => {
     expect(isBillOnMoneySurfaces(bill({ day_of_month: null, due_date: "2026-10-05", active: false }))).toBe(false);
     expect(isBillOnMoneySurfaces(bill({ day_of_month: null, due_date: "2026-10-05", expected_amount: null }))).toBe(false);

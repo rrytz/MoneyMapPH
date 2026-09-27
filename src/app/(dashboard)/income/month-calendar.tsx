@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { buildCalendarCells } from "@/lib/utils/calendar-cells";
 import { isOneTimeBill, visibleCalendarOccurrences } from "@/lib/utils/bills";
+import { billDraftForDate, type BillDraft } from "@/lib/utils/bill-draft";
 import { formatDate } from "@/lib/utils/date";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
+import { toast } from "sonner";
 import { PayBillForm } from "./pay-bill-form";
+import { BillForm } from "./bill-form";
+import { createBillAction } from "./bills/actions";
 import type { Bill, BillOccurrence, BillPayment, ExpenseCategory } from "@/lib/types";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -35,6 +40,17 @@ export function MonthCalendar({
   const [viewMonth, setViewMonth] = useState(month - 1); // 0-based
   const [viewYear, setViewYear] = useState(year);
   const [payTarget, setPayTarget] = useState<{ occurrence: CalendarOccurrence; paidPaymentId?: string } | null>(null);
+  // The date whose Sheet is open, and the draft it opened with. The draft is
+  // BUILT by billDraftForDate, which sets the date and the toggle together, so
+  // there is no path that opens a dated form with "repeats monthly" still on.
+  const [addTarget, setAddTarget] = useState<{ date: string; draft: BillDraft } | null>(null);
+  const [addDraft, setAddDraft] = useState<BillDraft | null>(null);
+  // Roving tabindex: exactly one day is in the tab order, so Tab crosses the
+  // calendar once instead of stopping 31 times. Which one is remembered across
+  // month changes, so arrowing to the 20th and paging to October keeps you on
+  // the 20th rather than jumping back to day 1.
+  const [activeDate, setActiveDate] = useState<string | null>(null);
+  const dayRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const todayISO = formatDate(new Date(), "yyyy-MM-dd");
 
@@ -52,6 +68,88 @@ export function MonthCalendar({
   const visibleOccurrences = visibleCalendarOccurrences(occurrences, oneTimeIds, paidKeys);
 
   const cells = buildCalendarCells(viewYear, viewMonth, visibleOccurrences, payments, todayISO);
+
+  // The one cell in the tab order. Prefers the day already chosen, then today
+  // if it is on screen, then the first of the month. A grid that is never
+  // tabbable at all is worse than one with a single sensible entry point.
+  const tabbableDate = (() => {
+    if (activeDate && cells.some((c) => c.date === activeDate)) return activeDate;
+    if (cells.some((c) => c.date === todayISO)) return todayISO;
+    return cells.find((c) => c.isInMonth)?.date ?? cells[0]?.date ?? null;
+  })();
+
+  const focusDay = (iso: string) => {
+    setActiveDate(iso);
+    dayRefs.current.get(iso)?.focus();
+  };
+
+  /**
+   * Spatial navigation. The MECHANISM is the roving tabindex already proven in
+   * filter-pills, but the CONTRACT is different and deliberately so: pills move
+   * linearly left-to-right, a calendar moves in two dimensions, and every
+   * platform's date picker agrees on what the arrow keys mean.
+   *
+   *   Left/Right  +/- 1 day      Up/Down  +/- 1 week
+   *   Home/End    start/end of the containing WEEK, not the month
+   *
+   * Home/End being week bounds rather than month bounds is the detail that
+   * makes this a calendar instead of a list with dates on it. Movement clamps
+   * at the grid edges rather than wrapping, so arrowing past the 1st does not
+   * teleport you to the 31st of the previous month.
+   */
+  const onDayKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, iso: string) => {
+    const idx = cells.findIndex((c) => c.date === iso);
+    if (idx < 0) return;
+    // Same Monday-start arithmetic buildCalendarCells uses to pad the grid, so
+    // "start of this week" lands on the same column the header calls Monday.
+    const mondayOffset = (new Date(`${iso}T00:00:00`).getDay() + 6) % 7;
+    const weekStart = idx - mondayOffset;
+    const weekEnd = Math.min(cells.length - 1, weekStart + 6);
+
+    let next: number | null = null;
+    switch (e.key) {
+      case "ArrowLeft": next = idx - 1; break;
+      case "ArrowRight": next = idx + 1; break;
+      case "ArrowUp": next = idx - 7; break;
+      case "ArrowDown": next = idx + 7; break;
+      case "Home": next = weekStart; break;
+      case "End": next = weekEnd; break;
+      default: return;
+    }
+    if (next === null) return;
+    e.preventDefault();
+    if (next < 0 || next >= cells.length) return; // clamp, do not wrap
+    focusDay(cells[next].date);
+  };
+
+  /**
+   * Close the Sheet and put the user back where they were.
+   *
+   * ONE close path, deliberately. It was originally written into onOpenChange
+   * only, and the save handler set the state to null itself - so saving dropped
+   * focus on <body> and left the user stranded at the top of a 31-cell grid,
+   * with the keyboard navigation they had just been using now unreachable.
+   * Three exits (backdrop, Escape, save) all go through here instead.
+   */
+  const closeAddSheet = () => {
+    const back = addTarget?.date ?? null;
+    setAddTarget(null);
+    setAddDraft(null);
+    if (back) {
+      // After the dialog has actually unmounted, or the element is still
+      // inside an inert subtree and focus() is a no-op.
+      requestAnimationFrame(() => dayRefs.current.get(back)?.focus());
+    }
+  };
+
+  const openAddSheet = (iso: string) => {
+    // One line, and it is the whole contract: the date and the toggle move
+    // together. A separate setDraft({due_date}) here is the silent-loss bug.
+    const draft = billDraftForDate(iso);
+    setAddDraft(draft);
+    setAddTarget({ date: iso, draft });
+    setActiveDate(iso);
+  };
 
   const openPayForm = (occ: CalendarOccurrence) => {
     const found = occ.paid
@@ -90,10 +188,16 @@ export function MonthCalendar({
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
+        {/* role="grid", not a radiogroup. A calendar is two-dimensional and the
+            arrow keys mean day and week, so the grid pattern is the honest
+            description. The roving tabindex below is the same MECHANISM as
+            filter-pills; only the contract differs. */}
+        <div role="grid" aria-label="Bills calendar" className="grid grid-cols-7 gap-1">
           {cells.map((cell) => (
             <div
               key={cell.date}
+              role="gridcell"
+              aria-label={formatDate(new Date(`${cell.date}T00:00:00`), "MMMM d, yyyy")}
               className={cn(
                 "min-h-16 rounded-lg border p-1.5 text-xs",
                 cell.isInMonth ? "bg-muted/30" : "bg-transparent opacity-40",
@@ -101,7 +205,29 @@ export function MonthCalendar({
               )}
             >
               <div className="flex items-center justify-between">
-                <span className="type-measurement text-[10px] font-medium">{Number(cell.date.slice(8, 10))}</span>
+                {/* The day number is the button, not the whole cell: the cell
+                    already contains the occurrence chips, and a <button> may
+                    not contain another <button>. */}
+                <button
+                  type="button"
+                  ref={(el) => {
+                    if (el) dayRefs.current.set(cell.date, el);
+                    else dayRefs.current.delete(cell.date);
+                  }}
+                  tabIndex={cell.date === tabbableDate ? 0 : -1}
+                  onKeyDown={(e) => onDayKeyDown(e, cell.date)}
+                  onClick={() => openAddSheet(cell.date)}
+                  aria-haspopup="dialog"
+                  // A button's accessible name comes from its own content, and
+                  // its content is the day number. "22" is a poor name: it does
+                  // not say which month, and it does not say what pressing it
+                  // does. The gridcell's label does not cover this, because the
+                  // cell is not the thing you activate.
+                  aria-label={`${formatDate(new Date(`${cell.date}T00:00:00`), "MMMM d, yyyy")} — add a bill`}
+                  className="type-measurement rounded px-0.5 text-[10px] font-medium hover:underline focus-visible:ring-2 focus-visible:ring-sulpot/60 focus-visible:outline-none"
+                >
+                  {Number(cell.date.slice(8, 10))}
+                </button>
                 {cell.isCutoffAnchor && <span className="h-1 w-1 rounded-full bg-sulpot" title="Cutoff anchor" />}
               </div>
               <div className="space-y-1 mt-1">
@@ -149,6 +275,44 @@ export function MonthCalendar({
             </div>
           ))}
         </div>
+
+        {/* The Sheet is the ONE creation surface for a dated bill, and it is
+            rendered through a portal so it is not clipped by the card. Clicking
+            a day is the trigger; the date it opens with comes from
+            billDraftForDate, which set the date and the toggle together. */}
+        {addTarget && addDraft && (
+          <Sheet open onOpenChange={(open) => { if (!open) closeAddSheet(); }}>
+            <SheetContent side="right" className="sm:max-w-sm">
+              <SheetHeader>
+                <SheetTitle>New bill</SheetTitle>
+                <SheetDescription>
+                  One-time, due {formatDate(new Date(`${addTarget.date}T00:00:00`), "MMMM d, yyyy")}.
+                  Switch to &ldquo;repeats monthly&rdquo; to make it recurring instead.
+                </SheetDescription>
+              </SheetHeader>
+              <BillForm
+                draft={addDraft}
+                onChange={setAddDraft}
+                categories={categories}
+                submitLabel="Save bill"
+                autoFocusName
+                onCancel={closeAddSheet}
+                onSubmit={async (values) => {
+                  const res = await createBillAction({
+                    name: values.name,
+                    expected_amount: values.expected_amount,
+                    category_id: values.category_id,
+                    day_of_month: values.day_of_month,
+                    due_date: values.due_date,
+                  });
+                  if (res.error) return toast.error(res.error);
+                  toast.success("Bill added");
+                  closeAddSheet();
+                }}
+              />
+            </SheetContent>
+          </Sheet>
+        )}
 
         {payTarget &&
           createPortal(

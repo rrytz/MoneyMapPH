@@ -272,38 +272,60 @@ export function MonthCalendar({
               role="gridcell"
               aria-label={formatDate(new Date(`${cell.date}T00:00:00`), "MMMM d, yyyy")}
               className={cn(
-                "min-h-16 rounded-lg border p-1.5 text-xs",
+                "relative min-h-16 rounded-lg border p-1.5 text-xs",
                 cell.isInMonth ? "bg-muted/30" : "bg-transparent opacity-40",
                 cell.isToday && "ring-2 ring-sulpot/60"
               )}
             >
-              <div className="flex items-center justify-between">
-                {/* The day number is the button, not the whole cell: the cell
-                    already contains the occurrence chips, and a <button> may
-                    not contain another <button>. */}
-                <button
-                  type="button"
-                  ref={(el) => {
-                    if (el) dayRefs.current.set(cell.date, el);
-                    else dayRefs.current.delete(cell.date);
-                  }}
-                  tabIndex={cell.date === tabbableDate ? 0 : -1}
-                  onKeyDown={(e) => onDayKeyDown(e, cell.date)}
-                  onClick={() => openAddSheet(cell.date)}
-                  aria-haspopup="dialog"
-                  // A button's accessible name comes from its own content, and
-                  // its content is the day number. "22" is a poor name: it does
-                  // not say which month, and it does not say what pressing it
-                  // does. The gridcell's label does not cover this, because the
-                  // cell is not the thing you activate.
-                  aria-label={`${formatDate(new Date(`${cell.date}T00:00:00`), "MMMM d, yyyy")} — add a bill`}
-                  className="type-measurement rounded px-0.5 text-[10px] font-medium hover:underline focus-visible:ring-2 focus-visible:ring-sulpot/60 focus-visible:outline-none"
-                >
+              {/* ONE button, sized to the cell it represents.
+
+                  The button used to wrap the day number and be sized to it, so
+                  the hit area was the digits while the affordance - border,
+                  padding, hover - was the whole cell. Clicking the empty part of
+                  a day did nothing, which is the surface saying one thing and
+                  the behaviour saying another.
+
+                  It cannot simply become the cell's content, because the cell
+                  also holds the occurrence chips and a <button> may not contain
+                  another <button>. So the button is absolutely positioned over
+                  the cell instead: still ONE element, still ONE action, and the
+                  focus ring now traces the cell rather than the digits, which
+                  is the right shape for a target this size. */}
+              <button
+                type="button"
+                ref={(el) => {
+                  if (el) dayRefs.current.set(cell.date, el);
+                  else dayRefs.current.delete(cell.date);
+                }}
+                tabIndex={cell.date === tabbableDate ? 0 : -1}
+                onKeyDown={(e) => onDayKeyDown(e, cell.date)}
+                onClick={() => openAddSheet(cell.date)}
+                aria-haspopup="dialog"
+                // A button's accessible name comes from its own content, and its
+                // content is the day number. "22" is a poor name: it does not
+                // say which month, and it does not say what pressing it does.
+                // The gridcell's label does not cover this, because the cell is
+                // not the thing you activate.
+                aria-label={`${formatDate(new Date(`${cell.date}T00:00:00`), "MMMM d, yyyy")} — add a bill`}
+                className="absolute -inset-px z-0 flex items-start rounded-lg p-1.5 text-left hover:bg-sulpot/5 focus-visible:ring-2 focus-visible:ring-sulpot/60 focus-visible:outline-none"
+              >
+                <span className="type-measurement px-0.5 text-[10px] font-medium">
                   {Number(cell.date.slice(8, 10))}
-                </button>
-                {cell.isCutoffAnchor && <span className="h-1 w-1 rounded-full bg-sulpot" title="Cutoff anchor" />}
-              </div>
-              <div className="space-y-1 mt-1">
+                </span>
+              </button>
+              {cell.isCutoffAnchor && (
+                <span
+                  className="pointer-events-none absolute right-2 top-2 z-10 h-1 w-1 rounded-full bg-sulpot"
+                  title="Cutoff anchor"
+                />
+              )}
+              {/* The chips sit ABOVE the day button so they stay clickable, and
+                  this wrapper is pointer-events-none so the gaps BETWEEN chips
+                  fall through to the day button underneath. Without that, the
+                  wrapper's own box would swallow every empty click in the cell
+                  and the bug would survive the fix. Each chip turns pointer
+                  events back on for itself. */}
+              <div className="pointer-events-none relative z-10 space-y-1 pt-3.5">
                 {cell.occurrences.slice(0, 3).map((occ) => {
                   // The same field the filter above reads, so a chip cannot say
                   // "one-time" while the rule that removes paid ones disagrees.
@@ -315,7 +337,7 @@ export function MonthCalendar({
                       onClick={() => openPayForm(occ)}
                       title={oneTime ? `${occ.billName} - one-time` : occ.billName}
                       className={cn(
-                        "flex w-full items-center justify-between rounded px-1 py-0.5 text-left text-[10px] leading-tight",
+                        "pointer-events-auto flex w-full items-center justify-between rounded px-1 py-0.5 text-left text-[10px] leading-tight",
                         // A one-time bill is outlined and dashed rather than
                         // filled, so recurrence is visible at a glance: a chip
                         // that reappears every month is one thing, and a chip

@@ -61,6 +61,72 @@ export const STATE_GROUNDS = {
 export const DARK_SURFACE = "#141b16";
 
 /**
+ * The alpha the ground is painted at, and why it is not a taste value.
+ *
+ * The palette above is specified as PURE hex, and the original test measured
+ * separation on those pure values - a minimum of 95, comfortably clear. The
+ * cards were then unreadable.
+ *
+ * Because a ground is a WASH, what renders is not the tone: it is the tone at
+ * `GROUND_ALPHA` composited over the card surface, and that composite is what
+ * two cards are compared against. Measured at the original 7%:
+ *
+ * ```
+ *   bank        #14261b   12 from untoned
+ *   ewallet     #172626   20
+ *   digital_bank #1e2326  20
+ *   credit      #1e2918   17
+ *   cash        #222823   23
+ *
+ *   tone-to-tone, composited: minimum 7   (digital_bank / cash)
+ * ```
+ *
+ * **7 apart from each other, while 12-23 from nothing.** The grounds were closer
+ * to one another than to the absence of a ground, which is precisely the
+ * condition under which a wash carries no information. Two accounts of different
+ * types were indistinguishable, and reading them as the same was correct.
+ *
+ * The eye compares the two cards to EACH OTHER, not to the blank page. So the
+ * threshold that matters is tone-to-tone on the COMPOSITE, and the test now
+ * asserts that rather than the pure hex. `GROUND_ALPHA` is the value at which
+ * the composited minimum clears the floor, measured rather than chosen.
+ *
+ * The failure generalises: a test on the specified value is not a test on the
+ * rendered one. Every token that passes through an alpha, a blend or a gradient
+ * needs its assertion moved to the far side of that transform.
+ */
+export const GROUND_ALPHA = 0.2;
+
+/** The icon's own fill behind the type mark. Above the ground so the mark reads on it. */
+export const ICON_ALPHA = 0.28;
+
+/** The dark card surface composited under a ground at `GROUND_ALPHA`. */
+export function compositedGround(ground: string, alpha = GROUND_ALPHA): string {
+  const rgb = (hex: string) =>
+    [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const [tr, tg, tb] = rgb(ground);
+  const [sr, sg, sb] = rgb(DARK_SURFACE);
+  const mix = (t: number, s: number) => Math.round(t * alpha + s * (1 - alpha));
+  return (
+    "#" +
+    [mix(tr, sr), mix(tg, sg), mix(tb, sb)]
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("")
+  );
+}
+
+/** RGB euclidean distance - the "is this distinguishable" measure used throughout. */
+export function toneDistance(a: string, b: string): number {
+  const rgb = (hex: string) =>
+    [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const [ar, ag, ab] = rgb(a);
+  const [br, bg, bb] = rgb(b);
+  return Math.round(
+    Math.sqrt(Math.pow(ar - br, 2) + Math.pow(ag - bg, 2) + Math.pow(ab - bb, 2))
+  );
+}
+
+/**
  * The tone for an account type, falling back to `cash` - the default type, and
  * the one the DB uses for an unrecognised value. A missing key must not render
  * a card with no ground, which reads as a missing tone rather than cash.

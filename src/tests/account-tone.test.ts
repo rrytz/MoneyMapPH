@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   ACCOUNT_TONES,
   DARK_SURFACE,
+  GROUND_ALPHA,
+  ICON_ALPHA,
   STATE_GROUNDS,
   accountTone,
+  compositedGround,
+  toneDistance,
   type AccountTypeKey,
 } from "@/lib/utils/account-tone";
 
@@ -79,6 +83,67 @@ describe("the tones differ from each other, not only from the states", () => {
   )("%s and %s are separable", (a, b) => {
     const d = distance(ACCOUNT_TONES[a].ground, ACCOUNT_TONES[b].ground);
     expect(d, `${a}/${b} are only ${d} apart`).toBeGreaterThanOrEqual(90);
+  });
+});
+
+describe("the RENDERED grounds separate, not just the specified hexes", () => {
+  // The test above passes on the pure hex - a minimum of 95 - and the cards were
+  // still indistinguishable, because a ground is a WASH. What renders is the
+  // tone composited over the card surface, and two cards are compared against
+  // EACH OTHER. At the original 7% the composited minimum was 7 while each
+  // ground sat 12-23 from the untoned surface: the grounds were closer to one
+  // another than to the absence of a ground, which is exactly the condition in
+  // which a wash carries no information.
+  //
+  // So the threshold that matters lives here, on the composite, and it is
+  // asserted in both directions.
+  it.each(
+    KEYS.flatMap((a, i) => KEYS.slice(i + 1).map((b) => [a, b] as const))
+  )("rendered %s and %s are separable", (a, b) => {
+    const da = compositedGround(ACCOUNT_TONES[a].ground);
+    const db = compositedGround(ACCOUNT_TONES[b].ground);
+    const d = toneDistance(da, db);
+    expect(d, `rendered ${a}/${b} are only ${d} apart (${da} vs ${db})`).toBeGreaterThanOrEqual(15);
+  });
+
+  it("and the compositing is real - the pure hex is NOT what renders", () => {
+    // Proof the assertion moved. If composites equalled the pure tones this
+    // test could not fail, and the original bug would still be green.
+    const bank = compositedGround(ACCOUNT_TONES.bank.ground);
+    expect(bank).not.toBe(ACCOUNT_TONES.bank.ground);
+    // #17b963 at 20% over #141b16 -> 20.6, 58.6, 37.4 -> 21, 59, 37 -> #153b25
+    expect(bank).toBe("#153b25");
+  });
+
+  it("the original 7% would have failed this, and the current alpha does not", () => {
+    // Both sides of the change, so the number cannot be quietly lowered back
+    // into illegibility by someone who liked the subtle look.
+    const at = (alpha: number) =>
+      Math.min(
+        ...KEYS.flatMap((a, i) =>
+          KEYS.slice(i + 1).map((b) =>
+            toneDistance(
+              compositedGround(ACCOUNT_TONES[a].ground, alpha),
+              compositedGround(ACCOUNT_TONES[b].ground, alpha)
+            )
+          )
+        )
+      );
+    expect(at(0.07)).toBeLessThan(15);
+    expect(at(GROUND_ALPHA)).toBeGreaterThanOrEqual(15);
+  });
+
+  it("every rendered ground is also visibly off the untoned surface", () => {
+    // A ground that composites to the card surface is not a ground, however
+    // separable it is from the other grounds.
+    for (const key of KEYS) {
+      const d = toneDistance(compositedGround(ACCOUNT_TONES[key].ground), DARK_SURFACE);
+      expect(d, `${key} renders indistinguishable from an untoned card`).toBeGreaterThanOrEqual(15);
+    }
+  });
+
+  it("the icon mark reads on the ground it sits on", () => {
+    expect(ICON_ALPHA).toBeGreaterThan(GROUND_ALPHA);
   });
 });
 

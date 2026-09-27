@@ -4,7 +4,7 @@ import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
-import { accountTone } from "@/lib/utils/account-tone";
+import { accountTone, GROUND_ALPHA, ICON_ALPHA } from "@/lib/utils/account-tone";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -60,11 +60,25 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
             ? "border-border bg-card/60 opacity-60"
             : "border-border hover:border-border"
       }`}
-      // 7% over the card surface: a ground, never loud enough to compete with
-      // the balance, which is the figure and this card's whole job. `p-5` also
-      // became `p-4` because the ledger figure is 138.3px against 125px of
-      // content at two-up - it fit the geometry but ate the padding.
-      style={showTone ? { backgroundColor: `${tone.ground}12` } : undefined}
+      // 20%, not the 7% this started at. The ground is a WASH, so what renders
+      // is the tone composited over the card surface - and at 7% the rendered
+      // grounds sat 7 apart from EACH OTHER while sitting 12-23 from an
+      // untoned card. The eye compares two cards to each other, so the type was
+      // genuinely unreadable and reading Gcash as a bank was correct. The alpha
+      // is now a measured constant, and the separation it achieves is asserted
+      // on the composite rather than on the specified hex.
+      //
+      // `p-5` became `p-4` because the ledger figure is 138.3px against 125px
+      // of content at two-up - it fit the geometry but ate the padding.
+      style={
+        showTone
+          ? {
+              backgroundColor: `${tone.ground}${Math.round(GROUND_ALPHA * 255)
+                .toString(16)
+                .padStart(2, "0")}`,
+            }
+          : undefined
+      }
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -72,11 +86,16 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
             className={`p-2.5 rounded-md ${
               account.is_negative ? "bg-rose-500/10 text-rose-400" : ""
             }`}
-            // 14% fill behind the icon, so the type reads as a mark on the
-            // card rather than as a second background competing with the ground.
+            // Above the ground's alpha so the type mark reads on it rather than
+            // dissolving into it.
             style={
               showTone
-                ? { backgroundColor: `${tone.ground}24`, color: tone.ground }
+                ? {
+                    backgroundColor: `${tone.ground}${Math.round(ICON_ALPHA * 255)
+                      .toString(16)
+                      .padStart(2, "0")}`,
+                    color: tone.ground,
+                  }
                 : undefined
             }
           >
@@ -134,7 +153,19 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
 
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="type-section-label text-muted-foreground">Current Derived Balance</span>
+          {/* "BALANCE", not "Current Derived Balance".
+
+              Two defects, one cause. At two-up the label wrapped to two lines
+              and the figure's ascenders collided with it, on every card. And
+              the label was carrying two words it did not need: "current" is
+              implied by a balance being the present figure, and "derived" is an
+              implementation detail - the tooltip below already explains it, in
+              full, for anyone who asks.
+
+              So the words go and the explanation stays where it belongs. This is
+              the same shape as dropping "17% used" on the budget card: the
+              label was restating a fact the figure beside it already carried. */}
+          <span className="type-section-label text-muted-foreground">Balance</span>
           {account.is_negative && (
             <TooltipProvider>
               <Tooltip>
@@ -163,7 +194,18 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+      {/* Stacked, not a two-item row. At 165px the label and the figure could
+          not share a line - the row ran past the card's right edge and clipped
+          the figure, which is the worst possible failure for a balance: the
+          number is present in the DOM and absent to the eye.
+
+          `justify-between` is what created it. Two items on one line at half
+          width have no slack, so either the label wraps or the figure is
+          clipped, and there is no width at which both survive. The starting
+          balance is also a secondary figure, so it does not need the primary
+          line - the same reason it is already `figure-inline` while the
+          balance above is `type-ledger`. */}
+      <div className="mt-4 pt-3 border-t border-border flex flex-col gap-0.5 text-xs text-muted-foreground">
         <span>Starting Balance</span>
         <CurrencyDisplay amount={account.initial_balance} className="figure-inline font-medium text-muted-foreground" />
       </div>

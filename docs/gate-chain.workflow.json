@@ -1,0 +1,65 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Gate Chain — money-manager",
+    "output": "docs/gate-chain.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "static", "label": "Static Gates" },
+    { "id": "browser", "label": "Browser Gates" },
+    { "id": "review", "label": "Human Gate", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "declare", "label": "Declare", "fromCol": 0, "toCol": 1 },
+    { "id": "prove", "label": "Prove", "fromCol": 2, "toCol": 4, "variant": "emphasis" },
+    { "id": "land", "label": "Land", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "change",
+    "types",
+    "suite",
+    "typography",
+    "dead_module",
+    "nav",
+    "captures",
+    "land"
+  ],
+  "nodes": [
+    { "id": "change", "lane": "static", "col": 0, "type": "frontend", "label": "Change", "sublabel": "src/ edit" },
+    { "id": "types", "lane": "static", "col": 1, "type": "backend", "label": "gate:types", "sublabel": "tsc --noEmit" },
+    { "id": "suite", "lane": "static", "col": 2, "type": "backend", "label": "npm test", "sublabel": "vitest run", "tag": "364 tests" },
+    { "id": "typography", "lane": "static", "col": 3, "type": "security", "label": "typography", "sublabel": "type + colour", "tag": "28 rules" },
+    { "id": "dead_module", "lane": "static", "col": 4, "type": "security", "label": "dead-module", "sublabel": "unreachable export", "tag": "design" },
+    { "id": "dom", "lane": "browser", "col": 2, "type": "cloud", "label": "gate:dom", "sublabel": "3 widths x 2 themes", "tag": "renders" },
+    { "id": "nav", "lane": "browser", "col": 4, "type": "cloud", "label": "gate:nav", "sublabel": "17 viewport widths", "tag": "renders" },
+    { "id": "captures", "lane": "browser", "col": 5, "type": "external", "label": "gate:captures", "sublabel": "4 pages x 3 viewports", "tag": "evidence" },
+    { "id": "land", "lane": "review", "col": 5, "type": "security", "label": "Commit + push", "sublabel": "full PASS only", "tag": "human gate" },
+    { "id": "render_only", "lane": "review", "col": 4, "width": 124, "type": "messagebus", "label": "Render, don't infer", "sublabel": "green, not rendered", "tag": "twice found" }
+  ],
+  "edges": [
+    { "from": "change", "to": "types" },
+    { "from": "types", "to": "suite", "label": "0 errors" },
+    { "from": "suite", "to": "typography", "label": "364 pass", "variant": "emphasis" },
+    { "from": "typography", "to": "dead_module", "label": "28/28", "variant": "emphasis" },
+    { "from": "dead_module", "to": "nav", "label": "0 dead", "variant": "emphasis" },
+    { "from": "dom", "to": "nav", "label": "PASS", "variant": "emphasis" },
+    { "from": "nav", "to": "captures", "label": "PASS" },
+    { "from": "captures", "to": "land", "label": "inspected", "variant": "emphasis" },
+    { "from": "captures", "to": "render_only", "label": "looks wrong", "variant": "security", "role": "error" },
+    { "from": "render_only", "to": "change", "label": "measure, then fix", "variant": "dashed", "role": "return" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "The Order Is Load-Bearing", "items": [
+      "Static gates first: they name a file and a line",
+      "Browser gates second: only they see the render",
+      "Commit last, on full PASS, never a partial run"
+    ] },
+    { "dot": "rose", "title": "What No Gate Could See", "items": [
+      "A query-only navigation fires no loading.tsx",
+      "A test importing a module keeps it passing forever",
+      "A UTF-8 BOM hid every export from the dead-module rule"
+    ] }
+  ]
+}

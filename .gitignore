@@ -83,3 +83,11 @@ next-env.d.ts
 .impeccable/live/deferred-svelte-component-accepts.json
 .impeccable/live/*.png
 # impeccable-ignore-end
+
+# archify visual-check sidecars: the same call as /verification/evidence/ above.
+# The authored spec and the delivered HTML are tracked; the screenshots, the
+# measurement receipt and the contact sheet are evidence produced by running
+# the check, and they stay untracked.
+docs/*.visual-check.json
+docs/*.visual-check.html
+docs/*.visual-check.*.png

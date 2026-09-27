@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useOptimistic, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, TrendingUp, DollarSign, Wallet, Layers, CalendarRange, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ interface IncomePageClientProps {
   currentMonth: number;
   currentYear: number;
   accounts?: Account[];
-  initialActiveTab: "income" | "bills";
+  initialActiveTab: "income" | "paychecks" | "bills";
   billView?: BillView;
   billsDueBy?: BillsDueBy;
 }
@@ -66,6 +67,10 @@ export function IncomePageClient({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [, startTransition] = useTransition();
+  // Separate from the server-action transition, so saving a paycheck does not
+  // dim the page. This one is only the tab navigation.
+  const [isTabPending, startTabTransition] = useTransition();
+  const router = useRouter();
 
   const [optimisticEntries, addOptimisticEntry] = useOptimistic(
     initialEntries,
@@ -150,7 +155,29 @@ export function IncomePageClient({
         </Button>
       </PageHeader>
 
-      <Tabs defaultValue={initialActiveTab} className="space-y-6">
+      <Tabs
+        value={initialActiveTab}
+        onValueChange={(next) => {
+          // The URL is the source of truth for the tab, the same idiom the
+          // month navigator already uses on every other screen.
+          //
+          // It has to be. Bill data is fetched server-side, and only when the
+          // server sees ?tab=bills - so an uncontrolled Tabs, which changed
+          // client state and left the URL alone, meant clicking "Bills" showed
+          // a panel whose data had never been requested. The only add-bill UI
+          // lives inside that panel, so bills could not be created through the
+          // app at all. A real tab now, not a client-side fiction.
+          startTabTransition(() => {
+            router.replace(next === "income" ? "/income" : `/income?tab=${next}`, {
+              scroll: false,
+            });
+          });
+        }}
+        className={cn(
+          "space-y-6 transition-opacity duration-150",
+          isTabPending && "opacity-55 pointer-events-none"
+        )}
+      >
         <TabsList className="p-1 rounded-xl">
           <TabsTrigger value="income" className="flex items-center gap-1.5 text-xs font-semibold rounded-lg">
             <TrendingUp className="h-4 w-4" /> Log Income
@@ -353,9 +380,23 @@ export function IncomePageClient({
                failed to load - not a user with no bills. An empty array is
                truthy, so someone with genuinely nothing due gets the real UI and
                its own empty state. This is a data-unavailable state, so it says
-               that. */
-            <div className="text-sm text-muted-foreground py-10 text-center">
-              Bills aren&apos;t available right now.
+               that.
+               It also has to be escapable. Reaching this state used to be the
+               normal way to see the tab at all, and it offered no way out - a
+               dead end that looked like a finished screen. Now that the tab is
+               reachable, this branch means a genuine load failure, and a
+               failure the user cannot retry is still a dead end. */
+            <div className="py-10 text-center">
+              <p className="text-sm text-muted-foreground">
+                Bills aren&apos;t available right now.
+              </p>
+              <button
+                type="button"
+                onClick={() => router.refresh()}
+                className="mt-3 cursor-pointer text-xs font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
+              >
+                Try again
+              </button>
             </div>
           )}
         </TabsContent>

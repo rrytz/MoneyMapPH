@@ -19,7 +19,11 @@ export default async function IncomePage({
   if (!user) return null;
 
   const params = await searchParams;
-  const activeTab = params.tab === "bills" ? "bills" : "income";
+  // "paychecks" is a real tab, so it belongs in the URL model alongside
+  // "bills" rather than being folded into the default. Its data is already in
+  // the main Promise.all, so it needs no fetch gate of its own.
+  const activeTab =
+    params.tab === "bills" ? "bills" : params.tab === "paychecks" ? "paychecks" : "income";
   const view = params.view === "all" ? "all" : "month";
 
   const { month, year } = getCurrentMonthYear();

@@ -7,7 +7,7 @@ import { AccountModal } from "@/components/accounts/account-modal";
 import { TransferModal } from "@/components/accounts/transfer-modal";
 import { TransferList } from "@/components/accounts/transfer-list";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
-import { gridTracksFor } from "@/lib/utils/grid-tracks";
+import { gridTracksFor, gridTracksClass } from "@/lib/utils/grid-tracks";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeftRight, Wallet, Info } from "lucide-react";
@@ -38,6 +38,16 @@ export function AccountsClient({
 
   const displayedAccounts = showArchived ? allAccountsWithArchived : initialAccounts;
   const accountTracks = gridTracksFor(displayedAccounts.length, 3);
+  // Mobile gets its own track count, capped at 2, and that cap is the whole
+  // reason this is not `grid-cols-2` at the base.
+  //
+  // A flat `grid-cols-2` would pair the cards on a phone - which is right for
+  // three accounts and wrong for one, where it reopens exactly the hole the
+  // composition arc closed: a 402px card beside a 402px void. Measured, 3 cards
+  // at one track is 609px and at two tracks is 455.6px, so 153.6px saved; but
+  // that saving only exists when there are enough cards to fill a row, and
+  // gridTracksFor is what knows which case this is.
+  const accountMobileTracks = gridTracksClass(gridTracksFor(displayedAccounts.length, 2), "");
 
   function handleCreateAccount() {
     setEditingAccount(null);
@@ -165,7 +175,7 @@ export function AccountsClient({
             </Button>
           </div>
         ) : (
-          <div className={cn("grid grid-cols-1 gap-4 md:grid-cols-2", `lg:grid-cols-${accountTracks}`)}>
+          <div className={cn("grid gap-4 md:grid-cols-2", accountMobileTracks, gridTracksClass(accountTracks, "lg"))}>
             {/* Count-aware tracks. At a fixed lg:grid-cols-3, two accounts left a
                 402px empty column - 97,284 px^2 of hole, which was more dead
                 space than the column slack the /budgets pass just removed. Two

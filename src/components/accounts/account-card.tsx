@@ -4,6 +4,7 @@ import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
+import { accountTone } from "@/lib/utils/account-tone";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,21 +40,46 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
 
   const Icon = getIcon();
 
+  // The GROUND is the type. State does not yield - it takes the figure and the
+  // accent instead, so the two never compete for one surface. A negative
+  // account still shows rose, and the type is carried by the icon and the name,
+  // which makes the ground redundancy rather than the only channel.
+  //
+  // Suppressed on negative and archived cards on purpose: both are states the
+  // reader must not miss, and a coloured ground behind a rose border is two
+  // things asking to be looked at at once.
+  const tone = accountTone(account.type);
+  const showTone = !account.is_negative && !account.is_archived;
+
   return (
-    <div className={`relative rounded-2xl border p-5 transition-all ${
-      account.is_negative
-        ? "border-rose-500/50 bg-rose-500/10 dark:bg-rose-950/20"
-        : account.is_archived
-        ? "border-border bg-card/60 opacity-60"
-        : "border-border bg-card hover:border-border"
-    }`}>
+    <div
+      className={`relative rounded-2xl border p-4 transition-all ${
+        account.is_negative
+          ? "border-rose-500/50 bg-rose-500/10 dark:bg-rose-950/20"
+          : account.is_archived
+            ? "border-border bg-card/60 opacity-60"
+            : "border-border hover:border-border"
+      }`}
+      // 7% over the card surface: a ground, never loud enough to compete with
+      // the balance, which is the figure and this card's whole job. `p-5` also
+      // became `p-4` because the ledger figure is 138.3px against 125px of
+      // content at two-up - it fit the geometry but ate the padding.
+      style={showTone ? { backgroundColor: `${tone.ground}12` } : undefined}
+    >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-md ${
-            account.is_negative
-              ? "bg-rose-500/10 text-rose-400"
-              : "bg-sulpot/10 text-sulpot-deep dark:text-sulpot-bright"
-          }`}>
+          <div
+            className={`p-2.5 rounded-md ${
+              account.is_negative ? "bg-rose-500/10 text-rose-400" : ""
+            }`}
+            // 14% fill behind the icon, so the type reads as a mark on the
+            // card rather than as a second background competing with the ground.
+            style={
+              showTone
+                ? { backgroundColor: `${tone.ground}24`, color: tone.ground }
+                : undefined
+            }
+          >
             <Icon className="h-5 w-5" />
           </div>
           <div>

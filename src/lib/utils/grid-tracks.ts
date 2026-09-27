@@ -53,9 +53,15 @@
  * unrecognised value throws rather than rendering a single column.
  */
 export function gridTracksClass(tracks: number, prefix = "sm"): string {
+  // An EMPTY prefix means the base class, with no breakpoint - which is the
+  // whole difference between a grid that pairs on a phone and one that waits
+  // for 640px. Getting this wrong produced `sm:grid-cols-2` on a 375px
+  // viewport, which renders one column and looks like the rule did not apply.
+  const at = (base: string) => (prefix ? `${prefix}:${base}` : base);
   const literal: Record<number, string> = {
     1: "",
-    2: `${prefix}:grid-cols-2`,
+    2: at("grid-cols-2"),
+    3: at("grid-cols-3"),
   };
   const cls = literal[tracks];
   if (cls === undefined) {

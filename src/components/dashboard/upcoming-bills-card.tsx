@@ -8,6 +8,26 @@ import { ReceiptText, HandCoins, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+/**
+ * The card is a dashboard block, so it is capped rather than unbounded - an
+ * uncapped list would make the page arbitrarily tall and undo the fold budget
+ * the composition pass established.
+ *
+ * The cap used to be silent, which made the header a lying number: it said
+ * "Due through {horizon}" and totalled EVERY item in the window while the list
+ * showed six of them, with nothing saying anything was hidden. The totals are
+ * true facts about the window, so they stay; what was untrue was the implication
+ * that the six rows were all of them. So the header now states how many it is
+ * showing, and the omission is disclosed at the point of the claim rather than
+ * left for the reader to infer from arithmetic that does not add up.
+ *
+ * Disclosing rather than removing the cap, because that stays correct whether
+ * or not a dedicated timeline screen ever lands. Removing the cap would fix this
+ * card and be undone by the screen; and if the screen arrives, this card still
+ * has to be honest on its own.
+ */
+const UPCOMING_LIMIT = 6;
+
 interface UpcomingBillsCardProps {
   billsDueBy: BillsDueBy;
   debts: Debt[];
@@ -54,9 +74,11 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
       overdue: isDebtOverdue(r.debt, r.paid, todayIso),
     }));
 
-  const items = [...billItems, ...debtItems]
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
-    .slice(0, 6);
+  const allItems = [...billItems, ...debtItems].sort((a, b) =>
+    a.dueDate.localeCompare(b.dueDate)
+  );
+  const items = allItems.slice(0, UPCOMING_LIMIT);
+  const hiddenCount = allItems.length - items.length;
 
   const billTotal = billItems.reduce((sum, item) => sum + item.amount, 0);
   const debtTotal = debtItems.reduce((sum, item) => sum + item.amount, 0);
@@ -67,7 +89,16 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
         <div>
           <FintechCardTitle>Upcoming Bills &amp; Debt Payments</FintechCardTitle>
           <p className="text-xs text-muted-foreground">
-            Due through {formatDate(billsDueBy.horizonDate, "MMM d")} ·{" "}
+            Due through {formatDate(billsDueBy.horizonDate, "MMM d")}
+            {hiddenCount > 0 && (
+              <>
+                {" · showing "}
+                <span className="font-semibold text-foreground">
+                  {items.length} of {allItems.length}
+                </span>
+              </>
+            )}
+            {" · "}
             <CurrencyDisplay amount={billTotal} className="figure-inline" /> bills + <CurrencyDisplay amount={debtTotal} className="figure-inline" /> debts
           </p>
         </div>

@@ -346,8 +346,16 @@ export function IncomePageClient({
               />
             </div>
           ) : (
+            /* This branch is the bills tab OF the income screen, so "load your
+               bills from the Income tab" pointed at the tab already open. Worse,
+               it was the wrong message for the condition: the branch runs when
+               billView / billsDueBy / safeToSpend is missing, which is data that
+               failed to load - not a user with no bills. An empty array is
+               truthy, so someone with genuinely nothing due gets the real UI and
+               its own empty state. This is a data-unavailable state, so it says
+               that. */
             <div className="text-sm text-muted-foreground py-10 text-center">
-              Load your bills from the Income tab.
+              Bills aren&apos;t available right now.
             </div>
           )}
         </TabsContent>

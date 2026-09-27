@@ -140,8 +140,23 @@ export default async function DashboardPage() {
           ledger-figure weight, putting two loud figures on one surface. */}
       <AttentionStrip safeToSpend={safeToSpend} />
 
-      {/* Attention — rendered only when something is actually due. */}
-      {billsDueBy.occurrences.length > 0 && (
+      {/* Whether the card renders is "do I have bills or debts at all", NOT
+          "is something due right now". Those are different predicates, and only
+          the second one makes the empty state dead:
+
+            occurrences.length > 0  implies  billItems.length > 0
+                                     implies  items.length > 0
+
+          so a gate on occurrences alone guaranteed the card could never reach
+          its own "Nothing due" branch. Worse, that gate counted BILLS only,
+          while the card is titled "Bills & Debt Payments" and is handed the
+          debts - so an unpaid debt falling due with no active bill was
+          invisible. A paused bill and a real obligation cancelled each other.
+
+          Gating on existence also makes the empty branch reachable: a debt that
+          is fully paid off, or overdue (the card filters both out of
+          debtItems), renders the card and lets it say "Nothing due". */}
+      {(billsDueBy.occurrences.length > 0 || debtView.debts.length > 0) && (
         <UpcomingBillsCard
           billsDueBy={billsDueBy}
           debts={debtView.debts}

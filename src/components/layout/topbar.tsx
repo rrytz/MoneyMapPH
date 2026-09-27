@@ -87,11 +87,21 @@ export function BalanceReadout({
                not know — the same violation the tide gauge avoids. */
             <span className="text-sm font-semibold leading-none text-ink-faint">&mdash;</span>
           )}
-          <span className="type-measurement text-[10px] text-ink-faint">
+          {/* Hidden below sm. At 320px the header has ~131px of content width
+              after the logo, four circular controls and the safe-area gutter -
+              and "₱3,300.00" alone spends most of it. The count was wrapping to
+              two lines and the second line ran into the Accounts button. It is
+              also the most redundant thing here: the button beside it opens the
+              account list that answers the same question. The balance is the
+              identity and stays; the meter is the signal and stays. */}
+          <span className="type-measurement hidden text-[10px] text-ink-faint sm:inline">
             {loaded ? `${accountCount} ${accountCount === 1 ? "account" : "accounts"}` : ""}
           </span>
         </div>
-        <div className="mt-1.5 h-1 w-28 overflow-hidden rounded-full bg-agosto-tint">
+        {/* w-full max-w-28 rather than a fixed w-28: the fixed width overflowed
+            its own min-w-0 parent on a phone, where the cap never applies but
+            the container is already narrower than 112px. */}
+        <div className="mt-1.5 h-1 w-full max-w-28 overflow-hidden rounded-full bg-agosto-tint">
           {measured && (
             <div
               className="h-full rounded-full bg-sulpot"
@@ -159,9 +169,9 @@ export function Topbar({
         {/* Account switcher — accounts stay reachable without a page. */}
         {accounts.length > 0 && (
           <DropdownMenu>
-            // One trigger, two densities. The label is the whole cost on a
-            // phone, so it is dropped below lg rather than the control being
-            // duplicated - the dropdown and its items are identical either way.
+            {/* One trigger, two densities. The label is the whole cost on a
+                phone, so it is dropped below lg rather than the control being
+                duplicated - the dropdown and its items are identical either way. */}
             <DropdownMenuTrigger
               className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-border px-2.5 text-xs font-medium text-ink transition-colors hover:bg-inset lg:rounded-lg lg:px-3"
               aria-label="Accounts"

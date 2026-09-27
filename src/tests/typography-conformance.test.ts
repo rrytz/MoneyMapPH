@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import ts from "typescript";
 
 const ROOT = process.cwd();
 const SRC = join(ROOT, "src");
@@ -838,5 +839,104 @@ describe("S5c typography hierarchy detector", () => {
     for (const file of LOGO_CALLER_FILES) {
       expect(read(file), `${file} still has a tagline contract`).not.toContain("showTagline");
     }
+  });
+});
+
+/**
+ * Rule 29 — the SILENT member of the JSX-comment family.
+ *
+ * The rule above (4244029) catches the loud half: a JSX comment container in
+ * expression position is a parse error, so tsc names it immediately, if
+ * misleadingly.
+ *
+ * This is the other half, and it is the dangerous one. A slash-slash or
+ * slash-star comment written where JSX expects CHILDREN is not a comment at
+ * all - it is a JsxText node, which is legal, renders as visible text, and
+ * raises nothing anywhere. No tsc error, no lint error, no test failure. A
+ * three-line comment about why a label is hidden below lg appeared on the
+ * mobile dashboard, in the top bar, in the user's face.
+ *
+ * It shipped in this arc twice, and the second time it was written by the same
+ * hand that had already written the rule for the first - which is the argument
+ * for a gate rather than for care. The first instance was caught by reading; the
+ * second was caught by the user, from a screenshot, after the suite was green.
+ *
+ * The AST is required. A slash-slash line in children is indistinguishable from
+ * intentional prose by regex - these files legitimately contain sentences - and
+ * only the parse tree knows the node is JsxText rather than a comment. A regex
+ * rule here would either miss the bug or fire on correct copy, and a rule that
+ * fires on correct code gets allowlisted, which is the escape hatch this project
+ * keeps removing.
+ *
+ * Note for the next editor: this doc block once contained a literal JSX comment
+ * container, whose closing marker terminated the block comment early and made
+ * the file unparseable. The family is more adhesive than it looks.
+ */
+function findRenderedComments(source: string): Array<{ line: number; text: string }> {
+  const sf = ts.createSourceFile(
+    "scan.tsx",
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const hits: Array<{ line: number; text: string }> = [];
+  const visit = (node: ts.Node) => {
+    if (ts.isJsxText(node)) {
+      const text = node.getText(sf);
+      if (/^\s*\/\//.test(text) || /^\s*\/\*/.test(text)) {
+        hits.push({
+          line: sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1,
+          text: text.replace(/\s+/g, " ").trim().slice(0, 60),
+        });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return hits;
+}
+
+describe("rendered comment text", () => {
+  it("never renders a comment as JSX children", () => {
+    const offenders: string[] = [];
+    for (const file of TSX_FILES) {
+      for (const hit of findRenderedComments(read(rel(file)))) {
+        offenders.push(
+          `${rel(file)}:${hit.line} — this comment is rendered as visible text. ` +
+            `Use {/* ... */} in children position, or move it above the element. ` +
+            `Found: "${hit.text}"`
+        );
+      }
+    }
+    expect(
+      offenders,
+      `Comments rendering as visible page text:\n  ${offenders.join("\n  ")}`
+    ).toEqual([]);
+  });
+
+  it("catches a rendered comment and does not flag a real one", () => {
+    // Pinned in both directions, because a rule that has only ever been silent
+    // is indistinguishable from a broken rule. The planted forms are the exact
+    // shapes that reached the screen.
+    const children = (body: string) =>
+      `export function D() {\n  return (\n    <div>\n      <span>\n${body}\n        <b>hi</b>\n      </span>\n    </div>\n  );\n}\n`;
+
+    // The bug: a // comment between two elements, where JSX renders it.
+    expect(findRenderedComments(children("        // dropped below lg")).length).toBe(1);
+    expect(findRenderedComments(children("        /* dropped below lg */")).length).toBe(1);
+    // The fix, and ordinary prose, must both stay silent.
+    expect(findRenderedComments(children("        {/* dropped below lg */}")).length).toBe(0);
+    expect(findRenderedComments(children("        Assets minus liabilities")).length).toBe(0);
+    // A URL mid-sentence is prose and stays silent; a line merely STARTING with
+    // // is not, even when it looks like one. In children position there is no
+    // such thing as a // that means something else.
+    expect(findRenderedComments(children("        See https://x.dev for terms")).length).toBe(0);
+    expect(findRenderedComments(children("        // a url in prose: see https://x.dev")).length).toBe(1);
+
+    // A // comment in EXPRESSION position is a real comment and must not be
+    // flagged - that is the shape the other rule in this family exists for.
+    const expression = `export function D({ ok }: { ok: boolean }) {\n  return (\n    <div>\n      {ok && (\n        // a genuine comment inside an expression\n        <b>hi</b>\n      )}\n    </div>\n  );\n}\n`;
+    expect(findRenderedComments(expression).length).toBe(0);
   });
 });

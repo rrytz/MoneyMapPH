@@ -8,6 +8,8 @@ export type BillInput = {
   expected_amount?: string | null;
   category_id?: string | null;
   day_of_month?: number | null;
+  /** One-time bills only; null means the bill recurs on day_of_month. */
+  due_date?: string | null;
   notes?: string | null;
   active?: boolean;
 };
@@ -35,6 +37,11 @@ export async function createBill(
       expected_amount: input.expected_amount ?? null,
       category_id: input.category_id ?? null,
       day_of_month: input.day_of_month ?? null,
+      // A one-time bill carries a date and no day; a recurring bill carries a
+      // day and no date. Writing exactly what the form's toggle says means the
+      // toggle is the single source of truth for which kind this is, and a bill
+      // can never end up scheduled both ways.
+      due_date: input.due_date ?? null,
       notes: input.notes ?? null,
       active: input.active ?? true,
     })

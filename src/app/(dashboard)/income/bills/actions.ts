@@ -87,13 +87,19 @@ export async function createBillAction(input: z.infer<typeof billInputSchema>): 
   if (!user) return { error: "Not signed in" };
 
   const dayOfMonth = parsed.data.day_of_month === "" ? null : parsed.data.day_of_month;
+  // One-time bills carry a date and no day; recurring bills the reverse. Both
+  // are written explicitly rather than left to whichever field the form
+  // happened to send, so switching the toggle actually moves the bill between
+  // the two kinds instead of leaving a stale schedule behind.
+  const dueDate = parsed.data.due_date === "" ? null : parsed.data.due_date;
 
   try {
     await createBill(supabase, user.id, {
       name: parsed.data.name,
       expected_amount: parsed.data.expected_amount ? String(parsed.data.expected_amount) : null,
       category_id: parsed.data.category_id || null,
-      day_of_month: dayOfMonth,
+      day_of_month: dueDate ? null : dayOfMonth,
+      due_date: dueDate,
       notes: parsed.data.notes || null,
     });
   } catch {
@@ -117,11 +123,15 @@ export async function updateBillAction(
   if (!user) return { error: "Not signed in" };
 
   try {
+    // Same rule as create: a date means one-time, and the day is cleared so the
+    // two schedules can never both be set on one bill.
+    const editDueDate = parsed.data.due_date === "" ? null : parsed.data.due_date;
     const patch = {
       name: parsed.data.name,
       expected_amount: parsed.data.expected_amount ? String(parsed.data.expected_amount) : null,
       category_id: parsed.data.category_id || null,
-      day_of_month: parsed.data.day_of_month === "" ? null : parsed.data.day_of_month,
+      day_of_month: editDueDate ? null : parsed.data.day_of_month === "" ? null : parsed.data.day_of_month,
+      due_date: editDueDate,
       notes: parsed.data.notes || null,
       ...(input.active !== undefined ? { active: input.active } : {}),
     };

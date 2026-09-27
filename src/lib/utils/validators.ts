@@ -134,8 +134,28 @@ export const billInputSchema = z.object({
   expected_amount: z.coerce.number().positive("Amount must be greater than 0").optional().or(z.literal("")),
   category_id: z.string().uuid("Select a category").optional().or(z.literal("")),
   day_of_month: z.coerce.number().int().min(1, "Day must be between 1 and 31").max(31, "Day must be between 1 and 31").optional().or(z.literal("")),
+  /**
+   * One-time bills only. A bill may legitimately have NEITHER a date nor a day
+   * - that is an unfilled onboarding template - but never both, which the
+   * refinement below enforces.
+   */
+  due_date: z.string().min(1, "Pick a date").optional().or(z.literal("")),
   notes: z.string().max(500, "Notes must be 500 characters or less").optional().or(z.literal("")),
-});
+})
+.refine(
+  // NOT "a bill must have a schedule". A schedule-less bill is a legitimate
+  // state: onboarding seeds ten bill templates with no day, and "not filled in
+  // yet" is exactly what they are - off the money surfaces, and refused by
+  // pay_bill as bill_not_ready. Requiring a schedule here would have made that
+  // state uncreatable and broken onboarding outright.
+  //
+  // The real invariant is that a bill is scheduled ONE way. Both set at once
+  // would mean a specific date and a monthly recurrence fighting over the same
+  // bill, and the service already nulls one of them; this is the check that
+  // says so in the one place a caller can see it.
+  (b) => !(b.due_date != null && b.day_of_month != null),
+  "A bill is either a one-time date or a monthly repeat, not both"
+);
 
 export const payBillSchema = z.object({
   billId: z.string().uuid("Select a bill"),

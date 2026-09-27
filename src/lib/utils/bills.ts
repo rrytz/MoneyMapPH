@@ -7,11 +7,33 @@ import { getManilaNow, toISODateString } from "@/lib/utils/date";
 import { lastDayOfMonth } from "date-fns";
 
 export function isBillOnMoneySurfaces(
-  bill: Pick<Bill, "expected_amount" | "day_of_month" | "active">
+  bill: Pick<Bill, "expected_amount" | "day_of_month" | "due_date" | "active">
 ): boolean {
-  return bill.expected_amount != null && bill.day_of_month != null && bill.active;
+  // A bill is on the money surfaces if it has an amount, is active, and has SOME
+  // schedule. Before one-time bills the only schedule was day_of_month, and a
+  // one-time bill would have been rejected here for lacking it - creatable and
+  // invisible at the same time.
+  if (bill.expected_amount == null || !bill.active) return false;
+  return bill.due_date != null || bill.day_of_month != null;
 }
 
+/** A bill with a specific date, as opposed to one that recurs on a day. */
+export function isOneTimeBill(
+  bill: Pick<Bill, "due_date" | "day_of_month">
+): boolean {
+  return bill.due_date != null;
+}
+
+/**
+ * The due date for a RECURRING bill in a given month.
+ *
+ * Only ever called with a number. `getBillDueDate(null, ...)` does not fail
+ * loudly - `null > last` is false, and `new Date(y, m, null)` is the LAST DAY
+ * OF THE PREVIOUS MONTH, so a null would silently produce a date in the wrong
+ * month. The clamp below guards a day that is too LARGE for a short month; it
+ * does not guard a missing one. The one-time path in listBillOccurrences
+ * therefore branches BEFORE any call here, and never casts a null to a number.
+ */
 export function getBillDueDate(dayOfMonth: number, year: number, month: number): Date {
   const last = lastDayOfMonth(new Date(year, month, 1));
   const candidate = new Date(year, month, dayOfMonth);
@@ -38,6 +60,18 @@ export function listBillOccurrences(bills: Bill[], from: Date, to: Date): BillOc
   const maxMonth = to.getMonth();
 
   for (const bill of eligible) {
+    // ONE-TIME FIRST, and this branch deliberately comes before any
+    // day_of_month is read or cast. A one-time bill has no day_of_month by
+    // design, and passing null into getBillDueDate would not throw - it would
+    // return the last day of the PREVIOUS month and quietly put the bill in
+    // the wrong place. So the recurrence loop is only ever reached by a bill
+    // that actually has a day.
+    if (isOneTimeBill(bill)) {
+      const oneTime = new Date(`${bill.due_date}T00:00:00`);
+      if (oneTime >= from && oneTime <= to) result.push(toOccurrence(bill, oneTime));
+      continue;
+    }
+
     const day = bill.day_of_month as number;
     let y = minYear;
     let m = minMonth;

@@ -13,6 +13,7 @@ function billRow(over: Partial<Bill>): Bill {
     expected_amount: "12000",
     category_id: null,
     day_of_month: 1,
+    due_date: null,
     active: true,
     notes: null,
     created_at: "x",

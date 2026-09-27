@@ -4,7 +4,7 @@ import type { Bill } from "@/lib/types";
 
 const base = (over: Partial<Bill> = {}): Bill => ({
   id: "b1", user_id: "u1", name: "Rent", expected_amount: "12000", category_id: null,
-  day_of_month: 1, active: true, notes: null, created_at: "x", updated_at: "x", ...over,
+  day_of_month: 1, due_date: null, active: true, notes: null, created_at: "x", updated_at: "x", ...over,
 });
 
 describe("billProfile", () => {

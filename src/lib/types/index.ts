@@ -328,6 +328,15 @@ export interface Bill {
   expected_amount: string | null;
   category_id: string | null;
   day_of_month: number | null;
+  /**
+   * One-time bills only. NULL means the bill recurs on day_of_month.
+   *
+   * A nullable date is the entire discriminator, with no frequency enum: "has a
+   * specific date" and "recurs on a day" are the same two states the model
+   * already had, with the first one simply unexpressible before. NULL is
+   * precisely what "recurring" already meant, so no backfill is needed.
+   */
+  due_date: string | null;
   active: boolean;
   notes: string | null;
   created_at: string;

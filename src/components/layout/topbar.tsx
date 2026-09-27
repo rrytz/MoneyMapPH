@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sun, Moon, Monitor, LogOut, Search, Wallet, Settings } from "lucide-react";
 import { NotificationsDrawer } from "@/components/dashboard/notifications-drawer";
 import { Logo } from "@/components/shared/logo";
-import { TideMark } from "@/components/shared/tide-gauge";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
 import type { AccountWithBalance, Profile, SafeToSpendStatus } from "@/lib/types";
@@ -69,8 +68,7 @@ export function BalanceReadout({
   const ratio = measured ? Math.max(0, Math.min(1, remaining / pool)) : 0;
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
-      <TideMark className={cn("h-4 w-4 shrink-0", loaded ? "text-sulpot" : "text-ink-faint")} />
+    <div className={cn("flex items-center", className)}>
       <div className="min-w-0">
         <div className="flex items-baseline gap-2">
           {loaded ? (
@@ -153,7 +151,14 @@ export function Topbar({
     // viewport - to say one word. Desktop is untouched.
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-4 border-b border-border bg-paper/90 px-4 backdrop-blur-md sm:px-6 lg:h-16">
       <Link href="/dashboard" className="shrink-0" aria-label="MoneyMap PH home">
-        <Logo iconOnly size="sm" />
+        {/* The one brand mark. It was rendering twice - this Logo, and a second
+            TideMark inside the balance readout - at 24px and 16px, from the same
+            commit. The mark now carries the readout's loaded tone instead, so a
+            single element does four jobs: linked, aria-labelled, sized, and
+            faint until the balance exists. That upholds "no surface may imply
+            knowledge it lacks" from the one place a reader looks first, and it
+            reclaims 28px at 320px, where the readout had only 80px to work with. */}
+        <Logo iconOnly size="sm" tone={loaded ? "default" : "faint"} />
       </Link>
 
       {/* The shell anchor — present on every page. */}

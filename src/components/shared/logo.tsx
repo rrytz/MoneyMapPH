@@ -5,7 +5,7 @@ interface LogoProps {
   className?: string;
   iconOnly?: boolean;
   size?: "sm" | "md" | "lg" | "xl";
-  tone?: "default" | "light";
+  tone?: "default" | "light" | "faint";
 }
 
 export function Logo({
@@ -30,7 +30,12 @@ export function Logo({
 
   const wordmarkBase = tone === "light" ? "text-white" : "text-foreground";
   const accentBase = tone === "light" ? "text-sulpot-tint" : "text-sulpot-deep dark:text-sulpot-bright";
-  const markTone = tone === "light" ? "text-sulpot-bright" : "text-sulpot";
+  // "faint" exists for the topbar, where the mark had to mirror the balance's
+  // loaded state. It was a second TideMark inside the readout doing that job;
+  // now the one mark carries it, so the bar states nothing before the data
+  // exists. No other call site passes a tone, so this is purely additive.
+  const markTone =
+    tone === "light" ? "text-sulpot-bright" : tone === "faint" ? "text-ink-faint" : "text-sulpot";
 
   return (
     <div

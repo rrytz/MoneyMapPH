@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { billSchedule, type BillDraft } from "@/lib/utils/bill-draft";
 import type { ExpenseCategory } from "@/lib/types";
 
@@ -93,14 +94,31 @@ export function BillForm({
             // what is sent, and it will not send both.
             set({ repeats: !draft.repeats })
           }
-          className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+          className={cn(
+            "relative h-5 w-9 shrink-0 rounded-full transition-colors",
             draft.repeats ? "bg-sulpot" : "bg-muted"
-          }`}
+          )}
         >
+          {/* The knob is inset by 0.5 (0.125rem) on BOTH sides, expressed as
+              left-0.5 / right-0.5 rather than as a computed offset.
+
+              It was left-[18px] before, which is the same shape of bug as the
+              ones this feature keeps producing: a hardcoded px offset sitting
+              next to rem-sized geometry. The track is w-9 (2.25rem) and the
+              knob is w-4 (1rem), so at this project's 15px root they measure
+              33.75px and 15px - and 18 + 15 = 33 left 0.75px of inset instead
+              of 1.88px, so the knob sat flush against the edge and read as
+              overflowing. Letting the two sides of the box do the arithmetic
+              is correct at any root size, and needs no magic number.
+
+              cn() rather than a template literal, so twMerge resolves the
+              left/right pair instead of shipping both and leaving stylesheet
+              order to arbitrate which one wins. */}
           <span
-            className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-[left] ${
-              draft.repeats ? "left-[18px]" : "left-0.5"
-            }`}
+            className={cn(
+              "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-[left]",
+              draft.repeats ? "right-0.5" : "left-0.5"
+            )}
           />
         </button>
       </div>

@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { buildCalendarCells } from "@/lib/utils/calendar-cells";
-import { isOneTimeBill, visibleCalendarOccurrences } from "@/lib/utils/bills";
+import { isOneTimeBill, listBillOccurrences, visibleCalendarOccurrences } from "@/lib/utils/bills";
 import { billDraftForDate, type BillDraft } from "@/lib/utils/bill-draft";
 import { formatDate } from "@/lib/utils/date";
 import { cn } from "@/lib/utils";
@@ -60,11 +61,31 @@ export function MonthCalendar({
   const oneTimeIds = new Set(bills.filter(isOneTimeBill).map((b) => b.id));
   const paidKeys = new Set(payments.map((p) => `${p.bill_id}|${p.due_date}`));
 
+  // OCCURRENCES FOR THE MONTH BEING VIEWED, not the month the page was served.
+  //
+  // `occurrences` arrives as a server prop fetched by getBillView for the
+  // page's INITIAL month, and nothing refetched it when viewMonth changed. So
+  // the header and the grid moved but the data did not: October showed
+  // September's grid with September's bills, and November and December showed
+  // nothing at all. That last part is what identifies the cause - a month-index
+  // bug would have shifted the data, so November would have carried October's
+  // bills. Empty is not shifted.
+  //
+  // bills and payments are both unscoped (every bill, every payment, all time),
+  // and listBillOccurrences is the same pure function the server used, so the
+  // viewed month is derived here with no refetch and no duplicated logic. The
+  // prop is now unused by this component.
+  const monthOccurrences = useMemo(() => {
+    const from = startOfMonth(new Date(viewYear, viewMonth, 1));
+    const to = endOfMonth(new Date(viewYear, viewMonth, 1));
+    return listBillOccurrences(bills, from, to);
+  }, [bills, viewYear, viewMonth]);
+
   // A PAID one-time bill leaves the calendar, and a paid recurring bill keeps
   // its tick. The rule and its two directions live in visibleCalendarOccurrences
   // so they can be pinned in tests; the payment record survives in the Paid
   // list either way.
-  const visibleOccurrences = visibleCalendarOccurrences(occurrences, oneTimeIds, paidKeys);
+  const visibleOccurrences = visibleCalendarOccurrences(monthOccurrences, oneTimeIds, paidKeys);
 
   const cells = buildCalendarCells(viewYear, viewMonth, visibleOccurrences, payments, todayISO);
 

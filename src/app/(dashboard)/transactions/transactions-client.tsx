@@ -23,6 +23,7 @@ import { FileText, History } from "lucide-react";
 import { SummaryView } from "./summary-view";
 import { formatDate, getMonthDateRange } from "@/lib/utils/date";
 import { FilterPills } from "@/components/shared/filter-pills";
+import { RecordList, RecordRow, recordPrimaryLabel } from "@/components/shared/record-list";
 import type { UnifiedTransaction, ExpenseCategory, IncomeSource, MonthlySummary, BudgetStatus, MonthlySnapshot } from "@/lib/types";
 
 interface TransactionsClientProps {
@@ -315,12 +316,61 @@ export function TransactionsClient({
           <FintechCardTitle>Filtered Results ({totalItems})</FintechCardTitle>
           <span className="text-xs text-muted-foreground">Showing logs based on filter criteria</span>
         </FintechCardHeader>
-        <FintechCardContent className="p-0 overflow-x-auto">
+        <FintechCardContent className="p-0">
           {paginated.length === 0 ? (
+            /* The empty state is shared by both presentations, so filtering to
+               zero reads the same on a phone as on a desk - and it is the state
+               most likely to be reached on mobile, where the filter controls sit
+               above a short list. */
             <p className="text-xs text-muted-foreground text-center py-10 italic">
               No matching records found. Try modifying filter criteria.
             </p>
           ) : (
+            <>
+              {/* PHONE: a list. Desktop: the table under it, unchanged. The
+                  amount leads because it was the column you had to scroll
+                  sideways to find, and a five-column table at 375px is the
+                  shrunken desktop this is meant to stop being. */}
+              <RecordList>
+                {paginated.map((tx) => {
+                  const isIncome = tx.type === "income";
+                  return (
+                    <RecordRow
+                      key={tx.id}
+                      icon={tx.categoryIcon}
+                      primary={recordPrimaryLabel(tx)}
+                      badge={
+                        <Badge
+                          variant={isIncome ? "income" : "expense"}
+                          className="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase"
+                        >
+                          {tx.type}
+                        </Badge>
+                      }
+                      secondary={
+                        <>
+                          {formatDate(tx.date, "MMM dd")} ·{" "}
+                          {tx.categoryName || (isIncome ? "Income" : "Expense")}
+                          {tx.notes ? ` · ${tx.notes}` : ""}
+                        </>
+                      }
+                      amountTone={isIncome ? "income" : "expense"}
+                      amount={
+                        <>
+                          {isIncome ? "+" : "-"}
+                          <CurrencyDisplay
+                            amount={tx.amount}
+                            className="figure-inline inline font-bold"
+                          />
+                        </>
+                      }
+                    />
+                  );
+                })}
+              </RecordList>
+
+              <div className="hidden lg:block">
+                <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-border bg-muted/30 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
@@ -375,6 +425,9 @@ export function TransactionsClient({
                 })}
               </tbody>
             </table>
+                </div>
+              </div>
+            </>
           )}
 
           {totalPages > 1 && (

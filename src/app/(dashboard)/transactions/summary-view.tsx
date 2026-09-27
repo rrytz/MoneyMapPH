@@ -25,6 +25,7 @@ import { CategoryIcon } from "@/components/shared/category-icon";
 import { resolveCategoryColor } from "@/lib/categories/color-map";
 import { formatCurrency } from "@/lib/utils/currency";
 import { getMonthName } from "@/lib/utils/date";
+import { RecordList, RecordRow, recordPrimaryLabel } from "@/components/shared/record-list";
 import type { MonthlySummary, BudgetStatus, ExpenseCategory, MonthlySnapshot } from "@/lib/types";
 
 interface SummaryViewProps {
@@ -231,12 +232,50 @@ export function SummaryView({
             <FintechCardTitle>Budget Variance Analysis</FintechCardTitle>
             <p className="text-xs text-muted-foreground">Target ceilings vs real spent amounts</p>
           </FintechCardHeader>
-          <FintechCardContent className="p-0 overflow-x-auto flex-1">
+          <FintechCardContent className="p-0 flex-1">
             {budgetStatuses.length === 0 ? (
               <p className="text-xs text-muted-foreground py-10 text-center italic">
                 No active budget configured for this calendar month. Set up target limits on the Budgets page.
               </p>
             ) : (
+              <>
+                {/* PHONE: the same list idiom as the ledger above. The variance
+                    leads, because Variance and Status were the last two columns
+                    and Variance is the number this table exists to answer. */}
+                <RecordList>
+                  {budgetStatuses.map((b) => (
+                    <RecordRow
+                      key={b.categoryId}
+                      icon={b.categoryIcon}
+                      primary={recordPrimaryLabel({ categoryName: b.categoryName })}
+                      badge={
+                        b.status === "under" ? (
+                          <Badge variant="income" className="shrink-0 text-[10px]">On Track</Badge>
+                        ) : b.status === "near" ? (
+                          <Badge variant="warning" className="shrink-0 text-[10px]">Watch</Badge>
+                        ) : (
+                          <Badge variant="expense" className="shrink-0 text-[10px]">Over Budget</Badge>
+                        )
+                      }
+                      secondary={
+                        <>
+                          Budgeted <CurrencyDisplay amount={b.budgeted} className="figure-inline" /> · spent{" "}
+                          <CurrencyDisplay amount={b.spent} className="figure-inline" />
+                        </>
+                      }
+                      amountTone={b.remaining >= 0 ? "income" : "expense"}
+                      amount={
+                        <>
+                          {b.remaining >= 0 ? "+" : ""}
+                          <CurrencyDisplay amount={b.remaining} className="figure-inline" />
+                        </>
+                      }
+                    />
+                  ))}
+                </RecordList>
+
+                <div className="hidden lg:block">
+                <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-border bg-muted/30 text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
@@ -279,6 +318,9 @@ export function SummaryView({
                   ))}
                 </tbody>
               </table>
+                </div>
+              </div>
+            </>
             )}
           </FintechCardContent>
         </FintechCard>

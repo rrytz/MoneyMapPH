@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, History } from "lucide-react";
 import { SummaryView } from "./summary-view";
 import { formatDate, getMonthDateRange } from "@/lib/utils/date";
+import { FilterPills } from "@/components/shared/filter-pills";
 import type { UnifiedTransaction, ExpenseCategory, IncomeSource, MonthlySummary, BudgetStatus, MonthlySnapshot } from "@/lib/types";
 
 interface TransactionsClientProps {
@@ -188,7 +189,34 @@ export function TransactionsClient({
       {/* Filter Bar */}
       <FintechCard>
         <FintechCardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+          {/* Type is a closed set of three, so it is a row of visible pills
+              rather than a dropdown - one tap instead of two, and the current
+              choice is legible without opening anything. The category filter
+              below it stays a Select: that set is user-defined and unbounded,
+              and a scroller of forty pills would read as equivalent to a
+              dropdown of forty items when it is not.
+
+              This is a restyle, not a capability: the same three values, the same
+              state, the same filter. The cascade is preserved deliberately -
+              narrowing to Income makes expense categories inapplicable, so the
+              category filter resets rather than offering choices that cannot
+              apply. */}
+          <FilterPills
+            label="Filter by transaction type"
+            value={type}
+            onChange={(val) => {
+              setType(val as "all" | "income" | "expense");
+              setFilterCategory("all");
+              setCurrentPage(1);
+            }}
+            options={[
+              { value: "all", label: "All" },
+              { value: "income", label: "Income" },
+              { value: "expense", label: "Expenses" },
+            ]}
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -201,24 +229,6 @@ export function TransactionsClient({
                 className="pl-9.5 h-10 rounded-xl bg-card border-border text-xs"
               />
             </div>
-
-            <Select
-              value={type}
-              onValueChange={(val) => {
-                setType((val || "all") as "all" | "income" | "expense");
-                setFilterCategory("all");
-                setCurrentPage(1);
-              }}
-            >
-              <SelectTrigger className="h-10 rounded-xl bg-card border-border text-xs">
-                <SelectValue placeholder="All Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="income">Income Only</SelectItem>
-                <SelectItem value="expense">Expenses Only</SelectItem>
-              </SelectContent>
-            </Select>
 
             <Select
               value={filterCategory}

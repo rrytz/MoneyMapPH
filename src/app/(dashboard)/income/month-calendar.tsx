@@ -8,9 +8,9 @@ import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { buildCalendarCells } from "@/lib/utils/calendar-cells";
-import { isOneTimeBill, listBillOccurrences, visibleCalendarOccurrences } from "@/lib/utils/bills";
+import { getBillDueDate, isOneTimeBill, listBillOccurrences, visibleCalendarOccurrences } from "@/lib/utils/bills";
 import { billDraftForDate, type BillDraft } from "@/lib/utils/bill-draft";
-import { formatDate } from "@/lib/utils/date";
+import { formatDate, toISODateString } from "@/lib/utils/date";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { PayBillForm } from "./pay-bill-form";
@@ -158,11 +158,63 @@ export function MonthCalendar({
     if (back) {
       // After the dialog has actually unmounted, or the element is still
       // inside an inert subtree and focus() is a no-op.
-      requestAnimationFrame(() => dayRefs.current.get(back)?.focus());
+      requestAnimationFrame(() => focusDayOrFallback(back));
     }
   };
 
+  /**
+   * Focus the day we came from - or, if the view moved while the sheet was
+   * open, the best cell that still exists.
+   *
+   * Opening a padding day navigates to that day's month, so the cell that
+   * opened the sheet may not exist in the grid we return to: August 31 is a
+   * leading cell in September, but October's grid starts September 28 and has
+   * no August 31 at all. Without a fallback, focus would land on <body> and
+   * the grid would be unreachable again.
+   */
+  const focusDayOrFallback = (iso: string) => {
+    const exact = dayRefs.current.get(iso);
+    if (exact) {
+      exact.focus();
+      return;
+    }
+    const dayOfMonth = new Date(`${iso}T00:00:00`).getDate();
+    // getBillDueDate clamps, so a 31st lands on the 30th in a short month
+    // instead of rolling into the next one.
+    const sameDay = toISODateString(getBillDueDate(dayOfMonth, viewYear, viewMonth));
+    const clamped = dayRefs.current.get(sameDay);
+    if (clamped) {
+      setActiveDate(sameDay);
+      clamped.focus();
+      return;
+    }
+    const first = cells.find((c) => c.isInMonth)?.date;
+    if (first) {
+      setActiveDate(first);
+      dayRefs.current.get(first)?.focus();
+    }
+  };
+
+  /**
+   * Activate a day: show the month that day belongs to, and open the form for
+   * it.
+   *
+   * A padding day is a REAL date that this month does not display, and every
+   * month grid treats it as such - Google and Apple both move the view to that
+   * month when you click one. Creating the bill without moving would leave the
+   * calendar pointing at a different month than the bill the user just made,
+   * and the dimmed cell implies "a day in THIS month" while meaning another.
+   *
+   * Doing both - navigate AND open - means the user gets the bill they came for
+   * and ends up looking at the month it lives in, so the result is visible in
+   * context rather than one navigation away.
+   */
   const openAddSheet = (iso: string) => {
+    const d = new Date(`${iso}T00:00:00`);
+    if (d.getMonth() !== viewMonth || d.getFullYear() !== viewYear) {
+      setViewMonth(d.getMonth());
+      setViewYear(d.getFullYear());
+    }
     // One line, and it is the whole contract: the date and the toggle move
     // together. A separate setDraft({due_date}) here is the silent-loss bug.
     const draft = billDraftForDate(iso);

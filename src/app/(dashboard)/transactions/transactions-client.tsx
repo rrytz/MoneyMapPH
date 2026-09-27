@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { MonthYearPicker } from "@/components/shared/month-year-picker";
 import {
   Search,
@@ -56,9 +57,20 @@ export function TransactionsClient({
   // The URL is the source of truth for the viewed month, the same idiom
   // /budgets uses. router.replace rather than push, so the arrows do not fill
   // the back button with month after month.
+  //
+  // Wrapped in a transition because a month change is a same-segment query
+  // navigation: loading.tsx does not fire for it, since the segment never
+  // changes. Measured here, the swap took 393ms with no intermediate state at
+  // all - the old month simply persisted, then the new one replaced it. That is
+  // near-invisible locally and a long silent wait on a slow connection, so the
+  // pending flag dims the stack. Dim rather than skeleton, because the page is
+  // not going away and a 400ms skeleton flash reads as a fault.
+  const [isMonthPending, startMonthTransition] = useTransition();
   const router = useRouter();
   function navigateToMonth(m: number, y: number) {
-    router.replace(`/transactions?month=${m}&year=${y}`, { scroll: false });
+    startMonthTransition(() => {
+      router.replace(`/transactions?month=${m}&year=${y}`, { scroll: false });
+    });
   }
 
   const filtered = initialTransactions.filter((tx) => {
@@ -135,7 +147,12 @@ export function TransactionsClient({
   }
 
   return (
-    <div className="space-y-6">
+    <div
+      className={cn(
+        "space-y-6 transition-opacity duration-150",
+        isMonthPending && "opacity-55 pointer-events-none"
+      )}
+    >
       <PageHeader
         title="Transaction History"
         description="Unified historical logs of all financial movements, allocations, and expenditures"

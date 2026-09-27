@@ -47,6 +47,9 @@ export function BudgetsPageClient({
   const [copying, setCopying] = useState(false);
   const [expenseForm, setExpenseForm] = useState<BudgetStatus | null>(null);
   const [, startTransition] = useTransition();
+  // Separate from the server-action transition above, so saving a budget does
+  // not dim the page. This one is only for the month navigation.
+  const [isMonthPending, startMonthTransition] = useTransition();
   const router = useRouter();
 
   const { month: realMonth, year: realYear } = getCurrentMonthYear();
@@ -120,7 +123,12 @@ export function BudgetsPageClient({
   }
 
   return (
-    <div className="space-y-6">
+    <div
+      className={cn(
+        "space-y-6 transition-opacity duration-150",
+        isMonthPending && "opacity-55 pointer-events-none"
+      )}
+    >
       <PageHeader title="Budget Planner" description="Set and monitor category targets for variable and fixed expenses">
         <div className="flex flex-wrap items-center gap-3">
           <MonthYearPicker
@@ -129,7 +137,15 @@ export function BudgetsPageClient({
             onChange={(m, y) => {
               setMonth(m);
               setYear(y);
-              router.replace(`/budgets?month=${m}&year=${y}`, { scroll: false });
+              // A month change is a same-segment query navigation, so
+              // loading.tsx never fires for it - the segment does not change.
+              // The pending flag dims the stack instead. This is the third
+              // screen to get the identical treatment, after /expenses and
+              // /transactions; the dim is deliberately not a skeleton, because
+              // the page is not going away.
+              startMonthTransition(() => {
+                router.replace(`/budgets?month=${m}&year=${y}`, { scroll: false });
+              });
             }}
           />
           {statuses.length === 0 ? (

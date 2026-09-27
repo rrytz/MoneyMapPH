@@ -16,6 +16,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ExpenseForm } from "@/components/forms/expense-form";
 import { removeExpense, addExpense } from "./actions";
 import { formatDate, getMonthName } from "@/lib/utils/date";
+import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/shared/category-icon";
 import { toast } from "sonner";
 import type { Expense, ExpenseCategory, Account } from "@/lib/types";
@@ -60,9 +61,17 @@ export function ExpensesPageClient({
   // The URL is the source of truth for the viewed month, the same idiom
   // /budgets uses. router.replace rather than push, so the arrows do not fill
   // the back button with month after month.
+  //
+  // Wrapped in a transition because a month change is a same-segment query
+  // navigation, and loading.tsx does not fire for one - the segment never
+  // changes. The pending flag dims the stack; dim rather than skeleton, because
+  // the page is not going away. Identical to /transactions and /budgets.
+  const [isMonthPending, startMonthTransition] = useTransition();
   const router = useRouter();
   function navigateToMonth(m: number, y: number) {
-    router.replace(`/expenses?month=${m}&year=${y}`, { scroll: false });
+    startMonthTransition(() => {
+      router.replace(`/expenses?month=${m}&year=${y}`, { scroll: false });
+    });
   }
 
   const [optimisticEntries, addOptimisticEntry] = useOptimistic(
@@ -178,7 +187,12 @@ export function ExpensesPageClient({
   const topCategory = sortedCategories[0] || { name: "None", amount: 0 };
 
   return (
-    <div className="space-y-6">
+    <div
+      className={cn(
+        "space-y-6 transition-opacity duration-150",
+        isMonthPending && "opacity-55 pointer-events-none"
+      )}
+    >
       <PageHeader title="Spending Intelligence" description="Monitor expenses, category allocations, and daily outflow">
         <div className="flex flex-wrap items-center gap-3">
           {/* The period control. The query was already month-scoped but pinned to

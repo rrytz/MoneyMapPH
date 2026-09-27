@@ -11,7 +11,6 @@ import { isOneTimeBill, visibleCalendarOccurrences } from "@/lib/utils/bills";
 import { billDraftForDate, type BillDraft } from "@/lib/utils/bill-draft";
 import { formatDate } from "@/lib/utils/date";
 import { cn } from "@/lib/utils";
-import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { PayBillForm } from "./pay-bill-form";
 import { BillForm } from "./bill-form";
@@ -314,19 +313,20 @@ export function MonthCalendar({
           </Sheet>
         )}
 
-        {payTarget &&
-          createPortal(
-            <PayBillForm
-              key={`${payTarget.occurrence.bill_id}-${payTarget.occurrence.dueDate}`}
-              open
-              onClose={() => setPayTarget(null)}
-              occurrence={payTarget.occurrence}
-              paidPaymentId={payTarget.paidPaymentId}
-              categoryId={bills.find((b) => b.id === payTarget.occurrence.bill_id)?.category_id ?? null}
-              categories={categories}
-            />,
-            document.body
-          )}
+        {/* No createPortal and no `open` prop: PayBillForm is the shared Dialog
+            primitive now, which portals itself. The key still resets its amount
+            and date per occurrence, which is why it is here and not inside
+            BillForm's world. */}
+        {payTarget && (
+          <PayBillForm
+            key={`${payTarget.occurrence.bill_id}-${payTarget.occurrence.dueDate}`}
+            onClose={() => setPayTarget(null)}
+            occurrence={payTarget.occurrence}
+            paidPaymentId={payTarget.paidPaymentId}
+            categoryId={bills.find((b) => b.id === payTarget.occurrence.bill_id)?.category_id ?? null}
+            categories={categories}
+          />
+        )}
       </FintechCardContent>
     </FintechCard>
   );

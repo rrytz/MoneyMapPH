@@ -2,19 +2,10 @@ import { describe, it, expect, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getMonthlySummary, getBudgetStatuses } from "@/lib/services/financial.service";
 import { getSafeToSpend } from "@/lib/services/safe-to-spend.service";
-import { calculateFinancialHealthReport } from "@/lib/services/health.service";
-import { calculateEmergencyFundStatus } from "@/lib/services/forecast.service";
-import { getPaychecks } from "@/lib/services/paycheck.service";
-
-vi.mock("@/lib/services/forecast.service", () => ({
-  calculateEmergencyFundStatus: vi.fn(),
-}));
-vi.mock("@/lib/services/paycheck.service", () => ({
-  getPaychecks: vi.fn(),
-}));
-
-const mockCalculateEmergencyFundStatus = calculateEmergencyFundStatus as ReturnType<typeof vi.fn>;
-const mockGetPaychecks = getPaychecks as ReturnType<typeof vi.fn>;
+// The health-report case lived here too and went with the module. The three
+// remaining cases - monthly summary, budget statuses, safe-to-spend - share
+// this file because they share a failure mode, not a subject: each asserts that
+// an absent or null account_id produces identical output rather than an error.
 
 type Row = Record<string, unknown>;
 type ChainTables = Record<string, Row[]>;
@@ -151,31 +142,6 @@ describe("Accounts Non-Regression Suite", () => {
 
     // 15000 core + 2000 incentive - 3000 expenses = 14000
     expect(withAccount.safeToSpend).toBe(14000);
-
-    expect(withAccount).toEqual(withNull);
-    expect(withAccount).toEqual(withAbsent);
-  });
-
-  it("produces identical financial health report regardless of account_id presence or nullability", async () => {
-    mockCalculateEmergencyFundStatus.mockResolvedValue({
-      hasFund: true,
-      currentBalance: 60000,
-      targetAmount: 60000,
-      averageExpenses: 10000,
-      monthsCovered: 6,
-      status: "adequate",
-    });
-    mockGetPaychecks.mockResolvedValue([
-      { id: "p1", amount: 30000, name: "Salary", allocations: [{ amount: 30000 }] },
-    ]);
-
-    const withAccount = await calculateFinancialHealthReport(makeChainSupabase(scenarioTables("acc-1")), userId);
-    const withNull = await calculateFinancialHealthReport(makeChainSupabase(scenarioTables(null)), userId);
-    const withAbsent = await calculateFinancialHealthReport(makeChainSupabase(scenarioTables(undefined)), userId);
-
-    // 30 (savings rate) + 30 (emergency fund) + 20 (budget adherence) + 20 (allocation) = 100
-    expect(withAccount.score).toBe(100);
-    expect(withAccount.grade).toBe("Excellent");
 
     expect(withAccount).toEqual(withNull);
     expect(withAccount).toEqual(withAbsent);

@@ -267,7 +267,14 @@ export function SettingsClient({
                     <Label htmlFor="prof-theme">Theme Preference <span className="text-rose-500">*</span></Label>
                     <Select value={themeSetting} onValueChange={(val) => setThemeSetting((val || "system") as "light" | "dark" | "system")}>
                       <SelectTrigger id="prof-theme">
-                        <SelectValue placeholder="Select Theme" />
+                        {/* base-ui renders the raw value, so this read "system". */}
+              <SelectValue placeholder="Select Theme">
+                {themeSetting === "light"
+                  ? "Light"
+                  : themeSetting === "dark"
+                    ? "Dark"
+                    : "System"}
+              </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="light">Light Mode</SelectItem>

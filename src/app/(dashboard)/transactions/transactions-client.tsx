@@ -238,7 +238,14 @@ export function TransactionsClient({
               }}
             >
               <SelectTrigger className="h-10 rounded-xl bg-card border-border text-xs">
-                <SelectValue placeholder="Category/Source" />
+                {/* base-ui's Select.Value renders the raw value, not the selected
+                    item's children, so an unlabelled Value shows "all". The
+                    label is written out here rather than left to the library,
+                    which keeps the trigger reading as a label instead of a
+                    database value. */}
+                <SelectValue placeholder="Category/Source">
+                  {filterCategory === "all" ? "All Categories" : filterCategory}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>

@@ -273,7 +273,16 @@ export function ExpensesPageClient({
         <Select value={selectedCategory} onValueChange={(val) => { setSelectedCategory(val || "all"); setCurrentPage(1); }}>
           <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-md bg-card border-border text-xs">
             <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
-            <SelectValue placeholder="All Categories" />
+            {/* base-ui renders the raw value, not the item's children, so this
+                trigger showed "all". Unlike /transactions, this Select stores
+                the category ID as its value, so the label has to be looked up -
+                without that the trigger reads a raw UUID. */}
+            <SelectValue placeholder="All Categories">
+              {selectedCategory === "all"
+                ? "All Categories"
+                : (categories.find((c) => c.id === selectedCategory)?.name ??
+                  selectedCategory)}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>

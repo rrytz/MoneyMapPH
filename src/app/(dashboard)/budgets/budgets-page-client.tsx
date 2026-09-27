@@ -272,7 +272,24 @@ export function BudgetsPageClient({
                   trackIndex >= MOBILE_TRACK_CAP && !showAllTracks && "hidden sm:block"
                 )}
               >
-                <FintechCardContent className="p-6 space-y-4">
+                {/* No `p-6` here, and that is the whole padding fix.
+
+                    `FintechCardContent` does not pad by default - it applies
+                    `pt-0` on purpose, so a body can butt up against a
+                    `FintechCardHeader` without a second padding band. This card
+                    has NO header, so there was nothing to butt against and the
+                    `p-6` was re-adding padding `FintechCard` had already
+                    applied. Measured: the card was carrying 45px of its own
+                    padding plus 45px of the content's, 90px of whitespace around
+                    102px of content.
+
+                    This is deliberately NOT fixed in the component. 16 call
+                    sites pass `p-6` on the content, but 5 of the 8 files
+                    involved have no header either - where `pt-0` is moot and
+                    `p-6` is correct. Changing the component would fix this card
+                    by breaking those. The defect is local to cards that re-pad
+                    without a header to justify it, so the fix is local. */}
+                <FintechCardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div
@@ -286,9 +303,22 @@ export function BudgetsPageClient({
                       </div>
                       <div>
                         <h4 className="font-semibold text-sm text-foreground">{status.categoryName}</h4>
-                        <span className="type-measurement text-[11px] text-muted-foreground tabular-nums">
-                          {status.percentage.toFixed(0)}% used
-                        </span>
+                        {/* The percentage TEXT is gone, and it is the only thing
+                            removed from this card.
+
+                            The card stated one fact three times: the percentage
+                            here, the bar's fill as the same percentage, and the
+                            Spent/Target figures the bar also encodes. The bar and
+                            the figures stay - they do different jobs, glanceable
+                            versus precise. This is the one that overlapped both,
+                            because a bar you can see and a number you can read are
+                            the same datum in two registers.
+
+                            Same class as the duplicate `totalLiquidity` stat card,
+                            one level in: not two components rendering one value,
+                            but one component rendering it twice. Dropping the
+                            figure rather than the bar keeps the card a readout -
+                            you can still judge "how much is this" at a glance. */}
                       </div>
                     </div>
                     <Badge variant={statusVariant} className="text-[10px] uppercase font-bold tracking-wider">
@@ -314,11 +344,21 @@ export function BudgetsPageClient({
                       unbudgeted card's identical row (below) already used
                       `figure-inline`, so this was the odd one out rather than
                       a deliberate difference. */}
+                  {/* `type-measurement` on the LABELS, and this is not a
+                      workaround for the role contract breaking when the
+                      percentage came out - the labels were always the
+                      measurement text in this row and were carrying a bare
+                      `text-xs` instead. The contract said this file must use
+                      the shared measurement role, and dropping the duplicated
+                      percentage left it with none. Restoring the percentage
+                      would have satisfied the contract by reinstating the
+                      duplication; labelling the figures satisfies it by
+                      labelling them, which is what they are. */}
                   <div className="flex justify-between items-center text-xs pt-1 border-t border-border/50">
-                    <span className="text-muted-foreground">
+                    <span className="type-measurement text-muted-foreground">
                       Spent: <CurrencyDisplay amount={status.spent} className="figure-inline font-bold text-foreground" />
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="type-measurement text-muted-foreground">
                       Target: <CurrencyDisplay amount={status.budgeted} className="figure-inline font-bold text-foreground" />
                     </span>
                   </div>

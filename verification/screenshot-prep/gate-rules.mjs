@@ -169,8 +169,31 @@ const waitForTimeout = /\bwaitForTimeout\s*\(/;
 const addStyleTag = /addStyleTag\s*\(/;
 const gotoCall = /\.goto\s*\(/;
 
+// ---------------------------------------------------------------- read
+//
+// LINE ENDINGS ARE NORMALISED ONCE, HERE, AND THAT IS THE WHOLE FIX.
+//
+// The class, not the instance: in JavaScript `.` does not match a carriage
+// return, and `$` without the `m` flag anchors only at end-of-string. So any
+// pattern of the form `/x\s+(.*)$/` tested against CRLF content can never
+// match - `.` refuses to consume the trailing `\r` that `$` sits behind. The
+// failure is silent and total: the pattern is not "nearly right", it never
+// fires, and it looks identical to a clean run.
+//
+// This bit once: gate-rules.mjs had been rewritten through a PowerShell splice
+// and was CRLF, so its own `rules:ok` suppression was dead and the checker
+// flagged its own legitimate self-report on every run. Files created with an
+// editor are LF, which is why every OTHER suppression worked and this one did
+// not - the difference looked like a logic bug and was not.
+//
+// Rather than audit and patch each pattern, the input is normalised so that the
+// class cannot occur: one substitution at read time, and every downstream
+// `split("\n")`, `.` and `$` in this file is then correct by construction. Every
+// pattern here is authored against LF text and needs no per-site defence.
+const readSource = (p) => fs.readFileSync(p, "utf8").replace(/\r\n?/g, "\n");
+
 for (const rel of files) {
-  const raw = fs.readFileSync(path.join(ROOT, rel), "utf8");
+  const raw = readSource(path.join(ROOT, rel));
   const rawLines = raw.split("\n");
   const code = stripComments(raw);
   const codeLines = code.split("\n");
@@ -184,18 +207,14 @@ for (const rel of files) {
   // reason is the point; making the reason hard to write defeats it. The scan
   // stops at a blank line so a suppression cannot silently reach forward over
   // unrelated code.
-  // `rules:ok` is matched with an explicit character class rather than `.` and
-  // `$`.
+  // `rules:ok` uses an explicit character class rather than `.` and `$`.
   //
-  // In JavaScript `.` does not match a carriage return and `$` (without the `m`
-  // flag) only matches at the very end of the string, so on a CRLF file the
-  // pattern `/rules:ok\s+(.*)$/` can never match: the `.` refuses to consume the
-  // trailing `\r` that the `$` is sitting behind. Every suppression in a
-  // CRLF-encoded script was therefore silently dead, and this file - written by
-  // a PowerShell rewrite and therefore CRLF - was flagging its own legitimate
-  // self-report on every run.
-  //
-  // `[^\r\n]*` is line-ending agnostic, which is the whole fix.
+  // The actual fix for the CRLF class is `readSource` above - the input is
+  // normalised before any of this runs, so `$` and `.` are correct here by
+  // construction. `[^\r\n]*` is defence in depth for the one place it matters
+  // most: a suppression that silently stops working is a rule that looks like
+  // it is passing, and that is the failure this whole file exists to prevent. If
+  // the normalisation is ever removed, this still does not go quietly.
   const suppressed = (n) => {
     for (let k = 1; k <= 12; k++) {
       const l = rawLines[n - k];
@@ -244,20 +263,69 @@ for (const rel of files) {
   // two correct sites with `rules:ok`, and a check whose escape hatch is used on
   // its own compliant code is a check whose escape hatch has stopped meaning
   // anything.
-  const emptyPass =
-    /if\s*\([^)]*\.length\s*===\s*0[^)]*\)\s*\{[^{}]*console\.(?:log|error)\([^)]*\b(?:PASS|clean|ok\b)/i;
-  let scan = code;
-  let guard = null;
-  while ((guard = scan.match(emptyPass)) !== null) {
-    const at = guard.index;
-    const n = scan.slice(0, at).split("\n").length;
-    const lookbehind = scan.slice(Math.max(0, at - 900), at);
-    const presenceAsserted = /\bfail\s*\(/.test(lookbehind) || /coverage\.[a-z]+\s*===?\s*0/.test(lookbehind);
-    if (!presenceAsserted && !suppressed(n)) report(rel, n, "empty-set-pass",
-      "reports success when the result set is empty; assert the subject is present before comparing it");
-    // blank the match out so the next iteration advances
-    scan = scan.slice(0, at) + " ".repeat(guard[0].length) + scan.slice(at + guard[0].length);
-  }
+  //
+  // THE WINDOW IS 400 CHARACTERS AND THAT IS THE POINT. It was 1400, which was
+  // wide enough to reach an unrelated `fail()` earlier in the file, so a
+  // genuinely unguarded absence assertion appended at the end of a script was
+  // accepted because the script had failed something else three hundred lines
+  // up. A guard on the wrong subject is not a guard. 400 characters covers the
+  // real shape -
+  //
+  //     if (coverage.cards === 0 || coverage.leaves === 0) {
+  //       fail(...)
+  //     } else if (hazards.length === 0) {
+  //       console.log("PASS ...")
+  //
+  // - and nothing wider.
+  const ABSENCE = [
+    {
+      id: "empty-set-pass",
+      re: /if\s*\([^)]*\.length\s*===\s*0[^)]*\)\s*\{[^{}]*console\.(?:log|error)\([^)]*\b(?:PASS|clean|ok\b)/i,
+      msg: "reports success when the result set is empty; assert the subject is present before comparing it",
+    },
+    {
+      id: "vacuous-every",
+      // Only receivers that could be a QUERY RESULT. An ALL_CAPS receiver is a
+      // declared constant - `[].every` cannot arise from iterating a literal -
+      // and query results in this codebase are camelCase members. A broader
+      // pattern flagged correct code, and a check that flags correct code gets
+      // switched off.
+      re: /(?:[a-z_$][\w$]*\.)+[a-z_$][\w$]*\.every\s*\(/,
+      msg: "[].every(p) is ALWAYS true. An .every() over a query result passes when the query found nothing - guard it with a presence assertion on the same subject.",
+    },
+    {
+      id: "absence-without-coverage",
+      re: /if\s*\(\s*!\s*[\w.]*(?:found|exists|matched)\s*\)\s*\{[^{}]*console\.(?:log|error)\([^)]*\b(?:PASS|clean|ok\b|none)/i,
+      msg: "reports success when nothing was found; assert the search covered something before concluding nothing is wrong",
+    },
+  ];
+
+  const assertsCoverage = (before) =>
+    /\bfail\s*\(/.test(before) ||
+    /coverage\.[a-z]+\s*===?\s*0/.test(before) ||
+    /\b(scanned|coverage)\b/i.test(before);
+
+  const blankOut = (subject, def) => {
+    let s = subject;
+    let m = null;
+    while ((m = s.match(def.re)) !== null) {
+      const at = m.index;
+      const n = s.slice(0, at).split("\n").length;
+      const before = s.slice(Math.max(0, at - 400), at);
+      // The guard may be on the SAME LINE. `links.length > 0 && links.every(p)`
+      // and `barPresent && links.every(p)` are the natural ways to write a
+      // guarded predicate; looking only backwards flagged both as violations.
+      const nl = s.lastIndexOf("\n", at - 1) + 1;
+      const end = s.indexOf("\n", at);
+      const line = s.slice(nl, end === -1 ? s.length : end);
+      const head = line.slice(0, Math.max(0, line.indexOf(".every")));
+      const locallyGuarded = /\.(?:length|size)\s*[=!<>]=?\s*\d/.test(head) || /\b\w+\s*&&/.test(head);
+      if (!assertsCoverage(before) && !locallyGuarded && !suppressed(n)) report(rel, n, def.id, def.msg);
+      s = s.slice(0, at) + " ".repeat(m[0].length) + s.slice(at + m[0].length);
+    }
+  };
+
+  for (const def of ABSENCE) blankOut(code, def);
 }
 
 // ---------------------------------------------------------------- output

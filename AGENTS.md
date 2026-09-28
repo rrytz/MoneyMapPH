@@ -81,12 +81,26 @@ Every verifier in this series reproduced the class it was written to catch:
 | root-hover test | passed; a leaf's own `:hover` is unreachable from it |
 | motion suppression | was never active; injected before the navigation that discarded it |
 | compositing proof | passed on an empty scan set |
+| **the human reading the output** | **twice reported a "false pass" that was a broken probe — a `.Replace()` whose `\n` was a literal, and a suppression that could not match CRLF** |
 
-**The checker will not catch the next instance above it, because the checker was
-written before that instance existed.** `gate:rules` enforces six patterns and
-none of them can tell whether a *semantic* selector is the *right* semantic
-selector, or whether a settled condition is the real one. When you add a gate,
-assume you will find its own blind spot by running it, not by writing it.
+The last row is the one that matters, and it is not a confession.
+
+A probe that does not do what it says is **indistinguishable from a rule
+passing** — including to the person reading the output, who is supposed to be
+the ceiling above the scanner. I found two of them by running the injection I
+was proud of, watching it "pass", and refusing to accept a structural
+explanation without checking. The same class then hid for an entire session as a
+CRLF mismatch: `.` does not match `\r` and `$` without `m` anchors only at
+end-of-string, so `/rules:ok\s+(.*)$/` could never match a CRLF file. The
+suppression was dead, the checker flagged its own legitimate self-report, and it
+looked exactly like a logic bug.
+
+The general form, and the boundary condition of this whole framework: **any
+mechanism that reports "fine" is the same shape whether it is correct, is
+silently doing nothing, or was never switched on.** The exit code cannot tell
+those apart. Only a deliberately broken input can — which is why every rule here
+carries a proof that it fires, and why "it passed" is never the end of a
+verification step.
 
 ## Scope boundary: named, not implicit
 
@@ -109,11 +123,11 @@ it describes.
 
 **Enforced by `npm run gate:rules`**, which runs first in `gate:all`. It fails
 a gate script that selects by a visual property, sleeps on a fixed duration,
-injects a style tag before navigating, or reports success on an empty result
-set. Findings can be silenced with `rules:ok <reason>` in the comment block
-above them - a reason is
-mandatory, and every suppression in force is printed on each run so they cannot
-accumulate unseen.
+injects a style tag before navigating, or asserts absence without first asserting
+coverage of what it is claiming is absent. Findings can be silenced with
+`rules:ok <reason>` in the comment block above them - a reason is mandatory,
+and every suppression in force is printed on each run so they cannot accumulate
+unseen.
 
 Its scope is **derived from the `gate:all` chain** by following `npm run`
 references transitively, not read from a list. Nothing maintains that list, so

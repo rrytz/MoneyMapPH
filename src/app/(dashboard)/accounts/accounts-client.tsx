@@ -191,6 +191,14 @@ export function AccountsClient({
           <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer pt-4">
             <input
               type="checkbox"
+              // A semantic handle for the gate. The verification script found
+              // this with `input[type="checkbox"]`, which silently depends on
+              // being the FIRST checkbox in the document - add a filter control
+              // above this one and the gate toggles the wrong element while
+              // still reporting a coherent archived count. Same class of defect
+              // as identifying a card by its background colour: the selector
+              // cannot distinguish the thing it is supposed to be testing.
+              data-archived-toggle
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
               className="rounded border-input bg-card text-sulpot focus:ring-sulpot"

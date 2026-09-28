@@ -212,8 +212,11 @@ console.log("\n--- hover: TRIGGER hovered -> TRIGGER read ---");
   const byScheme = {};
   for (const scheme of ["light", "dark"]) {
     const { ctx, pg } = await openAccounts(browser, { scheme });
-    // the `..` trigger is the only interactive element on a card
-    const target = await pg.$('[data-account-card] [data-slot="dropdown-menu-trigger"], [data-account-card] button');
+    // The trigger, identified by its Radix role slot. The comma fallback to a
+    // bare `button` is gone on purpose: it would silently hover whichever
+    // button came first, which is the archived selector defect again in a
+    // different costume.
+    const target = await pg.$('[data-account-card] [data-slot="dropdown-menu-trigger"]');
     if (target) await target.hover();
     const hovered = await pg.evaluate(SNAPSHOT, snapArgs);
     byScheme[scheme] = hovered;
@@ -362,10 +365,10 @@ console.log("\n--- archived (the real inactive state; this card has no :disabled
       if (archivedCount === 0) {
         // Create the fixture through the real UI, so the state under test is
         // the one a user reaches rather than one synthesised here.
-        const trigger = await pg.$('[data-account-card] button');
+        const trigger = await pg.$('[data-account-card] [data-slot="dropdown-menu-trigger"]');
         if (!trigger) { fail(`archived (${scheme}): no card trigger to archive from`); await ctx.close(); continue; }
         await trigger.click();
-        const item = await pg.waitForSelector("text=Archive Account", { timeout: 10000 }).catch(() => null);
+        const item = await pg.waitForSelector('[data-account-action="archive"]', { timeout: 10000 }).catch(() => null);
         if (!item) { fail(`archived (${scheme}): could not open the Archive menu item - the gate cannot create its own fixture`); await ctx.close(); continue; }
         await item.click();
         // The write is real; the restore is registered BEFORE the assertion so
@@ -382,15 +385,15 @@ console.log("\n--- archived (the real inactive state; this card has no :disabled
             // how the first restore attempt timed out.
             await p2.waitForFunction(
               () => [...document.querySelectorAll('[data-account-card]')].some(
-                (c) => [...c.querySelectorAll("*")].some((e) => /^Archived$/.test((e.textContent || "").trim()) && e.children.length === 0)
+                (c) => c.hasAttribute("data-account-archived")
               ),
               null,
               { timeout: 15000 }
             );
-            const t2 = await p2.$('[data-account-card]:has(span:text-is("Archived")) button');
+            const t2 = await p2.$('[data-account-archived] button');
             if (!t2) throw new Error("could not locate the archived card's trigger");
             await t2.click();
-            const un = await p2.waitForSelector("text=Unarchive Account", { timeout: 10000 });
+            const un = await p2.waitForSelector('[data-account-action="unarchive"]', { timeout: 10000 });
             await un.click();
             // Confirm the restore rather than assuming it: the count must fall.
             const back = await p2
@@ -432,9 +435,7 @@ console.log("\n--- archived (the real inactive state; this card has no :disabled
       await cb.check();
       const got = await pg
         .waitForFunction(
-          () => [...document.querySelectorAll("main *")].some(
-            (e) => /^Archived$/.test((e.textContent || "").trim()) && e.children.length === 0
-          ),
+          () => document.querySelectorAll("[data-account-archived]").length > 0,
           null,
           { timeout: 15000 }
         )
@@ -500,6 +501,28 @@ console.log("\n--- archived (the real inactive state; this card has no :disabled
 // -------------------------------------------------- pseudo-elements, and the menu
 console.log("\n--- known boundaries (asserted, not assumed) ---");
 {
+  // THE OPENED MENU IS NOT COVERED, AND THAT IS SEPARATE WORK - NOT AN EXCUSE.
+  //
+  // `DropdownMenuContent` is `bg-popover` / `text-popover-foreground` /
+  // `border-border`, with `text-muted-foreground` on its group labels. The
+  // brand invariant correctly does NOT apply there: the menu renders in a
+  // portal over the page background, so it is a themed surface by definition,
+  // not a brand surface. Nothing in this file is wrong about that.
+  //
+  // What IS uncovered is a different and real question: the popover is its own
+  // accessibility surface and it has a contrast story that no gate checks. It
+  // is keyboard-navigable, it opens on focus, its items carry a muted-foreground
+  // label at small size, and it is dismissed by Escape. None of that is
+  // measured anywhere. Written down so it cannot rot into silence.
+  //
+  //   TODO(popover-contrast): assert WCAG contrast for DropdownMenuContent and
+  //   DropdownMenuItem against `bg-popover` in BOTH schemes, and assert
+  //   keyboard reachability + Escape dismissal, using
+  //   [data-slot=dropdown-menu-content] as the structural handle. Separate
+  //   script and a separate gate entry: it is a different invariant (contrast,
+  //   not scheme-independence) on a different surface (a portal, not a card).
+  console.log("  popover: NOT covered - themed surface by design, brand invariant n/a.");
+  console.log("            TODO(popover-contrast): its own contrast + keyboard contract. Named, not silent.");
   // (2) PSEUDO-ELEMENTS. A text-leaf walk cannot see `::before` / `::after` -
   // CSS-generated content has no DOM node - so a themed colour there would be
   // invisible to every check in this file. That is the same blindness as the

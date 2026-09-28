@@ -172,12 +172,27 @@ export const COLLECT = () => {
     }
     return true;
   };
-  // Selected by the card's own structural marker, NOT by an inline background.
-  // The first version filtered on `el.style.backgroundColor`, which meant a card
-  // that did not paint a brand base was invisible to the whole gate - and the
-  // archived state does not paint one. So the archived "check" was silently
-  // re-measuring seven ACTIVE cards and reporting them as archived coverage. A
-  // selector that cannot distinguish the state under test is not a selector.
+  // SEMANTIC SELECTION, from the a26fa31 audit.
+  //
+  // The audit found five places in this gate identifying an element by a VISUAL
+  // property rather than a semantic one. The archived false-pass proved the
+  // class: a card was found by its inline `backgroundColor`, so a selector meant
+  // to reach archived cards landed on active ones and reported the result as
+  // coverage. All five are now structural handles:
+  //
+  //   card         [data-account-card]              was inline backgroundColor
+  //   toggle       [data-archived-toggle]           was input[type=checkbox]
+  //   trigger      [data-slot=dropdown-menu-trigger] was a bare `button`
+  //   divider      [data-account-divider]           was "first element with a
+  //                                                    non-zero top border"
+  //   menu action  [data-account-action=archive]     was text=Archive Account
+  //
+  // The last two are the instructive ones. A "divider" found by scanning for a
+  // visible border is a DEFINITION, not an identification: it would happily
+  // return the card's own outer border and fail SILENTLY by reporting a
+  // plausible value. A menu item found by label text breaks when the copy
+  // changes, and Playwright's `text=` is substring-based - "Archive" also
+  // matches inside "Unarchive".
   const roots = [];
   for (const el of document.querySelectorAll("[data-account-card]")) {
     if (!visible(el)) continue;
@@ -250,24 +265,49 @@ export const COMPOSITING_HAZARDS = [
   // attempt passed the functions and failed with "Attempting to serialize
   // unexpected value ... unsafe", which is the evaluate boundary being honest
   // about what it can carry.
-  { prop: "backdropFilter", test: 'v && v !== "none"' },
-  { prop: "mixBlendMode", test: 'v && v !== "normal"' },
-  { prop: "filter", test: 'v && v !== "none"' },
-  { prop: "color", test: '/oklch|oklab|lab\\(|lch\\(|color\\(/.test(v || "")' },
-  { prop: "backgroundColor", test: '/oklch|oklab|lab\\(|lch\\(|color\\(/.test(v || "")' },
+  //
+  // SCOPE is per-hazard and it matters:
+  //   "self"  - read on the element itself only. For INHERITED colour
+  //             properties (color, backgroundColor are not inherited, but the
+  //             declared value is what paints) the element's own value is
+  //             the whole story.
+  //   "chain" - read on EVERY ancestor up to and including the card. These are
+  //             the ones that are NOT inherited, so a `filter` on a wrapper
+  //             changes how the descendant renders while the descendant's own
+  //             computed `filter` still reads "none". Checking the leaf alone
+  //             would pass a card whose PARENT is filtered - which is the same
+  //             blindness as the leaf-hover case, one property over.
+  { prop: "backdropFilter", scope: "chain", test: 'v && v !== "none"' },
+  { prop: "mixBlendMode", scope: "chain", test: 'v && v !== "normal"' },
+  { prop: "filter", scope: "chain", test: 'v && v !== "none"' },
+  // `opacity` is a separate compositing step from alpha in `backgroundColor`.
+  // The compositor folds background alpha into `over()`; the `opacity`
+  // property scales the element's ENTIRE rendered result - text included -
+  // after its children are composited. `paintedBg` does not model that at all,
+  // so an `opacity-60` card would be measured at full strength and the
+  // contrast numbers would be fiction. The archived card used exactly this and
+  // measured 1.28:1; asserting its absence stops it coming back.
+  { prop: "opacity", scope: "chain", test: 'v !== "" && parseFloat(v) < 1' },
+  { prop: "color", scope: "self", test: '/oklch|oklab|lab\\(|lch\\(|color\\(/.test(v || "")' },
+  { prop: "backgroundColor", scope: "self", test: '/oklch|oklab|lab\\(|lch\\(|color\\(/.test(v || "")' },
 ];
 
 /**
- * Every element the contrast maths depends on: each measured leaf, each of its
- * ancestors up to and including the card, and the card's own pseudo-elements.
- * Pseudo-elements are included deliberately - see the pseudo-element note in
- * account-brand-states-check.mjs.
+ * The chain a `chain`-scoped hazard is read over.
+ *
+ * Deliberately walks to the DOCUMENT ROOT, not just to the card. A
+ * `mix-blend-mode` or `filter` on any ancestor changes how everything inside
+ * renders, including the card's own background - and the card's background is
+ * exactly the value the contrast maths terminates on. Stopping at the card
+ * would assert the absence of a property that is doing the damage one level up.
  */
 export const COMPOSITING_SCOPE = `(leaf, card) => {
   const nodes = [];
   let n = leaf;
-  while (n && n !== card.parentElement) { nodes.push(n); n = n.parentElement; }
-  if (card) nodes.push(card);
+  while (n) { nodes.push(n); if (n === card) break; n = n.parentElement; }
+  // keep going past the card: ancestors above it composite the card too
+  let above = card ? card.parentElement : null;
+  while (above) { nodes.push(above); above = above.parentElement; }
   return nodes;
 }`;
 
@@ -285,7 +325,7 @@ export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
   // over `v`, and the wrapper is what turns it into a function. Wrapping it in
   // the page rather than in the module is also what makes the regex escapes
   // survive - they are written for the page's parser, not this one's.
-  const checks = hazards.map((h) => ({ prop: h.prop, unsafe: eval(`((v) => ${h.test})`) }));
+  const checks = hazards.map((h) => ({ prop: h.prop, scope: h.scope, unsafe: eval(`((v) => ${h.test})`) }));
   const out = [];
   for (const card of cards) {
     const cname = (card.querySelector("h3") || {}).textContent || "(unnamed)";
@@ -309,8 +349,19 @@ export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
           const cs = pseudo ? getComputedStyle(node, pseudo) : getComputedStyle(node);
           if (pseudo && (!cs.content || cs.content === "none" || cs.content === "normal")) continue;
           for (const h of checks) {
+            // A "chain" hazard is asserted on EVERY node in the walked chain;
+            // a "self" hazard only on the element the walk started from. The
+            // distinction is the whole point: `filter` and `opacity` are not
+            // inherited, so only the ancestor can hold them.
+            if (h.scope === "self" && node !== leaf) continue;
             if (h.unsafe(cs[h.prop])) {
-              out.push({ card: cname, el: label + (pseudo || ""), prop: h.prop, value: cs[h.prop] });
+              out.push({
+                card: cname,
+                el: label + (pseudo || ""),
+                prop: h.prop,
+                value: cs[h.prop],
+                where: h.scope === "self" ? "self" : node === leaf ? "leaf" : "ancestor",
+              });
             }
           }
         }
@@ -363,16 +414,23 @@ export const describe = (card, nearestFn) => {
   }
 
   return {
-    name: (card.querySelector("h3") || {}).textContent || "(unnamed)",
+    // From the card's own attribute, not by hunting for an `h3` and assuming
+    // that is the name. An `h3` is a HEADING, and a card that grew a second
+    // heading would silently change which one the gate reports on.
+    name: card.getAttribute("data-account-card") || "(unnamed)",
     base: cs.backgroundColor,
     border: cs.borderTopColor,
+    // The divider is identified BY ROLE now. The previous version searched
+    // every descendant for "an element with a non-zero top border" - which is a
+    // definition rather than an identification, and it matches the card's OWN
+    // outer border too. On a card whose inner divider was removed it would
+    // return the outer border, compare it across schemes, find them equal, and
+    // report PASS for a divider that no longer exists. Silent, plausible, wrong.
     divider: (() => {
-      const d = [...card.querySelectorAll("*")].find((e) => {
-        const s = getComputedStyle(e);
-        return s.borderTopWidth !== "0px" && s.borderTopStyle !== "none";
-      });
+      const d = card.querySelector("[data-account-divider]");
       return d ? getComputedStyle(d).borderTopColor : null;
     })(),
+    dividerPresent: !!card.querySelector("[data-account-divider]"),
     texts,
     icons,
     geometry: `${Math.round(card.getBoundingClientRect().width)}x${Math.round(card.getBoundingClientRect().height)}`,
@@ -435,7 +493,12 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
       }
     }
     for (const m of iconFailures(lc, dc, "resting")) fail(m);
-    if (lc.divider && lc.divider !== dc.divider) fail(`${lc.name}: divider is theme-dependent (${lc.divider} -> ${dc.divider})`);
+    // The divider must EXIST as well as agree. A null divider compared against
+    // a null divider is trivially equal, so without this a card that lost its
+    // divider would pass the theme-dependence check by having nothing to
+    // compare.
+    if (!lc.dividerPresent) fail(`${lc.name}: no [data-account-divider] found - the divider assertion cannot run`);
+    else if (lc.divider !== dc.divider) fail(`${lc.name}: divider is theme-dependent (${lc.divider} -> ${dc.divider})`);
     if (lc.border !== dc.border) fail(`${lc.name}: border is theme-dependent (${lc.border} -> ${dc.border})`);
     if (lc.geometry !== dc.geometry) fail(`${lc.name}: geometry differs between schemes`);
     if (lc.clipped > 0) fail(`${lc.name}: ${lc.clipped} clipped text element(s)`);
@@ -457,11 +520,12 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
     }
     const all = [...haz.light, ...haz.dark];
     if (all.length === 0) {
-      console.log("  PASS  no backdrop-filter, mix-blend-mode, filter or non-sRGB colour on any measured chain.");
+      console.log("  PASS  no backdrop-filter, mix-blend-mode, filter, sub-1 opacity or non-sRGB colour");
+      console.log("        anywhere in any measured chain, up to the document root.");
       console.log("        sRGB alpha compositing is therefore a valid model for paintedBg().");
     } else {
       for (const h of all) {
-        fail(`compositing model: ${h.card} ${h.el} has ${h.prop}: ${h.value}. paintedBg() composites in sRGB and will report a wrong surface once a backdrop is filtered, blended, or non-sRGB. Fix the maths or exclude the element - do not leave it measuring.`);
+        fail(`compositing model: ${h.card} ${h.el} has ${h.prop}: ${h.value} (${h.where}). paintedBg() composites in sRGB and does not model this. ${h.prop === "opacity" ? "The opacity property scales the element's ENTIRE rendered result - text included - after its children are composited, so every contrast number on it is fiction." : "Filter, blend and backdrop-filter are not inherited, so only an ancestor can hold them, and they change how the card's own background paints."} Fix the maths or exclude the element - do not leave it measuring.`);
       }
     }
   }

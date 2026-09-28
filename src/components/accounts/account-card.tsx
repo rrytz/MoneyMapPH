@@ -66,6 +66,13 @@ const isBrandSurface = !account.is_negative;
       // brand base was silently invisible to it - including the archived state,
       // whose "coverage" was seven active cards being re-measured.
       data-account-card={account.name}
+      // The state itself, as a structural handle. The gate used to detect an
+      // archived card by scanning for a leaf whose text was exactly "Archived"
+      // - i.e. identifying the STATE by its visible label. Rename the pill and
+      // the check silently stops finding archived cards, which is the
+      // archived-false-pass defect a third time over. The label is copy; this
+      // is the fact.
+      data-account-archived={account.is_archived || undefined}
       className={`relative rounded-2xl border p-4 transition-all [border-color:var(--brand-line)] ${
         account.is_negative
           ? "border-rose-500/50 bg-rose-500/10 dark:bg-rose-950/20"
@@ -167,17 +174,17 @@ const isBrandSurface = !account.is_negative;
           <DropdownMenuContent align="end">
             {!account.is_archived && (
               <>
-                <DropdownMenuItem onClick={() => onEdit(account)}>
+                <DropdownMenuItem data-account-action="edit" onClick={() => onEdit(account)}>
                   <Edit2 className="h-4 w-4 mr-2" />
                   Edit Account
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onTransfer(account)}>
+                <DropdownMenuItem data-account-action="transfer" onClick={() => onTransfer(account)}>
                   <Wallet className="h-4 w-4 mr-2" />
                   Transfer From/To
                 </DropdownMenuItem>
               </>
             )}
-            <DropdownMenuItem onClick={() => onArchive(account)}>
+            <DropdownMenuItem data-account-action={account.is_archived ? "unarchive" : "archive"} onClick={() => onArchive(account)}>
               {account.is_archived ? (
                 <>
                   <RotateCcw className="h-4 w-4 mr-2" />
@@ -248,7 +255,7 @@ const isBrandSurface = !account.is_negative;
           balance is also a secondary figure, so it does not need the primary
           line - the same reason it is already `figure-inline` while the
           balance above is `type-ledger`. */}
-      <div className="mt-4 pt-3 border-t flex flex-col gap-0.5 text-xs [color:var(--brand-muted)] border-[color:var(--brand-line)]">
+      <div data-account-divider className="mt-4 pt-3 border-t flex flex-col gap-0.5 text-xs [color:var(--brand-muted)] border-[color:var(--brand-line)]">
         <span>Starting Balance</span>
         <CurrencyDisplay amount={account.initial_balance} className="figure-inline font-medium [color:var(--brand-muted)]" />
       </div>

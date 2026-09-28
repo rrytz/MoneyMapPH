@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { MonthYearPicker } from "@/components/shared/month-year-picker";
 import { Plus, Pencil, Trash2, TrendingDown, Search, Filter, PieChart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AccountSelect } from "@/components/forms/account-select";
+import { FilterPills } from "@/components/shared/filter-pills";
+import { isUnassignedEntry } from "@/lib/utils/expense-account-assignment";
+import { editExpense } from "./actions";
 import { Input } from "@/components/ui/input";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +34,13 @@ interface ExpensesPageClientProps {
   currentMonth: number;
   currentYear: number;
   accounts?: Account[];
+  /**
+   * From `?unassigned=1`. The URL is the source of truth, not a mirrored copy
+   * of it: the Accounts page links here, so refresh, back/forward and a
+   * bookmarked URL all have to mean the same thing. The same reason the month
+   * is read from `searchParams` rather than held in state.
+   */
+  initialUnassignedOnly?: boolean;
 }
 
 export function ExpensesPageClient({
@@ -41,6 +52,7 @@ export function ExpensesPageClient({
   currentMonth,
   currentYear,
   accounts,
+  initialUnassignedOnly = false,
 }: ExpensesPageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<Expense | null>(null);
@@ -55,6 +67,16 @@ export function ExpensesPageClient({
   // its own search and category filter: a page of results is the same job,
   // not a reduced one. Every entry stays reachable.
   const [currentPage, setCurrentPage] = useState(1);
+  // Synced from the prop rather than initialised from it once, matching the
+  // totals above: a back/forward navigation changes the URL without remounting
+  // this component, and `useState(fn)` would freeze the first value forever.
+  const [unassignedOnly, setUnassignedOnly] = useState(initialUnassignedOnly);
+  const [prevUnassignedOnly, setPrevUnassignedOnly] = useState(initialUnassignedOnly);
+  if (initialUnassignedOnly !== prevUnassignedOnly) {
+    setPrevUnassignedOnly(initialUnassignedOnly);
+    setUnassignedOnly(initialUnassignedOnly);
+    setCurrentPage(1);
+  }
   const itemsPerPage = 15;
   const [, startTransition] = useTransition();
 
@@ -74,9 +96,27 @@ export function ExpensesPageClient({
     });
   }
 
-  const [optimisticEntries, addOptimisticEntry] = useOptimistic(
+  /**
+   * One reducer, two operations. `add` prepends as it always did; `assign`
+   * rewrites `account_id` on a row in place.
+   *
+   * The in-place rewrite is what makes assigning from inside the Unassigned
+   * view feel right: the row leaves the filtered set the moment it is assigned,
+   * rather than sitting there claiming to be unassigned until the round trip
+   * lands. It is deliberately a PATCH and not a replace - `assign` copies the
+   * existing row and overrides one field, so an optimistic update cannot invent
+   * or lose any of the others, exactly as the server call does not.
+   */
+  type OptimisticOp =
+    | { kind: "add"; entry: Expense }
+    | { kind: "assign"; id: string; account_id: string | null };
+
+  const [optimisticEntries, applyOptimistic] = useOptimistic(
     initialEntries,
-    (state: Expense[], newEntry: Expense) => [newEntry, ...state]
+    (state: Expense[], op: OptimisticOp) =>
+      op.kind === "add"
+        ? [op.entry, ...state]
+        : state.map((e) => (e.id === op.id ? { ...e, account_id: op.account_id } : e))
   );
 
   const [total, setTotal] = useState(initialTotal);
@@ -120,7 +160,7 @@ export function ExpensesPageClient({
     setCategoryTotals((prev) => ({ ...prev, [data.category_id]: (prev[data.category_id] || 0) + data.amount }));
 
     startTransition(async () => {
-      addOptimisticEntry(optimistic);
+      applyOptimistic({ kind: "add", entry: optimistic });
       try {
         const result = await addExpense(data);
         if (result.error) {
@@ -146,6 +186,53 @@ export function ExpensesPageClient({
     setFormOpen(true);
   }
 
+  /**
+   * Assign or clear one row's account, and nothing else.
+   *
+   * Reuses `editExpense` - the same server action the edit form already uses -
+   * rather than adding a write path. Ownership is therefore checked by the same
+   * authenticated `.eq("user_id", userId)` that action already does; a row
+   * belonging to anyone else was never fetched in the first place.
+   *
+   * Every other field is passed through **from the row's own value**, not from
+   * a fresh default. That is the whole safety property: the only byte that
+   * differs is `account_id`. Sourcing `amount` from anywhere else - a zero, a
+   * re-derived total - is how a tagging control silently rewrites money.
+   *
+   * Optimistic in the direction of the change, so the row leaves the
+   * Unassigned view immediately instead of lingering until the round trip. If
+   * the action rejects, the entry is restored to the account it had, which for
+   * a failed clear is `null` again.
+   */
+  function handleAssignAccount(entry: Expense, nextAccountId: string) {
+    const accountId = nextAccountId === "" ? null : nextAccountId;
+    if ((entry.account_id ?? null) === accountId) return;
+
+    startTransition(async () => {
+      const previous = entry;
+      applyOptimistic({ kind: "assign", id: entry.id, account_id: accountId });
+      try {
+        await editExpense(entry.id, {
+          title: entry.title,
+          amount: Number(entry.amount),
+          category_id: entry.category_id,
+          date: entry.date,
+          notes: entry.notes ?? undefined,
+          account_id: accountId ?? undefined,
+        });
+        router.refresh();
+        toast.success(accountId ? "Account assigned" : "Account cleared");
+      } catch {
+        applyOptimistic({
+          kind: "assign",
+          id: previous.id,
+          account_id: previous.account_id ?? null,
+        });
+        toast.error("Unable to update the account on this expense.");
+      }
+    });
+  }
+
   function handleAdd() {
     setEditEntry(null);
     setFormOpen(true);
@@ -164,10 +251,21 @@ export function ExpensesPageClient({
     setDeleteId(null);
   }
 
+  // One definition, imported rather than restated: the filter and the row
+  // control have to agree on what "unassigned" is, or the view can show a row
+  // the control believes is already tagged.
+  const isUnassigned = (e: Expense) => isUnassignedEntry(e);
+
+  // Counted over the whole month's entries, not the current page, so the number
+  // does not change as you page through - a count that halves on page 2 reads
+  // as a bug.
+  const unassignedCount = optimisticEntries.filter(isUnassigned).length;
+
   const filteredEntries = optimisticEntries.filter((entry) => {
     const matchesSearch = entry.title.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === "all" || entry.category_id === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesAccount = !unassignedOnly || isUnassigned(entry);
+    return matchesSearch && matchesCategory && matchesAccount;
   });
 
   const totalItems = filteredEntries.length;
@@ -293,6 +391,36 @@ export function ExpensesPageClient({
             ))}
           </SelectContent>
         </Select>
+
+        {/* The unassigned filter, and the reason it is a PERSISTENT control
+            rather than a search box.
+
+            30 of this ledger's 30 rows are untagged, and the list pages at 15,
+            so they are not reachable without one. The /accounts screen already
+            carries an "Unassigned Transactions" card saying that this money is
+            excluded from totals - which is correct and, on its own, useless,
+            because it offered no way to act. This is that way, and `?unassigned=1`
+            is what makes the link from that card a destination rather than a
+            note.
+
+            The count is rendered because a filter that hides rows without saying
+            how many is how a list ends up reading as complete. */}
+        {accounts && accounts.length > 0 && (
+          <div className="flex items-center gap-2 sm:ml-auto">
+            <FilterPills
+              label="Account tagging"
+              options={[
+                { value: "all", label: "All" },
+                { value: "unassigned", label: `Unassigned (${unassignedCount})` },
+              ]}
+              value={unassignedOnly ? "unassigned" : "all"}
+              onChange={(v: string) => {
+                setUnassignedOnly(v === "unassigned");
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Expense List Section */}
@@ -331,6 +459,40 @@ export function ExpensesPageClient({
                   </div>
                   {entry.notes && (
                     <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
+                  )}
+                  {/* The tagging control, inline, from `sm` up ONLY.
+
+                      At 375 this was measured, not assumed: the compact select
+                      is 136px inside a 343px row that also carries the title,
+                      the category badge, the date, the amount and two icon
+                      buttons. The title collapsed to 3px. The row cannot hold
+                      all of it, and the things that lose in that contest are the
+                      things that identify the transaction - which is backwards,
+                      because "which expense is this" is the question a ledger
+                      row exists to answer. Compressing further was rejected: a
+                      3px title is not a tight fit, it is no title.
+
+                      So below `sm` the control is simply not rendered, and
+                      assignment happens through the expense edit flow, which
+                      already carries the full labelled AccountSelect. Nothing
+                      is hidden to make room - the row is unchanged from what it
+                      was before this feature, and every action on it still
+                      works. `?unassigned=1` remains the way to FIND the
+                      untagged rows on a phone; it just is not also the place to
+                      fix them.
+
+                      Deliberately NOT done: a page-level selector, because a
+                      control above a list of untagged rows reads as "apply to
+                      these", and there is no bulk feature to apply it to. */}
+                  {accounts && accounts.length > 0 && (
+                    <div className="mt-1 hidden sm:block">
+                      <AccountSelect
+                        compact
+                        accounts={accounts}
+                        value={entry.account_id ?? ""}
+                        onChange={(v) => handleAssignAccount(entry, v)}
+                      />
+                    </div>
                   )}
                 </div>
                 <div className="flex items-center gap-4 shrink-0">

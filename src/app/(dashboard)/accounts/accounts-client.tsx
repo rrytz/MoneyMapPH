@@ -11,7 +11,8 @@ import { FilterPills } from "@/components/shared/filter-pills";
 import { gridTracksFor, gridTracksClass } from "@/lib/utils/grid-tracks";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, ArrowLeftRight, Wallet, Info } from "lucide-react";
+import { Plus, ArrowLeftRight, Wallet, Info, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { toggleArchiveAccount, removeTransfer } from "@/app/(dashboard)/accounts/actions";
 import { toast } from "sonner";
 
@@ -149,8 +150,34 @@ export function AccountsClient({
             Untagged: ₱{(unassigned.unassignedIncome - unassigned.unassignedExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-muted-foreground">
-            Untagged transactions continue to be included in your monthly totals, budgets, and financial metrics.
+            Untagged transactions are <span className="font-semibold text-foreground">excluded</span> from account balances and net worth. Tag them to include them.
           </p>
+          {/* CORRECTED, and it was the more serious half of this card.
+
+              It previously said the opposite - that untagged transactions
+              still count toward monthly totals, budgets and financial
+              metrics. `get_account_aggregates` filters `account_id IS NOT NULL`
+              on the income, expense and transfer branches, so an untagged row
+              reaches no account, and therefore no `current_balance` and no
+              `totalLiquidity`. Measured against the live database: 29 of 29
+              expenses and 1 of 1 income rows are untagged, so every account card
+              on this screen is currently showing its `initial_balance` and
+              nothing else.
+
+              A warning that states the opposite of the truth is worse than no
+              warning, because it is read once and then relied on.
+
+              The link is what makes the corrected sentence actionable. Before
+              this, the card reported a problem and offered no way to fix it -
+              which is how a correct warning can sit on a screen indefinitely
+              while nothing changes. */}
+          <Link
+            href="/expenses?unassigned=1"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-sulpot-deep dark:text-sulpot-bright hover:underline"
+          >
+            Review and assign them
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
         {/* Account controls */}

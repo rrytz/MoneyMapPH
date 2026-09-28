@@ -10,7 +10,7 @@ import { resolveViewMonth } from "@/lib/utils/view-month";
 import { ExpensesPageClient } from "./expenses-page-client";
 
 interface ExpensesPageProps {
-  searchParams: Promise<{ month?: string; year?: string }>;
+  searchParams: Promise<{ month?: string; year?: string; unassigned?: string }>;
 }
 
 // The query was already month-scoped but the month was hardcoded to the current
@@ -48,6 +48,13 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       currentMonth={month}
       currentYear={year}
       accounts={accountsResult.accounts}
+      // `unassigned=1` only, and nothing more elaborate. The Accounts screen
+      // links here, so the state has to be a URL a person can follow, refresh,
+      // or go back from. The `key` above deliberately does NOT include it: the
+      // component syncs this from the prop on change, which is what makes
+      // back/forward work, and baking it into the key would remount instead and
+      // throw away the page and filters the user had set.
+      initialUnassignedOnly={params.unassigned === "1"}
     />
   );
 }

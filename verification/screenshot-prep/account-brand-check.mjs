@@ -443,6 +443,30 @@ export const describe = (card, nearestFn) => {
     // outer border too. On a card whose inner divider was removed it would
     // return the outer border, compare it across schemes, find them equal, and
     // report PASS for a divider that no longer exists. Silent, plausible, wrong.
+    // THE LOGO, or the monogram standing in for it.
+    //
+    // Measured, not inferred: `color` is the resolved value of the container's
+    // `[color:var(--brand-on)]`, which is what a `fill="currentColor"` path
+    // inherits. `present` is separate from every equality so the assertions
+    // below can fail on absence rather than on a null-vs-null comparison that
+    // is trivially satisfied.
+    logo: (() => {
+      const el = card.querySelector("[data-account-logo]");
+      if (!el) return { present: false, kind: "none" };
+      const cs = getComputedStyle(el);
+      const b = el.getBoundingClientRect();
+      const mono = !!el.querySelector("[data-account-logo-mono]");
+      return {
+        present: true,
+        kind: mono ? "monogram" : "mark",
+        color: cs.color,
+        height: Math.round(b.height),
+        width: Math.round(b.width),
+        // A real mark must actually paint something.
+        nonEmpty: mono ? (el.textContent || "").trim().length > 0 : !!el.querySelector("svg, path"),
+        bg: nearestFn(el, card),
+      };
+    })(),
     divider: (() => {
       const d = card.querySelector("[data-account-divider]");
       return d ? getComputedStyle(d).borderTopColor : null;
@@ -489,6 +513,7 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
 
   console.log("=== S5d: brand card contract - resting state ===");
   const light = byScheme.light;
+  const logos = [];
   console.log(`  cards found: ${light.length} (light) / ${byScheme.dark.length} (dark)`);
   if (light.length === 0) fail("no brand cards found - the check would pass vacuously");
 
@@ -516,6 +541,34 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
     // compare.
     if (!lc.dividerPresent) fail(`${lc.name}: no [data-account-divider] found - the divider assertion cannot run`);
     else if (lc.divider !== dc.divider) fail(`${lc.name}: divider is theme-dependent (${lc.divider} -> ${dc.divider})`);
+
+    // ---- THE LOGO -----------------------------------------------------
+    // Presence FIRST, before any equality. `lc.logo && lc.logo.color !== ...`
+    // would let a missing logo skip the comparison entirely, and two missing
+    // logos would compare equal to each other - null vs null, the exact shape
+    // that let a card with no divider pass.
+    if (!lc.logo.present) {
+      fail(`${lc.name}: no [data-account-logo] rendered - the logo assertions cannot run`);
+    } else if (!lc.logo.nonEmpty) {
+      fail(`${lc.name}: [data-account-logo] is present but empty - a mark with no path and no monogram is a hole in the card, not a logo`);
+    } else {
+      if (!dc.logo || !dc.logo.present) {
+        fail(`${lc.name}: logo present in light, absent in dark`);
+      } else {
+        if (lc.logo.color !== dc.logo.color) {
+          fail(`${lc.name}: logo is THEME-DEPENDENT - ${lc.logo.color} light, ${dc.logo.color} dark. The mark must inherit the card's text token; a per-path fill is the cause.`);
+        }
+        // Graphical element, so WCAG non-text 3:1, not the 4.5:1 text floor.
+        const lr = contrast(lc.logo.color, lc.logo.bg);
+        if (lr !== null && lr < MIN_ICON_CONTRAST) {
+          fail(`${lc.name}: logo (${lc.logo.kind}) ${lc.logo.color} on ${lc.logo.bg} = ${lr.toFixed(2)}:1, below the ${MIN_ICON_CONTRAST}:1 graphical-object floor.`);
+        }
+        if (lc.logo.height !== dc.logo.height) {
+          fail(`${lc.name}: logo height differs between schemes (${lc.logo.height} vs ${dc.logo.height})`);
+        }
+      }
+    }
+    logos.push(lc.logo);
     if (lc.border !== dc.border) fail(`${lc.name}: border is theme-dependent (${lc.border} -> ${dc.border})`);
     if (lc.geometry !== dc.geometry) fail(`${lc.name}: geometry differs between schemes`);
     if (lc.clipped > 0) fail(`${lc.name}: ${lc.clipped} clipped text element(s)`);
@@ -526,6 +579,39 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
   // here, over every element and pseudo-element both gates measured, so the day
   // someone adds a backdrop-filter the MEASUREMENT stops being trustworthy and
   // this says so instead of quietly reporting a plausible number.
+  // ---- the logo lockup, across cards ---------------------------------
+  // Rendered HEIGHT must be identical for every card. Width is NOT asserted:
+  // it is intrinsic and is expected to vary, because each mark keeps its own
+  // natural aspect ratio and nothing is padded to a square.
+  //
+  // Height is the whole point of the lockup. If marks render at different
+  // heights, the bank names sit on different baselines across the grid and the
+  // row stops reading as one row.
+  {
+    const withLogo = logos.filter((l) => l && l.present);
+    if (withLogo.length !== logos.length) {
+      fail(`${logos.length - withLogo.length} card(s) had no logo at all - see the presence failures above`);
+    }
+    const heights = [...new Set(withLogo.map((l) => l.height))];
+    if (heights.length > 1) {
+      fail(`logo lockup: rendered heights differ across cards (${withLogo.map((l) => `${l.kind}:${l.height}`).join(", ")}). The container height is fixed precisely so these match.`);
+    } else if (heights.length === 1) {
+      console.log(`  lockup: ${withLogo.length} logo(s) at a uniform ${heights[0]}px height; widths ${[...new Set(withLogo.map((l) => l.width))].sort((a, b) => a - b).join("/")}px (intrinsic, expected to vary)`);
+    }
+
+    // THE FALLBACK MUST ACTUALLY RENDER. A fallback that never renders is a
+    // fallback that does not work, and the fixture set has to prove it - so if
+    // no card resolved to the monogram, that is a FAILURE of coverage, not a
+    // pass. Cash has no mark by design, so the natural fixture exists; if a
+    // future data set has one, this is what stops the path rotting unnoticed.
+    const monos = withLogo.filter((l) => l.kind === "monogram");
+    if (monos.length === 0) {
+      fail("logo fallback: no card in the fixture set resolved to the monogram, so the fallback path was never exercised. A fallback that never renders is a fallback that does not work - add a brand with no mark, or a fixture that produces one.");
+    } else {
+      console.log(`  fallback: ${monos.length} card(s) rendered the monogram (${monos.map((l) => l.height + "px").join(", ")}) and were held to the same four assertions`);
+    }
+  }
+
   console.log("\n=== compositing-model guard ===");
   {
     const args = [COLLECT.toString(), COMPOSITING_SCOPE.toString(), COMPOSITING_HAZARDS];

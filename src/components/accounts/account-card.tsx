@@ -4,7 +4,8 @@ import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
-import { getAccountBrandPalette, ICON_FILL_ALPHA, brandHairline, withAlpha } from "@/lib/utils/account-brand";
+import { accountBrand, getAccountBrandPalette, ICON_FILL_ALPHA, brandHairline, withAlpha } from "@/lib/utils/account-brand";
+import { LOGO_HEIGHT_PX, resolveBrandLogo } from "@/lib/utils/brand-logos";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -56,6 +57,10 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
   // bank's card, and de-emphasis is the Archived pill's job, not the
   // legibility of the whole card.
   const brand = getAccountBrandPalette(account);
+  // The BRAND key, resolved the same way the palette resolves it, so the logo and
+  // the colours can never come from two different matchers. `null` for cash and
+  // for an unknown account, which is what routes it to the monogram.
+  const brandKey = accountBrand(account);
 const isBrandSurface = !account.is_negative;
 
   return (
@@ -139,6 +144,31 @@ const isBrandSurface = !account.is_negative;
           >
             <Icon className="h-5 w-5" />
           </div>
+          {/* LOGO LOCKUP. Height is fixed so every brand — mark or monogram —
+              occupies one vertical band and the name sits on a single line across
+              the grid. Width is intrinsic and is expected to vary with each
+              mark's natural aspect ratio: nothing is padded to a square and
+              nothing is letterboxed.
+
+              The logo inherits the card's TEXT token, not `brand.accent`, so the
+              mark and the balance resolve the same colour and the card keeps one
+              colour source. A null mark is not a hole: it renders the monogram at
+              the same height, on a translucent brand base, in the same token. */}
+          <span
+            data-account-logo
+            data-brand={brandKey ?? "neutral"}
+            className="inline-flex items-center justify-center shrink-0 [color:var(--brand-on)]"
+            style={{ height: LOGO_HEIGHT_PX, width: "auto" }}
+          >
+            {resolveBrandLogo(brandKey ?? "neutral") ?? (
+              <span
+                data-account-logo-mono
+                className="inline-flex items-center justify-center font-semibold uppercase leading-none rounded-sm w-full h-full [background-color:var(--brand-hover-bg)]"
+              >
+                {(account.name || "?").charAt(0)}
+              </span>
+            )}
+          </span>
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-base [color:var(--brand-on)]">{account.name}</h3>

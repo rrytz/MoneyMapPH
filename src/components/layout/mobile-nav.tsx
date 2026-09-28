@@ -50,7 +50,15 @@ export function MobileNav() {
   const MoreIcon = NAV_ICON_MAP.MoreHorizontal;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
+    // Identified semantically by gate:nav. It used to be found with
+    // `nav.fixed.bottom-0`, i.e. by its STYLING classes - which means a
+    // Tailwind refactor would make the gate silently stop finding the nav and
+    // report on nothing. A selector built on how an element is painted cannot
+    // distinguish it from any other element painted the same way.
+    <nav
+      data-mobile-nav
+      className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border bg-card/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
+    >
       <div className="flex items-center justify-around min-h-16 px-2">
         {primaryItems.map((item) => {
           const Icon = NAV_ICON_MAP[item.icon];
@@ -75,8 +83,18 @@ export function MobileNav() {
         })}
 
         <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-          <SheetTrigger className="flex flex-col items-center justify-center gap-1 flex-1 py-1 text-[11px] font-medium transition-colors cursor-pointer text-muted-foreground hover:text-foreground">
+          {/* `data-mobile-nav-more` replaces the gate's old
+              `button` + `/more/i over innerText`. That matched by visible label,
+              so an icon-only or translated More button became unfindable, and
+              the check's "More must light up" assertion quietly lost its
+              subject. The label is copy; this is the control.
+              `data-active` is the state, so the gate no longer has to infer
+              "active" by regexing theme class names out of the markup - which
+              is the archived-card defect, and it is what would have rotted on
+              the next theme rename. */}
+          <SheetTrigger data-mobile-nav-more className="flex flex-col items-center justify-center gap-1 flex-1 py-1 text-[11px] font-medium transition-colors cursor-pointer text-muted-foreground hover:text-foreground">
             <span
+              data-active={isMoreActive ? "true" : undefined}
               className={cn(
                 "flex flex-col items-center gap-1",
                 isMoreActive && "text-sulpot-deep dark:text-sulpot-bright font-semibold"

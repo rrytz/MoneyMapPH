@@ -57,6 +57,12 @@ export function DesktopNav() {
       <nav
         ref={navRef}
         aria-label="Primary navigation"
+        // Paired with the mobile nav's `data-mobile-nav` so gate:nav can tell
+        // the two bars apart by what they ARE rather than by the aria-label
+        // string on one and a `fixed bottom-0` class on the other. Two different
+        // identification schemes for the same question is how one of them ends
+        // up matching nothing.
+        data-desktop-nav
         tabIndex={0}
         className="type-nav hidden shrink-0 items-center gap-1 overflow-x-auto border-b border-border bg-background px-4 [scrollbar-width:none] sm:px-6 lg:flex [&::-webkit-scrollbar]:hidden"
       >

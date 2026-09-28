@@ -21,6 +21,17 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+/**
+ * Motion suppression, injected AFTER every navigation.
+ *
+ * This gate asserts on geometry, and both bars carry transitions, so without it
+ * every box is read mid-animation. The order matters and is not incidental:
+ * `addStyleTag` writes into the current document, `goto` replaces that
+ * document, so injecting first discards the tag with no error at all. The brand
+ * gate shipped that bug for two commits.
+ */
+const KILL_MOTION = "* { transition: none !important; animation: none !important; }";
+
 const REACHABILITY_WIDTHS = [1440, 1280, 1100, 1024, 900];
 const MOBILE_WIDTHS = [375, 390];
 const VISIBILITY_WIDTHS = [320, 360, 375, 390, 414, 430, 540, 768, 900, 1023, 1024, 1280];
@@ -42,9 +53,45 @@ async function openAt(width) {
   await ctx.addCookies(pairs.map((c) => ({ name: c.name, value: c.value, domain: "localhost", path: "/" })));
   const pg = await ctx.newPage();
   await pg.goto("http://localhost:3000/dashboard", { waitUntil: "load" });
-  await pg.waitForFunction(() => !document.querySelector(".animate-pulse"), null, { timeout: 20000 }).catch(() => {});
-  await pg.waitForTimeout(800);
+  // Motion suppressed AFTER navigation. `addStyleTag` writes into the CURRENT
+  // document and `goto` replaces that document, so injecting before the
+  // navigation discards the tag silently - which is what the brand gate did for
+  // two commits until a menu click timed out on a moving element and sent me
+  // looking at why.
+  //
+  // This gate measures geometry, and both bars carry transitions, so without
+  // this it has been reading boxes mid-animation and calling the result a
+  // layout.
+  await pg.addStyleTag({ content: KILL_MOTION });
+  // The previous line after goto was `waitForTimeout(800)`, immediately after a
+  // `waitForFunction` that the spinner had already gone. The condition implies
+  // the content is ready; the sleep was superstition, and it was on the hot
+  // path - once per viewport, and again once per destination.
+  await settled(pg);
   return { ctx, pg };
+}
+
+/**
+ * The one settling condition, shared by every opener.
+ *
+ * Waits for the nav to exist AND for the page to stop growing, which is the
+ * thing a fixed sleep was standing in for. `requestAnimationFrame` twice is not
+ * a sleep: it yields until the compositor has presented, so a box measured
+ * afterwards corresponds to a frame the user could actually see.
+ */
+async function settled(pg, navSelector = "[data-desktop-nav], [data-mobile-nav]") {
+  // `state: "attached"`, NOT the default "visible". At any given width exactly
+  // one of the two bars is legitimately hidden - the desktop nav carries
+  // `hidden ... lg:flex` - so waiting for visibility either hangs forever or
+  // waits for the wrong bar. What this needs to know is that the app has
+  // rendered, not which breakpoint it landed on; which bar is showing is
+  // precisely what the phases assert.
+  await pg.waitForSelector(navSelector, { state: "attached", timeout: 20000 });
+  await pg.waitForFunction(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(true)))),
+    null,
+    { timeout: 5000 }
+  );
 }
 
 // Phase D needs a real device height. `openAt` hardcodes 800, which is not
@@ -58,7 +105,11 @@ async function openAtViewport(width, height) {
   const pg = await ctx.newPage();
   pg.setDefaultTimeout(30000);
   await pg.goto("http://localhost:3000/dashboard", { waitUntil: "networkidle" });
-  await pg.waitForTimeout(1200);
+  await pg.addStyleTag({ content: KILL_MOTION });
+  // Was a bare 1200ms. Replaced by the same observed condition every other
+  // opener uses, so the two cannot drift into disagreeing about what "ready"
+  // means.
+  await settled(pg);
   return { ctx, pg };
 }
 
@@ -70,8 +121,8 @@ async function openAtViewport(width, height) {
  * into disagreeing about what "visible" means.
  */
 const PROBE = () => {
-  const top = document.querySelector('nav[aria-label="Primary navigation"], nav[aria-label="Primary"]');
-  const bottom = document.querySelector("nav.fixed.bottom-0");
+  const top = document.querySelector('[data-desktop-nav]');
+  const bottom = document.querySelector("[data-mobile-nav]");
   const box = (el) => {
     if (!el) return null;
     const b = el.getBoundingClientRect();
@@ -98,8 +149,8 @@ for (const width of REACHABILITY_WIDTHS) {
   const { ctx, pg } = await openAt(width);
 
   const result = await pg.evaluate(() => {
-    const top = document.querySelector('nav[aria-label="Primary navigation"], nav[aria-label="Primary"]');
-    const bottom = document.querySelector("nav.fixed.bottom-0");
+    const top = document.querySelector('[data-desktop-nav]');
+    const bottom = document.querySelector("[data-mobile-nav]");
     const shown = (el) => {
       if (!el || getComputedStyle(el).display === "none") return false;
       const b = el.getBoundingClientRect();
@@ -219,6 +270,19 @@ const DIRECT_ACTIVE = ["/dashboard", "/expenses", "/budgets", "/accounts"];
 
 // "Visible" cannot be a display keyword read off the element: a child of a
 // display:none subtree still computes its own display. Hence the ancestor walk.
+//
+// The bar is identified by `[data-mobile-nav]`, NOT by "the first visible
+// <nav> in the document". The old finder was the blanket
+// `querySelectorAll("nav").find(visible && height > 0)`, and I proved what that
+// costs by deleting the `data-mobile-nav` attribute: the gate still reported
+// `375px bar --- PASS` and exited 0, because with the attribute gone it simply
+// found the mobile nav by being the first visible <nav> on the page. The
+// rewrite had fixed the individual queries and left the finder, so the gate was
+// measuring a bar it had no handle to - the archived-card defect, in the file I
+// was rewriting specifically to remove it.
+//
+// Document order is not identity either: both bars are <nav>, so "first
+// visible" is a statement about layout that changes with the breakpoint.
 const FIND_VISIBLE_NAV = `(() => {
   const vis = (el) => {
     if (el.checkVisibility) return el.checkVisibility({ checkVisibilityCSS: true });
@@ -229,7 +293,8 @@ const FIND_VISIBLE_NAV = `(() => {
     }
     return true;
   };
-  return [...document.querySelectorAll("nav")].find((n) => vis(n) && n.getBoundingClientRect().height > 0) || null;
+  const el = document.querySelector("[data-mobile-nav]");
+  return el && vis(el) ? el : null;
 })()`;
 
 for (const width of MOBILE_WIDTHS) {
@@ -238,9 +303,15 @@ for (const width of MOBILE_WIDTHS) {
   // 1. five slots, in order, nothing clipped, no overflow
   const bar = await pg.evaluate((finder) => {
     const nav = eval(finder);
-    if (!nav) return { err: "no visible bottom nav" };
-    const more = [...nav.querySelectorAll("button")].find((b) => /more/i.test(b.innerText || ""));
+    // Presence is reported, not assumed. The old shape returned
+    // `{ err: "no visible bottom nav" }` and the very next line did
+    // `bar.links.map(...)` on it - so a missing nav produced a TypeError, an
+    // unhandled crash and a non-zero exit that says nothing about what was
+    // wrong. A crash is not a false pass, but it is an unnamed one.
+    if (!nav) return { navFound: false };
+    const more = nav.querySelector("[data-mobile-nav-more]");
     return {
+      navFound: true,
       links: [...nav.querySelectorAll("a")].map((a) => ({
         href: a.getAttribute("href"),
         w: Math.round(a.getBoundingClientRect().width),
@@ -255,14 +326,28 @@ for (const width of MOBILE_WIDTHS) {
     };
   }, FIND_VISIBLE_NAV);
 
+  if (!bar.navFound) {
+    // FAIL LOUDLY AND SPECIFICALLY rather than dereferencing a missing nav.
+    failures++;
+    console.log(`--- ${width}px bar --- FAIL (no [data-mobile-nav] rendered - nothing to assert on)`);
+    continue;
+  }
+
   const hrefs = bar.links.map((l) => l.href);
+  // Presence before equality, stated as its own term. `slotMatch` alone is
+  // false for an empty bar, so this is belt-and-braces - but the audit's rule
+  // is that the absence of a subject must be visible in the output, and
+  // `bar.links.length === 0` is exactly the condition a renamed selector would
+  // produce.
+  const barPresent = bar.links.length > 0 && !!bar.more;
   const slotMatch =
+    barPresent &&
     hrefs.length === EXPECTED_MOBILE_SLOTS.length &&
     EXPECTED_MOBILE_SLOTS.every((h, i) => hrefs[i] === h);
   const noClip = bar.links.every((l) => !l.clipped) && !(bar.more && bar.more.clipped);
-  const barOk = !bar.err && slotMatch && !!bar.more && noClip && !bar.overflow && !bar.hScroll;
+  const barOk = slotMatch && noClip && !bar.overflow && !bar.hScroll;
   if (!barOk) failures++;
-  console.log(`--- ${width}px bar --- ${barOk ? "PASS" : "FAIL"}`);
+  console.log(`--- ${width}px bar --- ${barOk ? "PASS" : "FAIL"}${barPresent ? "" : " (bar incomplete - nothing to compare)"}`);
   console.log(`  slots:    ${hrefs.join(" . ")} . ${bar.more ? bar.more.label : "(no More)"}`);
   console.log(`  expected: ${EXPECTED_MOBILE_SLOTS.join(" . ")} . More  -> ${slotMatch ? "match" : "MISMATCH"}`);
   console.log(`  height ${bar.navH}px  clipped ${noClip ? "none" : "YES"}  navOverflow ${bar.overflow}  hScroll ${bar.hScroll}`);
@@ -270,7 +355,8 @@ for (const width of MOBILE_WIDTHS) {
   // 2. each daily destination activates ITS OWN slot, via aria-current
   for (const href of DIRECT_ACTIVE) {
     await pg.goto(`http://localhost:3000${href}`, { waitUntil: "networkidle" });
-    await pg.waitForTimeout(700);
+    await pg.addStyleTag({ content: KILL_MOTION });
+    await settled(pg);
     const active = await pg.evaluate((finder) => {
       const nav = eval(finder);
       const a = nav && nav.querySelector('a[aria-current="page"]');
@@ -284,26 +370,44 @@ for (const width of MOBILE_WIDTHS) {
   // 3. every secondary destination highlights MORE and leaves no direct slot
   for (const href of MORE_SCOPES_ACTIVE) {
     await pg.goto(`http://localhost:3000${href}`, { waitUntil: "networkidle" });
-    await pg.waitForTimeout(700);
+    await pg.addStyleTag({ content: KILL_MOTION });
+    await settled(pg);
     const st = await pg.evaluate((finder) => {
       const nav = eval(finder);
-      if (!nav) return { active: null, more: false };
-      const more = [...nav.querySelectorAll("button")].find((b) => /more/i.test(b.innerText || ""));
+      if (!nav) return { active: null, more: false, moreFound: false, navFound: false };
+      const more = nav.querySelector("[data-mobile-nav-more]");
       const a = nav.querySelector('a[aria-current="page"]');
-      // The trigger is a button, so aria-current may not be set on it; the
-      // active class is the fallback. Either signal is acceptable - a MISSING
-      // active slot is not, which is what /income would have looked like.
-      const moreActive = !!(
-        (more && more.querySelector("span") && more.querySelector("span").getAttribute("data-active") === "true") ||
-        (more && /bg-sulpot|sulpot-tint|text-sulpot|text-sulpot-bright/.test(String(more.className + " " + (more.innerHTML || ""))))
-      );
-      return { active: a ? a.getAttribute("href") : null, more: moreActive };
+      // The state is `data-active`, and nothing else.
+      //
+      // This used to fall back to regexing `bg-sulpot|text-sulpot|...` out of
+      // className and innerHTML. That is the archived-card defect verbatim -
+      // inferring a state from how it is painted - and it is what would have
+      // rotted silently on the next theme rename, leaving "More must light up"
+      // asserting against a string that no longer appears anywhere. The
+      // `data-active` signal was already in the same object one line up; the
+      // fallback made the correct answer optional.
+      const moreActive = !!(more && more.querySelector("[data-active='true']"));
+      return { active: a ? a.getAttribute("href") : null, more: moreActive, moreFound: !!more, navFound: true };
     }, FIND_VISIBLE_NAV);
     // /income is the one this slice changed: it was a direct slot and is now
     // secondary, so More must light up where it previously did not.
+    //
+    // Presence before equality. `st.more === true` already implies the trigger
+    // was found, so this cannot pass by having nothing to assert on - but the
+    // reasons are separated so that a FAIL says which of the two things broke.
     const pass = st.more === true && st.active === null;
-    if (!pass) failures++;
-    console.log(`  ${href.padEnd(13)} -> More ${String(st.more).padEnd(6)} direct ${String(st.active).padEnd(11)} ${pass ? "PASS" : "FAIL"}`);
+    if (!st.navFound) {
+      failures++;
+      console.log(`  ${href.padEnd(13)} -> NO NAV FOUND  FAIL (nothing to assert on)`);
+    } else if (!st.moreFound) {
+      failures++;
+      console.log(`  ${href.padEnd(13)} -> no [data-mobile-nav-more]  FAIL (nothing to assert on)`);
+    } else if (!pass) {
+      failures++;
+      console.log(`  ${href.padEnd(13)} -> More ${String(st.more).padEnd(6)} direct ${String(st.active).padEnd(11)} FAIL`);
+    } else {
+      console.log(`  ${href.padEnd(13)} -> More ${String(st.more).padEnd(6)} direct ${String(st.active).padEnd(11)} PASS`);
+    }
   }
 
   await ctx.close();
@@ -398,7 +502,15 @@ for (const [width, height] of MOBILE_DEVICES) {
   // reading answers a different question and reports a false failure for any
   // page taller than its viewport.
   await pg.evaluate((s) => { const sc = document.querySelector("main") || document.scrollingElement; return eval(s)(sc); }, SCROLL_TO_END);
-  await pg.waitForTimeout(400);
+  // Was 400ms. A scroll is an event with a real completion condition, not a
+  // duration: wait until the container is actually at the end, then yield a
+  // frame so the measurement corresponds to a presented frame rather than a
+  // scroll position the compositor has not drawn yet.
+  await pg.waitForFunction(() => {
+    const sc = document.querySelector("main") || document.scrollingElement;
+    return sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 1;
+  }, null, { timeout: 5000 });
+  await settled(pg);
   const after = await pg.evaluate(
     ([finder, probe]) => {
       const nav = eval(finder);
@@ -443,7 +555,15 @@ for (const [width, height] of MOBILE_DEVICES) {
     const s = document.querySelector("main") || document.scrollingElement;
     s.scrollTop = s.scrollHeight;
   });
-  await pg.waitForTimeout(400);
+  // Was 400ms. Same condition as the real case: wait for the scroll to actually
+  // arrive, then yield a frame. The synthetic negative exists to prove this
+  // assertion can reject an unsafe state, and a measurement taken before the
+  // scroll lands would not be testing what it claims to test.
+  await pg.waitForFunction(() => {
+    const s = document.querySelector("main") || document.scrollingElement;
+    return s.scrollTop + s.clientHeight >= s.scrollHeight - 1;
+  }, null, { timeout: 5000 });
+  await settled(pg);
 
   const m = await pg.evaluate(
     ([finder, probe]) => {
@@ -479,13 +599,43 @@ for (const [width, height] of MOBILE_DEVICES) {
 {
   const { ctx, pg } = await openAt(1280);
   const r = await pg.evaluate((finder) => {
-    const nav = eval(finder);
-    const b = nav ? nav.getBoundingClientRect() : null;
-    return { h: b ? Math.round(b.height) : 0, top: b ? Math.round(b.top) : null, isBottom: !!b && b.top > window.innerHeight * 0.6 };
+    const mobile = eval(finder);
+    const desktop = document.querySelector("[data-desktop-nav]");
+    const vis = (el) => {
+      if (!el) return false;
+      if (el.checkVisibility) return el.checkVisibility({ checkVisibilityCSS: true });
+      return getComputedStyle(el).display !== "none";
+    };
+    const b = mobile && vis(mobile) ? mobile.getBoundingClientRect() : null;
+    return {
+      desktopPresent: vis(desktop),
+      mobilePresent: !!(mobile && vis(mobile)),
+      h: b ? Math.round(b.height) : 0,
+      top: b ? Math.round(b.top) : null,
+      isBottom: !!b && b.top > window.innerHeight * 0.6,
+    };
   }, FIND_VISIBLE_NAV);
-  const pass = r.isBottom === false;
+  // This used to be `r.isBottom === false`, and it passed for the wrong reason.
+  // `isBottom` is `!!b && ...`, so a nav that was never rendered also yields
+  // false - meaning "the mobile bar is not pinned to the bottom" was satisfied by
+  // "there is no mobile bar", which is a different claim. The printed line said
+  // so outright: `nav 0px at y=null ... PASS`.
+  //
+  // That is the archived-skip defect in its purest form: the condition producing
+  // the pass is the ABSENCE of the thing under test, so a mobile nav that
+  // silently stopped rendering would have been reported as correct.
+  //
+  // The subject at 1280px is the DESKTOP nav. So assert it is present, and
+  // separately that the mobile bar is not pinned - two complementary facts about
+  // one breakpoint, rather than one fact with two possible meanings.
+  const pass = r.desktopPresent && !r.isBottom;
   if (!pass) failures++;
-  console.log(`\n  1280px conditional ... ${pass ? "PASS" : "FAIL"}  (nav ${r.h}px at y=${r.top}, pinned bottom: ${r.isBottom})`);
+  const why = !r.desktopPresent
+    ? "no [data-desktop-nav] rendered - nothing to assert on"
+    : r.isBottom
+      ? "mobile nav pinned to the bottom at a desktop width"
+      : "desktop nav shown, mobile nav not pinned";
+  console.log(`\n  1280px conditional ... ${pass ? "PASS" : "FAIL"}  (${why}; mobile present=${r.mobilePresent} ${r.h}px at y=${r.top})`);
   await ctx.close();
 }
 

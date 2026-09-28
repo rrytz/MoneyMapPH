@@ -122,7 +122,7 @@ export default async function DashboardPage() {
     .slice(0, 10);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 pb-16 lg:pb-0">
       {/* space-y-4 between rows, not space-y-6. This is the "dashboard is too
           long" lever — 8 rows at 8px saved each. Deliberately not applied to
           the shared FintechCard p-6 default, which every other page inherits. */}

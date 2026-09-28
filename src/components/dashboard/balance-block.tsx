@@ -76,7 +76,7 @@ export function BalanceBlock({
 
   return (
     <section
-      className={cn("rounded-2xl border border-border bg-card p-4 sm:p-8", className)}
+      className={cn("rounded-2xl border border-border bg-card p-4 sm:p-6", className)}
       aria-label="Your balance"
     >
       {hasAnyAccount ? (
@@ -136,8 +136,22 @@ export function BalanceBlock({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 border-t border-border pt-3 sm:grid-cols-3 sm:gap-6">
-            <div>
+          {/* Four metric CELLS, not four floating label/value pairs.
+
+              Bare text under a `border-t` reads as a footnote to the figure
+              above it. Contained cells on their own subtle surface read as
+              discrete measurements you can take in one glance, which is the
+              point of having four of them - and it is what the reference does
+              with its metric panels.
+
+              The negative margin lets the cell fill the card's width edge to
+              edge while the LABEL stays on the card's own padding, so the
+              surface change does not cost any of the padding the density pass
+              won. `p-2.5` rather than more: the cell is a container, not a
+              panel, and padding it heavily is how a metric block becomes the
+              hero again. */}
+          <div className="-mx-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
+            <div className="rounded-lg bg-muted/50 p-2.5 border border-border/50">
               <p className="type-section-label text-muted-foreground">Safe to spend</p>
               <p
                 className={cn(
@@ -155,13 +169,13 @@ export function BalanceBlock({
                 )}
               </p>
             </div>
-            <div>
+            <div className="rounded-lg bg-muted/50 p-2.5 border border-border/50">
               <p className="type-section-label text-muted-foreground">Spent this period</p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-ink">
                 <CurrencyDisplay amount={spent} className="figure-inline" />
               </p>
             </div>
-            <div>
+            <div className="rounded-lg bg-muted/50 p-2.5 border border-border/50">
               <p className="type-section-label text-muted-foreground">Calendar month net</p>
               <p
                 className={cn(

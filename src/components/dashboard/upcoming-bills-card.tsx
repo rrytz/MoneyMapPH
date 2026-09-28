@@ -178,7 +178,7 @@ export function UpcomingBillsCard({ billsDueBy, debts, payments, todayIso }: Upc
                 <div
                   key={item.key}
                   className={cn(
-                    "flex items-center gap-3 p-2.5 rounded-lg border transition-colors",
+                    "flex items-center gap-2.5 p-2 rounded-lg border transition-colors",
                     // Same treatment as the calendar chip and the list badge:
                     // a dashed outline means "this happens once". The filled row
                     // means "and again next month", and on the dashboard that

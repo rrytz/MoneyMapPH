@@ -42,7 +42,7 @@ export function AttentionStrip({
     <aside
       aria-label="Needs attention"
       className={cn(
-        "flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card px-4 py-3",
+        "flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card px-4 py-2.5",
         breached ? "border-rose-500/40" : "border-amber-500/40",
         className
       )}
@@ -50,7 +50,7 @@ export function AttentionStrip({
       <div className="flex items-center gap-3">
         <span
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg",
+            "flex h-7 w-7 items-center justify-center rounded-lg",
             breached ? "bg-rose-500/10 text-rose" : "bg-amber-500/10 text-amber"
           )}
         >
@@ -61,7 +61,7 @@ export function AttentionStrip({
           )}
         </span>
         <div>
-          <p className="text-sm font-semibold text-ink">
+          <p className="type-section-label text-ink">
             {breached ? "Over this cutoff" : "Cutoff is close"}
           </p>
           <p className="text-xs text-muted-foreground">

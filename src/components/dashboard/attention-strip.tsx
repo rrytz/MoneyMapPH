@@ -42,7 +42,7 @@ export function AttentionStrip({
     <aside
       aria-label="Needs attention"
       className={cn(
-        "flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card px-6 py-4",
+        "flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card px-4 py-3",
         breached ? "border-rose-500/40" : "border-amber-500/40",
         className
       )}

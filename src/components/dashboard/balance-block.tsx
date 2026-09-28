@@ -76,29 +76,46 @@ export function BalanceBlock({
 
   return (
     <section
-      className={cn("rounded-2xl border border-border bg-card p-6 sm:p-8", className)}
+      className={cn("rounded-2xl border border-border bg-card p-4 sm:p-8", className)}
       aria-label="Your balance"
     >
       {hasAnyAccount ? (
-        <div className="space-y-5">
-          {/* space-y-5, not space-y-8. 30px of gap twice over is 60px of a
-              327px block, and this block has very little to give: 111 of its
-              267 is the label, the hero figure and the subtitle, and the
-              figure has to stay dominant. This is the whole of what is
-              available here. */}
-          <div className="space-y-3">
+        <div className="space-y-3">
+          {/* space-y-3, and the density pass that produced it.
+
+              This block was 348px of an 882px page at 375 - 39% of the screen
+              for seven data points - and the Upcoming Bills block beneath it
+              started at y=564, so only 103px of its 228px was above the fold.
+              The order was already right; the proportions were not.
+
+              Three changes, all measured, none of them removing content:
+                p-6 -> p-4        6px off each edge, 12px of the block
+                space-y-5 -> -3   8px twice, 16px
+                grid gap-6 -> 3   the four period metrics, tightened in place
+
+              What was NOT done: the four metrics were not made a 4-across row.
+              At 343px that is ~86px a cell, and the LABELS - "Safe to spend",
+              "Spent this period" - do not fit. It trades vertical space for
+              horizontal cramping, which is the failure the expense rows have. */}
+          <div className="space-y-2">
             <p className="type-section-label text-muted-foreground">Total across your accounts</p>
             {/* The hero is the largest ledger figure, not an identity moment.
                 Currency is Instrument everywhere so the eye reads one voice
                 across the hero and the rows below it. The Bricolage moment on
-                this surface is the character line underneath. */}
+                this surface is the character line underneath.
+
+                `text-4xl sm:text-5xl` is DASHBOARD-LOCAL on purpose. At 375 the
+                figure rendered 45px against a 30-36px target. Changing the
+                `type-ledger` role's mobile step instead would have moved every
+                ledger figure on the site - the account cards, the budgets
+                allowance - to fix one screen. */}
             <p
               className={cn(
-                "text-5xl font-semibold tracking-tight tabular-nums sm:text-6xl",
+                "text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl",
                 negative ? "text-rose" : "text-ink"
               )}
             >
-              <CurrencyDisplay amount={totalBalance} signed className="type-ledger text-5xl sm:text-6xl" />
+              <CurrencyDisplay amount={totalBalance} signed className="type-ledger text-4xl sm:text-5xl" />
             </p>
             {state !== "unmeasured" && (
               <p className="type-character text-foreground">{phaseLine[phase]}</p>
@@ -119,7 +136,7 @@ export function BalanceBlock({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 border-t border-border pt-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 border-t border-border pt-3 sm:grid-cols-3 sm:gap-6">
             <div>
               <p className="type-section-label text-muted-foreground">Safe to spend</p>
               <p

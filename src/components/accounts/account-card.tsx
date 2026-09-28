@@ -4,7 +4,7 @@ import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
-import { getAccountBrandPalette, ICON_FILL_ALPHA, brandHairline } from "@/lib/utils/account-brand";
+import { getAccountBrandPalette, ICON_FILL_ALPHA, brandHairline, withAlpha } from "@/lib/utils/account-brand";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -81,6 +81,16 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
               "--brand-on": brand.onBase,
               "--brand-muted": brand.mutedOnBase,
               "--brand-line": brandHairline(brand.onBase),
+              // INTERACTIVE STATES, derived from the brand and never from the
+              // theme. The trigger previously used `text-muted-foreground` /
+              // `hover:text-foreground` / `hover:bg-muted` - three theme
+              // tokens. The resting one already failed at 2.86:1 on GCash's
+              // base, and the hover pair went to `text-foreground`, which is
+              // near-black in light mode on a dark base. A brand card is not a
+              // themed surface, so it carries its own states.
+              "--brand-on-hover": withAlpha(brand.onBase, 1),
+              "--brand-hover-bg": withAlpha(brand.onBase, 0.12),
+              "--brand-focus-ring": withAlpha(brand.onBase, 0.55),
             } as React.CSSProperties)
           : undefined
       }
@@ -123,7 +133,14 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer">
+          {/* Theme tokens here were the live leak: `text-muted-foreground`
+              resolved to rgb(102,112,99) in light mode - 2.86:1 on GCash's
+              base - and `hover:text-foreground` went to near-black on a dark
+              base. Both removed, not out-ranked: a competing utility of equal
+              specificity cannot be beaten by a variable, only by absence. */}
+          <DropdownMenuTrigger
+            className="inline-flex items-center justify-center rounded-md p-2 cursor-pointer [color:var(--brand-muted)] hover:[color:var(--brand-on-hover)] hover:[background-color:var(--brand-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand-focus-ring)]"
+          >
             <MoreVertical className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

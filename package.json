@@ -7,13 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "gate:all": "npm run gate:types && npm test && npm run gate:typography && npm run gate:nav && npm run gate:brand && npm run build",
+    "gate:all": "npm run gate:types && npm test && npm run gate:typography && npm run gate:nav && npm run gate:brand && npm run gate:brand:states && npm run build",
     "test": "vitest run",
     "gate:types": "tsc --noEmit",
     "gate:typography": "vitest run src/tests/typography-conformance.test.ts",
     "gate:dom": "node verification/screenshot-prep/probe-run.mjs",
     "gate:nav": "node verification/screenshot-prep/nav-check.mjs",
     "gate:brand": "node verification/screenshot-prep/account-brand-check.mjs",
+    "gate:brand:states": "node verification/screenshot-prep/account-brand-states-check.mjs",
     "gate:captures": "node verification/screenshot-prep/capture-desktop.mjs && node verification/screenshot-prep/capture-mobile.mjs && node verification/screenshot-prep/capture-wide.mjs"
   },
   "dependencies": {

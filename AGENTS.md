@@ -52,9 +52,21 @@ assertion that had no way to report its own emptiness.
 
 A control that depends on someone remembering to apply it is the failure mode
 that produced this entire series — so this rule is subject to the same standard
-it describes. It is documented here first and **enforced separately**, by a
-check that fails a gate script violating 1, 2, 3 or 5. Until that check exists,
-this section is a claim and not a control, and should be read as one.
+it describes.
+
+**Enforced by `npm run gate:rules`**, which runs first in `gate:all`. It fails
+a gate script that selects by a visual property, sleeps on a fixed duration,
+injects a style tag before navigating, or reports success on an empty result
+set. Findings can be silenced per-line with `rules:ok <reason>` — a reason is
+mandatory, and every suppression in force is printed on each run so they cannot
+accumulate unseen.
+
+Its scope is **derived from the `gate:all` chain** by following `npm run`
+references transitively, not read from a list. Nothing maintains that list, so
+promoting a new gate into the chain brings it under the rules automatically. A
+checker whose scope is hand-kept is one more thing to forget, and it fails open.
+`gate:dom` and `gate:captures` are outside the chain, cannot turn it red, and
+are reported as uncovered rather than failed.
 
 ## Obsidian vault
 

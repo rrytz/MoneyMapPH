@@ -95,6 +95,11 @@ try {
     ["test", ["test"]],
     ["gate:typography", ["run", "gate:typography"]],
     ["gate:nav", ["run", "gate:nav"]],
+    // SOURCE check before the RENDERED brand checks: the point of a source
+    // check is to reject a bad asset before a browser ever sees it. A
+    // hardcoded fill renders identically in both schemes and would sail past
+    // every rendered assertion.
+    ["gate:logo-source", ["run", "gate:logo-source"]],
     ["gate:brand", ["run", "gate:brand"]],
     ["gate:brand:states", ["run", "gate:brand:states"]],
   ];

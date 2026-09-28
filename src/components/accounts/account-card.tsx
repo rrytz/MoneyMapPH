@@ -61,6 +61,9 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
   // the colours can never come from two different matchers. `null` for cash and
   // for an unknown account, which is what routes it to the monogram.
   const brandKey = accountBrand(account);
+  // Resolved ONCE and branched on. The stacked identity and the removed type icon
+  // apply only when there is a real mark; a null mark keeps the monogram + icon.
+  const brandLogo = resolveBrandLogo(brandKey ?? "neutral");
 const isBrandSurface = !account.is_negative;
 
   return (
@@ -123,71 +126,109 @@ const isBrandSurface = !account.is_negative;
           : undefined
       }
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between gap-2 mb-4">
         <div className="flex items-center gap-3">
-          <div
-            className={`p-2.5 rounded-md ${
-              account.is_negative ? "bg-rose-500/10 text-rose-400" : ""
-            }`}
-            // Above the ground's alpha so the type mark reads on it rather than
-            // dissolving into it.
-            style={
-              isBrandSurface
-                ? {
-                    backgroundColor: `${brand.base}${Math.round(ICON_FILL_ALPHA * 255)
-                      .toString(16)
-                      .padStart(2, "0")}`,
-                    color: brand.accent,
-                  }
-                : undefined
-            }
-          >
-            <Icon className="h-5 w-5" />
-          </div>
-          {/* LOGO LOCKUP. Height is fixed so every brand — mark or monogram —
-              occupies one vertical band and the name sits on a single line across
-              the grid. Width is intrinsic and is expected to vary with each
-              mark's natural aspect ratio: nothing is padded to a square and
-              nothing is letterboxed.
+          {brandLogo ? (
+            /* RECOGNISED BRAND — stacked identity.
+               [ logo ]
+               [ name ]
+               [ type ]
 
-              The logo inherits the card's TEXT token, not `brand.accent`, so the
-              mark and the balance resolve the same colour and the card keeps one
-              colour source. A null mark is not a hole: it renders the monogram at
-              the same height, on a translucent brand base, in the same token. */}
-          <span
-            data-account-logo
-            data-brand={brandKey ?? "neutral"}
-            className="inline-flex items-center justify-center shrink-0 [color:var(--brand-on)]"
-            style={{ height: LOGO_HEIGHT_PX, width: "auto" }}
-          >
-            {resolveBrandLogo(brandKey ?? "neutral") ?? (
+               This is a measured change, not a preference. The mobile grid is
+               2-up, so a card is 165px wide and its inner content ~133px. A
+               side-by-side lockup put a 56-84px wordmark next to the account
+               name and overflowed the card: Unionbank's name ended 62px past the
+               card edge, and four of eight cards reported clipped text. The
+               gate failed on it, which is the only reason it was caught.
+
+               Stacking gives the mark the full inner width, so nothing is
+               truncated, nothing is width-capped, and the aspect ratio and the
+               fixed 18px height both survive untouched. The alternative fixes
+               all buy that by distorting the mark, shrinking it to ~12px, or
+               changing the grid.
+
+               The generic type icon is gone here on purpose: a bank glyph beside
+               a bank wordmark says the same thing twice, and the mark is the
+               specific answer. */
+            <div className="flex flex-col gap-1.5 min-w-0" data-account-identity="stacked">
               <span
-                data-account-logo-mono
-                className="inline-flex items-center justify-center font-semibold uppercase leading-none rounded-sm w-full h-full [background-color:var(--brand-hover-bg)]"
+                data-account-logo
+                data-brand={brandKey ?? "neutral"}
+                className="inline-flex items-center [color:var(--brand-on)] min-w-0 max-w-full"
+                style={{ height: LOGO_HEIGHT_PX, width: "auto" }}
               >
-                {(account.name || "?").charAt(0)}
+                {brandLogo}
               </span>
-            )}
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-base [color:var(--brand-on)]">{account.name}</h3>
-              {account.is_archived && (
-                // The theme classes here were unreachable-but-present: the
-                // arbitrary value won, so the pill looked right by luck while
-                // `bg-muted` still painted a theme-coloured chip on a brand
-                // ground. Removed rather than out-ranked, same rule as the
-                // trigger.
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full [color:var(--brand-on)] [background-color:var(--brand-hover-bg)]">
-                  Archived
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                  <h3 className="font-semibold text-base [color:var(--brand-on)] min-w-0 break-words">
+                    {account.name}
+                  </h3>
+                  {account.is_archived && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 [color:var(--brand-on)] [background-color:var(--brand-hover-bg)]">
+                      Archived
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs font-medium capitalize [color:var(--brand-muted)]">
+                  {account.type.replace("_", " ")}
+                  {account.type === "credit" && " (Ledger)"}
                 </span>
-              )}
+              </div>
             </div>
-            <span className="text-xs font-medium capitalize [color:var(--brand-muted)]">
-              {account.type.replace("_", " ")}
-              {account.type === "credit" && " (Ledger)"}
-            </span>
-          </div>
+          ) : (
+            /* NO RECOGNISED MARK — the existing monogram + type icon, unchanged.
+               This is the fallback path the gate asserts is exercised, so it is
+               deliberately NOT restyled to match the stacked branch. */
+            <>
+              <div
+                className={`p-2.5 rounded-md shrink-0 ${
+                  account.is_negative ? "bg-rose-500/10 text-rose-400" : ""
+                }`}
+                style={
+                  isBrandSurface
+                    ? {
+                        backgroundColor: `${brand.base}${Math.round(ICON_FILL_ALPHA * 255)
+                          .toString(16)
+                          .padStart(2, "0")}`,
+                        color: brand.accent,
+                      }
+                    : undefined
+                }
+              >
+                <Icon className="h-5 w-5" />
+              </div>
+              <span
+                data-account-logo
+                data-brand={brandKey ?? "neutral"}
+                className="inline-flex items-center justify-center shrink-0 [color:var(--brand-on)]"
+                style={{ height: LOGO_HEIGHT_PX, width: "auto" }}
+              >
+                <span
+                  data-account-logo-mono
+                  className="inline-flex items-center justify-center font-semibold uppercase leading-none rounded-sm w-full h-full [background-color:var(--brand-hover-bg)]"
+                >
+                  {(account.name || "?").charAt(0)}
+                </span>
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                  <h3 className="font-semibold text-base [color:var(--brand-on)] min-w-0 break-words">
+                    {account.name}
+                  </h3>
+                  {account.is_archived && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 [color:var(--brand-on)] [background-color:var(--brand-hover-bg)]">
+                      Archived
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs font-medium capitalize [color:var(--brand-muted)]">
+                  {account.type.replace("_", " ")}
+                  {account.type === "credit" && " (Ledger)"}
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         <DropdownMenu>

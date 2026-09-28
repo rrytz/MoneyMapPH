@@ -14,6 +14,7 @@
     "gate:dom": "node verification/screenshot-prep/probe-run.mjs",
     "gate:nav": "node verification/screenshot-prep/nav-check.mjs",
     "gate:rules": "node verification/screenshot-prep/gate-rules.mjs",
+    "gate:logo-source": "node verification/screenshot-prep/brand-logo-source-check.mjs",
     "gate:brand": "node verification/screenshot-prep/account-brand-check.mjs",
     "gate:brand:states": "node verification/screenshot-prep/account-brand-states-check.mjs",
     "gate:captures": "node verification/screenshot-prep/capture-desktop.mjs && node verification/screenshot-prep/capture-mobile.mjs && node verification/screenshot-prep/capture-wide.mjs"

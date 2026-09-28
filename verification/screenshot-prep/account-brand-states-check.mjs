@@ -61,10 +61,13 @@
 import { chromium } from "playwright";
 import {
   COLLECT,
+  COMPOSITING_HAZARDS,
+  COMPOSITING_SCOPE,
   CONTRAST_POLICY,
   MIN_TEXT_CONTRAST,
   contrast,
   describe,
+  hazardScan,
   iconFailures,
   nearestOpaqueBg,
   openAccounts,
@@ -93,34 +96,68 @@ async function hoverReal(pg, cardIndex, selector) {
 }
 
 /** Tab until the target genuinely matches :focus-visible. */
+/**
+ * Tab until the INTENDED element is focused, then prove identity before any
+ * style is read.
+ *
+ * The obvious version - "keep pressing Tab until activeElement matches the
+ * selector" - is not sufficient, for the same structural reason the leaf-hover
+ * case exposed: identifying the target by a selector evaluated at assert-time
+ * means a shifted Tab order, a reordered list, or a new focusable element can
+ * silently substitute a DIFFERENT node, and the assertion then passes against
+ * the wrong control while reporting success. `:focus-visible` also has the
+ * ancestor/descendant asymmetry in reverse - focusing the card root does not
+ * focus a child - so the target must be the element actually tabbed to.
+ *
+ * So: mark the node with a unique data attribute FIRST, tab, then assert the
+ * focused element both carries the mark and matches :focus-visible. The mark is
+ * assigned before any tabbing, so it identifies the node rather than
+ * re-locating it.
+ */
 async function focusVisibleReal(pg, cardIndex, selector) {
-  const before = await pg.evaluate(() => document.activeElement?.tagName ?? "");
-  // A bounded number of presses, and it stops on a real condition. No fixed
-  // count "should be enough" and no sleeping.
-  for (let i = 0; i < 40; i++) {
-    await pg.keyboard.press("Tab");
-    const hit = await pg.evaluate(
-      ([ci, sel, collectSrc]) => {
-        const cards = eval(`(${collectSrc})`)();
-        const el = cards[ci]?.querySelector(sel);
-        return !!el && document.activeElement === el && el.matches(":focus-visible");
-      },
-      [cardIndex, selector, COLLECT.toString()]
-    );
-    if (hit) return true;
-  }
-  // Not an error by itself: a card with no :focus-visible styling still matches
-  // once focused by keyboard, because the PSEUDO-CLASS applies. If nothing
-  // matched after 40 presses the page is not in the expected state at all.
-  const landed = await pg.evaluate(
-    ([ci, sel, collectSrc]) => {
+  const mark = `mm-fv-${cardIndex}-${Math.random().toString(36).slice(2, 8)}`;
+  const marked = await pg.evaluate(
+    ([ci, sel, collectSrc, m]) => {
       const cards = eval(`(${collectSrc})`)();
       const el = cards[ci]?.querySelector(sel);
-      return !!el && document.activeElement === el;
+      if (!el) return false;
+      el.setAttribute("data-mm-fv-target", m);
+      return true;
     },
-    [cardIndex, selector, COLLECT.toString()]
+    [cardIndex, selector, COLLECT.toString(), mark]
   );
-  return landed;
+  if (!marked) return { ok: false, reason: `no element matching ${selector} inside card ${cardIndex}` };
+
+  // Bounded, and it stops on a real condition: no fixed "40 should be enough"
+  // and no sleeping.
+  let presses = 0;
+  for (; presses < 60; presses++) {
+    await pg.keyboard.press("Tab");
+    const onMark = await pg.evaluate(
+      (m) => document.activeElement?.getAttribute?.("data-mm-fv-target") === m,
+      mark
+    );
+    if (onMark) break;
+  }
+
+  // IDENTITY FIRST. Only now are styles read.
+  const verdict = await pg.evaluate(
+    (m) => {
+      const el = document.activeElement;
+      if (!el || el.getAttribute?.("data-mm-fv-target") !== m) {
+        return { ok: false, reason: `Tab never reached the marked target within the bound (landed on <${el?.tagName?.toLowerCase() ?? "none"}>)` };
+      }
+      if (!el.matches(":focus-visible")) {
+        return { ok: false, reason: "the target is focused but does NOT match :focus-visible - reading :focus styles here would assert something the keyboard user never sees" };
+      }
+      return { ok: true, presses: 0 };
+    },
+    mark
+  );
+  if (verdict.ok) verdict.presses = presses + 1;
+  // Leave the page as we found it.
+  await pg.evaluate((m) => document.querySelector(`[data-mm-fv-target="${m}"]`)?.removeAttribute("data-mm-fv-target"), mark).catch(() => {});
+  return verdict;
 }
 
 const SNAPSHOT = ([collectSrc, nearestSrc, descSrc]) => {
@@ -141,7 +178,7 @@ console.log("\n--- hover: ROOT hovered -> ROOT read ---");
     const { ctx, pg } = await openAccounts(browser, { scheme });
     const cards = await pg.evaluate(SNAPSHOT, snapArgs);
     // hover the FIRST card's root. Reading the root is named explicitly.
-    await pg.hover('main div[style*="background-color"]');
+    await pg.hover('[data-account-card]');
     const hovered = await pg.evaluate(SNAPSHOT, snapArgs);
     byScheme[scheme] = { rest: cards, hovered };
     await ctx.close();
@@ -176,7 +213,7 @@ console.log("\n--- hover: TRIGGER hovered -> TRIGGER read ---");
   for (const scheme of ["light", "dark"]) {
     const { ctx, pg } = await openAccounts(browser, { scheme });
     // the `..` trigger is the only interactive element on a card
-    const target = await pg.$('main div[style*="background-color"] [data-slot="dropdown-menu-trigger"], main div[style*="background-color"] button');
+    const target = await pg.$('[data-account-card] [data-slot="dropdown-menu-trigger"], [data-account-card] button');
     if (target) await target.hover();
     const hovered = await pg.evaluate(SNAPSHOT, snapArgs);
     byScheme[scheme] = hovered;
@@ -218,7 +255,7 @@ console.log("\n--- hover: NAME hovered -> NAME read (leaf's OWN hover style) ---
     const { ctx, pg } = await openAccounts(browser, { scheme });
     // Hover the FIRST card's name. Read target and hover target are the same
     // element - stated, not inferred.
-    const name = await pg.$('main div[style*="background-color"] h3');
+    const name = await pg.$('[data-account-card] h3');
     if (name) await name.hover();
     else fail(`hover(NAME) ${scheme}: no card name found to hover`);
     byScheme[scheme] = await pg.evaluate(SNAPSHOT, snapArgs);
@@ -255,7 +292,8 @@ console.log("\n--- focus-visible: TRIGGER reached by real Tab ---");
   for (const scheme of ["light", "dark"]) {
     const { ctx, pg } = await openAccounts(browser, { scheme });
     const reached = await focusVisibleReal(pg, 0, 'button');
-    if (!reached) fail(`focus-visible (${scheme}): could not reach a card trigger by keyboard`);
+    if (!reached.ok) fail(`focus-visible (${scheme}): ${reached.reason}`);
+    else console.log(`  ${scheme}: marked target reached in ${reached.presses} Tab press(es), identity and :focus-visible both confirmed`);
     const focused = await pg.evaluate(SNAPSHOT, snapArgs);
     byScheme[scheme] = focused;
     await ctx.close();
@@ -285,37 +323,156 @@ console.log("\n--- focus-visible: TRIGGER reached by real Tab ---");
 // -------------------------------------------- archived, standing in for :disabled
 console.log("\n--- archived (the real inactive state; this card has no :disabled) ---");
 {
+  // NO SKIP PATH. A previous version printed SKIPPED when this ledger had no
+  // archived account, and that is a bypass wearing a warning label: the skip
+  // condition was the DATA, not the state of the code, so archiving an account
+  // tomorrow would change nothing about whether the assertion ran. The gate
+  // would keep printing SKIPPED forever, and the assertion underneath would be
+  // dead code that reads as coverage. That is the same control-in-intent-not-
+  // enforcement this work exists to remove, so the fixture is now created by
+  // the gate: it archives a real account through the real UI, asserts, and
+  // un-archives in a `finally` so the ledger is left as found.
+  //
+  // This also makes the state assertion unconditional - there is no longer a
+  // branch in which the archived assertions do not execute.
+  // A WIDER VIEWPORT FOR THIS BLOCK ONLY, and the reason is mechanical rather
+  // than cosmetic: at 375x667 the archived card's trigger sits at y=669, one
+  // pixel below the fold, and the accounts page does not scroll at that height,
+  // so the click can never land. The gate's fixture path is therefore not
+  // reachable at the mobile size it measures everywhere else. Colours and
+  // contrast are viewport-independent, and the geometry assertion compares light
+  // against dark at the SAME viewport, so the contract this block enforces is
+  // unaffected - but the viewport is stated rather than assumed.
+  const FIXTURE_VIEWPORT = { width: 1280, height: 900 };
   const byScheme = {};
-  let archivedPresent = false;
-  for (const scheme of ["light", "dark"]) {
-    const { ctx, pg } = await openAccounts(browser, { scheme });
-    // Show Archived Accounts, which is what puts a card into the archived state.
-    const cb = await pg.$('input[type="checkbox"]');
-    if (cb) await cb.check();
-    // Wait on the ACTUAL condition - an archived card renders an "Archived"
-    // pill. If the user has no archived accounts the wait times out, and that
-    // is a data fact, not a failure of the invariant. So: bounded wait, then
-    // detect and report it as SKIPPED rather than either failing (wrong) or
-    // silently passing (vacuous).
-    const gotArchived = await pg
-      .waitForFunction(
-        () => [...document.querySelectorAll("main *")].some(
-          (e) => /^Archived$/.test((e.textContent || "").trim()) && e.children.length === 0
-        ),
-        null,
-        { timeout: 8000 }
-      )
-      .then(() => true)
-      .catch(() => false);
-    archivedPresent = gotArchived;
-    byScheme[scheme] = await pg.evaluate(SNAPSHOT, snapArgs);
-    await ctx.close();
+  const restorers = [];
+  try {
+    for (const scheme of ["light", "dark"]) {
+      const { ctx, pg } = await openAccounts(browser, { scheme, ...FIXTURE_VIEWPORT });
+
+      // How many archived accounts does this ledger have RIGHT NOW? Read from
+      // the live page, not assumed.
+      const archivedCount = await pg.evaluate(() => {
+        const cb = document.querySelector('input[type="checkbox"]');
+        const label = cb ? (cb.closest("label") || cb.parentElement)?.textContent || "" : "";
+        const m = label.match(/\((\d+)\)/);
+        return m ? +m[1] : 0;
+      });
+
+      if (archivedCount === 0) {
+        // Create the fixture through the real UI, so the state under test is
+        // the one a user reaches rather than one synthesised here.
+        const trigger = await pg.$('[data-account-card] button');
+        if (!trigger) { fail(`archived (${scheme}): no card trigger to archive from`); await ctx.close(); continue; }
+        await trigger.click();
+        const item = await pg.waitForSelector("text=Archive Account", { timeout: 10000 }).catch(() => null);
+        if (!item) { fail(`archived (${scheme}): could not open the Archive menu item - the gate cannot create its own fixture`); await ctx.close(); continue; }
+        await item.click();
+        // The write is real; the restore is registered BEFORE the assertion so
+        // a failure below still leaves the ledger clean.
+        restorers.push(async () => {
+          const { ctx: c2, pg: p2 } = await openAccounts(browser, { scheme, ...FIXTURE_VIEWPORT });
+          try {
+            const cb = await p2.$('input[type="checkbox"]');
+            if (cb) await cb.check();
+            // Target the ARCHIVED card's own trigger. Selecting the first card on
+            // the page is wrong: with the toggle on, archived cards sit after the
+            // active ones, so "first card" is an active account whose menu says
+            // "Archive Account" and never "Unarchive Account" - which is exactly
+            // how the first restore attempt timed out.
+            await p2.waitForFunction(
+              () => [...document.querySelectorAll('[data-account-card]')].some(
+                (c) => [...c.querySelectorAll("*")].some((e) => /^Archived$/.test((e.textContent || "").trim()) && e.children.length === 0)
+              ),
+              null,
+              { timeout: 15000 }
+            );
+            const t2 = await p2.$('[data-account-card]:has(span:text-is("Archived")) button');
+            if (!t2) throw new Error("could not locate the archived card's trigger");
+            await t2.click();
+            const un = await p2.waitForSelector("text=Unarchive Account", { timeout: 10000 });
+            await un.click();
+            // Confirm the restore rather than assuming it: the count must fall.
+            const back = await p2
+              .waitForFunction(
+                () => {
+                  const cb = document.querySelector('input[type="checkbox"]');
+                  const label = cb ? (cb.closest("label") || cb.parentElement)?.textContent || "" : "";
+                  const m = label.match(/\((\d+)\)/);
+                  return !!m && +m[1] === 0;
+                },
+                null,
+                { timeout: 15000 }
+              )
+              .then(() => true)
+              .catch(() => false);
+            if (!back) throw new Error("clicked Unarchive but the archived count never returned to 0");
+          } finally { await c2.close(); }
+        });
+        // Wait on the real condition: the toggle now reports one archived.
+        const ok = await pg
+          .waitForFunction(
+            () => {
+              const cb = document.querySelector('input[type="checkbox"]');
+              const label = cb ? (cb.closest("label") || cb.parentElement)?.textContent || "" : "";
+              const m = label.match(/\((\d+)\)/);
+              return !!m && +m[1] >= 1;
+            },
+            null,
+            { timeout: 15000 }
+          )
+          .then(() => true)
+          .catch(() => false);
+        if (!ok) { fail(`archived (${scheme}): archived an account but the count never moved`); await ctx.close(); continue; }
+      }
+
+      // Now reveal them.
+      const cb = await pg.$('input[type="checkbox"]');
+      if (!cb) { fail(`archived (${scheme}): no archived toggle found`); await ctx.close(); continue; }
+      await cb.check();
+      const got = await pg
+        .waitForFunction(
+          () => [...document.querySelectorAll("main *")].some(
+            (e) => /^Archived$/.test((e.textContent || "").trim()) && e.children.length === 0
+          ),
+          null,
+          { timeout: 15000 }
+        )
+        .then(() => true)
+        .catch(() => false);
+      if (!got) {
+        // An archived account EXISTS (count >= 1) but no Archived pill rendered.
+        // That is a defect, not a missing fixture, and it must fail.
+        fail(`archived (${scheme}): the ledger reports archived accounts but no card rendered the Archived pill - the toggle is not actually revealing them`);
+        await ctx.close();
+        continue;
+      }
+      byScheme[scheme] = await pg.evaluate(SNAPSHOT, snapArgs);
+      await ctx.close();
+    }
+  } finally {
+    for (const restore of restorers) {
+      await restore().catch((e) => fail(`archived: RESTORE FAILED - the gate left an account archived: ${e.message}`));
+    }
+    if (restorers.length) console.log(`  fixture: archived a real account and restored it (${restorers.length} restore(s))`);
   }
-  const l = byScheme.light;
-  const d = byScheme.dark;
-  if (!archivedPresent || l.length === 0) {
-    console.log("  SKIPPED: this ledger has no archived account, so the archived state could not be exercised.");
-    console.log("           Not a failure - the state does not exist in the data. Re-run after archiving one.");
+  const l = byScheme.light || [];
+  const d = byScheme.dark || [];
+  // AN ARCHIVED CARD IS NOW A BRAND SURFACE, AND THE GATE SAYS SO.
+  //
+  // It was not. `showTone = !is_negative && !is_archived` meant an archived card
+  // painted no brand base, defined no CSS variables, and fell back to
+  // `bg-card/60` + `border-border` + `opacity-60` - which measured 1.28:1 in
+  // light mode. This block caught it precisely because the archived check had
+  // been a vacuous pass until the collector was made structural: it was
+  // re-measuring seven ACTIVE cards and calling that archived coverage.
+  //
+  // Archived now keeps the brand ground and brand text, and is de-emphasised by
+  // the Archived pill instead. So the full invariant applies here - base, text,
+  // icons, divider, border, geometry - and none of it is exempt.
+  console.log("  archived cards are brand surfaces; the full invariant applies (no exemptions).");
+  if (l.length === 0) {
+    fail("archived: no archived cards were measured in EITHER scheme - the assertions below did not run");
   } else {
     for (let i = 0; i < l.length; i++) {
       if (!d[i]) { fail(`archived: card ${i} missing in dark`); continue; }
@@ -332,9 +489,41 @@ console.log("\n--- archived (the real inactive state; this card has no :disabled
         }
       }
       for (const m of iconFailures(l[i], d[i], "archived")) fail(m);
+      if (l[i].divider && l[i].divider !== d[i].divider) fail(`archived ${l[i].name}: divider is theme-dependent when archived (${l[i].divider} -> ${d[i].divider})`);
+      if (l[i].border && l[i].border !== d[i].border) fail(`archived ${l[i].name}: border is theme-dependent when archived (${l[i].border} -> ${d[i].border})`);
       if (l[i].geometry !== d[i].geometry) fail(`archived ${l[i].name}: geometry differs between schemes when archived`);
     }
-    console.log(`  cards: ${l.length}   archived scheme-independence checked`);
+    console.log(`  cards: ${l.length} (${l.map((c) => c.name).join(", ")})   archived scheme-independence checked`);
+  }
+}
+
+// -------------------------------------------------- pseudo-elements, and the menu
+console.log("\n--- known boundaries (asserted, not assumed) ---");
+{
+  // (2) PSEUDO-ELEMENTS. A text-leaf walk cannot see `::before` / `::after` -
+  // CSS-generated content has no DOM node - so a themed colour there would be
+  // invisible to every check in this file. That is the same blindness as the
+  // SVG-only trigger, one layer down.
+  //
+  // The card uses no pseudo-element today: no `before:` / `after:` variant in
+  // account-card.tsx and no rule in globals.css targeting it. Rather than leave
+  // that as a comment that silently rots, the scan below reads
+  // getComputedStyle(node, "::before") / "::after" over every element these
+  // gates measure, so the day one is added with a colour the scan sees it and
+  // the compositing guard fails naming it. The boundary is enforced, not
+  // documented.
+  const hazArgs = [COLLECT.toString(), COMPOSITING_SCOPE.toString(), COMPOSITING_HAZARDS];
+  for (const scheme of ["light", "dark"]) {
+    const { ctx, pg } = await openAccounts(browser, { scheme });
+    const haz = await pg.evaluate(hazardScan, hazArgs);
+    if (haz.length === 0) {
+      console.log(`  ${scheme}: PASS  no backdrop-filter / blend / filter / non-sRGB on any element or pseudo-element`);
+    } else {
+      for (const h of haz) {
+        fail(`compositing model (${scheme}): ${h.card} ${h.el} has ${h.prop}: ${h.value}. The sRGB compositing in paintedBg() is wrong for this element.`);
+      }
+    }
+    await ctx.close();
   }
 }
 

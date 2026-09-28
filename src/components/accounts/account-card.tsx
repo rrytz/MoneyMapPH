@@ -45,19 +45,35 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
   // account still shows rose, and the type is carried by the icon and the name,
   // which makes the ground redundancy rather than the only channel.
   //
-  // Suppressed on negative and archived cards on purpose: both are states the
-  // reader must not miss, and a coloured ground behind a rose border is two
-  // things asking to be looked at at once.
+  // Suppressed on NEGATIVE cards on purpose: that is a state the reader must
+  // not miss, and a coloured ground behind a rose border is two things asking
+  // to be looked at at once.
+  //
+  // NOT suppressed on archived cards. Archived used to be grouped with negative
+  // here, which meant no CSS variables were defined at all: every label fell
+  // back to a theme token and the card measured 1.28:1 in light mode - dark
+  // text on a near-black `bg-card/60` surface. An archived card is still that
+  // bank's card, and de-emphasis is the Archived pill's job, not the
+  // legibility of the whole card.
   const brand = getAccountBrandPalette(account);
-  const showTone = !account.is_negative && !account.is_archived;
+const isBrandSurface = !account.is_negative;
 
   return (
     <div
+      // Structural marker, so the gate can identify a card WITHOUT inferring it
+      // from an inline background. The previous collector selected on
+      // `el.style.backgroundColor`, which meant any card that did not paint a
+      // brand base was silently invisible to it - including the archived state,
+      // whose "coverage" was seven active cards being re-measured.
+      data-account-card={account.name}
       className={`relative rounded-2xl border p-4 transition-all [border-color:var(--brand-line)] ${
         account.is_negative
           ? "border-rose-500/50 bg-rose-500/10 dark:bg-rose-950/20"
           : account.is_archived
-            ? "border-border bg-card/60 opacity-60"
+            ? // Still the brand surface. `bg-card/60` + `opacity-60` was a theme
+              // surface at 60% over whatever the page happened to be, and the
+              // text on it was never re-measured against that composite.
+              "hover:border-[color:var(--brand-line)]"
             : "hover:border-[color:var(--brand-line)]"
       }`}
       // Painted SOLID, as `brand.base` and not as a wash over `bg-card`.
@@ -70,7 +86,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
       // while sitting 12-23 from no ground at all, which is why a bank and an
       // e-wallet were indistinguishable. A wash would put that straight back.
       style={
-        showTone
+        isBrandSurface
           ? ({
               backgroundColor: brand.base,
               // CSS variables rather than inline colours on each child, because
@@ -104,7 +120,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
             // Above the ground's alpha so the type mark reads on it rather than
             // dissolving into it.
             style={
-              showTone
+              isBrandSurface
                 ? {
                     backgroundColor: `${brand.base}${Math.round(ICON_FILL_ALPHA * 255)
                       .toString(16)
@@ -120,7 +136,12 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-base [color:var(--brand-on)]">{account.name}</h3>
               {account.is_archived && (
-                <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full [color:var(--brand-muted)]">
+                // The theme classes here were unreachable-but-present: the
+                // arbitrary value won, so the pill looked right by luck while
+                // `bg-muted` still painted a theme-coloured chip on a brand
+                // ground. Removed rather than out-ranked, same rule as the
+                // trigger.
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full [color:var(--brand-on)] [background-color:var(--brand-hover-bg)]">
                   Archived
                 </span>
               )}

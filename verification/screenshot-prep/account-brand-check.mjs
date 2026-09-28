@@ -73,14 +73,18 @@ export async function openAccounts(browser, { scheme, width = 375, height = 667,
   );
   const pg = await ctx.newPage();
   pg.setDefaultTimeout(30000);
-  await pg.addStyleTag({ content: KILL_MOTION }).catch(() => {});
+  // Motion is killed AFTER navigation, not before. `addStyleTag` injects into
+  // the CURRENT document, and `goto` replaces that document wholesale - so the
+  // tag added first is silently discarded, every transition stays live, and
+  // hover readings come back mid-animation. That is not theoretical: it is why
+  // the cleanup click in this file's own fixture path timed out on a moving
+  // element. The order is the fix.
   await pg.goto(url, { waitUntil: "networkidle" });
+  await pg.addStyleTag({ content: KILL_MOTION });
   // Deterministic settling: fonts resolved, then the cards themselves present.
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForFunction(
-    () => [...document.querySelectorAll("main div")].some(
-      (el) => el.style.backgroundColor && /Starting Balance/i.test(el.textContent || "")
-    ),
+    () => document.querySelector("[data-account-card]") !== null,
     null,
     { timeout: 15000 }
   );
@@ -168,14 +172,18 @@ export const COLLECT = () => {
     }
     return true;
   };
+  // Selected by the card's own structural marker, NOT by an inline background.
+  // The first version filtered on `el.style.backgroundColor`, which meant a card
+  // that did not paint a brand base was invisible to the whole gate - and the
+  // archived state does not paint one. So the archived "check" was silently
+  // re-measuring seven ACTIVE cards and reporting them as archived coverage. A
+  // selector that cannot distinguish the state under test is not a selector.
   const roots = [];
-  for (const el of document.querySelectorAll("main div")) {
+  for (const el of document.querySelectorAll("[data-account-card]")) {
     if (!visible(el)) continue;
-    if (!el.style.backgroundColor) continue;
-    if (!/Starting Balance/i.test(el.textContent || "")) continue;
     roots.push(el);
   }
-  return roots.filter((e) => !roots.some((o) => o !== e && o.contains(e)));
+  return roots;
 };
 
 /**
@@ -208,6 +216,105 @@ export const iconFailures = (lc, dc, label) => {
     const r = contrast(a.color, a.bg);
     if (r !== null && r < MIN_ICON_CONTRAST) {
       out.push(`${label} ${lc.name}: icon "${a.t}" ${a.color} on ${a.bg} = ${r.toFixed(2)}:1, below the ${MIN_ICON_CONTRAST}:1 graphical-object floor (WCAG non-text contrast).`);
+    }
+  }
+  return out;
+};
+
+/**
+ * THE COMPOSITING MODEL IS sRGB "over", AND THIS IS WHAT MAKES THAT CLAIM
+ * CHECKABLE RATHER THAN ASSUMED.
+ *
+ * `paintedBg` composites the ancestor chain with plain sRGB alpha blending.
+ * That is only correct while nothing in the chain does its own colour maths.
+ * Four things break it, and none of them announce themselves:
+ *
+ *   backdrop-filter    the backdrop is sampled, filtered, then composited -
+ *                      the effective backdrop is not the ancestor's declared
+ *                      colour, so the blend result differs from `over()`
+ *   mix-blend-mode     the element blends with what is already painted
+ *                      BENEATH it, which `over()` never consults
+ *   filter             a filter chain can alter colour before compositing
+ *   non-sRGB colour    oklch/oklab/color() interpolate and convert; a
+ *                      declared value is not the value the eye sees
+ *
+ * Rather than handle those - the brief does not ask for it, and no card uses
+ * them today - the gate ASSERTS their absence over every element it measured.
+ * The moment one is introduced, this fails and names it, because a guard that
+ * cannot fail is exactly the control-in-intent-not-enforcement this work exists
+ * to remove. Absence is the thing being proven, and absence is testable.
+ */
+export const COMPOSITING_HAZARDS = [
+  // Each carries its own PREDICATE AS SOURCE, because a function cannot cross
+  // the Playwright evaluate boundary - it is not serialisable. The first
+  // attempt passed the functions and failed with "Attempting to serialize
+  // unexpected value ... unsafe", which is the evaluate boundary being honest
+  // about what it can carry.
+  { prop: "backdropFilter", test: 'v && v !== "none"' },
+  { prop: "mixBlendMode", test: 'v && v !== "normal"' },
+  { prop: "filter", test: 'v && v !== "none"' },
+  { prop: "color", test: '/oklch|oklab|lab\\(|lch\\(|color\\(/.test(v || "")' },
+  { prop: "backgroundColor", test: '/oklch|oklab|lab\\(|lch\\(|color\\(/.test(v || "")' },
+];
+
+/**
+ * Every element the contrast maths depends on: each measured leaf, each of its
+ * ancestors up to and including the card, and the card's own pseudo-elements.
+ * Pseudo-elements are included deliberately - see the pseudo-element note in
+ * account-brand-states-check.mjs.
+ */
+export const COMPOSITING_SCOPE = `(leaf, card) => {
+  const nodes = [];
+  let n = leaf;
+  while (n && n !== card.parentElement) { nodes.push(n); n = n.parentElement; }
+  if (card) nodes.push(card);
+  return nodes;
+}`;
+
+/**
+ * Hazard scan, run per scheme. Also walks `::before` and `::after` on every
+ * element in scope, for the reason in the states gate: CSS-generated content
+ * has no DOM node, so no element walk can ever see it, and a colour applied to
+ * a pseudo-element would be a theme token nothing inspects.
+ */
+export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
+  const cards = eval(`(${collectSrc})`)();
+  const scope = eval(`(${scopeSrc})`);
+  // Predicates arrive as source text and are compiled here, inside the page.
+  // The parameter is supplied HERE: each `test` is a bare boolean EXPRESSION
+  // over `v`, and the wrapper is what turns it into a function. Wrapping it in
+  // the page rather than in the module is also what makes the regex escapes
+  // survive - they are written for the page's parser, not this one's.
+  const checks = hazards.map((h) => ({ prop: h.prop, unsafe: eval(`((v) => ${h.test})`) }));
+  const out = [];
+  for (const card of cards) {
+    const cname = (card.querySelector("h3") || {}).textContent || "(unnamed)";
+    const leaves = [];
+    for (const el of card.querySelectorAll("*")) {
+      const isTextLeaf = el.children.length === 0 && (el.textContent || "").trim();
+      const isControl = el.tagName === "BUTTON" || el.getAttribute("role") === "button" || el.tagName === "A";
+      if (isTextLeaf || isControl) leaves.push(el);
+    }
+    for (const leaf of leaves) {
+      for (const node of scope(leaf, card)) {
+        const label =
+          node.tagName.toLowerCase() +
+          (typeof node.className === "string" && node.className.trim()
+            ? "." + node.className.trim().split(/\\s+/).slice(0, 2).join(".")
+            : "");
+        // Real elements AND their pseudo-elements: the pseudo-element styles
+        // are read through getComputedStyle(node, "::before"), which is the
+        // only way to observe CSS-generated content at all.
+        for (const pseudo of [null, "::before", "::after"]) {
+          const cs = pseudo ? getComputedStyle(node, pseudo) : getComputedStyle(node);
+          if (pseudo && (!cs.content || cs.content === "none" || cs.content === "normal")) continue;
+          for (const h of checks) {
+            if (h.unsafe(cs[h.prop])) {
+              out.push({ card: cname, el: label + (pseudo || ""), prop: h.prop, value: cs[h.prop] });
+            }
+          }
+        }
+      }
     }
   }
   return out;
@@ -332,6 +439,31 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
     if (lc.border !== dc.border) fail(`${lc.name}: border is theme-dependent (${lc.border} -> ${dc.border})`);
     if (lc.geometry !== dc.geometry) fail(`${lc.name}: geometry differs between schemes`);
     if (lc.clipped > 0) fail(`${lc.name}: ${lc.clipped} clipped text element(s)`);
+  }
+
+  // ---- the compositing guard -------------------------------------------
+  // `paintedBg` assumes plain sRGB alpha blending. That assumption is asserted
+  // here, over every element and pseudo-element both gates measured, so the day
+  // someone adds a backdrop-filter the MEASUREMENT stops being trustworthy and
+  // this says so instead of quietly reporting a plausible number.
+  console.log("\n=== compositing-model guard ===");
+  {
+    const args = [COLLECT.toString(), COMPOSITING_SCOPE.toString(), COMPOSITING_HAZARDS];
+    const haz = {};
+    for (const scheme of ["light", "dark"]) {
+      const { ctx, pg } = await openAccounts(browser, { scheme });
+      haz[scheme] = await pg.evaluate(hazardScan, args);
+      await ctx.close();
+    }
+    const all = [...haz.light, ...haz.dark];
+    if (all.length === 0) {
+      console.log("  PASS  no backdrop-filter, mix-blend-mode, filter or non-sRGB colour on any measured chain.");
+      console.log("        sRGB alpha compositing is therefore a valid model for paintedBg().");
+    } else {
+      for (const h of all) {
+        fail(`compositing model: ${h.card} ${h.el} has ${h.prop}: ${h.value}. paintedBg() composites in sRGB and will report a wrong surface once a backdrop is filtered, blended, or non-sRGB. Fix the maths or exclude the element - do not leave it measuring.`);
+      }
+    }
   }
 
   console.log(`\n  brands exercised: ${light.map((c) => c.name).join(", ")}`);

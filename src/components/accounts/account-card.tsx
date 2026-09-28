@@ -4,7 +4,7 @@ import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
-import { accountTone, GROUND_ALPHA, ICON_ALPHA } from "@/lib/utils/account-tone";
+import { getAccountBrandPalette, ICON_FILL_ALPHA, brandHairline } from "@/lib/utils/account-brand";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,35 +48,40 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
   // Suppressed on negative and archived cards on purpose: both are states the
   // reader must not miss, and a coloured ground behind a rose border is two
   // things asking to be looked at at once.
-  const tone = accountTone(account.type);
+  const brand = getAccountBrandPalette(account);
   const showTone = !account.is_negative && !account.is_archived;
 
   return (
     <div
-      className={`relative rounded-2xl border p-4 transition-all ${
+      className={`relative rounded-2xl border p-4 transition-all [border-color:var(--brand-line)] ${
         account.is_negative
           ? "border-rose-500/50 bg-rose-500/10 dark:bg-rose-950/20"
           : account.is_archived
             ? "border-border bg-card/60 opacity-60"
-            : "border-border hover:border-border"
+            : "hover:border-[color:var(--brand-line)]"
       }`}
-      // 20%, not the 7% this started at. The ground is a WASH, so what renders
-      // is the tone composited over the card surface - and at 7% the rendered
-      // grounds sat 7 apart from EACH OTHER while sitting 12-23 from an
-      // untoned card. The eye compares two cards to each other, so the type was
-      // genuinely unreadable and reading Gcash as a bank was correct. The alpha
-      // is now a measured constant, and the separation it achieves is asserted
-      // on the composite rather than on the specified hex.
+      // Painted SOLID, as `brand.base` and not as a wash over `bg-card`.
       //
-      // `p-5` became `p-4` because the ledger figure is 138.3px against 125px
-      // of content at two-up - it fit the geometry but ate the padding.
+      // The palette's text-contrast ratios are computed against these exact
+      // values, so blending them at an alpha would render a colour nobody
+      // measured. That is the mistake this file was born out of: the previous
+      // type palette specified pure hexes, tested THOSE, then painted a 7%-alpha
+      // wash - and the rendered grounds came out 7 units apart from each other
+      // while sitting 12-23 from no ground at all, which is why a bank and an
+      // e-wallet were indistinguishable. A wash would put that straight back.
       style={
         showTone
-          ? {
-              backgroundColor: `${tone.ground}${Math.round(GROUND_ALPHA * 255)
-                .toString(16)
-                .padStart(2, "0")}`,
-            }
+          ? ({
+              backgroundColor: brand.base,
+              // CSS variables rather than inline colours on each child, because
+              // CurrencyDisplay sets its OWN colour class - a parent inline
+              // colour is inherited only by children that do not set one, and
+              // that is exactly why the balance stayed dark in light mode while
+              // every other label was fixed.
+              "--brand-on": brand.onBase,
+              "--brand-muted": brand.mutedOnBase,
+              "--brand-line": brandHairline(brand.onBase),
+            } as React.CSSProperties)
           : undefined
       }
     >
@@ -91,10 +96,10 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
             style={
               showTone
                 ? {
-                    backgroundColor: `${tone.ground}${Math.round(ICON_ALPHA * 255)
+                    backgroundColor: `${brand.base}${Math.round(ICON_FILL_ALPHA * 255)
                       .toString(16)
                       .padStart(2, "0")}`,
-                    color: tone.ground,
+                    color: brand.accent,
                   }
                 : undefined
             }
@@ -103,14 +108,14 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-card-foreground text-base">{account.name}</h3>
+              <h3 className="font-semibold text-base [color:var(--brand-on)]">{account.name}</h3>
               {account.is_archived && (
-                <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full [color:var(--brand-muted)]">
                   Archived
                 </span>
               )}
             </div>
-            <span className="text-xs font-medium text-muted-foreground capitalize">
+            <span className="text-xs font-medium capitalize [color:var(--brand-muted)]">
               {account.type.replace("_", " ")}
               {account.type === "credit" && " (Ledger)"}
             </span>
@@ -165,7 +170,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
               So the words go and the explanation stays where it belongs. This is
               the same shape as dropping "17% used" on the budget card: the
               label was restating a fact the figure beside it already carried. */}
-          <span className="type-section-label text-muted-foreground">Balance</span>
+          <span className="type-section-label [color:var(--brand-muted)]">Balance</span>
           {account.is_negative && (
             <TooltipProvider>
               <Tooltip>
@@ -183,12 +188,12 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           )}
         </div>
 
-        <div className="tabular-nums text-card-foreground">
+        <div className="tabular-nums [color:var(--brand-on)]">
           <CurrencyDisplay
             amount={account.current_balance}
             className={cn(
               "type-ledger",
-              account.is_negative ? "font-semibold text-rose-400" : "font-semibold text-card-foreground"
+              account.is_negative ? "font-semibold text-rose-400" : "font-semibold [color:var(--brand-on)]"
             )}
           />
         </div>
@@ -205,9 +210,9 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountC
           balance is also a secondary figure, so it does not need the primary
           line - the same reason it is already `figure-inline` while the
           balance above is `type-ledger`. */}
-      <div className="mt-4 pt-3 border-t border-border flex flex-col gap-0.5 text-xs text-muted-foreground">
+      <div className="mt-4 pt-3 border-t flex flex-col gap-0.5 text-xs [color:var(--brand-muted)] border-[color:var(--brand-line)]">
         <span>Starting Balance</span>
-        <CurrencyDisplay amount={account.initial_balance} className="figure-inline font-medium text-muted-foreground" />
+        <CurrencyDisplay amount={account.initial_balance} className="figure-inline font-medium [color:var(--brand-muted)]" />
       </div>
     </div>
   );

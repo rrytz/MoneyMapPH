@@ -22,6 +22,7 @@ import os from "node:os";
 import path from "node:path";
 
 const REACHABILITY_WIDTHS = [1440, 1280, 1100, 1024, 900];
+const MOBILE_WIDTHS = [375, 390];
 const VISIBILITY_WIDTHS = [320, 360, 375, 390, 414, 430, 540, 768, 900, 1023, 1024, 1280];
 
 const cookieText = fs.readFileSync(path.join(os.tmpdir(), "mm-capture-cookie.txt"), "utf8");
@@ -168,6 +169,128 @@ for (const width of VISIBILITY_WIDTHS) {
       `overlap=${r.overlap}  hScroll=${hScroll}`
   );
   if (!pass) console.log(`    expected tier: ${isDesktopTier ? "top nav only" : "bottom nav only"}`);
+  await ctx.close();
+}
+
+
+// ---------------------------------------------------------------- Phase C
+// The mobile bar's CONTENT and its active state.
+//
+// Phases A and B both assert the bottom nav PAINTS at a mobile width. Neither
+// says what is IN it, so swapping two destinations - or a slot going silently
+// missing - passed the gate completely. That gap is why this phase exists.
+//
+// Added with the IA change that moved /accounts onto the bar and /income
+// behind More, which has one non-obvious consequence: `isMoreActive` derives
+// from `secondaryItems`, so More must now highlight on Income. That is exactly
+// the kind of behaviour that renders correctly and asserts nothing.
+console.log("\n=== PHASE C - mobile slot identity, order and active state ===");
+
+// MEMBERSHIP comes from PRIMARY_MOBILE_HREFS; RENDERED ORDER comes from
+// NAV_ITEMS, because `primaryItems = NAV_ITEMS.filter(...)` preserves it. Those
+// are two different lists and this expectation asserts the second one.
+//
+// So this is NOT the order of PRIMARY_MOBILE_HREFS. Accounts sits second
+// because that is where NAV_ITEMS declares it, and it is the only list that
+// orders anything - on desktop as well as mobile. Reordering NAV_ITEMS would
+// reorder both navs, and sorting primaryItems would put ordering in two places
+// and make the two navs disagree. Neither was done; this expectation simply
+// records what the shared constant actually produces.
+const EXPECTED_MOBILE_SLOTS = ["/dashboard", "/accounts", "/expenses", "/budgets"];
+const MORE_SCOPES_ACTIVE = [
+  "/income", "/savings", "/transactions", "/forecasting", "/simulator", "/settings",
+];
+const DIRECT_ACTIVE = ["/dashboard", "/expenses", "/budgets", "/accounts"];
+
+// "Visible" cannot be a display keyword read off the element: a child of a
+// display:none subtree still computes its own display. Hence the ancestor walk.
+const FIND_VISIBLE_NAV = `(() => {
+  const vis = (el) => {
+    if (el.checkVisibility) return el.checkVisibility({ checkVisibilityCSS: true });
+    let n = el;
+    while (n && n !== document.documentElement) {
+      if (getComputedStyle(n).display === "none") return false;
+      n = n.parentElement;
+    }
+    return true;
+  };
+  return [...document.querySelectorAll("nav")].find((n) => vis(n) && n.getBoundingClientRect().height > 0) || null;
+})()`;
+
+for (const width of MOBILE_WIDTHS) {
+  const { ctx, pg } = await openAt(width);
+
+  // 1. five slots, in order, nothing clipped, no overflow
+  const bar = await pg.evaluate((finder) => {
+    const nav = eval(finder);
+    if (!nav) return { err: "no visible bottom nav" };
+    const more = [...nav.querySelectorAll("button")].find((b) => /more/i.test(b.innerText || ""));
+    return {
+      links: [...nav.querySelectorAll("a")].map((a) => ({
+        href: a.getAttribute("href"),
+        w: Math.round(a.getBoundingClientRect().width),
+        clipped: a.scrollWidth > a.clientWidth + 1,
+      })),
+      more: more
+        ? { label: (more.innerText || "").trim(), clipped: more.scrollWidth > more.clientWidth + 1 }
+        : null,
+      navH: Math.round(nav.getBoundingClientRect().height),
+      overflow: nav.scrollWidth > nav.clientWidth + 1,
+      hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  }, FIND_VISIBLE_NAV);
+
+  const hrefs = bar.links.map((l) => l.href);
+  const slotMatch =
+    hrefs.length === EXPECTED_MOBILE_SLOTS.length &&
+    EXPECTED_MOBILE_SLOTS.every((h, i) => hrefs[i] === h);
+  const noClip = bar.links.every((l) => !l.clipped) && !(bar.more && bar.more.clipped);
+  const barOk = !bar.err && slotMatch && !!bar.more && noClip && !bar.overflow && !bar.hScroll;
+  if (!barOk) failures++;
+  console.log(`--- ${width}px bar --- ${barOk ? "PASS" : "FAIL"}`);
+  console.log(`  slots:    ${hrefs.join(" . ")} . ${bar.more ? bar.more.label : "(no More)"}`);
+  console.log(`  expected: ${EXPECTED_MOBILE_SLOTS.join(" . ")} . More  -> ${slotMatch ? "match" : "MISMATCH"}`);
+  console.log(`  height ${bar.navH}px  clipped ${noClip ? "none" : "YES"}  navOverflow ${bar.overflow}  hScroll ${bar.hScroll}`);
+
+  // 2. each daily destination activates ITS OWN slot, via aria-current
+  for (const href of DIRECT_ACTIVE) {
+    await pg.goto(`http://localhost:3000${href}`, { waitUntil: "networkidle" });
+    await pg.waitForTimeout(700);
+    const active = await pg.evaluate((finder) => {
+      const nav = eval(finder);
+      const a = nav && nav.querySelector('a[aria-current="page"]');
+      return a ? a.getAttribute("href") : null;
+    }, FIND_VISIBLE_NAV);
+    const pass = active === href;
+    if (!pass) failures++;
+    console.log(`  ${href.padEnd(13)} -> active slot ${String(active).padEnd(13)} ${pass ? "PASS" : `FAIL (expected ${href})`}`);
+  }
+
+  // 3. every secondary destination highlights MORE and leaves no direct slot
+  for (const href of MORE_SCOPES_ACTIVE) {
+    await pg.goto(`http://localhost:3000${href}`, { waitUntil: "networkidle" });
+    await pg.waitForTimeout(700);
+    const st = await pg.evaluate((finder) => {
+      const nav = eval(finder);
+      if (!nav) return { active: null, more: false };
+      const more = [...nav.querySelectorAll("button")].find((b) => /more/i.test(b.innerText || ""));
+      const a = nav.querySelector('a[aria-current="page"]');
+      // The trigger is a button, so aria-current may not be set on it; the
+      // active class is the fallback. Either signal is acceptable - a MISSING
+      // active slot is not, which is what /income would have looked like.
+      const moreActive = !!(
+        (more && more.querySelector("span") && more.querySelector("span").getAttribute("data-active") === "true") ||
+        (more && /bg-sulpot|sulpot-tint|text-sulpot|text-sulpot-bright/.test(String(more.className + " " + (more.innerHTML || ""))))
+      );
+      return { active: a ? a.getAttribute("href") : null, more: moreActive };
+    }, FIND_VISIBLE_NAV);
+    // /income is the one this slice changed: it was a direct slot and is now
+    // secondary, so More must light up where it previously did not.
+    const pass = st.more === true && st.active === null;
+    if (!pass) failures++;
+    console.log(`  ${href.padEnd(13)} -> More ${String(st.more).padEnd(6)} direct ${String(st.active).padEnd(11)} ${pass ? "PASS" : "FAIL"}`);
+  }
+
   await ctx.close();
 }
 

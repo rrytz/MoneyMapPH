@@ -8,7 +8,25 @@ import { NAV_ITEMS } from "@/lib/constants";
 import { NAV_ICON_MAP } from "./nav-icons";
 import { cn } from "@/lib/utils";
 
-const PRIMARY_MOBILE_HREFS = ["/dashboard", "/income", "/expenses", "/budgets"];
+// The four daily destinations, in the order NAV_ITEMS declares them.
+//
+// Accounts IN, Income OUT - and both because of measured usage rather than
+// preference. Accounts was opened daily and sat behind More; Income was weekly
+// and held a slot. Safe-to-spend and upcoming-bills need no slot at all, since
+// both are already on the Dashboard - a frequent ACTION does not imply a
+// frequent DESTINATION, which is what made the swap worth making.
+//
+// Nothing is lost. `secondaryItems` is `!PRIMARY_MOBILE_HREFS`, so /income
+// joins Savings, Transactions, Forecasting, Simulator and Settings inside More,
+// and `isMoreActive` derives from that same list - so More now highlights on
+// Income, which it did not before. That is the correct behaviour and it falls
+// out of the existing code rather than needing a special case.
+const PRIMARY_MOBILE_HREFS = [
+  "/dashboard",
+  "/expenses",
+  "/budgets",
+  "/accounts",
+];
 
 export function MobileNav() {
   const pathname = usePathname();

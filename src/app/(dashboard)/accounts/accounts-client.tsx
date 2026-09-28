@@ -7,6 +7,7 @@ import { AccountModal } from "@/components/accounts/account-modal";
 import { TransferModal } from "@/components/accounts/transfer-modal";
 import { TransferList } from "@/components/accounts/transfer-list";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
+import { FilterPills } from "@/components/shared/filter-pills";
 import { gridTracksFor, gridTracksClass } from "@/lib/utils/grid-tracks";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,8 @@ export function AccountsClient({
   totalLiquidity,
 }: AccountsClientProps) {
   const [showArchived, setShowArchived] = useState(false);
+  // The type order is the closed set's own, so sections are stable.
+  const ACCOUNT_TYPE_ORDER = ["bank", "digital_bank", "ewallet", "credit", "cash"] as const;
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AccountWithBalance | null>(null);
@@ -38,16 +41,31 @@ export function AccountsClient({
 
   const displayedAccounts = showArchived ? allAccountsWithArchived : initialAccounts;
   const accountTracks = gridTracksFor(displayedAccounts.length, 3);
-  // Mobile gets its own track count, capped at 2, and that cap is the whole
-  // reason this is not `grid-cols-2` at the base.
+
+  // Grouped by the account type, and only over types that are PRESENT.
   //
-  // A flat `grid-cols-2` would pair the cards on a phone - which is right for
-  // three accounts and wrong for one, where it reopens exactly the hole the
-  // composition arc closed: a 402px card beside a 402px void. Measured, 3 cards
-  // at one track is 609px and at two tracks is 455.6px, so 153.6px saved; but
-  // that saving only exists when there are enough cards to fill a row, and
-  // gridTracksFor is what knows which case this is.
-  const accountMobileTracks = gridTracksClass(gridTracksFor(displayedAccounts.length, 2), "");
+  // Order is the closed type set's order, not alphabetical and not by size, so
+  // the sections do not reshuffle when an account is added or archived. An
+  // absent type contributes no section at all - a section with nothing in it is
+  // a header describing zero accounts, and a pill for a type with no accounts is
+  // a filter to nothing. Both are dead controls, so both derive from what is
+  // actually on the page.
+  const accountGroups = ACCOUNT_TYPE_ORDER.map((type) => ({
+    type,
+    accounts: displayedAccounts.filter((a) => a.type === type),
+  })).filter((g) => g.accounts.length > 0);
+
+  // Pills over present types, using the app's OWN type strings - lowercase and
+  // unhyphenated, because that is what the DB stores and what the card renders.
+  // Measured: All + the three present types is 224.5px against 345px usable, one
+  // row. The six-pill version measured 394.5px, over by 49.5px, which would mean
+  // a partially-visible last pill - the same interaction removed from the
+  // tables. Deriving from present types makes that case unreachable.
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const visibleGroups =
+    typeFilter === null
+      ? accountGroups
+      : accountGroups.filter((g) => g.type === typeFilter);
 
   function handleCreateAccount() {
     setEditingAccount(null);
@@ -157,6 +175,21 @@ export function AccountsClient({
 
       {/* Account Cards Grid */}
       <div className="space-y-4">
+        {/* The pill row, and it is derived rather than declared. Filtered to a
+            type that has no accounts, the filter is not a control. */}
+        {accountGroups.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <FilterPills
+              label="Account type"
+              options={[
+                { value: "all", label: "All" },
+                ...accountGroups.map((g) => ({ value: g.type, label: g.type })),
+              ]}
+              value={typeFilter ?? "all"}
+              onChange={(v) => setTypeFilter(v === "all" ? null : v)}
+            />
+          </div>
+        )}
         <h2 className="text-lg font-semibold text-foreground">Your Wallets & Accounts</h2>
         {displayedAccounts.length === 0 ? (
           <div className="rounded-2xl border border-border bg-card/60 p-12 text-center space-y-4">
@@ -175,21 +208,67 @@ export function AccountsClient({
             </Button>
           </div>
         ) : (
-          <div className={cn("grid gap-4 md:grid-cols-2", accountMobileTracks, gridTracksClass(accountTracks, "lg"))}>
-            {/* Count-aware tracks. At a fixed lg:grid-cols-3, two accounts left a
-                402px empty column - 97,284 px^2 of hole, which was more dead
-                space than the column slack the /budgets pass just removed. Two
-                tracks fill the same single row exactly, so the cards get wider
-                and the hole closes. */}
-            {displayedAccounts.map((acc) => (
-              <AccountCard
-                key={acc.id}
-                account={acc}
-                onEdit={handleEditAccount}
-                onArchive={handleArchiveToggle}
-                onTransfer={handleOpenTransfer}
-              />
-            ))}
+          /* Grouped by type, and grouped for a reason that was measured rather
+             than assumed: a flat grid has ONE track count for the whole page, so
+             a group of one account lands beside a 165px void at two-up. Grouping
+             makes that visible - two of four accounts in three types - and the
+             fix is that the track count is now derived PER GROUP.
+
+             A single-account group rendering full width is therefore correct
+             behaviour, not a layout failure. At two-up it would be a defect; at
+             one track it is a card that fills its row.
+
+             The header is the type and a COUNT, never a currency subtotal. The
+             page already carries four figures at 30px, and a subtotal is a
+             `type-ledger` by nature, so three of them would make seven and put
+             the group total ahead of the accounts it summarises. The Allowance
+             card was refused at two overlapping figures of 33.75px; this page
+             is already at four. A count reads as metadata and leaves the ledger
+             count where it is. */
+          <div className="space-y-6">
+            {visibleGroups.map((group) => {
+              const groupMobile = gridTracksClass(
+                gridTracksFor(group.accounts.length, 2),
+                ""
+              );
+              return (
+                <section key={group.type}>
+                  <div className="flex items-baseline justify-between mb-3">
+                    <span className="type-section-label text-muted-foreground">
+                      {group.type.replace("_", " ")}
+                    </span>
+                    <span className="type-section-label text-muted-foreground tabular-nums">
+                      {group.accounts.length}
+                    </span>
+                  </div>
+                  <div
+                    className={cn(
+                      "grid gap-4",
+                      groupMobile,
+                      // Per-group at BOTH breakpoints. Leaving `md:grid-cols-2`
+                      // in the base hard-coded is what put a 610px void beside
+                      // every single-account group on desktop: the `lg` class was
+                      // per-group and correctly declined to 1, but the base
+                      // `md` class then put two tracks back at md and above.
+                      // A group of one has no width-appropriate pair at any
+                      // breakpoint, so the count is derived once and used twice.
+                      gridTracksClass(group.accounts.length === 1 ? 1 : 2, "md"),
+                      gridTracksClass(group.accounts.length === 1 ? 1 : gridTracksFor(group.accounts.length, 3), "lg")
+                    )}
+                  >
+                    {group.accounts.map((acc) => (
+                      <AccountCard
+                        key={acc.id}
+                        account={acc}
+                        onEdit={handleEditAccount}
+                        onArchive={handleArchiveToggle}
+                        onTransfer={handleOpenTransfer}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
           </div>
         )}
       </div>

@@ -47,6 +47,21 @@ async function openAt(width) {
   return { ctx, pg };
 }
 
+// Phase D needs a real device height. `openAt` hardcodes 800, which is not
+// short: the overlap it guards against was found at 375x667, where the page
+// had to scroll, and asserting at 800 passes by having more room. Measuring the
+// width while ignoring the height is the same class of error as comparing to
+// the wrong frame.
+async function openAtViewport(width, height) {
+  const ctx = await browser.newContext({ viewport: { width, height }, colorScheme: "dark" });
+  await ctx.addCookies(pairs.map((c) => ({ name: c.name, value: c.value, domain: "localhost", path: "/" })));
+  const pg = await ctx.newPage();
+  pg.setDefaultTimeout(30000);
+  await pg.goto("http://localhost:3000/dashboard", { waitUntil: "networkidle" });
+  await pg.waitForTimeout(1200);
+  return { ctx, pg };
+}
+
 /**
  * Visibility means "painted", not a literal display keyword. The bottom <nav>
  * computes to `block` (its inner div is the flex row) and the top nav to
@@ -291,6 +306,186 @@ for (const width of MOBILE_WIDTHS) {
     console.log(`  ${href.padEnd(13)} -> More ${String(st.more).padEnd(6)} direct ${String(st.active).padEnd(11)} ${pass ? "PASS" : "FAIL"}`);
   }
 
+  await ctx.close();
+}
+
+
+// ---------------------------------------------------------------- Phase D
+// Mobile end-of-scroll reachability: can the last thing on the page actually be
+// seen, or is it behind the fixed bottom nav?
+//
+// Phase C asserts what is IN the bar. This asserts what is UNDER it.
+//
+// WHY A SEPARATE OPENER: `openAt` hardcodes height 800, which is not short. An
+// earlier version of this phase passed at 375 and 390 while opening at 800
+// tall - it measured the width and ignored the height, which is the same class
+// of error as comparing against the wrong frame. Hence openAtViewport.
+//
+// WHY A SYNTHETIC NEGATIVE CASE: with the real dashboard - one short bills row -
+// the last content sits 114px+ above the bar, so the real assertion has nothing
+// to catch and passes vacuously. A check that has never been observed to fail is
+// not evidence of anything. The synthetic case below forces an unsafe state
+// INSIDE the probe and requires the assertion to REJECT it. If someone weakens
+// the assertion, this case fails, which is the only thing that makes it worth
+// having.
+//
+// Both cases call the SAME function and the SAME scroll-to-end behaviour, on
+// the REAL scroll container and the REAL nav element. Nothing is mocked.
+console.log("\n=== PHASE D - mobile end-of-scroll reachability ===");
+
+// 1px tolerance: sub-pixel layout can put a descender a fraction below a
+// boundary it visually clears. Note how small this is - it is the number a
+// weakened assertion would inflate, and the synthetic case below exists to
+// catch exactly that.
+const REACHABILITY_TOLERANCE_PX = 1;
+
+/**
+ * The one assertion. True when the lowest content is clear of the nav.
+ * Both the real and the synthetic case call this, so weakening it here fails
+ * the synthetic case rather than silently passing both.
+ */
+function contentClearsNav(lastContentBottom, navTop) {
+  if (lastContentBottom === null || navTop === null) return false;
+  return lastContentBottom <= navTop + REACHABILITY_TOLERANCE_PX;
+}
+
+// The lowest visible leaf text inside the scroller. A BLOCK can be mostly
+// padding and still read as "clears the nav" while its content does not, so
+// the measurement target is text, not a container.
+const PROBE_LOWEST_TEXT = `(scroller) => {
+  let lowest = null;
+  for (const el of scroller.querySelectorAll("*")) {
+    if (el.children.length) continue;
+    const t = (el.textContent || "").trim();
+    if (!t) continue;
+    const b = el.getBoundingClientRect();
+    if (b.height === 0 || b.width === 0) continue;
+    if (!lowest || b.bottom > lowest.bottom) lowest = { bottom: b.bottom, t: t.slice(0, 28) };
+  }
+  return lowest;
+}`;
+
+// The two real device sizes this was reported against. Height matters: the
+// defect was found at 375x667, and an 800px-tall viewport passes vacuously.
+const MOBILE_DEVICES = [[375, 667], [390, 844]];
+
+const SCROLL_TO_END = `(scroller) => {
+  scroller.scrollTop = scroller.scrollHeight;
+}`;
+
+
+// ------------------------------------------------------------------ REAL
+console.log("\n--- REAL ---");
+for (const [width, height] of MOBILE_DEVICES) {
+  const { ctx, pg } = await openAtViewport(width, height);
+  const r = await pg.evaluate(
+    ([finder, probe, scrollerSel]) => {
+      const nav = eval(finder);
+      const scroller = document.querySelector(scrollerSel) || document.scrollingElement;
+      const navBox = nav ? nav.getBoundingClientRect() : null;
+      return {
+        isBottom: !!navBox && navBox.top > window.innerHeight * 0.6,
+        navTop: navBox ? Math.round(navBox.top) : null,
+        lowest: eval(probe)(scroller),
+        scrolledTo: scroller.scrollTop,
+        contentH: scroller.scrollHeight,
+      };
+    },
+    [FIND_VISIBLE_NAV, PROBE_LOWEST_TEXT, "main"]
+  );
+
+  // SCROLL FIRST, then measure. The rect is viewport-relative, so an unscrolled
+  // reading answers a different question and reports a false failure for any
+  // page taller than its viewport.
+  await pg.evaluate((s) => { const sc = document.querySelector("main") || document.scrollingElement; return eval(s)(sc); }, SCROLL_TO_END);
+  await pg.waitForTimeout(400);
+  const after = await pg.evaluate(
+    ([finder, probe]) => {
+      const nav = eval(finder);
+      const scroller = document.querySelector("main") || document.scrollingElement;
+      const navBox = nav ? nav.getBoundingClientRect() : null;
+      return { navTop: navBox ? Math.round(navBox.top) : null, lowest: eval(probe)(scroller) };
+    },
+    [FIND_VISIBLE_NAV, PROBE_LOWEST_TEXT]
+  );
+
+  const pass = after.isBottom !== false && contentClearsNav(after.lowest?.bottom ?? null, after.navTop);
+  if (!pass) failures++;
+  console.log(`  ${width}x${height} ... ${pass ? "PASS" : "FAIL"}`);
+  console.log(`    nav top ${after.navTop}, lowest content "${after.lowest?.t ?? "-"}" bottom ${after.lowest ? Math.round(after.lowest.bottom) : "-"}`);
+  await ctx.close();
+}
+
+// ----------------------------------------------------------- SYNTHETIC
+// Force an unsafe state INSIDE the probe: strip the scroll container's bottom
+// clearance and append a sentinel tall enough that the end of the scroll
+// necessarily reaches the nav. Then require the assertion to REJECT it.
+console.log("\n--- SYNTHETIC NEGATIVE (assertion must reject an unsafe state) ---");
+for (const [width, height] of MOBILE_DEVICES) {
+  const { ctx, pg } = await openAtViewport(width, height);
+
+  const unsafe = await pg.evaluate((finder) => {
+    const nav = eval(finder);
+    const scroller = document.querySelector("main") || document.scrollingElement;
+    // 1. no bottom clearance on the scroll container
+    scroller.style.paddingBottom = "0px";
+    // 2. a sentinel that guarantees the end of the scroll reaches the nav area
+    const sentinel = document.createElement("div");
+    sentinel.id = "__reachability_sentinel";
+    sentinel.style.cssText = "height:900px;background:transparent;";
+    sentinel.textContent = "sentinel";
+    scroller.appendChild(sentinel);
+    return { isBottom: !!nav && nav.getBoundingClientRect().top > window.innerHeight * 0.6 };
+  }, FIND_VISIBLE_NAV);
+
+  // 3. scroll fully to the end
+  await pg.evaluate(() => {
+    const s = document.querySelector("main") || document.scrollingElement;
+    s.scrollTop = s.scrollHeight;
+  });
+  await pg.waitForTimeout(400);
+
+  const m = await pg.evaluate(
+    ([finder, probe]) => {
+      const nav = eval(finder);
+      const scroller = document.querySelector("main") || document.scrollingElement;
+      const navBox = nav ? nav.getBoundingClientRect() : null;
+      const sentinel = document.getElementById("__reachability_sentinel");
+      return {
+        navTop: navBox ? Math.round(navBox.top) : null,
+        sentinelBottom: sentinel ? sentinel.getBoundingClientRect().bottom : null,
+        lowest: eval(probe)(scroller),
+      };
+    },
+    [FIND_VISIBLE_NAV, PROBE_LOWEST_TEXT]
+  );
+
+  const measured = m.sentinelBottom ?? m.lowest?.bottom ?? null;
+  const assertionSaysClear = contentClearsNav(measured, m.navTop);
+  const overlap = m.navTop !== null && measured !== null ? Math.round(measured - m.navTop) : 0;
+
+  // The synthetic case PASSES only when the assertion correctly REJECTS.
+  // If it accepts an unsafe state, the assertion has been weakened and THE GATE
+  // FAILS - which is the entire purpose of this block.
+  const detected = assertionSaysClear === false && overlap > 0;
+  if (!detected) failures++;
+  console.log(`  ${width}x${height} ... ${detected ? "expected assertion failure detected ... PASS" : "*** ASSERTION ACCEPTED AN UNSAFE STATE - FAIL ***"}`);
+  console.log(`    nav top ${m.navTop}, sentinel bottom ${m.sentinelBottom !== null ? Math.round(m.sentinelBottom) : "-"}, overlap ${overlap > 0 ? overlap + "px behind the nav" : "none"}`);
+
+  await ctx.close();
+}
+
+// The desktop conditional, proving the skip path rather than assuming it.
+{
+  const { ctx, pg } = await openAt(1280);
+  const r = await pg.evaluate((finder) => {
+    const nav = eval(finder);
+    const b = nav ? nav.getBoundingClientRect() : null;
+    return { h: b ? Math.round(b.height) : 0, top: b ? Math.round(b.top) : null, isBottom: !!b && b.top > window.innerHeight * 0.6 };
+  }, FIND_VISIBLE_NAV);
+  const pass = r.isBottom === false;
+  if (!pass) failures++;
+  console.log(`\n  1280px conditional ... ${pass ? "PASS" : "FAIL"}  (nav ${r.h}px at y=${r.top}, pinned bottom: ${r.isBottom})`);
   await ctx.close();
 }
 

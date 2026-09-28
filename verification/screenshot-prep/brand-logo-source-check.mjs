@@ -24,11 +24,47 @@
 //   hardcoded / theme / pasted-white fills   any fill that is not currentColor
 //   opacity and fill-opacity                 tonal variation
 //   gradients and <image>                   not a flat monochrome mark
-//   <rect> background fields                a background is not a mark
-//   shapes with no fill at all               must be explicit, never implicit
+//   full-canvas background shapes           see BACKGROUND BY COVERAGE below
 //
 // The escape hatch is `rules:ok <reason>` in a comment, consistent with
 // gate:rules.
+//
+// ------------------------------------------------------------------
+// BACKGROUND, BY COVERAGE - NOT BY TAG NAME
+// ------------------------------------------------------------------
+//
+// The first stripper looked for <rect>. UnionBank's asset authored its
+// background as <polygon points="0 43.9 179.8 43.9 179.8 0 0 0"> - a
+// full-canvas shape wearing a different tag. The stripper missed it, the
+// polygon took currentColor, and the card rendered a solid white rectangle 77px
+// wide. It passed every other rule in this file.
+//
+// So the rule is COVERAGE, never tag name: any shape whose geometry spans
+// effectively the whole viewBox is a background, whatever element it is called.
+// "Look for <rect> and also <polygon>" is the same mistake a second time - a
+// filter listing the cases seen rather than the property they share, which is
+// how a regex matching one line ending and not another gets written.
+//
+// A path is judged on the extent of its coordinate values, which is
+// conservative: it over-reports rather than under-reports, because a false
+// rejection is a TODO and a false pass is a rectangle on the card.
+//
+// ------------------------------------------------------------------
+// ASSUMPTION: assets must not rely on GROUP TRANSFORMS
+// ------------------------------------------------------------------
+//
+// The conversion pipeline keeps flat shape elements and DISCARDS the <g>
+// wrappers around them, including their transforms. UnionBank carried two
+// <g transform="translate(...)"> wrappers, so positioning was lost along with
+// the masks. It was rejected for the masks, so the transform loss was never the
+// visible failure - but any asset relying on a group transform to position its
+// own paths will render them displaced, while passing every rule in this file.
+//
+// Flattening transforms during conversion is the better fix and is NOT done
+// here; it needs its own verification, because silently rewriting coordinates is
+// right in principle and easy to get wrong in practice. Until it exists the
+// assumption is stated rather than left as an incidental property of a
+// throwaway script: ASSETS MUST USE ABSOLUTE POSITIONS.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -69,9 +105,79 @@ const FORBIDDEN = [
   { re: /\bfill\s*=\s*"(?!currentColor)[^"]*"/i, msg: "a fill that is not currentColor - hardcoded, theme, or pasted white" },
   { re: /\bfill\s*=\s*'(?!currentColor)[^']*'/i, msg: "a fill that is not currentColor - hardcoded, theme, or pasted white" },
   { re: /\bstroke\s*=/i, msg: "a stroked shape is not a filled monochrome mark" },
-  { re: /<rect\b/i, msg: "<rect> is either a background field or a counter; neither is allowed in a mark" },
+  // A <rect> that is NOT full-canvas is a counter (a hole punched in a mark) and\n  // is still rejected: authored in the asset's own white or any other colour, it\n  // becomes a pasted white fill the moment it takes currentColor. Full-canvas\n  // rects are caught by the COVERAGE rule below, which is tag-agnostic.\n  { re: /<rect\b/i, msg: "<rect> is a counter or a background; counters become a pasted white fill once currentColor, and backgrounds belong to the page, not the mark" },
 ];
 
+
+// ---------------------------------------------------------------- geometry
+// "Does this shape cover the whole viewBox?" - COVERAGE, not tag name.
+//
+// Every element that can describe an area is measured the same way, so adding a
+// new shape tag to some future asset cannot smuggle a background past this by
+// wearing a different name. Bounding boxes, not exact geometry: cheap, and the
+// error direction is toward rejection.
+const num = (v) => {
+  const m = String(v ?? "").match(/-?\d*\.?\d+(?:e-?\d+)?/i);
+  return m ? Number(m[0]) : NaN;
+};
+
+/** [minX, minY, maxX, maxY] of a shape, or null when it cannot be determined. */
+const bbox = (tag, attrs) => {
+  const a = (n) => num((attrs.match(new RegExp(`\\b${n}="([^"]*)"`)) || [])[1]);
+  if (tag === "rect") {
+    const x = a("x") || 0, y = a("y") || 0, w = a("width"), h = a("height");
+    if (!isFinite(w) || !isFinite(h)) return null;
+    return [x, y, x + w, y + h];
+  }
+  if (tag === "circle") {
+    const cx = a("cx") || 0, cy = a("cy") || 0, r = a("r");
+    if (!isFinite(r)) return null;
+    return [cx - r, cy - r, cx + r, cy + r];
+  }
+  if (tag === "ellipse") {
+    const cx = a("cx") || 0, cy = a("cy") || 0, rx = a("rx"), ry = a("ry");
+    if (!isFinite(rx) || !isFinite(ry)) return null;
+    return [cx - rx, cy - ry, cx + rx, cy + ry];
+  }
+  if (tag === "polygon" || tag === "polyline") {
+    const pts = (attrs.match(/points="([^"]*)"/) || [])[1];
+    if (!pts) return null;
+    const n = pts.trim().split(/[\s,]+/).map(Number).filter((v) => isFinite(v));
+    if (n.length < 4) return null;
+    const xs = n.filter((_, i) => i % 2 === 0), ys = n.filter((_, i) => i % 2 === 1);
+    return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+  }
+  return null;
+}
+
+// WHY <path> IS EXCLUDED, which is a property and not an oversight.
+//
+// The rule asks whether a shape is a BACKGROUND. The signal is coverage, and
+// coverage only carries that meaning for a shape that is SOLID BY CONSTRUCTION
+// - rect, circle, ellipse, and a polygon whose points trace the canvas. Those
+// are filled regions: if the box is the whole canvas, the painted area is the
+// whole canvas.
+//
+// A <path> is arbitrary geometry. Its bounding box routinely spans the whole
+// viewBox and that means nothing about its AREA: every wordmark does it, because
+// the first letter reaches the left edge and the last reaches the right, and the
+// gaps between letters are not painted. Applying coverage to paths flagged Maya
+// and PayPal - both correct wordmarks - on the first run.
+//
+// So the distinction is "solid by construction" versus "arbitrary geometry", not
+// "the tags I happened to see". A path-based background would slip past; that is
+// a real gap and it is stated rather than hidden, because closing it needs area
+// computation (an SVG rasteriser or a boolean-geometry pass), not a bigger
+// tag list.
+const SOLID_SHAPES = new Set(["rect", "circle", "ellipse", "polygon"]);
+
+const COVERAGE = 0.9; // a background that covers >=90% of each axis is a background
+const coversViewBox = (tag, attrs, w, h) => {
+  if (!SOLID_SHAPES.has(tag)) return false;
+  const b = bbox(tag, attrs);
+  if (!b) return false;
+  return (b[2] - b[0]) / w >= COVERAGE && (b[3] - b[1]) / h >= COVERAGE;
+};
 for (const e of entries) {
   // An empty slot is a stated TODO, not a violation. The rendered gate is what
   // requires a card to actually render a monogram, so this check must not also
@@ -88,6 +194,11 @@ for (const e of entries) {
   for (const s of shapes) {
     const tag = s[1];
     const attrs = s[2] || "";
+    // THE COVERAGE RULE. Tag-agnostic on purpose: <polygon> is what UnionBank
+    // used, and a rule that only knew about <rect> passed it.
+    if (coversViewBox(tag, attrs, e.w, e.h)) {
+      fail(e.brand, e.line, `<${tag}> covers the whole viewBox (${e.w}x${e.h}) - that is a BACKGROUND field, not a mark, whatever element it is called`);
+    }
     for (const f of FORBIDDEN) {
       const probe = `<${tag}${attrs}>`;
       if (f.re.test(probe)) fail(e.brand, e.line, `<${tag}> ${f.msg}`);

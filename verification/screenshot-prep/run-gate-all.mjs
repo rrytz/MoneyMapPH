@@ -126,5 +126,34 @@ if (buildCode === 0) {
   buildCode = run("build", ["run", "build"]);
 }
 
+// ---------------------------------------------------------------- teardown
+//
+// The chain ENDS with a dev server running, on purpose.
+//
+// The browser gates need the server up and the build needs it down, so the
+// sequence is necessarily start -> gates -> stop -> build. STOPPING LAST is
+// what made `localhost` look broken after every gate run - twice now, which is
+// twice more than it should take. The complaint is not that the server stops; it
+// is that nothing puts it back.
+//
+// So the chain puts it back, and says so. Cost is one extra `next dev` start.
+// Skipped under CI, where there is no browser and nobody to serve.
+//
+// Same failure as the rest of this work, one level up: a procedure with a step
+// that depends on the person remembering it. The step belongs in the tool.
+if (!process.env.CI) {
+  say("restarting the dev server so localhost survives the run");
+  const again = spawn(npm, ["run", "dev"], { detached: true, stdio: "ignore", shell: isWindows });
+  again.unref();
+  try {
+    const polls = await waitForPort(ORIGIN, 30000);
+    say(`dev server back up on ${ORIGIN} (${polls} poll(s)) - left running`);
+  } catch {
+    say("WARNING: dev server did not come back up - check it manually");
+  }
+} else {
+  say("CI detected - not starting a dev server");
+}
+
 say(buildCode === 0 ? "chain PASS" : `chain FAIL (${buildCode})`);
 process.exit(buildCode);

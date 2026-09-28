@@ -459,6 +459,14 @@ export const describe = (card, nearestFn) => {
       return {
         present: true,
         kind: mono ? "monogram" : "mark",
+        // Enough identity to NAME the element in a failure. A mark and a
+        // monogram are different elements and must be told apart: the monogram
+        // holds a text leaf, so it is also covered by the text walk, while a
+        // mark is covered by nothing else. A failure message that only said
+        // "the logo" would hide which assertion actually caught it.
+        el: mono
+          ? "span[data-account-logo-mono]"
+          : `svg[data-brand-logo="${el.querySelector("svg")?.getAttribute("data-brand-logo") ?? "?"}"]`,
         color: cs.color,
         height: Math.round(b.height),
         width: Math.round(b.width),
@@ -556,12 +564,12 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
         fail(`${lc.name}: logo present in light, absent in dark`);
       } else {
         if (lc.logo.color !== dc.logo.color) {
-          fail(`${lc.name}: logo is THEME-DEPENDENT - ${lc.logo.color} light, ${dc.logo.color} dark. The mark must inherit the card's text token; a per-path fill is the cause.`);
+          fail(`${lc.name}: ${lc.logo.el} is THEME-DEPENDENT - ${lc.logo.color} light, ${dc.logo.color} dark. A brand mark must inherit the card's text token; a theme token or a hardcoded fill is the cause.`);
         }
         // Graphical element, so WCAG non-text 3:1, not the 4.5:1 text floor.
         const lr = contrast(lc.logo.color, lc.logo.bg);
         if (lr !== null && lr < MIN_ICON_CONTRAST) {
-          fail(`${lc.name}: logo (${lc.logo.kind}) ${lc.logo.color} on ${lc.logo.bg} = ${lr.toFixed(2)}:1, below the ${MIN_ICON_CONTRAST}:1 graphical-object floor.`);
+          fail(`${lc.name}: ${lc.logo.el} (${lc.logo.kind}) ${lc.logo.color} on ${lc.logo.bg} = ${lr.toFixed(2)}:1, below the ${MIN_ICON_CONTRAST}:1 graphical-object floor.`);
         }
         if (lc.logo.height !== dc.logo.height) {
           fail(`${lc.name}: logo height differs between schemes (${lc.logo.height} vs ${dc.logo.height})`);

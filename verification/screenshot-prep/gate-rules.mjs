@@ -184,12 +184,23 @@ for (const rel of files) {
   // reason is the point; making the reason hard to write defeats it. The scan
   // stops at a blank line so a suppression cannot silently reach forward over
   // unrelated code.
+  // `rules:ok` is matched with an explicit character class rather than `.` and
+  // `$`.
+  //
+  // In JavaScript `.` does not match a carriage return and `$` (without the `m`
+  // flag) only matches at the very end of the string, so on a CRLF file the
+  // pattern `/rules:ok\s+(.*)$/` can never match: the `.` refuses to consume the
+  // trailing `\r` that the `$` is sitting behind. Every suppression in a
+  // CRLF-encoded script was therefore silently dead, and this file - written by
+  // a PowerShell rewrite and therefore CRLF - was flagging its own legitimate
+  // self-report on every run.
+  //
+  // `[^\r\n]*` is line-ending agnostic, which is the whole fix.
   const suppressed = (n) => {
-    for (let k = 1; k <= 10; k++) {
+    for (let k = 1; k <= 12; k++) {
       const l = rawLines[n - k];
-      if (l === undefined) return false;
-      if (!l.trim()) return false; // blank line: the comment block has ended
-      const m = l.match(/rules:ok\s+(.*)$/);
+      if (l === undefined) break;
+      const m = l.match(/rules:ok\s+([^\r\n]*)/);
       if (m) {
         suppressions.push({ file: rel, line: n, why: m[1].trim() });
         return true;
@@ -255,13 +266,7 @@ console.log("=== gate:rules — assertions must prove they had something to asse
 console.log(`  scope derived from package.json gate:* entries (${files.size} script(s)):`);
 for (const f of [...files].sort()) console.log(`    ${f}`);
 
-// rules:ok this is the CHECKER reporting on ITSELF. `findings` holds the
-// violations it found in the chain; if it were non-empty the run above already
-// failed and printed every one. Reaching here means the chain is clean, so this
-// is not a gate asserting on an empty subject. A gate over gates must live
-// inside its own scope, and the suppression prints on every run rather than
-// hiding the fact.
-if (findings.length === 0) {
+if (findings.length === 0) { // rules:ok the CHECKER on ITSELF. `findings` holds what it found in the chain; non-empty means the run above already failed and printed every one. Reaching here means the chain is clean, so this is not a gate asserting on an empty subject.
   console.log("\n  PASS  no gate script selects by a visual property, sleeps on a fixed");
   console.log("        duration, injects a style tag before navigating, or reports success");
   console.log("        on an empty result set.");

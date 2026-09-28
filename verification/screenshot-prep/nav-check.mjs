@@ -181,7 +181,10 @@ for (const width of REACHABILITY_WIDTHS) {
       reachable,
       groups: groupEls.map((el) => el.textContent.trim()),
       navRole: links.length > 0 && links.every((el) => el.classList.contains("type-nav")),
-      groupRole: groupEls.every((el) => el.classList.contains("type-nav-group")),
+      // rules:ok fixed in the commit that added Rule 6 - this was unguarded, so
+    // "every group carries the right role" passed on a nav that rendered no
+    // groups. Rule 6 found it on its first run, in code written for it.
+    groupRole: groupEls.length > 0 && groupEls.every((el) => el.classList.contains("type-nav-group")),
       overflow: !!top && top.scrollWidth > top.clientWidth + 1,
       overflowAffordance: !!top?.parentElement?.querySelector('[class*="bg-gradient-to-l"]'),
       noWrap: !!top && top.scrollHeight <= top.clientHeight + 1,
@@ -343,8 +346,13 @@ for (const width of MOBILE_WIDTHS) {
   const slotMatch =
     barPresent &&
     hrefs.length === EXPECTED_MOBILE_SLOTS.length &&
+    // rules:ok EXPECTED_MOBILE_SLOTS is a non-empty literal declared above, not
+    // a query result, so [].every cannot arise here.
     EXPECTED_MOBILE_SLOTS.every((h, i) => hrefs[i] === h);
-  const noClip = bar.links.every((l) => !l.clipped) && !(bar.more && bar.more.clipped);
+  // rules:ok `[].every(p) === true`, so on its own this claimed "nothing is
+  // clipped" from a bar that rendered no links. `barPresent &&` makes the claim
+  // conditional on there being something to be clipped about.
+  const noClip = barPresent && bar.links.every((l) => !l.clipped) && !(bar.more && bar.more.clipped);
   const barOk = slotMatch && noClip && !bar.overflow && !bar.hScroll;
   if (!barOk) failures++;
   console.log(`--- ${width}px bar --- ${barOk ? "PASS" : "FAIL"}${barPresent ? "" : " (bar incomplete - nothing to compare)"}`);

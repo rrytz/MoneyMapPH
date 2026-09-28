@@ -49,6 +49,59 @@ assertion that had no way to report its own emptiness.
 5. **Wait on an observed condition.** No `waitForTimeout` in a gate. A gate
    whose green depends on a constant being long enough is not deterministic; it
    is *currently* fast enough.
+6. **Coverage before absence.** A script asserting "no element has X" must
+   first assert the element set is non-empty and covers the scope it claims.
+   `"found nothing"` and `"nothing exists"` are indistinguishable, and only one
+   of them is the answer you want. Watch for `.every()` in particular:
+   `[].every(p) === true`, so it passes on an empty subject.
+
+## Read the output. The exit code is necessary, not sufficient.
+
+After **any** gate change, run the gate and read what it printed. Not the exit
+code — the output.
+
+Scanning is a floor. Reading is the ceiling. Two of the four real defects in
+the audit pass were found by reading a printed line, not by any tool:
+
+- `1280px conditional ... PASS  (nav 0px at y=null, pinned bottom: false)` — the
+  line announced that it had measured nothing, and passed.
+- `fixture: archived a real account and restored it` — the only evidence the
+  fixture was real and not a proxy.
+
+A gate that prints `cards: 7` should make you ask *which seven*. Silence is not
+evidence.
+
+## The recursion you are about to walk into
+
+Every verifier in this series reproduced the class it was written to catch:
+
+| verifier | what it reproduced |
+|---|---|
+| palette unit test | passed; the component never consumed the palette |
+| root-hover test | passed; a leaf's own `:hover` is unreachable from it |
+| motion suppression | was never active; injected before the navigation that discarded it |
+| compositing proof | passed on an empty scan set |
+
+**The checker will not catch the next instance above it, because the checker was
+written before that instance existed.** `gate:rules` enforces six patterns and
+none of them can tell whether a *semantic* selector is the *right* semantic
+selector, or whether a settled condition is the real one. When you add a gate,
+assume you will find its own blind spot by running it, not by writing it.
+
+## Scope boundary: named, not implicit
+
+`gate:rules` checks the scripts reachable from `gate:all` by following `npm run`
+transitively. **A script invoked directly — in CI, by a person, or by a future
+contributor — runs unconstrained.** That is a real gap and it is the same shape
+as the `SKIPPED` that could not un-skip itself.
+
+It is stated here rather than closed, deliberately. Closing it means either a
+hand-kept exclusion list, which fails open and is one more thing to forget, or
+a checker rewrite that would police the capture and diagnostic scripts — which
+wait on time to produce a screenshot, not to decide a pass. `gate:dom` and
+`gate:captures` are outside the chain and are reported as uncovered on every
+`gate:rules` run. If you promote a script into `gate:all`, it comes under the
+rules automatically.
 
 A control that depends on someone remembering to apply it is the failure mode
 that produced this entire series — so this rule is subject to the same standard
@@ -57,7 +110,8 @@ it describes.
 **Enforced by `npm run gate:rules`**, which runs first in `gate:all`. It fails
 a gate script that selects by a visual property, sleeps on a fixed duration,
 injects a style tag before navigating, or reports success on an empty result
-set. Findings can be silenced per-line with `rules:ok <reason>` — a reason is
+set. Findings can be silenced with `rules:ok <reason>` in the comment block
+above them - a reason is
 mandatory, and every suppression in force is printed on each run so they cannot
 accumulate unseen.
 

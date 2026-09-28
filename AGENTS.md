@@ -86,8 +86,16 @@ Every verifier in this series reproduced the class it was written to catch:
 | motion suppression | was never active; injected before the navigation that discarded it |
 | compositing proof | passed on an empty scan set |
 | **the human reading the output** | **twice reported a "false pass" that was a broken probe — a `.Replace()` whose `\n` was a literal, and a suppression that could not match CRLF** |
+| **`gate:logo-source`** | **passed a logo that rendered as a solid white rectangle — a full-canvas background authored as `<polygon>`, which is not a `<rect>`, plus a `<mask>` and group transforms the converter dropped** |
 
 The last row is the one that matters, and it is not a confession.
+
+**The source gate verifies the SHAPE of the source, not the IDENTITY of the
+mark.** A full-canvas `<polygon>` background with `fill="currentColor"`
+satisfies every rule `gate:logo-source` enforces — right fill, no opacity, no
+gradient, no `<rect>`, no `<image>`, explicit per path — and it rendered as a
+solid white rectangle 77px wide, the widest thing on the card. The only layer
+that caught it was a human reading the render.
 
 A probe that does not do what it says is **indistinguishable from a rule
 passing** — including to the person reading the output, who is supposed to be

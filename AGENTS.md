@@ -6,11 +6,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Verification gates
 
-Run the chain, not the parts: `npm run gate:all`.
+Run the chain, not the parts: `npm run gate:all`. **One invocation.** It starts
+the dev server, waits for the port, runs every gate, stops the server, then runs
+the build — because `next dev` and `next build` share `.next`, so the browser
+gates need the server up and the build needs it down. That order used to be a
+manual procedure, and a procedure that has to be remembered is the failure mode
+this section exists to prevent.
 
-```
-types -> test -> typography -> nav -> brand -> brand:states -> build
-```
+Individual gates still run standalone: `npm run gate:nav` and friends. Those
+need the dev server up, and they are for iterating — `gate:all` is the gate.
 
 ### Rule: an assertion must prove it had something to assert on
 

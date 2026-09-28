@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "gate:all": "npm run gate:rules && npm run gate:types && npm test && npm run gate:typography && npm run gate:nav && npm run gate:brand && npm run gate:brand:states && npm run build",
+    "gate:all": "node verification/screenshot-prep/run-gate-all.mjs",
     "test": "vitest run",
     "gate:types": "tsc --noEmit",
     "gate:typography": "vitest run src/tests/typography-conformance.test.ts",

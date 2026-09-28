@@ -320,6 +320,20 @@ export const COMPOSITING_SCOPE = `(leaf, card) => {
 export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
   const cards = eval(`(${collectSrc})`)();
   const scope = eval(`(${scopeSrc})`);
+  // COVERAGE, returned alongside the findings.
+  //
+  // This function used to return a bare array of hazards, and the caller
+  // printed PASS when that array was empty. That is the archived false-pass
+  // shape in new code: if the card collector returns nothing - a renamed
+  // selector, a changed route, a failed load - the guard reports that no
+  // backdrop-filter, blend or sub-1 opacity exists anywhere in the app.
+  //
+  // Asserting absence is the one place an empty result is most dangerous,
+  // because "found nothing" and "nothing exists" are indistinguishable and only
+  // one of them is the desired answer. So the scan now reports how much it
+  // actually looked at, and the caller treats zero coverage as a FAILURE of the
+  // scan rather than a clean bill of health.
+  const coverage = { cards: cards.length, leaves: 0, nodes: 0, pseudos: 0 };
   // Predicates arrive as source text and are compiled here, inside the page.
   // The parameter is supplied HERE: each `test` is a bare boolean EXPRESSION
   // over `v`, and the wrapper is what turns it into a function. Wrapping it in
@@ -328,7 +342,7 @@ export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
   const checks = hazards.map((h) => ({ prop: h.prop, scope: h.scope, unsafe: eval(`((v) => ${h.test})`) }));
   const out = [];
   for (const card of cards) {
-    const cname = (card.querySelector("h3") || {}).textContent || "(unnamed)";
+    const cname = card.getAttribute("data-account-card") || "(unnamed)";
     const leaves = [];
     for (const el of card.querySelectorAll("*")) {
       const isTextLeaf = el.children.length === 0 && (el.textContent || "").trim();
@@ -336,7 +350,9 @@ export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
       if (isTextLeaf || isControl) leaves.push(el);
     }
     for (const leaf of leaves) {
+      coverage.leaves++;
       for (const node of scope(leaf, card)) {
+        coverage.nodes++;
         const label =
           node.tagName.toLowerCase() +
           (typeof node.className === "string" && node.className.trim()
@@ -348,6 +364,7 @@ export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
         for (const pseudo of [null, "::before", "::after"]) {
           const cs = pseudo ? getComputedStyle(node, pseudo) : getComputedStyle(node);
           if (pseudo && (!cs.content || cs.content === "none" || cs.content === "normal")) continue;
+          if (pseudo) coverage.pseudos++;
           for (const h of checks) {
             // A "chain" hazard is asserted on EVERY node in the walked chain;
             // a "self" hazard only on the element the walk started from. The
@@ -368,7 +385,7 @@ export const hazardScan = ([collectSrc, scopeSrc, hazards]) => {
       }
     }
   }
-  return out;
+  return { hazards: out, coverage };
 };
 
 export const describe = (card, nearestFn) => {
@@ -518,14 +535,24 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
       haz[scheme] = await pg.evaluate(hazardScan, args);
       await ctx.close();
     }
-    const all = [...haz.light, ...haz.dark];
-    if (all.length === 0) {
-      console.log("  PASS  no backdrop-filter, mix-blend-mode, filter, sub-1 opacity or non-sRGB colour");
-      console.log("        anywhere in any measured chain, up to the document root.");
-      console.log("        sRGB alpha compositing is therefore a valid model for paintedBg().");
+    // COVERAGE BEFORE ABSENCE. An empty hazard list is only evidence if the
+    // scan actually looked at something. This is the fix for the vacuous pass
+    // the audit found here: a renamed selector or a failed load used to produce
+    // the same green as a clean app.
+    const cov = haz.light.coverage;
+    if (cov.cards === 0 || cov.leaves === 0) {
+      fail(`compositing-model guard did not run: scanned ${cov.cards} card(s) and ${cov.leaves} leaf/leaves. An empty hazard list means nothing when the scan saw nothing - fix the collector, do not read this as an absence.`);
     } else {
+      const all = [...haz.light.hazards, ...haz.dark.hazards];
+      console.log(`  scanned ${cov.cards} card(s), ${cov.leaves} leaves, ${cov.nodes} chain nodes, ${cov.pseudos} pseudo-element(s) per scheme`);
+      if (all.length === 0) {
+        console.log("  PASS  no backdrop-filter, mix-blend-mode, filter, sub-1 opacity or non-sRGB colour");
+        console.log("        anywhere in any measured chain, up to the document root.");
+        console.log("        sRGB alpha compositing is therefore a valid model for paintedBg().");
+      } else {
       for (const h of all) {
         fail(`compositing model: ${h.card} ${h.el} has ${h.prop}: ${h.value} (${h.where}). paintedBg() composites in sRGB and does not model this. ${h.prop === "opacity" ? "The opacity property scales the element's ENTIRE rendered result - text included - after its children are composited, so every contrast number on it is fiction." : "Filter, blend and backdrop-filter are not inherited, so only an ancestor can hold them, and they change how the card's own background paints."} Fix the maths or exclude the element - do not leave it measuring.`);
+      }
       }
     }
   }

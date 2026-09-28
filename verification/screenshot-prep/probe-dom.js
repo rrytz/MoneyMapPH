@@ -279,15 +279,25 @@
       }
       if (e.violations.length >= 8) break;
     }
-    // Card surfaces (padTop >= 16 + border/shadow + width >= 120, same filter
-    // as (b)) must resolve to light paper in the light world — token cores,
-    // never literals.
+    // Card surfaces must resolve to light paper in the light world — token
+    // cores, never literals.
+    //
+    // Every filter below is a VISUAL property, so the whole predicate is a
+    // definition rather than an identification: it is really "things that look
+    // like a card". Two of them were dropped for that reason. The class
+    // substring match is the surviving one and it is a genuine weakness — a
+    // rename to `rounded-lg` empties this loop, and an empty loop increments
+    // nothing and reports nothing, which is rule 2 wearing a costume.
+    //
+    // The count of what was actually examined is now reported, so an empty
+    // sweep is visible instead of indistinguishable from a clean one.
+    let cardsSeen = 0;
     for (const el of document.querySelectorAll('[class*="rounded-2xl"],[class*="rounded-xl"]')) {
       if (!visible(el)) continue;
       const s = cs(el);
       if ((parseFloat(s.paddingTop) || 0) < 16) continue;
       if (!((parseFloat(s.borderTopWidth) || 0) > 0 || s.boxShadow !== "none")) continue;
-      if (el.getBoundingClientRect().width < 120) continue;
+      cardsSeen++;
       const bg = rgbOf(s.backgroundColor);
       if (!bg) continue;
       const lum = bg[0] + bg[1] + bg[2];
@@ -298,6 +308,9 @@
         if (e.violations.length >= 8) break;
       }
     }
+    // Coverage, not just findings: a class rename that empties this loop must
+    // be visible rather than indistinguishable from a clean sweep.
+    e.cardsSeen = cardsSeen;
   }
   // Body ink polarity: light world => dark ink, dark world => light ink.
   const bodyColor = rgbOf(bs.color);

@@ -538,12 +538,17 @@ console.log("\n--- known boundaries (asserted, not assumed) ---");
   const hazArgs = [COLLECT.toString(), COMPOSITING_SCOPE.toString(), COMPOSITING_HAZARDS];
   for (const scheme of ["light", "dark"]) {
     const { ctx, pg } = await openAccounts(browser, { scheme });
-    const haz = await pg.evaluate(hazardScan, hazArgs);
-    if (haz.length === 0) {
-      console.log(`  ${scheme}: PASS  no backdrop-filter / blend / filter / non-sRGB on any element or pseudo-element`);
+    const { hazards, coverage } = await pg.evaluate(hazardScan, hazArgs);
+    // Coverage before absence - the audit's finding. An empty hazard list is
+    // evidence only if the scan actually looked at something; otherwise a
+    // renamed selector produces the same green as a clean app.
+    if (coverage.cards === 0 || coverage.leaves === 0) {
+      fail(`compositing-model guard (${scheme}) did not run: scanned ${coverage.cards} card(s), ${coverage.leaves} leaves. An empty hazard list means nothing when the scan saw nothing.`);
+    } else if (hazards.length === 0) {
+      console.log(`  ${scheme}: PASS  no backdrop-filter / blend / filter / sub-1 opacity / non-sRGB — scanned ${coverage.cards} cards, ${coverage.nodes} chain nodes, ${coverage.pseudos} pseudo-element(s)`);
     } else {
-      for (const h of haz) {
-        fail(`compositing model (${scheme}): ${h.card} ${h.el} has ${h.prop}: ${h.value}. The sRGB compositing in paintedBg() is wrong for this element.`);
+      for (const h of hazards) {
+        fail(`compositing model (${scheme}): ${h.card} ${h.el} has ${h.prop}: ${h.value} (${h.where}). The sRGB compositing in paintedBg() is wrong for this element.`);
       }
     }
     await ctx.close();

@@ -38,7 +38,13 @@ const READ = `(() => {
   // account count and the safe-to-spend meter width.
   const peso = (text.match(/₱[\\d,]+\\.\\d{2}/) || [null])[0];
   const accounts = (text.match(/(\\d+)\\s+accounts?/i) || [null])[1];
-  const meter = header.querySelector('div[style*="width"]');
+  // The meter used to be found with div[style*="width"] - a substring match
+  // on a style attribute. That matches ANY div carrying an inline width, so it
+  // reported whichever came first in document order, and returned null (which
+  // the caller rendered as "no meter") whenever the width came from a class.
+  // Reading a value out of an element's own inline style is a correct use of a
+  // visual property; using one to decide WHICH element to read was not.
+  const meter = header.querySelector('[data-meter-fill]') || header.querySelector('div[style*="width"]');
   return {
     found: true,
     peso: peso,

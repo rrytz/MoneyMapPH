@@ -102,6 +102,10 @@ export function BalanceReadout({
         <div className="mt-1.5 h-1 w-full max-w-28 overflow-hidden rounded-full bg-agosto-tint">
           {measured && (
             <div
+              // Read by the meter sweep. It used to be located with
+              // `div[style*="width"]`, which matches any div carrying an inline
+              // width and so reported whichever came first rather than this one.
+              data-meter-fill
               className="h-full rounded-full bg-sulpot"
               style={{ width: `${ratio * 100}%` }}
             />

@@ -206,7 +206,14 @@ const isBrandSurface = !account.is_negative;
               >
                 <span
                   data-account-logo-mono
-                  className="inline-flex items-center justify-center font-semibold uppercase leading-none rounded-sm w-full h-full [background-color:var(--brand-hover-bg)]"
+                  // The letter is --brand-on, the SAME token as the name - measured, not
+                  // assumed: #EAF0F6 in both schemes, identical to the h3. It is
+                  // NOT a theme token. It reads muted because it sits on
+                  // --brand-hover-bg (a 12% onBase wash), which lifts the local
+                  // surface toward the text and lowers PERCEIVED contrast without
+                  // changing a single colour value. The treatment is intentional;
+                  // the original spec was imprecise about why it looks soft.
+                  className="inline-flex items-center justify-center font-semibold uppercase leading-none rounded-sm w-full h-full [color:var(--brand-on)] [background-color:var(--brand-hover-bg)]"
                 >
                   {(account.name || "?").charAt(0)}
                 </span>

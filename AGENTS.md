@@ -101,6 +101,33 @@ Every verifier in this series reproduced the class it was written to catch:
 | **the human reading the output** | **twice reported a "false pass" that was a broken probe — a `.Replace()` whose `\n` was a literal, and a suppression that could not match CRLF** |
 | **`gate:logo-source`** | **passed a logo that rendered as a solid white rectangle — a full-canvas background authored as `<polygon>`, which is not a `<rect>`, plus a `<mask>` and group transforms the converter dropped** |
 | **`gate:brand` (logo assertions)** | **passed a card rendering TWO marks — a legacy account-type icon beside the monogram — because "present and non-empty" is a PRESENCE assertion, and two elements satisfy presence exactly as one does. The icon also carried no `data-*`, so no selector in the gate ever saw it** |
+| **a throwaway measurement script** | **reported GCash's 76×18 box as evidence that the *monogram's* glyph was unchanged — `brand.toLowerCase().includes("cash")` matches "gcash", so the probe measured a different card and printed a passing answer about the wrong subject** |
+
+That last row is the one that changes what the table means.
+
+**It is the first instance outside the gate suite.** Every row above it was a
+file reachable from `gate:all` — a checker that could, in principle, be brought
+under `gate:rules`. This one was a scratch script written to answer "did my
+change work", deleted minutes later, never committed, and outside the chain by
+construction. `gate:rules` could not have flagged it, and no future version of
+`gate:rules` will: the script does not exist to be inspected.
+
+So the class is **not a property of the gate suite**. It is a property of how
+selectors get written *anywhere* — a substring where an exact match was meant, a
+visual property where a semantic one was required, a comparison that holds when
+both sides are null. The gate files are simply where the samples were
+collected, because they are the only verifiers anybody has historically thought
+to audit.
+
+That is worse than the previous reading, and it is the useful part of the
+finding. The gates did not *attract* this bug; they were the only place anyone
+was looking, which made the absence elsewhere look like an absence of bugs. It
+was an absence of looking.
+
+The discipline is unchanged and it is the only thing that travels: **identify
+elements semantically, and assert the count of what you selected before you
+trust anything measured through it.** Auxiliary tooling is where it will next
+happen, because auxiliary tooling is where review is thinnest.
 
 **The common property, and it is the one to carry forward: a presence assertion
 is not a uniqueness assertion, and a selector defines what the verifier sees.**
@@ -112,7 +139,7 @@ Assert exact counts and exact kinds, never "at least one". And when a check
 reports "8 cards rendered the monogram", ask what else those eight rendered that
 the report could not see.
 
-The last row is the one that matters, and it is not a confession.
+The `gate:brand` row is the one that matters most, and it is not a confession.
 
 **The source gate verifies the SHAPE of the source, not the IDENTITY of the
 mark.** A full-canvas `<polygon>` background with `fill="currentColor"`

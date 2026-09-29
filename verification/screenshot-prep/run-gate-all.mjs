@@ -109,12 +109,69 @@ try {
     // other's property.
     ["gate:popover", ["run", "gate:popover"]],
   ];
+
+  // The chain ASSERTS ITS OWN COMPLETENESS.
+  //
+  // A PowerShell edit once wrote this file EMPTY. `gate:all` then exited 0 in
+  // 886ms having asserted nothing at all - the chain passed because it did not
+  // run, which is the worst failure mode in this whole series. It was caught by
+  // a human noticing that 886ms was impossible, and a human noticing is exactly
+  // the review line we rejected six commits ago: a control that depends on
+  // someone being alert.
+  //
+  // So completeness is asserted mechanically, against the named list below, in
+  // order. Not "at least one gate ran" - that would pass on a truncated list.
+  // Not a duration floor either - that fails on a fast machine and passes on a
+  // silently broken one. The precise question is "did every gate I expect run,
+  // in the order I expect", and that is answerable.
+  const EXPECTED = [
+    "gate:rules",
+    "gate:types",
+    "test",
+    "gate:typography",
+    "gate:nav",
+    "gate:logo-source",
+    "gate:brand",
+    "gate:brand:states",
+    "gate:popover",
+  ];
+
+  const planned = withServer.map(([label]) => label);
+  const missing = EXPECTED.filter((g) => !planned.includes(g));
+  const unplanned = planned.filter((g) => !EXPECTED.includes(g));
+  if (missing.length || unplanned.length) {
+    console.error(
+      `[gate:all] CHAIN INCOMPLETE - this is a failure, not a warning.`
+    );
+    if (missing.length) console.error(`[gate:all]   missing from the chain: ${missing.join(", ")}`);
+    if (unplanned.length) console.error(`[gate:all]   in the chain but not expected: ${unplanned.join(", ")}`);
+    console.error(`[gate:all]   a chain that does not run its gates must not report success.`);
+    throw new Error("gate chain does not match the expected gate list");
+  }
+
+  const ran = [];
   for (const [label, args] of withServer) {
     const code = run(label, args);
+    ran.push(label);
     if (code !== 0) {
       say(`${label} failed - skipping the rest of the chain`);
       buildCode = code;
     }
+  }
+
+  // Post-hoc: the gates that ACTUALLY executed must match, in order. A list
+  // that was correct when read and wrong by the time it ran is still a lie.
+  const executed = ran;
+  const notRun = EXPECTED.filter((g) => !executed.includes(g));
+  const outOfOrder = executed.join(",") !== EXPECTED.slice(0, executed.length).join(",");
+  if (executed.length === 0) {
+    throw new Error("no gate ran at all - the chain is structurally broken");
+  }
+  if (notRun.length) {
+    throw new Error(`these gates did not run: ${notRun.join(", ")}`);
+  }
+  if (outOfOrder && buildCode === 0) {
+    throw new Error(`gates ran out of order: ${executed.join(" -> ")}`);
   }
 } catch (err) {
   console.error(`[gate:all] ${err.message}`);

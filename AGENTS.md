@@ -75,6 +75,14 @@ the audit pass were found by reading a printed line, not by any tool:
 A gate that prints `cards: 7` should make you ask *which seven*. Silence is not
 evidence.
 
+**Do not edit gate scripts with shell string substitution.** PowerShell against
+a JavaScript file has now cost two sessions: a `$c2=$2` typo wrote
+`run-gate-all.mjs` **empty**, after which `gate:all` exited 0 in 886ms having
+asserted nothing; and earlier a `.Replace('\n')` in single quotes never matched,
+producing a probe that silently did nothing. Use an editor. This is a
+discipline, not a control — `gate:rules` cannot catch it, and the read-the-output
+discipline above is what catches it today.
+
 ## The recursion you are about to walk into
 
 Every verifier in this series reproduced the class it was written to catch:

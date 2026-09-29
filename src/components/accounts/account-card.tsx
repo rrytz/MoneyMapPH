@@ -120,7 +120,7 @@ const isBrandSurface = !account.is_negative;
               // near-black in light mode on a dark base. A brand card is not a
               // themed surface, so it carries its own states.
               "--brand-on-hover": withAlpha(brand.onBase, 1),
-              "--brand-hover-bg": withAlpha(brand.onBase, 0.12),
+              "--brand-hover-bg": brand.chipAlpha === null ? "transparent" : withAlpha(brand.onBase, brand.chipAlpha),
               "--brand-focus-ring": withAlpha(brand.onBase, 0.55),
             } as React.CSSProperties)
           : undefined
@@ -208,12 +208,11 @@ const isBrandSurface = !account.is_negative;
                 <span
                   data-account-logo-mono
                   // The letter is --brand-on, the SAME token as the name - measured, not
-                  // assumed: #EAF0F6 in both schemes, identical to the h3. It is
-                  // NOT a theme token. It reads muted because it sits on
-                  // --brand-hover-bg (a 12% onBase wash), which lifts the local
-                  // surface toward the text and lowers PERCEIVED contrast without
-                  // changing a single colour value. The treatment is intentional;
-                  // the original spec was imprecise about why it looks soft.
+                  // assumed, and identical to the h3. It is NOT a theme token. Where
+                  // the brand's chipAlpha is null (gcash) the wash is dropped entirely
+                  // rather than painted at an alpha too faint to read as a chip: an
+                  // element that exists in the DOM but not on screen is the same
+                  // defect as an assertion that passes on nothing.
                   // The container is widened to the logo HEIGHT and the glyph is
                   // left alone - internal padding, not scaling. At 11px the bare
                   // "C" carried far less visual mass than a 67-84px wordmark and

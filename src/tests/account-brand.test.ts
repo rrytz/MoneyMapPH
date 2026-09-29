@@ -38,15 +38,8 @@ function composite(fg: string, alpha: number, bg: string): string {
 
 /** The floor that was actually measured, not a round number. */
 const MIN_BASE_SEPARATION = 12;
-/**
- * Accent separation, in dE CIE2000 - perceptual units, not RGB. This replaced
- * an RGB-distance floor of 18, which could not distinguish two greens of similar
- * lightness and so passed an accent that was the same colour as its base.
- */
-const MIN_ACCENT_SEPARATION = 8;
 const MIN_TEXT_CONTRAST = 4.5;
 const MIN_MUTED_CONTRAST = 4.5;
-const MIN_ACCENT_ON_SURFACE = 4.5;
 
 describe("the palette is derived from the brand, not the type", () => {
   // The reason this file exists. Type painted every bank the same green and
@@ -63,7 +56,6 @@ describe("the palette is derived from the brand, not the type", () => {
     const g = getAccountBrandPalette({ name: "Gcash", type: "ewallet" });
     const p = getAccountBrandPalette({ name: "PayPal", type: "ewallet" });
     expect(rgbDistance(g.base, p.base)).toBeGreaterThanOrEqual(MIN_BASE_SEPARATION);
-    expect(rgbDistance(g.accent, p.accent)).toBeGreaterThanOrEqual(MIN_ACCENT_SEPARATION);
   });
 
   it("separates Maya from Wise, which are both green families", () => {
@@ -72,7 +64,7 @@ describe("the palette is derived from the brand, not the type", () => {
     expect(rgbDistance(m.base, w.base)).toBeGreaterThanOrEqual(MIN_BASE_SEPARATION);
   });
 
-  it("keeps EVERY recognised brand separable from every other, in base and accent", () => {
+  it("keeps EVERY recognised brand separable from every other in base", () => {
     for (const a of BRAND_KEYS) {
       for (const b of BRAND_KEYS) {
         if (a === b) continue;
@@ -80,10 +72,6 @@ describe("the palette is derived from the brand, not the type", () => {
           rgbDistance(ACCOUNT_BRANDS[a].base, ACCOUNT_BRANDS[b].base),
           `base ${a}/${b}`
         ).toBeGreaterThanOrEqual(MIN_BASE_SEPARATION);
-        expect(
-          rgbDistance(ACCOUNT_BRANDS[a].accent, ACCOUNT_BRANDS[b].accent),
-          `accent ${a}/${b}`
-        ).toBeGreaterThanOrEqual(MIN_ACCENT_SEPARATION);
       }
     }
   });
@@ -112,21 +100,17 @@ describe("text is never sacrificed for brand fidelity", () => {
       .toBeGreaterThanOrEqual(MIN_MUTED_CONTRAST);
   });
 
-  // The icon mark and the balance render on the app's dark surface too, in the
-  // places a card is not the backdrop. Two candidates failed this and were
-  // brightened: BPI red at 3.46:1 and PayPal blue at 4.19:1.
-  it.each(BRAND_KEYS)("%s: accent clears 4.5:1 on the dark card surface", (key) => {
-    const ratio = contrastRatio(ACCOUNT_BRANDS[key].accent, DARK_CARD_SURFACE);
-    expect(ratio, `${key} accent ${ACCOUNT_BRANDS[key].accent} is only ${ratio.toFixed(2)}:1`)
-      .toBeGreaterThanOrEqual(MIN_ACCENT_ON_SURFACE);
-  });
-
-  it("would have caught the two accents that failed during the build", () => {
-    expect(contrastRatio("#CC3540", DARK_CARD_SURFACE)).toBeLessThan(MIN_ACCENT_ON_SURFACE);
-    expect(contrastRatio("#2E7BE0", DARK_CARD_SURFACE)).toBeLessThan(MIN_ACCENT_ON_SURFACE);
-    expect(contrastRatio(ACCOUNT_BRANDS.bpi.accent, DARK_CARD_SURFACE))
-      .toBeGreaterThanOrEqual(MIN_ACCENT_ON_SURFACE);
-  });
+  // NOTE: the accent assertions that used to live here were deleted with the
+  // field. They were not removed because they failed - they all passed. They
+  // were removed because `accent` renders NOWHERE: no card, no state, no scheme.
+  // The marks are monochrome and draw in `onBase`. A passing assertion about an
+  // unrendered value is the most dangerous kind of dead code, because it looks
+  // like coverage of something real.
+  //
+  // The dE00 floor lives on in account-brand.ts as a DERIVATION RULE for a
+  // future feature that actually renders an accent. See the note there, and
+  // re-derive the floor under that feature's real luminance, adjacency and size
+  // - do not inherit the number.
 });
 
 describe("recognition is exact, not fuzzy", () => {
@@ -179,31 +163,29 @@ describe("recognition is exact, not fuzzy", () => {
 describe("every palette is a complete, valid colour set", () => {
   it.each(BRAND_KEYS)("%s: every colour is a 6-digit hex", (key) => {
     const p = ACCOUNT_BRANDS[key];
-    for (const c of [p.base, p.accent, p.secondary, p.onBase, p.mutedOnBase]) {
+    for (const c of [p.base, p.secondary, p.onBase, p.mutedOnBase]) {
       expect(c, `${key} has a malformed colour: ${c}`).toMatch(/^#[0-9a-fA-F]{6}$/);
     }
   });
 
-  it.each(BRAND_KEYS)("%s: the accent is perceptually distinct from its base", (key) => {
-    // RENAMED. This test used to be called "the base is dark and the accent is
-    // not", which described a rule the assertion never made - it only measured
-    // RGB distance. The bases are now the brands' real luminance and are mostly
-    // BRIGHT, so the old name was simply false while the test kept passing. That
-    // is this project's own recorded failure class: a check that misdescribes
-    // what it does.
-    //
-    // The metric changed with the name. Naive RGB distance cleared the old floor
-    // of 18 for Wise's old accent (#A6E85C, 21 units) while CIE2000 puts the
-    // same pair at dE00 3.11 - the same green twice. RGB distance cannot tell.
-    const p = ACCOUNT_BRANDS[key];
-    expect(
-      perceptualDistance(p.accent, p.base),
-      `${key} accent ${p.accent} is only dE00 ${perceptualDistance(p.accent, p.base).toFixed(2)} from its base ${p.base} (need ${MIN_ACCENT_SEPARATION})`
-    ).toBeGreaterThanOrEqual(MIN_ACCENT_SEPARATION);
+  it("carries no accent field, because nothing renders one", () => {
+    // The deletion's own regression test. If `accent` ever comes back it must
+    // come back WITH a rendered use, and this fails until then - which is the
+    // point. A palette field that no component reads is the failure mode that
+    // looked most like coverage: it had assertions, a calibrated metric, a
+    // numeric floor and a written derivation rule, and it still governed no
+    // pixel on any screen.
+    for (const key of BRAND_KEYS) {
+      const p = ACCOUNT_BRANDS[key] as unknown as Record<string, unknown>;
+      expect(Object.prototype.hasOwnProperty.call(p, "accent"), `${key} has an accent again`)
+        .toBe(false);
+    }
   });
 
   it("would have caught Wise's old accent, which the RGB metric passed", () => {
-    // The regression proof. 21 units apart in RGB, 3.11 perceptually.
+    // Why the metric exists at all, kept as a property of the metric rather
+    // than of any current value. 21 units apart in RGB, 3.11 perceptually -
+    // RGB distance cannot tell two indistinguishable greens apart.
     expect(rgbDistance("#A6E85C", "#9FE870")).toBeGreaterThanOrEqual(18);
     expect(perceptualDistance("#A6E85C", "#9FE870")).toBeLessThan(8);
   });

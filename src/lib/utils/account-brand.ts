@@ -24,16 +24,22 @@
  * ------------------------------------------------------------------
  * THE VALUES ARE MEASURED, NOT CHOSEN
  *
- * Hue direction comes from each brand's own logo, then is darkened into a
- * surface and brightened into an accent. Two things were checked before these
- * numbers were accepted, both asserted in `account-brand.test.ts`:
+ * Hue and luminance come from each brand's own published colour, used AS IS -
+ * the bases are the real brand colours, not a darkening of them. That was not
+ * always true: every base used to sit between L 0.0068 and 0.0223, darkened so
+ * that ONE global text constant could serve all eight. See the note above
+ * ACCOUNT_BRANDS for why that trade was reversed.
  *
- *   - TEXT on the base. Body text clears 12.6:1 and muted text clears 6.8:1
- *     across all eight. Brand fidelity is never bought with readability.
- *   - The ACCENT on the app's own dark surface #141b16, because the icon mark
- *     and the balance sit on the card, not on an isolated swatch. Two earlier
- *     candidates failed here - BPI red at 3.46:1 and PayPal blue at 4.19:1 -
- *     and were brightened until they cleared 4.5:1.
+ * What is measured, asserted in `account-brand.test.ts`:
+ *
+ *   - TEXT on each brand's OWN base, per brand. Body text clears 4.85:1 at the
+ *     worst (unionbank) and 16.61:1 at the best (neutral). Muted text clears
+ *     4.55:1 everywhere it survives at all, and collapses to the text colour on
+ *     the two brands where no window remains. Brand fidelity is never bought
+ *     with readability.
+ *   - Base-to-base separation: the closest pair is gcash/paypal at 45 against a
+ *     floor of 12. Bright bases are FURTHER apart than the dark ones were.
+ *   - The chip wash, held to the same 4.5:1 under the text that sits on it.
  *
  * ------------------------------------------------------------------
  * MATCHING
@@ -54,8 +60,6 @@ export type AccountBrand =
 export interface AccountBrandPalette {
   /** The card surface. The brand's own colour at its real luminance. */
   base: string;
-  /** Icon mark, active accents. >= 8 dE CIE2000 from `base`. */
-  accent: string;
   /** A supporting hue from the same logo, used sparingly. */
   secondary: string;
   /** Primary text on `base`. Assigned per brand, never one global constant. */
@@ -133,7 +137,6 @@ export function chipAlphaFor(base: string, onBase: string): number | null {
 
 export const NEUTRAL_PALETTE: AccountBrandPalette = {
   base: "#1C1F1E",
-  accent: "#AFB9B5",
   secondary: "#525B57",
   onBase: ON_LIGHT,
   mutedOnBase: "#828785",
@@ -191,74 +194,86 @@ export const NEUTRAL_PALETTE: AccountBrandPalette = {
  */
 export const ACCOUNT_BRANDS: Record<AccountBrand, AccountBrandPalette> = {
   maribank: {
-    base: "#F5812F", accent: "#D08754", secondary: "#3E8FD0",
+    base: "#F5812F", secondary: "#3E8FD0",
     onBase: ON_DARK, mutedOnBase: "#552D10", chipAlpha: 0.12,
-    note: "real MariBank orange. Accent is DERIVED, not sourced - see the accent note",
+    note: "real MariBank orange - see the derivation note for what is NOT here",
   },
   unionbank: {
-    base: "#E4002B", accent: "#FF5E1F", secondary: "#96401A",
+    base: "#E4002B", secondary: "#96401A",
     onBase: ON_LIGHT, mutedOnBase: ON_LIGHT, chipAlpha: 0.115,
     note: "UnionBank red. Muted tier COLLAPSED to onBase; chip survives at 0.115",
   },
   gcash: {
-    base: "#007DFE", accent: "#4FA8F5", secondary: "#1B6FC0",
+    base: "#007DFE", secondary: "#1B6FC0",
     onBase: ON_DARK, mutedOnBase: ON_DARK, chipAlpha: null,
     note: "real GCash blue. Muted tier COLLAPSED and the chip is DROPPED - see chipAlphaFor",
   },
   maya: {
-    base: "#00C853", accent: "#1AD98E", secondary: "#7B5CE8",
+    base: "#00C853", secondary: "#7B5CE8",
     onBase: ON_DARK, mutedOnBase: "#38443D", chipAlpha: 0.12,
     note: "Maya green with the wordmark's violet as the secondary",
   },
   bpi: {
-    base: "#004E9E", accent: "#E8505C", secondary: "#E5C25C",
+    base: "#004E9E", secondary: "#E5C25C",
     onBase: ON_LIGHT, mutedOnBase: "#9CC6F1", chipAlpha: 0.12,
-    note: "BPI blue, red mark, gold crest as the secondary",
+    note: "BPI blue, gold crest as the secondary",
   },
   paypal: {
-    base: "#009CDE", accent: "#4A94F0", secondary: "#63B4F5",
+    base: "#009CDE", secondary: "#63B4F5",
     onBase: ON_DARK, mutedOnBase: "#242D31", chipAlpha: 0.12,
     note: "PayPal bright blue - 45 from gcash, the closest pair in the set",
   },
   wise: {
-    base: "#9FE870", accent: "#A4D187", secondary: "#44882A",
+    base: "#9FE870", secondary: "#44882A",
     onBase: ON_DARK, mutedOnBase: "#466433", chipAlpha: 0.12,
-    note: "real Wise lime. Accent is DERIVED, not sourced - see the accent note",
+    note: "real Wise lime - see the derivation note for what is NOT here",
   },
   neutral: NEUTRAL_PALETTE,
 };
 
 /**
- * The two accents that could not be sourced, and why.
+ * NO ACCENT EXISTS, AND THE RULE FOR MAKING ONE IS HERE SO IT IS NOT REINVENTED
  *
- * MariBank and Wise are MONOCHROMATIC brands: the accent colour the palette
- * already carried was the brand's own colour. That worked only because the base
- * was a darkened version, so "accent" and "identity" were different values by
- * accident. Put the real colour in the base and they collide - MariBank at
- * dE00 0.00, which is the same colour twice.
+ * The palette carried an `accent` - an "icon mark, active accent" - and it was
+ * deleted because it renders NOWHERE. Not on the card, not in any state, not in
+ * any scheme: the marks draw in `onBase` because they are monochrome, and no
+ * other element reads the field.
  *
- * This is not a missing file. No source fixes it, because the brand does not
- * have a second colour. So both are DERIVED, by rule rather than by eye:
+ * It was deleted rather than left parked because it was the most dangerous kind
+ * of dead code: it had tests, a rule, a calibrated metric and a floor, so it
+ * looked alive. A future contributor would trust all of it and derive a value
+ * under a constraint no screen ever imposed. Rigorous work on a value nothing
+ * renders is still a value nothing renders.
  *
- *   smallest shift along ONE axis - lightness OR saturation, never both -
- *   that clears dE CIE2000 >= 8 against the base, stopping at the threshold
- *   rather than pushing past it for aesthetics.
+ * ------------------------------------------------------------------
+ * THE DERIVATION RULE - keep this, re-derive the value from scratch
+ * ------------------------------------------------------------------
  *
- *     maribank  #F5812F -> #D08754   saturation -   dE00 8.12
- *     wise      #9FE870 -> #A4D187   saturation -   dE00 8.05
+ * MariBank and Wise are MONOCHROMATIC brands. An accent derived from their base
+ * collides with it by construction - MariBank came out at dE00 0.00, the same
+ * colour twice. That is not a missing file: the brand has no second colour, so
+ * any accent must be derived, by rule rather than by eye:
  *
- * Both still clear 4.5:1 on the app's dark surface (#141b16), which is the other
- * floor an accent has to hold. The alternative candidates were lightness shifts
- * - #F8A165 at dE00 8.26 and #C4F1A7 at dE00 8.10 - which score marginally
- * better and were rejected because a saturation shift preserves the hue.
+ *   1. measure in dE CIE2000, never naive RGB distance. RGB counted two
+ *      indistinguishable greens as 21 units apart and passed them.
+ *   2. shift along ONE axis - saturation OR lightness, never both.
+ *   3. prefer SATURATION over lightness, because it preserves the hue. On a
+ *      saturated base a large-enough lightness shift exhausts saturation and
+ *      lands on grey, which is no longer the brand.
+ *   4. stop AT the threshold rather than pushing past it for aesthetics.
+ *   5. hold the result to 4.5:1 on whatever surface it will actually sit on.
  *
- * WISE is the case that justifies the metric change. Its previous accent
- * #A6E85C is 21 units from its base in naive RGB, which cleared the old floor
- * of 18, and it is perceptually the SAME colour: dE00 3.11. RGB distance does
- * not know that two greens at similar luma are indistinguishable.
+ * **If a feature needs an accent, this rule is the starting point and NOT the
+ * answer. Re-derive under that feature's real luminance, adjacency and size
+ * before using any number.** The margin problem that forced a floor judgement
+ * last time - where dE00 8 was clearly distinct on MariBank's orange but only
+ * marginal on Wise's lime - was a property of a specific base and a specific
+ * assumed size, and it may simply not recur.
  *
- * These are DERIVED values. If a real second brand colour ever surfaces, it
- * replaces these - do not read the derivation as a provenance claim.
+ * Floors of 8, 12, 16, 20 and 25 were all measured on those two bases. 8 was
+ * adequate on the orange and marginal on the lime. That is the whole reason a
+ * floor needs re-deriving rather than inheriting: the correct number depends on
+ * where the colour will be seen, which is exactly the part that was missing.
  */
 
 /** Normalised name -> brand. Exact matches only, by design. See the file note. */
@@ -355,11 +370,13 @@ export function rgbDistance(a: string, b: string): number {
 // The perceptual separation metric, and the reason RGB distance was retired.
 //
 // Naive RGB distance cannot tell that two colours at similar lightness are the
-// same colour: it counted Wise's old accent as 21 units from its base and called
-// that separated, while CIE2000 puts them at dE00 3.11 - indistinguishable. It
-// also cannot see that a large numerical gap can be perceptually small. So the
-// accent floor moved from "18 units of RGB" to "dE00 >= 8", and the unit is
-// named so the next person knows what is being measured.
+// same colour: it counted two indistinguishable greens as 21 units apart and
+// called that separated, while CIE2000 puts them at dE00 3.11. It also cannot
+// see that a large numerical gap can be perceptually small.
+//
+// There is currently no accent to measure - see the derivation note above. The
+// metric is kept, calibrated and exported, because the RULE that used it is
+// worth keeping and a re-derivation under a real constraint will need it.
 //
 // Proven against the Sharma, Wu & Dalal published vectors in the test file. A
 // colour metric that has not been checked against known pairs is an instrument

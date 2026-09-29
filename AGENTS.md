@@ -102,10 +102,11 @@ Every verifier in this series reproduced the class it was written to catch:
 | **`gate:logo-source`** | **passed a logo that rendered as a solid white rectangle — a full-canvas background authored as `<polygon>`, which is not a `<rect>`, plus a `<mask>` and group transforms the converter dropped** |
 | **`gate:brand` (logo assertions)** | **passed a card rendering TWO marks — a legacy account-type icon beside the monogram — because "present and non-empty" is a PRESENCE assertion, and two elements satisfy presence exactly as one does. The icon also carried no `data-*`, so no selector in the gate ever saw it** |
 | **a throwaway measurement script** | **reported GCash's 76×18 box as evidence that the *monogram's* glyph was unchanged — `brand.toLowerCase().includes("cash")` matches "gcash", so the probe measured a different card and printed a passing answer about the wrong subject** |
+| **a test named for a rule it never asserted** | **`"the base is dark and the accent is not"` asserted only `rgbDistance(base, accent) >= 18` and never measured darkness. It held by coincidence while the bases were dark. When the bases became the brands' real luminance — bright — the name became false and the assertion kept passing. An assertion is not its description: the reality moved, the assertion did not, and nothing turned red** |
 
-That last row is the one that changes what the table means.
+The measurement-script row is the one that changes what the table means.
 
-**It is the first instance outside the gate suite.** Every row above it was a
+**It is the first instance outside the gate suite.** Every OTHER row was a
 file reachable from `gate:all` — a checker that could, in principle, be brought
 under `gate:rules`. This one was a scratch script written to answer "did my
 change work", deleted minutes later, never committed, and outside the chain by

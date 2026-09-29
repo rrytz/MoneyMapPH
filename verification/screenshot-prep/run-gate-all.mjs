@@ -102,6 +102,12 @@ try {
     ["gate:logo-source", ["run", "gate:logo-source"]],
     ["gate:brand", ["run", "gate:brand"]],
     ["gate:brand:states", ["run", "gate:brand:states"]],
+    // A DIFFERENT invariant, deliberately in the same chain. gate:brand asserts
+    // a brand surface is theme-PROOF; a portal popover is a themed surface BY
+    // DEFINITION, so gate:popover asserts AA legibility in both schemes instead
+    // of scheme-independence. Merging them would ask each surface for the
+    // other's property.
+    ["gate:popover", ["run", "gate:popover"]],
   ];
   for (const [label, args] of withServer) {
     const code = run(label, args);

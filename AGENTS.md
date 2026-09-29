@@ -88,6 +88,17 @@ producing a probe that silently did nothing. Use an editor. This is a
 discipline, not a control — `gate:rules` cannot catch it, and the read-the-output
 discipline above is what catches it today.
 
+**Name the target, never its position.** In a growing table or list, refer to
+an entry by what it *is* — "the `gate:brand` row", "the measurement-script
+row" — never by where it sits: "the last row", "the row above". Appending one
+entry silently invalidates every positional reference into it, and those
+references read exactly as well afterwards as they did a minute before, so
+nothing marks them stale. Three separate positional references went stale
+inside the single commit that fixed their siblings. This is a discipline, not a
+control — nothing can check it, because the failure is invisible by
+construction. It is the same shape as the lint baseline that drifted 27 → 26
+unrecorded in a commit body.
+
 ## The recursion you are about to walk into
 
 Every verifier in this series reproduced the class it was written to catch:
@@ -129,6 +140,22 @@ The discipline is unchanged and it is the only thing that travels: **identify
 elements semantically, and assert the count of what you selected before you
 trust anything measured through it.** Auxiliary tooling is where it will next
 happen, because auxiliary tooling is where review is thinnest.
+
+**And that generalises further than "tooling".** The class does not live in the
+gates; it lives in whatever tool is doing the verifying. Four instances in this
+series were not gate files at all: a `.Replace('\n')` in PowerShell single
+quotes that never matched, a substring selector (`"gcash".includes("cash")`) in
+a scratch measurement script, and — twice in one session — a cleanup routine
+that opened a fresh browser context where the archived cards were hidden behind
+a filter, matched nothing, skipped the restore, **and printed "restored"
+anyway**. It left the ledger dirty twice and was caught only by re-reading the
+ledger rather than trusting the report it had just produced.
+
+That restore is the purest instance of the whole series: *verification tooling
+reproducing the failure it exists to catch.* A restore that cannot fail is a
+restore that does not restore, and it announced success in the same breath. A
+durable audit script is no more exempt from this than a gate is — it is simply
+the place where nobody is looking, because it is not in `gate:all`.
 
 **The common property, and it is the one to carry forward: a presence assertion
 is not a uniqueness assertion, and a selector defines what the verifier sees.**

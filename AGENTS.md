@@ -16,6 +16,11 @@ this section exists to prevent.
 Individual gates still run standalone: `npm run gate:nav` and friends. Those
 need the dev server up, and they are for iterating — `gate:all` is the gate.
 
+`npm run lint` is **not** part of the gate. Its baseline as of 2026-09-29 is
+**26 errors and 124 warnings**, all pre-existing and none of them ours. It is
+recorded here so a future session does not quote a stale figure out of an old
+commit body — check the live number rather than trusting this line.
+
 ### Rule: an assertion must prove it had something to assert on
 
 **A pass that could have passed by having nothing to compare is not a pass.**

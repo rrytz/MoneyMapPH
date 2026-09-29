@@ -214,7 +214,16 @@ const isBrandSurface = !account.is_negative;
                   // surface toward the text and lowers PERCEIVED contrast without
                   // changing a single colour value. The treatment is intentional;
                   // the original spec was imprecise about why it looks soft.
+                  // The container is widened to the logo HEIGHT and the glyph is
+                  // left alone - internal padding, not scaling. At 11px the bare
+                  // "C" carried far less visual mass than a 67-84px wordmark and
+                  // read as a weak mark beside it; an 18px chip gives the same
+                  // letter the same optical size without touching the type size
+                  // or the glyph. Deliberately NOT square-forcing every mark:
+                  // wordmarks keep their natural ratios, and only the narrow
+                  // monogram gets a floor.
                   className="inline-flex items-center justify-center font-semibold uppercase leading-none rounded-sm w-full h-full [color:var(--brand-on)] [background-color:var(--brand-hover-bg)]"
+                  style={{ minWidth: LOGO_HEIGHT_PX }}
                 >
                   {(account.name || "?").charAt(0)}
                 </span>

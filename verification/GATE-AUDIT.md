@@ -162,6 +162,32 @@ brand gates are catching up to.
 
 ---
 
+## Owed: design-conformance assumes exclusive CPU in a parallel pool
+
+`src/tests/design-conformance.test.ts` fails `gate:all` under load, and it is
+**not a borderline test that needs a bigger budget.** It is structurally wrong:
+it scans 123 `.tsx` files from inside a vitest worker, and it only fits inside
+the default 5s when it is not competing with 51 other workers for the disk.
+
+| | outcome |
+|---|---|
+| scan alone | ~1.4s |
+| under 52-worker contention | >6s, times out |
+| same file earlier in the session | 844ms, passed |
+| same file later in the session | 2.2s, times out |
+| suite at HEAD, changes stashed | **2** timeouts |
+| suite with the rule commit applied | **1** timeout |
+
+So it is pre-existing and load-dependent — stashing the commit reproduces it,
+and does so worse. 51 of 52 files pass, the file passes in isolation, and every
+browser gate passes.
+
+**The fix is to run it serially or outside the worker pool, not to raise the
+timeout.** Raising `testTimeout` is a proxy: it hides the real defect — a test
+that assumes it owns the machine — and would be rejected the moment the gate
+pass resumes. This is recorded as **owed**, not tuned: do not spend a change
+making it green by enlarging the number.
+
 ## What the audit concludes
 
 The class is **real but bounded**, and the bound is instructive:

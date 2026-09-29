@@ -443,7 +443,66 @@ export const describe = (card, nearestFn) => {
     // outer border too. On a card whose inner divider was removed it would
     // return the outer border, compare it across schemes, find them equal, and
     // report PASS for a divider that no longer exists. Silent, plausible, wrong.
-    // THE LOGO, or the monogram standing in for it.
+    // THE MARK SLOT, measured for UNIQUENESS and for COVERAGE.
+    //
+    // The fallback path once rendered a legacy account-TYPE icon (a bank
+    // pictogram, an e-wallet glyph, a dollar sign) BESIDE the monogram, so a
+    // fallback card showed two marks. This check passed throughout, because
+    // every previous assertion was a PRESENCE assertion: two elements satisfy
+    // "present and non-empty" exactly as one does, and the legacy icon carried
+    // no data-* at all, so no selector in this file ever saw it.
+    //
+    // Two things are therefore asserted, and they are different:
+    //
+    //   uniqueness  the slot has EXACTLY ONE visible child - not "at least one"
+    //   coverage    that child is a recognised mark, and no sibling in the slot
+    //               renders anything visible whatever it is called
+    //
+    // The second is the scope gap: a selector defines what the verifier sees, and
+    // anything outside it renders unmeasured. `unmatched` is the list of visible
+    // children the mark selectors do not account for, which is how an unlabelled
+    // legacy icon becomes visible to a gate instead of invisible to one.
+    markSlot: (() => {
+      const slots = card.querySelectorAll("[data-mark-slot]");
+      if (slots.length !== 1) {
+        return { ok: false, why: `expected exactly 1 [data-mark-slot], found ${slots.length}` };
+      }
+      const slot = slots[0];
+      const row = slot.parentElement;
+      const vis = (el) => {
+        if (el.checkVisibility) return el.checkVisibility({ checkVisibilityCSS: true });
+        const b = el.getBoundingClientRect();
+        return b.width > 0 && b.height > 0;
+      };
+      const describe = (el) => {
+        const hasSvg = el.querySelectorAll("svg").length;
+        const cs = getComputedStyle(el);
+        return `<${el.tagName.toLowerCase()}${el.className ? "." + String(el.className).trim().split(/\s+/)[0] : ""}>` +
+          (hasSvg ? ` containing ${hasSvg} <svg>` : "") +
+          ` (${Math.round(el.getBoundingClientRect().width)}px, bg ${cs.backgroundColor})`;
+      };
+      // The slot's own child must be the mark and nothing else.
+      const marks = [...slot.children].filter(vis).filter((el) =>
+        el.matches("[data-brand-logo]") || el.matches("[data-account-logo-mono]")
+      );
+      const extraInSlot = [...slot.children].filter(vis).filter((el) =>
+        !el.matches("[data-brand-logo]") && !el.matches("[data-account-logo-mono]")
+      );
+      // AND the ROW is the real container: the legacy type icon was a SIBLING
+      // of the mark slot, not a child, so a slot-scoped check never saw it.
+      // Everything visible in the row must be the mark or the name block.
+      const rowKids = [...row.children].filter(vis);
+      const rowUnmatched = rowKids.filter(
+        (el) => !el.matches("[data-mark-slot]") && !el.matches("[data-account-name-block]")
+      );
+      return {
+        ok: true,
+        marks: marks.length,
+        extraInSlot: extraInSlot.map(describe),
+        rowUnmatched: rowUnmatched.map(describe),
+        kind: marks[0] ? (marks[0].matches("[data-brand-logo]") ? "mark" : "monogram") : null,
+      };
+    })(),
     //
     // Measured, not inferred: `color` is the resolved value of the container's
     // `[color:var(--brand-on)]`, which is what a `fill="currentColor"` path
@@ -575,6 +634,19 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
           fail(`${lc.name}: logo height differs between schemes (${lc.logo.height} vs ${dc.logo.height})`);
         }
       }
+    }
+    // UNICITY AND COVERAGE, asserted before anything is compared. A presence
+    // assertion cannot see a second mark; this is the check that can.
+    if (!lc.markSlot.ok) {
+      fail(`${lc.name}: ${lc.markSlot.why} - the mark slot must be a single structural container`);
+    } else if (lc.markSlot.marks !== 1) {
+      fail(`${lc.name}: mark slot has ${lc.markSlot.marks} marks, expected EXACTLY 1. Presence is not uniqueness - two elements satisfy "present and non-empty" exactly as one does.`);
+    } else if (lc.markSlot.extraInSlot.length > 0) {
+      fail(`${lc.name}: mark slot contains ${lc.markSlot.extraInSlot.length} visible element(s) that are not a mark: ${lc.markSlot.extraInSlot.join(", ")}. A selector defines what the verifier sees - anything outside it renders UNMEASURED.`);
+    } else if (lc.markSlot.rowUnmatched.length > 0) {
+      fail(`${lc.name}: the identity row renders ${lc.markSlot.rowUnmatched.length} visible element(s) that are neither the mark nor the name block: ${lc.markSlot.rowUnmatched.join(", ")}. The mark slot's PARENT is the real container - the legacy type icon lived beside it, not inside it, so a slot-scoped check never saw it.`);
+    } else if (lc.markSlot.kind !== (lc.logo.kind === "mark" ? "mark" : "monogram")) {
+      fail(`${lc.name}: mark slot holds a ${lc.markSlot.kind} but the measured logo is a ${lc.logo.kind} - the slot and the measurement disagree`);
     }
     logos.push(lc.logo);
     if (lc.border !== dc.border) fail(`${lc.name}: border is theme-dependent (${lc.border} -> ${dc.border})`);

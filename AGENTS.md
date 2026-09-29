@@ -95,6 +95,17 @@ Every verifier in this series reproduced the class it was written to catch:
 | compositing proof | passed on an empty scan set |
 | **the human reading the output** | **twice reported a "false pass" that was a broken probe — a `.Replace()` whose `\n` was a literal, and a suppression that could not match CRLF** |
 | **`gate:logo-source`** | **passed a logo that rendered as a solid white rectangle — a full-canvas background authored as `<polygon>`, which is not a `<rect>`, plus a `<mask>` and group transforms the converter dropped** |
+| **`gate:brand` (logo assertions)** | **passed a card rendering TWO marks — a legacy account-type icon beside the monogram — because "present and non-empty" is a PRESENCE assertion, and two elements satisfy presence exactly as one does. The icon also carried no `data-*`, so no selector in the gate ever saw it** |
+
+**The common property, and it is the one to carry forward: a presence assertion
+is not a uniqueness assertion, and a selector defines what the verifier sees.**
+Anything outside the selector renders *unmeasured* — not failing, not measured,
+just absent as far as the check is concerned. Both halves have now appeared
+separately, and both are invisible by construction rather than by mistake.
+
+Assert exact counts and exact kinds, never "at least one". And when a check
+reports "8 cards rendered the monogram", ask what else those eight rendered that
+the report could not see.
 
 The last row is the one that matters, and it is not a confession.
 

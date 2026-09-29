@@ -4,7 +4,7 @@ import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
-import { accountBrand, getAccountBrandPalette, ICON_FILL_ALPHA, brandHairline, withAlpha } from "@/lib/utils/account-brand";
+import { accountBrand, getAccountBrandPalette, brandHairline, withAlpha } from "@/lib/utils/account-brand";
 import { LOGO_HEIGHT_PX, resolveBrandLogo } from "@/lib/utils/brand-logos";
 import { Button } from "@/components/ui/button";
 import {
@@ -152,6 +152,7 @@ const isBrandSurface = !account.is_negative;
                specific answer. */
             <div className="flex flex-col gap-1.5 min-w-0" data-account-identity="stacked">
               <span
+                data-mark-slot
                 data-account-logo
                 data-brand={brandKey ?? "neutral"}
                 className="inline-flex items-center [color:var(--brand-on)] min-w-0 max-w-full"
@@ -159,7 +160,12 @@ const isBrandSurface = !account.is_negative;
               >
                 {brandLogo}
               </span>
-              <div className="min-w-0">
+              {/* The name + type block. `data-account-name-block` is a structural
+                  handle so the gate can define the identity row as "the mark OR
+                  the name block" and fail on anything else - which is how a
+                  legacy icon rendered beside the mark went unmeasured for two
+                  commits. A selector defines what the verifier sees. */}
+              <div data-account-name-block className="min-w-0">
                 <div className="flex items-center gap-2 min-w-0 flex-wrap">
                   <h3 className="font-semibold text-base [color:var(--brand-on)] min-w-0 break-words">
                     {account.name}
@@ -177,28 +183,23 @@ const isBrandSurface = !account.is_negative;
               </div>
             </div>
           ) : (
-            /* NO RECOGNISED MARK — the existing monogram + type icon, unchanged.
-               This is the fallback path the gate asserts is exercised, so it is
-               deliberately NOT restyled to match the stacked branch. */
+            /* NO RECOGNISED MARK - the monogram, and ONLY the monogram.
+               This branch used to render the legacy account-TYPE icon beside it
+               (a bank pictogram, an e-wallet glyph, a dollar sign), so a
+               fallback card showed two marks: a generic glyph for the account
+               TYPE and a letter for the brand. The type icon also carried no
+               information the card did not already print - the type is set as
+               text under the name in BOTH layouts ("bank", "ewallet", "cash"),
+               in both branches here. It was a leftover from the pre-logo design
+               and it is gone rather than restyled, because a glyph that repeats
+               adjacent text is noise, not information.
+
+               This is the fallback path the gate asserts is exercised, so the
+               monogram still renders at the real logos' height and on the same
+               brand base; only the second mark is removed. */
             <>
-              <div
-                className={`p-2.5 rounded-md shrink-0 ${
-                  account.is_negative ? "bg-rose-500/10 text-rose-400" : ""
-                }`}
-                style={
-                  isBrandSurface
-                    ? {
-                        backgroundColor: `${brand.base}${Math.round(ICON_FILL_ALPHA * 255)
-                          .toString(16)
-                          .padStart(2, "0")}`,
-                        color: brand.accent,
-                      }
-                    : undefined
-                }
-              >
-                <Icon className="h-5 w-5" />
-              </div>
               <span
+                data-mark-slot
                 data-account-logo
                 data-brand={brandKey ?? "neutral"}
                 className="inline-flex items-center justify-center shrink-0 [color:var(--brand-on)]"
@@ -218,7 +219,7 @@ const isBrandSurface = !account.is_negative;
                   {(account.name || "?").charAt(0)}
                 </span>
               </span>
-              <div className="min-w-0">
+              <div data-account-name-block className="min-w-0">
                 <div className="flex items-center gap-2 min-w-0 flex-wrap">
                   <h3 className="font-semibold text-base [color:var(--brand-on)] min-w-0 break-words">
                     {account.name}

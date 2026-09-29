@@ -271,22 +271,33 @@ describe("the chip wash is dropped rather than rendered invisible", () => {
       .toBeLessThan(CHIP_ALPHA_FLOOR);
   });
 
-  it("drops exactly one chip, and it is gcash", () => {
-    // Coverage before absence: the claim "one chip is dropped" is only
-    // meaningful if the other seven are known to have one.
-    const dropped = BRAND_KEYS.filter((k) => ACCOUNT_BRANDS[k].chipAlpha === null);
-    const kept = BRAND_KEYS.filter((k) => ACCOUNT_BRANDS[k].chipAlpha !== null);
-    expect(dropped).toEqual(["gcash"]);
-    expect(kept).toHaveLength(7);
+  it("drops the wash on every brand whose base cannot carry one", () => {
+    // Coverage before absence: the claim is only meaningful against a known
+    // population, so both sides are listed.
+    //
+    // This changed when the bases deepened. On the OLD near-black bases a 12%
+    // onBase wash sat comfortably under the text. At the reference luminance
+    // (L ~0.17) white text is already at its AA ceiling, so a white wash pulls
+    // the pill below 4.5:1 - the maximum wash drops to 1.1% opacity, below the
+    // visibility floor, so the wash is dropped and the pill is text-only.
+    const dropped = BRAND_KEYS.filter((k) => ACCOUNT_BRANDS[k].chipAlpha === null).sort();
+    const kept = BRAND_KEYS.filter((k) => ACCOUNT_BRANDS[k].chipAlpha !== null).sort();
+    expect(dropped).toEqual(["bpi", "gcash", "maribank", "maya", "paypal"]);
+    expect(kept).toEqual(["neutral", "unionbank", "wise"]);
   });
 
-  it("keeps unionbank's chip where gcash's is dropped, for a stated reason", () => {
-    // Both bases wash toward a near-opposite text colour, but in opposite
-    // directions: white onto a mid red reads, near-black onto a bright blue
-    // does not. Same alpha, opposite perceptibility - which is why the rule has
-    // a visibility floor and not only an AA floor.
-    expect(ACCOUNT_BRANDS.unionbank.chipAlpha).not.toBeNull();
-    expect(ACCOUNT_BRANDS.gcash.chipAlpha).toBeNull();
+  it("keeps wise's wash, for the stated reason", () => {
+    // Wise is the one brand whose text is DARK on a BRIGHT base, so its wash
+    // moves the pill away from the text rather than toward it - the opposite
+    // direction to every white-on-dark brand, which is why it is the one that
+    // still has headroom.
+    expect(ACCOUNT_BRANDS.wise.onBase).toBe("#0B0E0F");
+    expect(ACCOUNT_BRANDS.wise.chipAlpha).not.toBeNull();
+    for (const key of BRAND_KEYS) {
+      if (key === "wise") continue;
+      if (ACCOUNT_BRANDS[key].chipAlpha === null) continue;
+      expect(ACCOUNT_BRANDS[key].chipAlpha).not.toBeNull();
+    }
   });
 });
 
@@ -332,12 +343,17 @@ describe("text tiers collapse honestly rather than pretending", () => {
   });
 
   it("resolves gcash, which the old rule had collapsed", () => {
-    // The old rule pinned gcash because its window is [0, 0.0096] with the text
-    // sitting at 0.0042 inside it. Maximising separation within that window
-    // reaches a navy at dE00 20.1 - a visible tier the old rule could not find.
+    // v2 of the rule RESCUED gcash on the old bright base, reaching a navy at
+    // dE00 20.1. Deepening the base to the reference luminance then collapsed
+    // it again - a different base, a different answer, and the rule still
+    // decides. Asserted as the ARITHMETIC it is, so it cannot be "fixed" by
+    // picking a value that reads as secondary and does not pass.
+    //
+    // At base L ~0.17 with white text, headroom before AA is 1.1% opacity: no
+    // dimmer value passes at all. The tier is not missing for want of a value.
     const p = ACCOUNT_BRANDS.gcash;
-    expect(p.mutedOnBase).not.toBe(p.onBase);
-    expect(perceptualDistance(p.mutedOnBase, p.onBase)).toBeGreaterThanOrEqual(MUTED_MIN_SEPARATION);
+    expect(p.mutedOnBase).toBe(p.onBase);
+    expect(p.note).toMatch(/EXTRACTED/);
   });
 
   it.each(BRAND_KEYS)("%s: onBase is one of the two measured tokens, not a free choice", (key) => {

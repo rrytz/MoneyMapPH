@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
 import { accountBrand, getAccountBrandPalette, brandHairline, withAlpha } from "@/lib/utils/account-brand";
 import { LOGO_HEIGHT_PX, resolveBrandLogo } from "@/lib/utils/brand-logos";
+import { CHIP_MARK_RATIO, CHIP_SIZE_PX } from "@/lib/utils/account-brand";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -110,6 +111,8 @@ const isBrandSurface = !account.is_negative;
               // that is exactly why the balance stayed dark in light mode while
               // every other label was fixed.
               "--brand-on": brand.onBase,
+      "--brand-chip-bg": brand.chipBg,
+      "--brand-chip-on": brand.chipOn,
               "--brand-muted": brand.mutedOnBase,
               "--brand-line": brandHairline(brand.onBase),
               // INTERACTIVE STATES, derived from the brand and never from the
@@ -152,13 +155,20 @@ const isBrandSurface = !account.is_negative;
                specific answer. */
             <div className="flex flex-col gap-1.5 min-w-0" data-account-identity="stacked">
               <span
-                data-mark-slot
-                data-account-logo
+                data-mark-chip
                 data-brand={brandKey ?? "neutral"}
-                className="inline-flex items-center [color:var(--brand-on)] min-w-0 max-w-full"
-                style={{ height: LOGO_HEIGHT_PX, width: "auto" }}
+                className="inline-flex items-center justify-center shrink-0 rounded-lg overflow-hidden
+                           [background-color:var(--brand-chip-bg)] [color:var(--brand-chip-on)]"
+                style={{ width: CHIP_SIZE_PX, height: CHIP_SIZE_PX }}
               >
-                {brandLogo}
+                <span
+                  data-mark-slot
+                  data-account-logo
+                  className="inline-flex items-center justify-center max-w-full"
+                  style={{ width: CHIP_SIZE_PX * CHIP_MARK_RATIO, height: CHIP_SIZE_PX * CHIP_MARK_RATIO }}
+                >
+                  {brandLogo}
+                </span>
               </span>
               {/* The name + type block. `data-account-name-block` is a structural
                   handle so the gate can define the identity row as "the mark OR
@@ -199,32 +209,23 @@ const isBrandSurface = !account.is_negative;
                brand base; only the second mark is removed. */
             <>
               <span
-                data-mark-slot
-                data-account-logo
+                data-mark-chip
                 data-brand={brandKey ?? "neutral"}
-                className="inline-flex items-center justify-center shrink-0 [color:var(--brand-on)]"
-                style={{ height: LOGO_HEIGHT_PX, width: "auto" }}
+                className="inline-flex items-center justify-center shrink-0 rounded-lg overflow-hidden
+                           [background-color:var(--brand-chip-bg)] [color:var(--brand-chip-on)]"
+                style={{ width: CHIP_SIZE_PX, height: CHIP_SIZE_PX }}
               >
                 <span
-                  data-account-logo-mono
-                  // The letter is --brand-on, the SAME token as the name - measured, not
-                  // assumed, and identical to the h3. It is NOT a theme token. Where
-                  // the brand's chipAlpha is null (gcash) the wash is dropped entirely
-                  // rather than painted at an alpha too faint to read as a chip: an
-                  // element that exists in the DOM but not on screen is the same
-                  // defect as an assertion that passes on nothing.
-                  // The container is widened to the logo HEIGHT and the glyph is
-                  // left alone - internal padding, not scaling. At 11px the bare
-                  // "C" carried far less visual mass than a 67-84px wordmark and
-                  // read as a weak mark beside it; an 18px chip gives the same
-                  // letter the same optical size without touching the type size
-                  // or the glyph. Deliberately NOT square-forcing every mark:
-                  // wordmarks keep their natural ratios, and only the narrow
-                  // monogram gets a floor.
-                  className="inline-flex items-center justify-center font-semibold uppercase leading-none rounded-sm w-full h-full [color:var(--brand-on)] [background-color:var(--brand-hover-bg)]"
-                  style={{ minWidth: LOGO_HEIGHT_PX }}
+                  data-mark-slot
+                  data-account-logo
+                  className="inline-flex items-center justify-center font-semibold uppercase leading-none"
+                  style={{
+                    width: CHIP_SIZE_PX * CHIP_MARK_RATIO,
+                    height: CHIP_SIZE_PX * CHIP_MARK_RATIO,
+                    fontSize: CHIP_SIZE_PX * CHIP_MARK_RATIO * 0.78,
+                  }}
                 >
-                  {(account.name || "?").charAt(0)}
+                  <span data-account-logo-mono>{(account.name || "?").charAt(0)}</span>
                 </span>
               </span>
               <div data-account-name-block className="min-w-0">

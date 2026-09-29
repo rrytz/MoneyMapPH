@@ -58,8 +58,19 @@ export type AccountBrand =
   | "bpi" | "paypal" | "wise" | "neutral";
 
 export interface AccountBrandPalette {
-  /** The card surface. The brand's own colour at its real luminance. */
+  /** The card surface. Deep enough that white text clears AA on every brand. */
   base: string;
+  /**
+   * The rounded-square chip behind the mark. A FIXED colour, identical in both
+   * schemes - the chip is a brand surface, not a themed one.
+   */
+  chipBg: string;
+  /**
+   * The mark's colour inside the chip. Deliberately NOT the card's text token:
+   * the mark is a graphic on its own surface and is measured against `chipBg`,
+   * never against `base`.
+   */
+  chipOn: string;
   /** A supporting hue from the same logo, used sparingly. */
   secondary: string;
   /** Primary text on `base`. Assigned per brand, never one global constant. */
@@ -88,6 +99,24 @@ export interface AccountBrandPalette {
  */
 const ON_LIGHT = "#FFFFFF"; // text for a DARK base
 const ON_DARK = "#0B0E0F"; // text for a BRIGHT base
+
+/**
+ * The mark chip, fixed square, uniform across every brand.
+ *
+ * This replaces the old invariant - a height-fixed slot with width driven by
+ * each wordmark's intrinsic ratio, which produced a 11px-to-84px spread. A
+ * fixed square is strictly stronger: every chip is exactly CHIP_SIZE_PX on both
+ * axes, so "all chip bounding boxes identical" is a total check with no
+ * tolerances and nothing to allow for.
+ *
+ * The chip is NOT subject to `CHIP_ALPHA_FLOOR`. That floor governs a translucent
+ * wash on a variable surface, where "is this still a chip" is a judgement. This
+ * is an opaque brand colour - it either is the chip colour or it is not.
+ */
+export const CHIP_SIZE_PX = 32;
+
+/** The mark sits at ~60% of the chip, per the reference lockup. */
+export const CHIP_MARK_RATIO = 0.6;
 
 /**
  * The chip threshold, in alpha over the base, below which a wash stops reading
@@ -137,6 +166,8 @@ export function chipAlphaFor(base: string, onBase: string): number | null {
 
 export const NEUTRAL_PALETTE: AccountBrandPalette = {
   base: "#1C1F1E",
+  chipBg: "#2E3230",
+  chipOn: ON_LIGHT,
   secondary: "#525B57",
   onBase: ON_LIGHT,
   mutedOnBase: "#7C8884",
@@ -194,39 +225,39 @@ export const NEUTRAL_PALETTE: AccountBrandPalette = {
  */
 export const ACCOUNT_BRANDS: Record<AccountBrand, AccountBrandPalette> = {
   maribank: {
-    base: "#F5812F", secondary: "#3E8FD0",
-    onBase: ON_DARK, mutedOnBase: "#700A05", chipAlpha: 0.12,
-    note: "real MariBank orange, a monochromatic brand - see the derivation note",
+    base: "#BF5409", chipBg: "#A8450C", chipOn: ON_LIGHT, secondary: "#3E8FD0",
+    onBase: ON_LIGHT, mutedOnBase: ON_LIGHT, chipAlpha: null,
+    note: "DERIVED - not extracted. Reference contains no MariBank card. Deepened MariBank orange",
   },
   unionbank: {
-    base: "#E4002B", secondary: "#96401A",
+    base: "#E4002B", chipBg: "#8C0512", chipOn: ON_LIGHT, secondary: "#96401A",
     onBase: ON_LIGHT, mutedOnBase: ON_LIGHT, chipAlpha: 0.115,
-    note: "UnionBank red. Muted tier COLLAPSED to onBase; chip survives at 0.115",
+    note: "DERIVED - not extracted. No reference card. UnionBank red already clears AA; muted tier COLLAPSED",
   },
   gcash: {
-    base: "#007DFE", secondary: "#1B6FC0",
-    onBase: ON_DARK, mutedOnBase: "#000A57", chipAlpha: null,
-    note: "real GCash blue. Chip DROPPED - see chipAlphaFor. Muted tier was rescued by the v2 rule",
+    base: "#396DE4", chipBg: "#396FEF", chipOn: ON_LIGHT, secondary: "#1B6FC0",
+    onBase: ON_LIGHT, mutedOnBase: ON_LIGHT, chipAlpha: null,
+    note: "EXTRACTED from the reference crop. Chip is within 5% of the base, by design - subtle is not the same as absent",
   },
   maya: {
-    base: "#00C853", secondary: "#7B5CE8",
-    onBase: ON_DARK, mutedOnBase: "#004D03", chipAlpha: 0.12,
-    note: "Maya green with the wordmark's violet as the secondary",
+    base: "#3E8247", chipBg: "#010101", chipOn: ON_LIGHT, secondary: "#7B5CE8",
+    onBase: ON_LIGHT, mutedOnBase: ON_LIGHT, chipAlpha: null,
+    note: "EXTRACTED, base DEEPENED. Reference #499954 gave white 3.52:1; chipOn overridden to white",
   },
   bpi: {
-    base: "#004E9E", secondary: "#E5C25C",
-    onBase: ON_LIGHT, mutedOnBase: "#00DBA6", chipAlpha: 0.12,
-    note: "BPI blue, gold crest as the secondary",
+    base: "#CB4643", chipBg: "#D04D47", chipOn: ON_LIGHT, secondary: "#E5C25C",
+    onBase: ON_LIGHT, mutedOnBase: ON_LIGHT, chipAlpha: null,
+    note: "EXTRACTED, base DEEPENED. Reference #D15C59 gave white 3.90:1. Coral red, not blue",
   },
   paypal: {
-    base: "#009CDE", secondary: "#63B4F5",
-    onBase: ON_DARK, mutedOnBase: "#07009E", chipAlpha: 0.12,
-    note: "PayPal bright blue - 45 from gcash, the closest pair in the set",
+    base: "#007BAF", chipBg: "#003087", chipOn: ON_LIGHT, secondary: "#63B4F5",
+    onBase: ON_LIGHT, mutedOnBase: ON_LIGHT, chipAlpha: null,
+    note: "DERIVED - not extracted. Chip is PayPal navy #003087 (the logo's own blue), not #009CDE",
   },
   wise: {
-    base: "#9FE870", secondary: "#44882A",
-    onBase: ON_DARK, mutedOnBase: "#126911", chipAlpha: 0.12,
-    note: "real Wise lime, bright enough that only ON_DARK clears AA. Its muted tier is verified by eye, not by metric alone",
+    base: "#97DC6A", chipBg: "#A7EE77", chipOn: "#1F3D12", secondary: "#44882A",
+    onBase: ON_DARK, mutedOnBase: "#185F16", chipAlpha: 0.12,
+    note: "EXTRACTED. The one bright brand - lime cannot carry white at AA, so it takes ON_DARK",
   },
   neutral: NEUTRAL_PALETTE,
 };

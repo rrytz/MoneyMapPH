@@ -468,7 +468,32 @@ export const describe = (card, nearestFn) => {
         return { ok: false, why: `expected exactly 1 [data-mark-slot], found ${slots.length}` };
       }
       const slot = slots[0];
-      const row = slot.parentElement;
+      // THE CHIP MUST EXIST BEFORE ANY CONTRAST IS MEASURED AGAINST IT.
+      //
+      // The background walker below resolves an icon's surface by walking up to
+      // the nearest non-transparent ancestor. With the chip present that is the
+      // chip, which is correct. With the chip MISSING it walks past, finds the
+      // card, measures mark-vs-card, and passes. The contrast assertion would be
+      // satisfied by the exact defect it exists to detect.
+      //
+      // So the chip is asserted FIRST, and separately. Coverage before absence:
+      // "the chip is there" and "the chip is the right size" are both real
+      // claims about a known population, not one claim standing in for another.
+      const chip = card.querySelector("[data-mark-chip]");
+      if (!chip) {
+        return { ok: false, why: "no [data-mark-chip] rendered - mark contrast would silently fall through to the card base and pass on the wrong subject" };
+      }
+      const chipBox = chip.getBoundingClientRect();
+      const chipStyle = getComputedStyle(chip);
+      const chipTransparent = /rgba\(0, 0, 0, 0\)|transparent/.test(chipStyle.backgroundColor);
+      if (chipTransparent) {
+        return { ok: false, why: "[data-mark-chip] has no background - it is not a chip, and contrast would be measured against the card" };
+      }
+      // The identity row is the chip's PARENT: the chip now occupies the position
+      // the bare mark used to, so `slot.parentElement` would scope the
+      // "nothing unlabelled in the row" check to the chip alone and quietly stop
+      // seeing the name block beside it.
+      const row = chip.parentElement;
       const vis = (el) => {
         if (el.checkVisibility) return el.checkVisibility({ checkVisibilityCSS: true });
         const b = el.getBoundingClientRect();
@@ -493,7 +518,10 @@ export const describe = (card, nearestFn) => {
       // Everything visible in the row must be the mark or the name block.
       const rowKids = [...row.children].filter(vis);
       const rowUnmatched = rowKids.filter(
-        (el) => !el.matches("[data-mark-slot]") && !el.matches("[data-account-name-block]")
+        (el) =>
+          !el.matches("[data-mark-slot]") &&
+          !el.matches("[data-mark-chip]") &&
+          !el.matches("[data-account-name-block]")
       );
       return {
         ok: true,

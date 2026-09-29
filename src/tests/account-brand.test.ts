@@ -14,6 +14,8 @@ import {
   maxChipAlpha,
   chipAlphaFor,
   CHIP_ALPHA_FLOOR,
+  mutedFor,
+  MUTED_MIN_SEPARATION,
   type AccountBrand,
 } from "@/lib/utils/account-brand";
 
@@ -289,15 +291,53 @@ describe("the chip wash is dropped rather than rendered invisible", () => {
 });
 
 describe("text tiers collapse honestly rather than pretending", () => {
-  it.each(BRAND_KEYS)("%s: muted is either clearly separate or identical to onBase", (key) => {
-    // The middle ground is the failure: a "muted" value that is subtly
-    // different from the text beside it is decoration pretending to be a tier.
+  it.each(BRAND_KEYS)("%s: muted is the rule's output for its own base", (key) => {
+    // The muted value is DERIVED, not typed. If this fails, the table and the
+    // rule have drifted - which is how a hand-maintained colour set stops being
+    // the thing its own rule describes.
     const p = ACCOUNT_BRANDS[key];
-    const sep = rgbDistance(p.mutedOnBase, p.onBase);
+    expect(p.mutedOnBase, `${key} muted is ${p.mutedOnBase}, rule says ${mutedFor(p.base, p.onBase)}`)
+      .toBe(mutedFor(p.base, p.onBase));
+  });
+
+  it.each(BRAND_KEYS)("%s: muted either reads as a tier or IS the text", (key) => {
+    // The middle ground is the failure. ΔE00 replaces the old rgbDistance >= 24
+    // check, which was the wrong instrument twice over: it is not perceptual, and
+    // it called paypal "distinct" at 52 RGB units when that pair is dE00 9.60.
+    //
+    // A value either separates from the name by a visible margin, or it is
+    // identical to it. "Subtly different" is decoration pretending to be a tier.
+    const p = ACCOUNT_BRANDS[key];
+    const de = perceptualDistance(p.mutedOnBase, p.onBase);
     expect(
-      sep === 0 || sep >= 24,
-      `${key} muted ${p.mutedOnBase} is ${sep} from onBase ${p.onBase} - neither identical nor a clear tier`
+      p.mutedOnBase === p.onBase || de >= MUTED_MIN_SEPARATION,
+      `${key} muted ${p.mutedOnBase} is dE00 ${de.toFixed(1)} from onBase ${p.onBase} - neither identical nor a visible tier`
     ).toBe(true);
+  });
+
+  it("would have caught paypal's old muted, which rgbDistance called distinct", () => {
+    // The regression proof for the metric change. 52 RGB units apart, dE00 9.60.
+    expect(rgbDistance("#242D31", "#0B0E0F")).toBeGreaterThanOrEqual(24);
+    expect(perceptualDistance("#242D31", "#0B0E0F")).toBeLessThan(MUTED_MIN_SEPARATION);
+  });
+
+  it("collapses unionbank, and says why", () => {
+    // The one genuine arithmetic collapse. unionbank's AA window is
+    // [0.9251, 1.0] - entirely on white's side of the base - so the most
+    // distinct value that clears 4.5:1 is a near-white at dE00 6.9, which
+    // renders as pure white. No rule fixes that; only a deeper base might.
+    const p = ACCOUNT_BRANDS.unionbank;
+    expect(p.mutedOnBase).toBe(p.onBase);
+    expect(p.note).toMatch(/COLLAPSED/);
+  });
+
+  it("resolves gcash, which the old rule had collapsed", () => {
+    // The old rule pinned gcash because its window is [0, 0.0096] with the text
+    // sitting at 0.0042 inside it. Maximising separation within that window
+    // reaches a navy at dE00 20.1 - a visible tier the old rule could not find.
+    const p = ACCOUNT_BRANDS.gcash;
+    expect(p.mutedOnBase).not.toBe(p.onBase);
+    expect(perceptualDistance(p.mutedOnBase, p.onBase)).toBeGreaterThanOrEqual(MUTED_MIN_SEPARATION);
   });
 
   it.each(BRAND_KEYS)("%s: onBase is one of the two measured tokens, not a free choice", (key) => {

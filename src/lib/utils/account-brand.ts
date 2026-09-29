@@ -139,7 +139,7 @@ export const NEUTRAL_PALETTE: AccountBrandPalette = {
   base: "#1C1F1E",
   secondary: "#525B57",
   onBase: ON_LIGHT,
-  mutedOnBase: "#828785",
+  mutedOnBase: "#7C8884",
   chipAlpha: 0.12,
   note: "neutral stone - cash has no brand, and an unknown account gets the same",
 };
@@ -195,8 +195,8 @@ export const NEUTRAL_PALETTE: AccountBrandPalette = {
 export const ACCOUNT_BRANDS: Record<AccountBrand, AccountBrandPalette> = {
   maribank: {
     base: "#F5812F", secondary: "#3E8FD0",
-    onBase: ON_DARK, mutedOnBase: "#552D10", chipAlpha: 0.12,
-    note: "real MariBank orange - see the derivation note for what is NOT here",
+    onBase: ON_DARK, mutedOnBase: "#700A05", chipAlpha: 0.12,
+    note: "real MariBank orange, a monochromatic brand - see the derivation note",
   },
   unionbank: {
     base: "#E4002B", secondary: "#96401A",
@@ -205,28 +205,28 @@ export const ACCOUNT_BRANDS: Record<AccountBrand, AccountBrandPalette> = {
   },
   gcash: {
     base: "#007DFE", secondary: "#1B6FC0",
-    onBase: ON_DARK, mutedOnBase: ON_DARK, chipAlpha: null,
-    note: "real GCash blue. Muted tier COLLAPSED and the chip is DROPPED - see chipAlphaFor",
+    onBase: ON_DARK, mutedOnBase: "#000A57", chipAlpha: null,
+    note: "real GCash blue. Chip DROPPED - see chipAlphaFor. Muted tier was rescued by the v2 rule",
   },
   maya: {
     base: "#00C853", secondary: "#7B5CE8",
-    onBase: ON_DARK, mutedOnBase: "#38443D", chipAlpha: 0.12,
+    onBase: ON_DARK, mutedOnBase: "#004D03", chipAlpha: 0.12,
     note: "Maya green with the wordmark's violet as the secondary",
   },
   bpi: {
     base: "#004E9E", secondary: "#E5C25C",
-    onBase: ON_LIGHT, mutedOnBase: "#9CC6F1", chipAlpha: 0.12,
+    onBase: ON_LIGHT, mutedOnBase: "#00DBA6", chipAlpha: 0.12,
     note: "BPI blue, gold crest as the secondary",
   },
   paypal: {
     base: "#009CDE", secondary: "#63B4F5",
-    onBase: ON_DARK, mutedOnBase: "#242D31", chipAlpha: 0.12,
+    onBase: ON_DARK, mutedOnBase: "#07009E", chipAlpha: 0.12,
     note: "PayPal bright blue - 45 from gcash, the closest pair in the set",
   },
   wise: {
     base: "#9FE870", secondary: "#44882A",
-    onBase: ON_DARK, mutedOnBase: "#466433", chipAlpha: 0.12,
-    note: "real Wise lime - see the derivation note for what is NOT here",
+    onBase: ON_DARK, mutedOnBase: "#126911", chipAlpha: 0.12,
+    note: "real Wise lime, bright enough that only ON_DARK clears AA. Its muted tier is verified by eye, not by metric alone",
   },
   neutral: NEUTRAL_PALETTE,
 };
@@ -338,6 +338,104 @@ export function rgbToHex(rgb: [number, number, number]): string {
       .map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0"))
       .join("")
   ).toUpperCase();
+}
+
+// ---------------------------------------------------------------- the muted tier
+/**
+ * MUTED RULE, v2. Maximise perceptual separation from the TEXT, subject to
+ * legibility against the BASE - and stay inside the brand's own hue family.
+ *
+ * v1 was "the maximum shift toward the base that still clears 4.5:1", and it was
+ * self-defeating: maximum shift IS the boundary case, so "just legible" and
+ * "clearly a different tier" were the same value by construction. Six of eight
+ * muted values landed within 0.06 of the floor. The label was guaranteed to sit
+ * as close to the text as legibility permitted, which is the opposite of a tier.
+ *
+ * v2 optimises the thing that is actually wanted - separation - instead of
+ * minimising the thing that was merely constrained.
+ *
+ * THE HUE CONSTRAINT IS NOT OPTIONAL. Run without it, "maximise ΔE00 from the
+ * text" is free to abandon the hue entirely, and does:
+ *
+ *     unionbank  -> #ffff00   dE00 30.5   a yellow label on a red card
+ *     bpi        -> #00e000   dE00 34.5   pure green on a blue card
+ *
+ * Both satisfy every written constraint. Both are nonsense, because "far from
+ * the text" is not the same objective as "reads as a secondary version of it".
+ * The objective without its boundary is not a weaker rule - it is a different
+ * and wrong one.
+ */
+
+/** How far the muted may drift from the base's hue before it stops being that brand's. */
+export const MUTED_HUE_TOLERANCE_DEG = 45;
+
+/**
+ * Below this ΔE00 the muted is not a second tier, and collapses to `onBase`.
+ *
+ * Bounded by two rendered judgements, not chosen for tidiness. unionbank's best
+ * legal value scores 6.9 and renders as pure white - indistinguishable. gcash's
+ * scores 20.1 and renders as a clearly navy "Ewallet" beside a black name. The
+ * floor sits between a value confirmed invisible and one confirmed visible.
+ *
+ * Same kind of judgement as CHIP_ALPHA_FLOOR, and for the same reason: it is a
+ * threshold about perception, so it was settled by rendering and looking rather
+ * than by picking a number that made a test pass.
+ */
+export const MUTED_MIN_SEPARATION = 15;
+
+function rgbToHsl(rgb: [number, number, number]): [number, number, number] {
+  const [r0, g0, b0] = rgb.map((v) => v / 255);
+  const mx = Math.max(r0, g0, b0);
+  const mn = Math.min(r0, g0, b0);
+  const l = (mx + mn) / 2;
+  if (mx === mn) return [0, 0, l];
+  const d = mx - mn;
+  const s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+  let h: number;
+  if (mx === r0) h = (g0 - b0) / d + (g0 < b0 ? 6 : 0);
+  else if (mx === g0) h = (b0 - r0) / d + 2;
+  else h = (r0 - g0) / d + 4;
+  return [h * 60, s, l];
+}
+
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+  return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
+}
+
+/**
+ * The muted value for a brand, derived rather than typed.
+ *
+ * Returns `onBase` when the base cannot support a second tier - which is
+ * arithmetic, not a preference, and is recorded as such per brand in the table.
+ */
+export function mutedFor(base: string, onBase: string): string {
+  const [h0, s0] = rgbToHsl(hexToRgb(base));
+  const offsets = [0, 22.5, 45, -22.5, -45];
+  let best: { hex: string; d: number } | null = null;
+  for (const off of offsets) {
+    const hue = (h0 + off + 360) % 360;
+    for (const sm of [0, 0.15, 0.3, 0.5, 0.75, 1]) {
+      const s = s0 * sm;
+      for (let l = 0; l <= 1; l += 0.01) {
+        const cand = rgbToHex(hslToRgb(hue, s, l));
+        if (contrastRatio(cand, base) < 4.5) continue;
+        const d = perceptualDistance(cand, onBase);
+        if (!best || d > best.d) best = { hex: cand, d };
+      }
+    }
+  }
+  if (!best || best.d < MUTED_MIN_SEPARATION) return onBase;
+  return best.hex;
 }
 
 export function relativeLuminance(hex: string): number {

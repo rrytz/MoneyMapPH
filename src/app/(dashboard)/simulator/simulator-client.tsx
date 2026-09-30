@@ -73,7 +73,11 @@ function EmergencyFundCta({ goals }: { goals: SavingsGoal[] }) {
         toast.error(res.error);
       } else {
         toast.success(`"${match.name}" is now your Emergency Fund`);
-        // editGoal revalidates savings/dashboard/forecasting but not this page.
+        // FOLLOW-UP, not fixed here: editGoal revalidates
+        // savings/dashboard/forecasting but not /simulator, so this refresh is
+        // load-bearing. Incomplete invalidation is how stale-render bugs start -
+        // any future caller mutating goal state from another route must remember
+        // its own refresh.
         router.refresh();
       }
     });

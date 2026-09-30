@@ -373,8 +373,42 @@ export function rgbToHex(rgb: [number, number, number]): string {
 
 // ---------------------------------------------------------------- the muted tier
 /**
- * MUTED RULE, v2. Maximise perceptual separation from the TEXT, subject to
- * legibility against the BASE - and stay inside the brand's own hue family.
+ * MUTED RULE, v2 - and a KNOWN DEFECT in it. Read the defect before the rule.
+ *
+ * ------------------------------------------------------------------
+ * ⚠ OWED: v2 CONFLATES "MAXIMALLY SEPARATED" WITH "READS AS SECONDARY"
+ * ------------------------------------------------------------------
+ *
+ * `argmax ΔE00(muted, onBase)` inside a hue window optimises for distance. It
+ * does not optimise for DIMMER. Asked for a muted tier on a deep blue base at
+ * the target luminance it returned `#66EAE3` - a saturated cyan at dE00 25.3 -
+ * which is a second design element, not a muted label. A muted tier means
+ * DIMMER, same hue, closer to the base in lightness. The rule cannot express
+ * that, so it leaves the hue family and returns a colour that reads as wrong.
+ *
+ * Two things made this visible, and neither was the arithmetic:
+ *
+ *   1. On a base at L ~0.17 there is no dimmer value that clears 4.5:1 at all -
+ *      about 1.1% of opacity of headroom. The rule was asked for a value that
+ *      cannot exist and returned the furthest thing it could find instead of
+ *      saying so.
+ *   2. Asked to find a tier on the lime base, where headroom DOES exist, it
+ *      still returned a hue-shifted result rather than a dimmer one.
+ *
+ * IF A FUTURE FEATURE NEEDS A REAL MUTED TIER, the rule should be:
+ *
+ *     muted = same hue as onBase, LOWER contrast against base, still >= 4.5:1
+ *
+ * - a dimming of the text toward the base, not a search for a distant colour.
+ * Not `argmax ΔE00`. Not worth fixing for the current palette, where the tier
+ * is collapsed on six cards for arithmetic reasons and on two by choice.
+ *
+ * ------------------------------------------------------------------
+ * WHAT v2 IS, AND WHY IT REPLACED v1
+ * ------------------------------------------------------------------
+ *
+ * v2 maximises perceptual separation from the TEXT, subject to legibility
+ * against the BASE, and stays inside the brand's own hue family.
  *
  * v1 was "the maximum shift toward the base that still clears 4.5:1", and it was
  * self-defeating: maximum shift IS the boundary case, so "just legible" and

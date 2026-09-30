@@ -32,6 +32,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { chromium } from "playwright";
+import { fileURLToPath } from "node:url";
 
 export const MIN_TEXT_CONTRAST = 4.5;
 
@@ -437,6 +438,23 @@ export const describe = (card, nearestFn) => {
     name: card.getAttribute("data-account-card") || "(unnamed)",
     base: cs.backgroundColor,
     border: cs.borderTopColor,
+    // The muted tier, read as a NAMED CLAIM rather than left to emerge from the
+    // general contrast sweep. It is either a real second tier or it is collapsed
+    // to the text colour, and those are the only two legal states - "subtly
+    // different" is the failure. Asserting it explicitly means a future change
+    // cannot quietly introduce a below-AA mute on one card and have the sweep
+    // report it as merely another passing colour.
+    muted: (() => {
+      const label = card.querySelector("[data-account-name-block] span:last-child");
+      const nameEl = card.querySelector("[data-account-name-block] h3");
+      if (!label || !nameEl) return null;
+      return {
+        present: true,
+        text: (label.textContent || "").trim(),
+        color: getComputedStyle(label).color,
+        nameColor: getComputedStyle(nameEl).color,
+      };
+    })(),
     // The divider is identified BY ROLE now. The previous version searched
     // every descendant for "an element with a non-zero top border" - which is a
     // definition rather than an identification, and it matches the card's OWN
@@ -628,8 +646,13 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
 // a brand must not require editing this line, and a count maintained by hand is
 // a count that will drift.
 function countBrandsInPalette() {
+  // Resolved from THIS FILE's location, never from process.cwd(). A gate that
+  // only works when launched from the repo root is a gate that silently does
+  // nothing when launched from anywhere else - and gate-hygiene.test.ts exists
+  // to keep that class out.
+  const here = path.dirname(fileURLToPath(import.meta.url));
   const src = fs.readFileSync(
-    path.join(process.cwd(), "src", "lib", "utils", "account-brand.ts"),
+    path.join(here, "..", "..", "src", "lib", "utils", "account-brand.ts"),
     "utf8"
   );
   const start = src.indexOf("export const ACCOUNT_BRANDS");
@@ -654,6 +677,61 @@ function countBrandsInPalette() {
   }
   if (byScheme.dark.length !== EXPECTED_CARDS) {
     fail(`expected EXACTLY ${EXPECTED_CARDS} brand cards in dark, found ${byScheme.dark.length}`);
+  }
+
+  // THE MUTED TIER IS EITHER REAL OR DECLARED COLLAPSED - NEVER NEITHER.
+  //
+  // Contrast alone does not say this. A muted value that is 3.2:1 on the base
+  // and a muted value identical to the name are different defects, and a sweep
+  // that only checks "is this colour legible" reports the first as fine and the
+  // second as fine, because neither trips it.
+  //
+  // So the claim is named per card, and coverage is checked before absence:
+  // six cards currently carry a DECLARED collapse, and that number is stated
+  // rather than discovered by counting whatever happened to render.
+  const EXPECTED_COLLAPSED = 6;
+  const EXPECTED_TIERED = 2;
+  {
+    const seen = [];
+    const collapsed = [];
+    const tiered = [];
+    for (const lc of light) {
+      if (!lc.muted) { fail(`${lc.name}: no muted label rendered - the tier claim cannot be made`); continue; }
+      seen.push(lc.name);
+      const isCollapsed = lc.muted.color === lc.muted.nameColor;
+      if (isCollapsed) {
+        collapsed.push(lc.name);
+        continue;
+      }
+      const r = contrast(lc.muted.color, lc.base);
+      tiered.push(lc.name);
+      if (r !== null && r < MIN_TEXT_CONTRAST) {
+        fail(
+          `${lc.name}: muted tier "${lc.muted.color}" on base ${lc.base} = ${r.toFixed(2)}:1, ` +
+          `below ${MIN_TEXT_CONTRAST}:1. A muted value must clear AA on its base, or be IDENTICAL to ` +
+          `onBase and declared collapsed. Subtle-but-different is the failure.`
+        );
+      }
+    }
+    if (seen.length !== EXPECTED_CARDS) {
+      fail(`muted tier: only ${seen.length} of ${EXPECTED_CARDS} cards were classified - the claim covers a short list`);
+    }
+    if (collapsed.length !== EXPECTED_COLLAPSED || tiered.length !== EXPECTED_TIERED) {
+      fail(
+        `muted tier: expected ${EXPECTED_COLLAPSED} collapsed and ${EXPECTED_TIERED} tiered, ` +
+        `found ${collapsed.length} and ${tiered.length}. Collapsed: [${collapsed.join(", ")}]. ` +
+        `Tiered: [${tiered.join(", ")}]. If this is an intended change, update the counts AND the ` +
+        `reason in the palette; if not, a brand's tier changed by accident.`
+      );
+    } else {
+      console.log(
+        `  muted tier: ${tiered.length} real (${tiered.join(", ")}) · ` +
+        `${collapsed.length} declared collapsed (${collapsed.join(", ")})`
+      );
+      console.log(`    collapse is ARITHMETIC: at base L~0.17 white text has ~1.1% opacity of headroom`);
+      console.log(`    before it stops clearing 4.5:1, so no dimmer value passes. Hierarchy is carried`);
+      console.log(`    by size and weight, as the reference does.`);
+    }
   }
 
   for (const [i, lc] of light.entries()) {

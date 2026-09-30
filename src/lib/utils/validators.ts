@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+/**
+ * LAYERING: server actions are the validation layer. The schemas in this file
+ * are consumed server-side and gate every write - a failing safeParse returns
+ * before any DB call. Client-side checks (native required/min, disabled
+ * states) are UX, not security: they communicate early, they do not protect.
+ * Do not add client-side validation as if it were primary, and do not read
+ * the absence of a client check as an open write - check the action first.
+ */
+
 export const incomeSchema = z.object({
   amount: z.coerce
     .number()

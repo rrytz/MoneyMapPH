@@ -202,6 +202,14 @@ describe("design-conformance — accent + light-world regression guard", () => {
       lines.forEach((line, i) => {
         const trimmed = line.trim();
         if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return;
+        // Metadata theme colors are concrete values by spec (theme-color metas
+        // cannot reference CSS vars), so no token exists for them. The ban
+        // targets render surfaces that bypass theming; a meta tag is not a
+        // surface. Without this carve-out no correct per-scheme theme-color
+        // could ship. Narrow by shape, not by keyword: a theme-color entry is
+        // a media+color pair on one line. A bare `color: "#..."` anywhere else
+        // (inline style) stays banned.
+        if (/media:\s*["'][^"']*["']\s*,\s*color:\s*["']#/.test(line)) return;
         for (const hex of BANNED_NEUTRALS) {
           if (new RegExp(`#${hex}\\b`, "i").test(line)) {
             violations.push({ file: short, line: i + 1, token: `#${hex}` });

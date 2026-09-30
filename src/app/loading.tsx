@@ -15,8 +15,7 @@
 export default function Loading() {
   return (
     <div
-      className="flex h-dvh items-center justify-center"
-      style={{ backgroundColor: "#0e1410" }}
+      className="launch-surface flex h-dvh items-center justify-center"
       aria-label="Loading MoneyMap"
       role="status"
     >

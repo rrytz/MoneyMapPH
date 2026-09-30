@@ -321,6 +321,17 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Launch surface: the ONE non-token use of dark paper outside the token
+   block. loading.tsx must pixel-match the apple-touch-startup-image PNGs,
+   which are static - a theme token would resolve light on the server render
+   and break the match. So the value lives here, beside the tokens, and
+   loading.tsx references this class instead of carrying the hex (which Rule D
+   of design-conformance forbids on render surfaces). Re-run splash-gen.mjs
+   if this value ever changes - the PNGs are baked from the same constant. */
+.launch-surface {
+  background-color: #0e1410;
+}
+
 /* ---- S5c semantic typography roles ----
    Roles assign meaning first. Sizes follow the role, and utilities may only
    provide a documented size step or color override. */

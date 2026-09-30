@@ -34,5 +34,11 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # File-scan lane: design-conformance assumes exclusive disk/CPU and is
+      # excluded from `npm test`, so it runs alone here instead of inside the
+      # shared worker pool.
+      - name: Run file-scan tests
+        run: npm run test:scan
+
       - name: Build
         run: npm run build

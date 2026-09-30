@@ -100,6 +100,12 @@ try {
     // under the rules automatically.
     ["gate:card-padding", ["run", "gate:card-padding"]],
     ["test", ["test"]],
+    // The file-scan lane: design-conformance assumes exclusive disk/CPU and
+    // times out inside the shared worker pool, so it runs alone here instead
+    // of inside `test`. Same shape as gate:typography's single-file run. If a
+    // second file-scan test starts flaking, it joins this invocation - the
+    // lane exists so the fix is scheduling, never a bigger timeout.
+    ["test:scan", ["run", "test:scan"]],
     ["gate:typography", ["run", "gate:typography"]],
     ["gate:nav", ["run", "gate:nav"]],
     // SOURCE check before the RENDERED brand checks: the point of a source
@@ -137,6 +143,7 @@ try {
     "gate:select-items",
     "gate:card-padding",
     "test",
+    "test:scan",
     "gate:typography",
     "gate:nav",
     "gate:logo-source",

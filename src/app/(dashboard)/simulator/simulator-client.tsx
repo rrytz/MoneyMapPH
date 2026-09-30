@@ -57,7 +57,11 @@ export function SimulatorClient({
 
   async function handleSaveSimulation(e: React.FormEvent) {
     e.preventDefault();
-    if (!purchaseName || !purchaseAmount) {
+    // Numeric, not truthiness: "0" is truthy and used to submit a zero-cost
+    // simulation (the server schema rejects it, but only after the round trip).
+    // min="0.01" on the input is the first gate; this is the second, for values
+    // set past the input constraint.
+    if (!purchaseName || !(Number(purchaseAmount) > 0)) {
       toast.error("Please provide name and amount.");
       return;
     }
@@ -132,6 +136,7 @@ export function SimulatorClient({
                   id="sim-amount"
                   type="number"
                   step="0.01"
+                  min="0.01"
                   placeholder="0.00"
                   value={purchaseAmount}
                   onChange={(e) => setPurchaseAmount(e.target.value)}

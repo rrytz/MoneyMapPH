@@ -213,6 +213,17 @@ const filled = entries.filter((e) => !e.empty).length;
 console.log("=== gate:logo-source — every path explicitly currentColor ===");
 console.log(`  ${entries.length} brand slot(s) in brand-logos.tsx, ${filled} filled, ${entries.length - filled} monogram placeholder(s)`);
 
+// An empty scan set must not pass. `entries` is built by a regex over
+// brand-logos.tsx, so a reformat that the entry pattern no longer matches
+// yields zero entries, zero findings, and the PASS below - success on a scan
+// that saw nothing. The per-entry guard further down only fires for entries
+// that were found, so it cannot catch this. Same total===0 shape as the
+// sibling source checks.
+if (entries.length === 0) {
+  console.error("  FAIL  scanned brand-logos.tsx, matched 0 brand slots - the entry pattern matched nothing, so it has proved nothing.");
+  process.exit(1);
+}
+
 if (findings.length === 0) {
   console.log("  PASS  no hardcoded, theme, or white fills; no opacity; no gradients; no background rects.");
   console.log("        Every shape in every mark carries an explicit fill=\"currentColor\".");

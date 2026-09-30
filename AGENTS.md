@@ -197,8 +197,10 @@ verification step.
 
 ## Scope boundary: named, not implicit
 
-`gate:rules` checks the scripts reachable from `gate:all` by following `npm run`
-transitively. **A script invoked directly — in CI, by a person, or by a future
+`gate:rules` checks the scripts reachable from `gate:all`: the `npm run` chain
+in `package.json`, then the `["run", name]` spawn pairs inside
+`run-gate-all.mjs`, resolved through `package.json` again, transitively.
+**A script invoked directly — in CI, by a person, or by a future
 contributor — runs unconstrained.** That is a real gap and it is the same shape
 as the `SKIPPED` that could not un-skip itself.
 
@@ -222,12 +224,14 @@ coverage of what it is claiming is absent. Findings can be silenced with
 and every suppression in force is printed on each run so they cannot accumulate
 unseen.
 
-Its scope is **derived from the `gate:all` chain** by following `npm run`
-references transitively, not read from a list. Nothing maintains that list, so
-promoting a new gate into the chain brings it under the rules automatically. A
-checker whose scope is hand-kept is one more thing to forget, and it fails open.
-`gate:dom` and `gate:captures` are outside the chain, cannot turn it red, and
-are reported as uncovered rather than failed.
+Its scope is **derived from the `gate:all` chain**, not read from a list:
+`package.json`'s `gate:all` entry, into `run-gate-all.mjs`'s `["run", name]`
+spawn pairs, resolved back through `package.json`'s script bodies,
+transitively. Nothing maintains that list, so adding a gate to the chain —
+the `withServer` pairs plus the `EXPECTED` list — brings it under the rules
+automatically. A checker whose scope is hand-kept is one more thing to forget,
+and it fails open. `gate:dom` and `gate:captures` are outside the chain, cannot
+turn it red, and are reported as uncovered rather than failed.
 
 ## Obsidian vault
 

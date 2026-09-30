@@ -89,6 +89,40 @@ const walkChain = (name) => {
 };
 walkChain("gate:all");
 
+// `gate:all` is a single node invocation - `node run-gate-all.mjs` - and the
+// chain itself lives INSIDE that file, as `["gate:x", ["run", "gate:x"]]` spawn
+// pairs. The `npm run <name>` walk above cannot see them: there is no literal
+// `npm run` text anywhere, only the words "run" and "gate:x" as separate array
+// elements. Without this step the scope is the runner alone and every real gate
+// reads as "uncovered" - gate:rules passing while checking almost nothing,
+// which is the exact failure it exists to prevent.
+const runnerFiles = scriptsIn(chainBody);
+let runnerGates = 0;
+let grew = true;
+while (grew) {
+  grew = false;
+  for (const rel of [...chainFiles]) {
+    const body = fs.readFileSync(path.join(ROOT, rel), "utf8");
+    for (const m of body.matchAll(/\["run",\s*"([\w:-]+)"\]/g)) {
+      const name = m[1];
+      if (!scripts[name] || seen.has(name)) continue;
+      // Only a `gate:*` pair proves the pattern is live. `["run", "dev"]` and
+      // `["run", "build"]` resolve to `next ...` bodies with no script files, so
+      // counting them would let a runner with all gate pairs removed still look
+      // healthy - the guard below would pass on the very staleness it exists to
+      // catch.
+      if (runnerFiles.has(rel) && name.startsWith("gate:")) runnerGates++;
+      grew = true;
+      walkChain(name);
+    }
+  }
+}
+if (runnerFiles.size > 0 && runnerGates === 0) {
+  console.error('gate:rules: the gate:all runner contains no ["run", name] spawn pairs.');
+  console.error("The pair pattern went stale - the derivation is blind and the scope cannot be trusted.");
+  process.exit(1);
+}
+
 const files = chainFiles;
 
 // gate:* entries that are not in the chain, and so are not covered.

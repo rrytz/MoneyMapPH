@@ -94,8 +94,10 @@ try {
     ["gate:types", ["run", "gate:types"]],
   ["gate:select-items", ["run", "gate:select-items"]],
     // Sibling source check over src/, same rationale as gate:select-items: the
-    // chain holds verifiers, not the components they verify, so neither this nor
-    // that one can live inside gate-rules' derived scope.
+    // chain holds verifiers, not the components they verify. Both siblings ARE
+    // in this chain and under gate:rules - its scope derivation descends into
+    // this file's ["run", name] spawn pairs, so adding a gate here brings it
+    // under the rules automatically.
     ["gate:card-padding", ["run", "gate:card-padding"]],
     ["test", ["test"]],
     ["gate:typography", ["run", "gate:typography"]],

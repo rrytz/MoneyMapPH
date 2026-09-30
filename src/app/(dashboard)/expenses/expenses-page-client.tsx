@@ -318,7 +318,22 @@ export function ExpensesPageClient({
       {/* Top KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
+          {/* No `p-6` here, and that is the whole fix. `FintechCard` already
+              applies `p-6`; this content applied it a second time, so every card
+              carried 22.5px of padding twice - 45px of whitespace per side, plus
+              the 2px border, which is the 47px band measured above the header row.
+
+              The header row lives INSIDE this content, so the content's padding
+              was never structural: `FintechCardContent` defaults to `pt-0` for a
+              body that butts up against a real `FintechCardHeader`, and there is
+              no such header here. Same reasoning and same local fix as
+              budgets-page-client.tsx:275-291.
+
+              Measured: card height 196px -> 151px at 1280px and 188px -> 143px at
+              390px, identical in both schemes. The residual dead space below the
+              content at 1280px is the three-column grid stretching all cards to
+              the tallest - a design call, deliberately not addressed. */}
+          <FintechCardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-md bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
                 <TrendingDown className="h-5 w-5" />
@@ -337,7 +352,7 @@ export function ExpensesPageClient({
         </FintechCard>
 
         <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
+          <FintechCardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <PieChart className="h-5 w-5" />
@@ -353,7 +368,7 @@ export function ExpensesPageClient({
         </FintechCard>
 
         <FintechCard>
-          <FintechCardContent className="p-6 space-y-3">
+          <FintechCardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
                 <Calendar className="h-5 w-5" />

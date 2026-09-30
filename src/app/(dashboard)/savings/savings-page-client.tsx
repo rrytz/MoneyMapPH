@@ -591,7 +591,10 @@ export function SavingsPageClient({
                     <div className="flex justify-between items-baseline pt-1">
                       <div>
                         <span className="text-xs text-muted-foreground font-medium">Remaining Balance</span>
-                        <CurrencyDisplay amount={remaining} className="type-ledger text-2xl font-bold block text-rose-600 dark:text-rose-400" />
+                        {/* Rose is the owed/danger signal: it belongs on a live
+                            balance, not a settled one. A paid-off debt at ₱0.00
+                            in danger-red reads as still owed - inverted. */}
+                        <CurrencyDisplay amount={remaining} className={`type-ledger text-2xl font-bold block ${paidOff ? "text-muted-foreground" : "text-rose-600 dark:text-rose-400"}`} />
                       </div>
                       <div className="text-right">
                         <span className="text-xs text-muted-foreground font-medium">Total Owed</span>

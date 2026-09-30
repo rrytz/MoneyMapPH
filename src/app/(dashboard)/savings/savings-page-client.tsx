@@ -500,7 +500,7 @@ export function SavingsPageClient({
                       <span>Funded</span>
                       <span className="font-bold text-foreground tabular-nums">{Math.round(goalProgress)}%</span>
                     </div>
-                    <Progress value={goalProgress} className="h-2 rounded-full [&>div]:bg-sulpot" />
+                    <Progress value={goalProgress} className="h-2 rounded-full [&>div>div]:bg-sulpot" />
                   </div>
 
                   <Button
@@ -604,7 +604,7 @@ export function SavingsPageClient({
                         <span>Paid Off</span>
                         <span className="font-bold text-foreground tabular-nums">{Math.round(progress * 100)}%</span>
                       </div>
-                      <Progress value={progress * 100} className="h-2 rounded-full [&>div]:bg-rose-500" />
+                      <Progress value={progress * 100} className="h-2 rounded-full [&>div>div]:bg-rose-500" />
                     </div>
 
                     {history.length > 0 && (

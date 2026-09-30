@@ -111,7 +111,7 @@ export function SummaryView({
               <span className="text-xs font-medium text-muted-foreground block">Budget Used</span>
               <div className="flex items-center gap-3">
                 <p className="type-measurement text-3xl sm:text-4xl font-bold tracking-tight text-foreground tabular-nums">{summary.budgetUtilization}%</p>
-                <Progress value={summary.budgetUtilization} className="h-2 flex-1 [&>div]:bg-amber-500" />
+                <Progress value={summary.budgetUtilization} className="h-2 flex-1 [&>div>div]:bg-amber-500" />
               </div>
             </div>
           </FintechCardContent>

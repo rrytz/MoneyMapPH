@@ -231,7 +231,7 @@ export function TransferModal({
           </div>
 
           <DialogFooter className="pt-4">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

@@ -86,7 +86,7 @@ export function BillsCrud({
 
   return (
     <FintechCard>
-      <FintechCardContent className="p-6 space-y-4">
+      <FintechCardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Bills</h3>
           <Button

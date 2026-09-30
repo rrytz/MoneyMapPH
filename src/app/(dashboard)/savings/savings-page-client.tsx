@@ -373,7 +373,7 @@ export function SavingsPageClient({
       {/* Emergency Adequacy Alert Card */}
       {emergencyStatus.hasFund && (
         <FintechCard className="border-l-4 border-l-sulpot bg-card">
-          <FintechCardContent className="p-6 space-y-4">
+          <FintechCardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
@@ -446,7 +446,7 @@ export function SavingsPageClient({
                   isEmergencyGoal && "border-sulpot/40 ring-1 ring-sulpot/20"
                 )}
               >
-                <FintechCardContent className="p-6 space-y-4">
+                <FintechCardContent className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
@@ -555,7 +555,7 @@ export function SavingsPageClient({
                   key={debt.id}
                   className="relative overflow-hidden transition-all duration-200 border-rose-200/70 dark:border-rose-900/40"
                 >
-                  <FintechCardContent className="p-6 space-y-4">
+                  <FintechCardContent className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2">

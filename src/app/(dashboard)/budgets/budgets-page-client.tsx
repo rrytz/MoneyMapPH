@@ -459,7 +459,7 @@ export function BudgetsPageClient({
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-5">
               {unbudgetedViews.map((view) => (
                 <FintechCard key={view.categoryId} className="space-y-4 border-dashed">
-                  <FintechCardContent className="p-6 space-y-4">
+                  <FintechCardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <div

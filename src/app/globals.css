@@ -300,6 +300,10 @@
     overflow-x: clip;
   }
   html {
+    /* Pre-paint backdrop for cold launch: before CSS/body render, the
+       viewport shows this, not white or black. Same dark paper as the
+       startup images and loading.tsx, so every handoff is shade-identical. */
+    background-color: #0e1410;
     @apply font-sans;
     /* S5a density loosening: 14px -> 15px body. S1 made the app dense as a
        fintech-aesthetic choice; S5a trades some of that for warmth. The

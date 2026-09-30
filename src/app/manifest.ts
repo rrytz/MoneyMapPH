@@ -17,8 +17,11 @@ export default function manifest(): MetadataRoute.Manifest {
     // how the manifest URL is derived.
     scope: "/",
     orientation: "portrait",
-    background_color: "#020617",
-    theme_color: "#020617",
+    // Dark paper, matching the startup images and loading.tsx. The previous
+    // #020617 matched neither paper token, so any surface falling back to the
+    // manifest backdrop flashed a third shade.
+    background_color: "#0e1410",
+    theme_color: "#0e1410",
     icons: [
       {
         src: "/pwa-192x192.png",

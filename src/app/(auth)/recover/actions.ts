@@ -1,6 +1,7 @@
 "use server";
 
 import { recoverAccount } from "@/lib/services/recovery.service";
+import { recoverySchema } from "@/lib/utils/validators";
 import {
   listUserByEmail,
   updateUserPassword,
@@ -20,17 +21,18 @@ export async function recoverAccess(
   _prevState: RecoverAccessState,
   formData: FormData
 ): Promise<RecoverAccessState> {
-  const email = formData.get("email");
-  const passphrase = formData.get("passphrase");
-  const password = formData.get("password");
-
-  if (
-    typeof email !== "string" ||
-    typeof passphrase !== "string" ||
-    typeof password !== "string"
-  ) {
-    return { error: "Invalid submission." };
+  // recoverySchema existed in validators.ts and was imported nowhere - the gate
+  // was three typeof checks. Same shape as every other validated action:
+  // safeParse first, schema message on failure, typed data after.
+  const parsed = recoverySchema.safeParse({
+    email: formData.get("email"),
+    passphrase: formData.get("passphrase"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
   }
+  const { email, passphrase, password } = parsed.data;
 
   let result;
   try {

@@ -111,10 +111,17 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                           {formatDate(paycheck.date, "MMM d, yyyy")}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 font-medium">
-                        <span>Total: <CurrencyDisplay amount={Number(paycheck.amount)} className="type-ledger font-bold text-foreground" /></span>
-                        <span>Allocated: <CurrencyDisplay amount={summary.totalAllocated} className="type-ledger font-bold text-sulpot-deep dark:text-sulpot-bright" /></span>
-                        <span>Unallocated: <CurrencyDisplay amount={summary.totalUnallocated} className="type-ledger font-bold text-ink-muted" /></span>
+                      {/* Baseline-aligned and wrapping: 2rem figures beside xs labels
+                          collide vertically under items-center (the label rides
+                          at mid-figure height into the next pair) and have
+                          nowhere to go horizontally without wrap. */}
+                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1 font-medium">
+                        {/* Explicit {' '}: JSX strips the source newline into NO space,
+                            gluing the label to the figure at 0px. The collision
+                            was missing whitespace, not the flex row. */}
+                        <span>Total:{' '}<CurrencyDisplay amount={Number(paycheck.amount)} className="type-ledger font-bold text-foreground" /></span>
+                        <span>Allocated:{' '}<CurrencyDisplay amount={summary.totalAllocated} className="type-ledger font-bold text-sulpot-deep dark:text-sulpot-bright" /></span>
+                        <span>Unallocated:{' '}<CurrencyDisplay amount={summary.totalUnallocated} className="type-ledger font-bold text-ink-muted" /></span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">

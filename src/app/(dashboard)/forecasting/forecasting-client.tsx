@@ -109,7 +109,13 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={forecastData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                {/* right: 30, not 10: the final XAxis tick is centered on the last point,
+                    so half a "Sep 2026" label (~18px at 11px type) hung past the
+                    plot edge and rendered "Sep 202". */}
+                {/* right: 30, not 10: the final XAxis tick is centered on the last point,
+                    so half a "Sep 2026" label (~18px at 11px type) hung past the
+                    plot edge and rendered "Sep 202". */}
+                <AreaChart data={forecastData} margin={{ top: 10, right: 30, left: -10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--color-sulpot-deep)" stopOpacity={0.35} />

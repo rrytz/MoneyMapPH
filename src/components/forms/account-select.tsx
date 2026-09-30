@@ -3,26 +3,43 @@
 import type { Account } from "@/lib/types";
 
 /**
- * The option text for an account: the name, plus the type only when the type
- * says something the name does not already say.
+ * The option text for an account: the name, plus the type unless the name IS
+ * the type.
  *
  * It used to concatenate unconditionally, so an account named "Cash" of type
  * "cash" rendered "Cash (Cash)" - the type repeated verbatim in parentheses,
- * which reads as a mistake rather than as information. The same held for
- * "Maya" / "ewallet" and "BPI" / "bank".
+ * which reads as a mistake rather than as information.
  *
- * `·` rather than parentheses so a multi-word type reads as a label
- * ("BPI Savings · Digital Bank") instead of colliding with the name's own
- * bracket-free typography.
+ * The SECOND rule here is the subtle one, and it was substring before it was
+ * equality. Dropping the type when it appears ANYWHERE in the name means
+ * "Maribank" and "Unionbank" render bare while "BPI" and "Wise" render
+ * "· Bank" - four accounts of the same type, rendered two different ways, for a
+ * reason nobody can see in the data. That is worse than the redundancy it
+ * replaced: "Cash (Cash)" was at least consistent.
+ *
+ * So the test is EXACT: bare only when the name, case-folded and stripped of
+ * punctuation, equals the type the same way. Every bank shows "· Bank", every
+ * wallet shows "· Ewallet", and only an account literally named after its own
+ * type collapses. Slight redundancy on "Maribank · Bank" is the price of a rule
+ * a reader can predict.
+ *
+ * `·` rather than parentheses, so a multi-word type reads as a label
+ * ("BPI Savings · Digital Bank") instead of colliding with the name.
+ *
+ * Multi-word types: `digital_bank` is the longest `AccountType` today, but the
+ * underscore replace is GLOBAL and the title-case is PER WORD, so a future
+ * `credit_card` renders "Credit Card" rather than the "Credit card" a
+ * single-underscore replace would give.
  */
 function accountOptionLabel(name: string, type: string): string {
   const typeLabel = type
     .replace(/_/g, " ")
     .trim()
     .replace(/\b\w/g, (c) => c.toUpperCase());
-  const nameKey = name.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const typeKey = typeLabel.toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (!typeKey || nameKey.includes(typeKey)) return name;
+  const fold = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const nameKey = fold(name);
+  const typeKey = fold(typeLabel);
+  if (!typeKey || nameKey === typeKey) return name;
   return `${name} · ${typeLabel}`;
 }
 

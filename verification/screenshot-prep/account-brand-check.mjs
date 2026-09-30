@@ -612,6 +612,50 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}`) {
   console.log(`  cards found: ${light.length} (light) / ${byScheme.dark.length} (dark)`);
   if (light.length === 0) fail("no brand cards found - the check would pass vacuously");
 
+  // A MISSING CARD IS A FAILURE, NOT A SHORTER LIST.
+  //
+  // This check used to assert only `length > 0`, so a card that vanished from
+  // the ledger reduced the list and every remaining assertion still passed on
+  // seven cards. That is not hypothetical: Maribank was found ARCHIVED while a
+  // prior gate run's archive/restore fixture had not put it back, and the only
+  // symptom was this line printing 7. The gate reported its own reduced
+  // population and nobody read it.
+  //
+  // The expected count is what the brand table actually has. It is derived, not
+  // typed, so adding a brand does not require editing this line - and a stale
+  // count fails loudly rather than quietly shrinking coverage.
+// The expected count is DERIVED from the palette source, not typed here: adding
+// a brand must not require editing this line, and a count maintained by hand is
+// a count that will drift.
+function countBrandsInPalette() {
+  const src = fs.readFileSync(
+    path.join(process.cwd(), "src", "lib", "utils", "account-brand.ts"),
+    "utf8"
+  );
+  const start = src.indexOf("export const ACCOUNT_BRANDS");
+  if (start < 0) throw new Error("ACCOUNT_BRANDS not found in account-brand.ts - the expected-card count cannot be derived");
+  const block = src.slice(start, src.indexOf("};", start));
+  // Entries sit at two spaces; their properties are at four. The last entry,
+  // `neutral`, references NEUTRAL_PALETTE rather than opening an object, so the
+  // pattern must not require a brace - getting that wrong counted 7 of 8 and
+  // the new assertion caught it on its first run.
+  const keys = [...block.matchAll(/^ {2}([a-z]+):/gm)].map((m) => m[1]);
+  if (keys.length === 0) throw new Error("no brand keys parsed from ACCOUNT_BRANDS - refusing to assert a count of 0");
+  return keys.length;
+}
+  const EXPECTED_CARDS = countBrandsInPalette();
+  if (light.length !== EXPECTED_CARDS) {
+    fail(
+      `expected EXACTLY ${EXPECTED_CARDS} brand cards, found ${light.length}` +
+      ` - a card is missing from the ledger or is ARCHIVED. Every other assertion` +
+      ` below just passed on a shorter list, which is the vacuous pass this line exists to stop.` +
+      ` Found: ${light.map((c) => c.name).join(", ")}`
+    );
+  }
+  if (byScheme.dark.length !== EXPECTED_CARDS) {
+    fail(`expected EXACTLY ${EXPECTED_CARDS} brand cards in dark, found ${byScheme.dark.length}`);
+  }
+
   for (const [i, lc] of light.entries()) {
     const dc = byScheme.dark[i];
     if (!dc) { fail(`${lc.name}: present in light, absent in dark`); continue; }

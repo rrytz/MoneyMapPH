@@ -93,6 +93,10 @@ try {
     ["gate:rules", ["run", "gate:rules"]],
     ["gate:types", ["run", "gate:types"]],
   ["gate:select-items", ["run", "gate:select-items"]],
+    // Sibling source check over src/, same rationale as gate:select-items: the
+    // chain holds verifiers, not the components they verify, so neither this nor
+    // that one can live inside gate-rules' derived scope.
+    ["gate:card-padding", ["run", "gate:card-padding"]],
     ["test", ["test"]],
     ["gate:typography", ["run", "gate:typography"]],
     ["gate:nav", ["run", "gate:nav"]],
@@ -129,6 +133,7 @@ try {
     "gate:rules",
     "gate:types",
     "gate:select-items",
+    "gate:card-padding",
     "test",
     "gate:typography",
     "gate:nav",

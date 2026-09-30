@@ -49,6 +49,10 @@ export function KpiCard({
 
   return (
     <FintechCard className={cn("relative", className)}>
+      {/* card-padding-ok: p-5 TIGHTENS the card's p-6 (20px vs 24px) rather than
+          doubling it, so there is no dead band - a density choice on a shared
+          primitive, not the 91d78a2 defect. Surfaced by gate:card-padding when
+          the rule was written; not audited, not fixed. OWED. */}
       <FintechCardContent className="p-5 flex flex-col justify-between h-full space-y-4">
         <div className="flex items-center justify-between">
           <div className={cn("p-2.5 rounded-md shrink-0", iconBgClass)}>

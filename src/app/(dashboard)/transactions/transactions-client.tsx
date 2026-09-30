@@ -203,6 +203,10 @@ export function TransactionsClient({
 
       {/* Filter Bar */}
       <FintechCard>
+        {/* card-padding-ok: p-4 TIGHTENS the card's p-6 (16px vs 24px) rather than
+            doubling it, so there is no dead band - this filter bar is deliberately
+            denser than a standard card. Surfaced by gate:card-padding when the
+            rule was written; not audited, not fixed. OWED. */}
         <FintechCardContent className="p-4 space-y-4">
           {/* Type is a closed set of three, so it is a row of visible pills
               rather than a dropdown - one tap instead of two, and the current

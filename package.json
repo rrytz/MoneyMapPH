@@ -11,6 +11,7 @@
     "test": "vitest run",
     "gate:types": "tsc --noEmit",
     "gate:select-items": "node verification/screenshot-prep/select-items-check.mjs",
+    "gate:card-padding": "node verification/screenshot-prep/card-padding-check.mjs",
     "gate:typography": "vitest run src/tests/typography-conformance.test.ts",
     "gate:dom": "node verification/screenshot-prep/probe-run.mjs",
     "gate:nav": "node verification/screenshot-prep/nav-check.mjs",

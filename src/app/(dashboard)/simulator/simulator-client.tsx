@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Trash2,
   Calendar,
@@ -20,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { addSimulation, removeSimulation } from "./actions";
+import { editGoal } from "../savings/actions";
 import { formatDate } from "@/lib/utils/date";
 import { calculatePurchaseImpact } from "@/lib/services/simulation.service";
 import type { SimulatedPurchase, SavingsGoal } from "@/lib/types";
@@ -30,6 +32,62 @@ interface SimulatorClientProps {
   goals: SavingsGoal[];
   emergencyStatus: EmergencyFundStatus;
   monthlyNetSavings: number;
+}
+
+/**
+ * The "no fund" state, with a same-named escape hatch.
+ *
+ * The timeline below lists goals by NAME, so a goal called "emergency funds"
+ * can sit beside "No Emergency Fund goal configured" with no flag set - both
+ * true, disagreeing at the UI. Telling the user to "create one" there
+ * duplicates the name instead of flagging the goal, which is the
+ * user-repairable-but-undiscoverable trap. When such a goal exists the CTA
+ * offers to mark it; otherwise the original create-one text stands.
+ *
+ * Flag-is-truth is untouched: this sets the flag through the existing
+ * validated editGoal, it does not teach any reader to trust names.
+ */
+function EmergencyFundCta({ goals }: { goals: SavingsGoal[] }) {
+  const router = useRouter();
+  const [marking, startMarking] = useTransition();
+  const match = goals.find(
+    (g) => !g.is_emergency_fund && /^emergency funds?$/i.test((g.name || "").trim())
+  );
+  if (!match) {
+    return (
+      <p className="text-xs text-muted-foreground py-2 italic">
+        No Emergency Fund goal configured. Create one on the Savings tab to evaluate impact.
+      </p>
+    );
+  }
+  const mark = () => {
+    startMarking(async () => {
+      const res = await editGoal(match.id, {
+        name: match.name,
+        target_amount: Number(match.target_amount),
+        target_date: match.target_date || undefined,
+        notes: match.notes || undefined,
+        is_emergency_fund: true,
+      });
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success(`"${match.name}" is now your Emergency Fund`);
+        // editGoal revalidates savings/dashboard/forecasting but not this page.
+        router.refresh();
+      }
+    });
+  };
+  return (
+    <div className="py-2 space-y-2.5">
+      <p className="text-xs text-muted-foreground italic">
+        No Emergency Fund goal configured — but “{match.name}” exists without the flag.
+      </p>
+      <Button size="sm" onClick={mark} disabled={marking}>
+        {marking ? "Marking…" : `Mark "${match.name}" as your Emergency Fund`}
+      </Button>
+    </div>
+  );
 }
 
 export function SimulatorClient({
@@ -184,9 +242,7 @@ export function SimulatorClient({
             </FintechCardHeader>
             <FintechCardContent className="space-y-4">
               {!emergencyStatus.hasFund ? (
-                <p className="text-xs text-muted-foreground py-2 italic">
-                  No Emergency Fund goal configured. Create one on the Savings tab to evaluate impact.
-                </p>
+                <EmergencyFundCta goals={goals} />
               ) : (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">

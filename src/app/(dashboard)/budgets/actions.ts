@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createBudget, updateBudgetCategory, copyBudgetFromPreviousMonth } from "@/lib/services/budget.service";
 import { generateSnapshot } from "@/lib/services/snapshot.service";
 import { revalidateUserFinancialCache } from "@/lib/cache/tags";
-import { budgetSchema } from "@/lib/utils/validators";
+import { budgetSchema, budgetCategorySchema } from "@/lib/utils/validators";
 
 export async function addBudget(formData: {
   month: number;
@@ -36,6 +36,19 @@ export async function addBudget(formData: {
 }
 
 export async function updateBudgetCategoryLimit(budgetCategoryId: string, amount: number, month: number, year: number) {
+  // The one write path that skipped validation: amount reached the service
+  // unchecked. Same shape as every other validated action - safeParse first,
+  // return the schema message before any write. budgetCategorySchema already
+  // governs this exact pair on the nested addBudget path, so it is applied
+  // unchanged: id uuid-checked as a consequence, amount >= 0 as the point.
+  // month/year are untouched, consistent with every other action - ids and
+  // period ints cross unvalidated elsewhere too, and this commit closes the
+  // amount hole rather than changing that boundary.
+  const parsed = budgetCategorySchema.safeParse({ category_id: budgetCategoryId, amount });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };

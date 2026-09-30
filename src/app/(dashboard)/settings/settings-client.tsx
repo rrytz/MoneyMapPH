@@ -44,6 +44,25 @@ interface SettingsClientProps {
   sources: IncomeSource[];
 }
 
+/**
+ * Base UI value -> label maps for the Selects on this page.
+ *
+ * Base UI's `Select.Value` renders the raw value, not the selected item's
+ * children: the items live in a Portal that is unmounted while the popup is
+ * closed, so there is no ItemText to read and it falls back to the value
+ * string. Without one of these, a pre-populated Select prints "PHP", "system"
+ * or "core" in the trigger instead of a label.
+ *
+ * Declared once at module scope because they are static, and named so a new
+ * option cannot be added to a SelectItem without also being added here.
+ */
+const CURRENCY_LABELS = { PHP: "PHP (₱)", USD: "USD ($)", EUR: "EUR (€)" };
+const THEME_LABELS = { light: "Light Mode", dark: "Dark Mode", system: "System Default" };
+const SOURCE_TYPE_LABELS = {
+  core: "Core income (regular salary)",
+  incentive: "Incentive (bonus, OT, commission)",
+};
+
 export function SettingsClient({
   profile,
   categories,
@@ -252,34 +271,27 @@ export function SettingsClient({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label htmlFor="prof-curr">Currency Preference <span className="text-rose-500">*</span></Label>
-                    <Select value={currency} onValueChange={(val) => setCurrency(val || "PHP")}>
+                    <Select value={currency} onValueChange={(val) => setCurrency(val || "PHP")} items={CURRENCY_LABELS}>
                       <SelectTrigger id="prof-curr">
                         <SelectValue placeholder="Select Currency" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="PHP">PHP (₱)</SelectItem>
-                        <SelectItem value="USD">USD ($)</SelectItem>
-                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="PHP">{CURRENCY_LABELS.PHP}</SelectItem>
+                        <SelectItem value="USD">{CURRENCY_LABELS.USD}</SelectItem>
+                        <SelectItem value="EUR">{CURRENCY_LABELS.EUR}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="prof-theme">Theme Preference <span className="text-rose-500">*</span></Label>
-                    <Select value={themeSetting} onValueChange={(val) => setThemeSetting((val || "system") as "light" | "dark" | "system")}>
+                    <Select value={themeSetting} onValueChange={(val) => setThemeSetting((val || "system") as "light" | "dark" | "system")} items={THEME_LABELS}>
                       <SelectTrigger id="prof-theme">
-                        {/* base-ui renders the raw value, so this read "system". */}
-              <SelectValue placeholder="Select Theme">
-                {themeSetting === "light"
-                  ? "Light"
-                  : themeSetting === "dark"
-                    ? "Dark"
-                    : "System"}
-              </SelectValue>
+                        <SelectValue placeholder="Select Theme" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="light">Light Mode</SelectItem>
-                        <SelectItem value="dark">Dark Mode</SelectItem>
-                        <SelectItem value="system">System Default</SelectItem>
+                        <SelectItem value="light">{THEME_LABELS.light}</SelectItem>
+                        <SelectItem value="dark">{THEME_LABELS.dark}</SelectItem>
+                        <SelectItem value="system">{THEME_LABELS.system}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -507,13 +519,13 @@ export function SettingsClient({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="src-type">Source Type</Label>
-              <Select value={sourceType} onValueChange={(v) => setSourceType((v || "core") as IncomeSourceType)}>
+              <Select value={sourceType} onValueChange={(v) => setSourceType((v || "core") as IncomeSourceType)} items={SOURCE_TYPE_LABELS}>
                 <SelectTrigger id="src-type">
                   <SelectValue placeholder="Select source type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="core">Core income (regular salary)</SelectItem>
-                  <SelectItem value="incentive">Incentive (bonus, OT, commission)</SelectItem>
+                  <SelectItem value="core">{SOURCE_TYPE_LABELS.core}</SelectItem>
+                  <SelectItem value="incentive">{SOURCE_TYPE_LABELS.incentive}</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-[11px] text-muted-foreground">

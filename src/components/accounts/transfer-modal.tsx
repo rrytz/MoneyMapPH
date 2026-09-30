@@ -38,6 +38,15 @@ export function TransferModal({
   const isEditing = !!editTransferData;
   const activeAccounts = accounts.filter((a) => !a.is_archived);
 
+  // Base UI value -> label map for the two account Selects below. Without it
+  // each prints the account's raw UUID into the trigger. See expense-form.tsx.
+  const accountLabels = Object.fromEntries(
+    activeAccounts.map((a) => [
+      a.id,
+      `${a.name} (Bal: ₱${a.current_balance.toLocaleString("en-US", { minimumFractionDigits: 2 })})`,
+    ])
+  );
+
   useEffect(() => {
     if (editTransferData) {
       setFromAccountId(editTransferData.from_account_id);
@@ -106,14 +115,14 @@ export function TransferModal({
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           <div className="space-y-2">
             <Label>From Account (Source)</Label>
-            <Select value={fromAccountId} onValueChange={(v) => setFromAccountId(v ?? "")}>
+            <Select value={fromAccountId} onValueChange={(v) => setFromAccountId(v ?? "")} items={accountLabels}>
               <SelectTrigger>
                 <SelectValue placeholder="Select source account" />
               </SelectTrigger>
               <SelectContent>
                 {activeAccounts.map((acc) => (
                   <SelectItem key={acc.id} value={acc.id}>
-                    {acc.name} (Bal: ₱{acc.current_balance.toLocaleString("en-US", { minimumFractionDigits: 2 })})
+                    {accountLabels[acc.id]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -122,7 +131,7 @@ export function TransferModal({
 
           <div className="space-y-2">
             <Label>To Account (Destination)</Label>
-            <Select value={toAccountId} onValueChange={(v) => setToAccountId(v ?? "")}>
+            <Select value={toAccountId} onValueChange={(v) => setToAccountId(v ?? "")} items={accountLabels}>
               <SelectTrigger>
                 <SelectValue placeholder="Select destination account" />
               </SelectTrigger>
@@ -131,7 +140,7 @@ export function TransferModal({
                   .filter((acc) => acc.id !== fromAccountId)
                   .map((acc) => (
                     <SelectItem key={acc.id} value={acc.id}>
-                      {acc.name} (Bal: ₱{acc.current_balance.toLocaleString("en-US", { minimumFractionDigits: 2 })})
+                      {accountLabels[acc.id]}
                     </SelectItem>
                   ))}
               </SelectContent>

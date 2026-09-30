@@ -2,6 +2,30 @@
 
 import type { Account } from "@/lib/types";
 
+/**
+ * The option text for an account: the name, plus the type only when the type
+ * says something the name does not already say.
+ *
+ * It used to concatenate unconditionally, so an account named "Cash" of type
+ * "cash" rendered "Cash (Cash)" - the type repeated verbatim in parentheses,
+ * which reads as a mistake rather than as information. The same held for
+ * "Maya" / "ewallet" and "BPI" / "bank".
+ *
+ * `·` rather than parentheses so a multi-word type reads as a label
+ * ("BPI Savings · Digital Bank") instead of colliding with the name's own
+ * bracket-free typography.
+ */
+function accountOptionLabel(name: string, type: string): string {
+  const typeLabel = type
+    .replace(/_/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+  const nameKey = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const typeKey = typeLabel.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (!typeKey || nameKey.includes(typeKey)) return name;
+  return `${name} · ${typeLabel}`;
+}
+
 interface AccountSelectProps {
   accounts: Account[];
   value?: string;
@@ -71,7 +95,7 @@ export function AccountSelect({
         <option value="">None / Unassigned</option>
         {activeAccounts.map((acc) => (
           <option key={acc.id} value={acc.id}>
-            {acc.name} ({acc.type.replace("_", " ")})
+            {accountOptionLabel(acc.name, acc.type)}
           </option>
         ))}
       </select>

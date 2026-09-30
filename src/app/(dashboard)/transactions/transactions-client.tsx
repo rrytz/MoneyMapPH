@@ -50,6 +50,20 @@ export function TransactionsClient({
   const [search, setSearch] = useState("");
   const [type, setType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
+
+  // Base UI value -> label map. This filter is the one odd shape in the sweep:
+  // its values are NAMES, not ids (`value={s.name}` / `value={c.name}`), so the
+  // map is close to an identity and this site read acceptably before. It still
+  // needs `items` for "all", and it lets the hand-written SelectValue fallback
+  // go - that fallback printed the raw value, which happened to be the label
+  // here, and would print a name-with-no-option the moment one is removed.
+  const filterLabels: Record<string, string> = {
+    all: "All Categories",
+    ...Object.fromEntries([
+      ...sources.map((s) => [s.name, s.name] as const),
+      ...categories.map((c) => [c.name, c.name] as const),
+    ]),
+  };
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -237,19 +251,13 @@ export function TransactionsClient({
                 setFilterCategory(val || "all");
                 setCurrentPage(1);
               }}
+              items={filterLabels}
             >
               <SelectTrigger className="h-10 rounded-xl bg-card border-border text-xs">
-                {/* base-ui's Select.Value renders the raw value, not the selected
-                    item's children, so an unlabelled Value shows "all". The
-                    label is written out here rather than left to the library,
-                    which keeps the trigger reading as a label instead of a
-                    database value. */}
-                <SelectValue placeholder="Category/Source">
-                  {filterCategory === "all" ? "All Categories" : filterCategory}
-                </SelectValue>
+                <SelectValue placeholder="Category/Source" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{filterLabels.all}</SelectItem>
                 {type !== "expense" &&
                   sources.map((s) => (
                     <SelectItem key={s.id} value={s.name}>

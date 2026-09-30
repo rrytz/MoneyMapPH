@@ -60,6 +60,17 @@ export function ExpensesPageClient({
   const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  // Base UI value -> label map. "all" is a real selection here, so it is a real
+  // key: without it the trigger prints the raw "all". The previous fix on this
+  // Select hand-wrote the label into SelectValue and fell back with
+  // `?? selectedCategory` - which printed a raw category UUID whenever the
+  // selected id was not in `categories`. This map has no such hole: an
+  // unresolvable value renders as "Unknown category", never as a database key.
+  const categoryLabels: Record<string, string> = {
+    all: "All Categories",
+    ...Object.fromEntries(categories.map((c) => [c.id, c.name])),
+  };
   // Paginated at 15 to match /transactions. This ledger rendered every entry,
   // so 28 rows made the page 2.87 folds while its sibling showed 15 behind a
   // pager - two ledgers doing one job in two ways. The cap is defensible here
@@ -368,25 +379,20 @@ export function ExpensesPageClient({
             className="pl-9.5 h-10 rounded-md bg-card border-border text-xs"
           />
         </div>
-        <Select value={selectedCategory} onValueChange={(val) => { setSelectedCategory(val || "all"); setCurrentPage(1); }}>
+        <Select
+          value={selectedCategory}
+          onValueChange={(val) => { setSelectedCategory(val || "all"); setCurrentPage(1); }}
+          items={categoryLabels}
+        >
           <SelectTrigger className="w-full sm:w-[220px] h-10 rounded-md bg-card border-border text-xs">
             <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
-            {/* base-ui renders the raw value, not the item's children, so this
-                trigger showed "all". Unlike /transactions, this Select stores
-                the category ID as its value, so the label has to be looked up -
-                without that the trigger reads a raw UUID. */}
-            <SelectValue placeholder="All Categories">
-              {selectedCategory === "all"
-                ? "All Categories"
-                : (categories.find((c) => c.id === selectedCategory)?.name ??
-                  selectedCategory)}
-            </SelectValue>
+            <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="all">{categoryLabels.all}</SelectItem>
             {categories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
+                {categoryLabels[cat.id]}
               </SelectItem>
             ))}
           </SelectContent>

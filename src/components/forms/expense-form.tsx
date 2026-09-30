@@ -33,6 +33,21 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
     setAccountId(editEntry?.account_id || "");
   }, [editEntry, open]);
 
+  // Base UI needs the value -> label map up front; see the Category field below.
+  // Built from `categories` rather than typed, so a new category cannot drift out
+  // of the map and leak its UUID again.
+  const categoryLabels = Object.fromEntries(
+    categories.map((c) => [
+      c.id,
+      (
+        <span className="flex items-center gap-2">
+          <CategoryIcon icon={c.icon} className="h-4 w-4 text-muted-foreground" />
+          {c.name}
+        </span>
+      ),
+    ])
+  );
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -102,17 +117,31 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
 
           <div className="space-y-2">
             <Label htmlFor="category_id">Category</Label>
-            <Select name="category_id" defaultValue={editEntry?.category_id || ""} required>
+            {/* `items` is Base UI's value -> label map, and it is what makes the
+                trigger read as a LABEL rather than a database value.
+
+                The bug was never a value mismatch. `defaultValue` and every
+                `SelectItem value` already referenced `cat.id`, and the rendered
+                item carried `aria-selected="true"` - Base UI knew exactly which
+                category was selected. It printed the UUID because `SelectItem`s
+                live inside a Portal that is UNMOUNTED while the popup is closed,
+                so `Value` had no mounted ItemText to read a label from and fell
+                back to the raw value.
+
+                `items` supplies that label without needing the popup mounted. */}
+            <Select
+              name="category_id"
+              items={categoryLabels}
+              defaultValue={editEntry?.category_id || ""}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    <span className="flex items-center gap-2">
-                      <CategoryIcon icon={cat.icon} className="h-4 w-4 text-muted-foreground" />
-                      {cat.name}
-                    </span>
+                    {categoryLabels[cat.id]}
                   </SelectItem>
                 ))}
               </SelectContent>

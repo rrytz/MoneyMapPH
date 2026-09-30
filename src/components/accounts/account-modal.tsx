@@ -16,6 +16,19 @@ interface AccountModalProps {
   editAccountData?: AccountWithBalance | null;
 }
 
+/**
+ * Base UI value -> label map. Without it a pre-populated Select renders its raw
+ * value ("bank") in the trigger rather than "Bank Account".
+ * See expense-form.tsx for the full explanation.
+ */
+const ACCOUNT_TYPE_LABELS = {
+  bank: "Bank Account",
+  ewallet: "E-Wallet (GCash, Maya)",
+  digital_bank: "Digital Bank (GoTyme, SeaBank)",
+  cash: "Cash Reserves",
+  credit: "Credit Line (Ledger Only)",
+};
+
 export function AccountModal({ open, onOpenChange, editAccountData }: AccountModalProps) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
@@ -80,16 +93,16 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
 
           <div className="space-y-2">
             <Label htmlFor="account-type">Account Type</Label>
-            <Select value={type} onValueChange={(val) => setType(val as AccountType)}>
+            <Select value={type} onValueChange={(val) => setType(val as AccountType)} items={ACCOUNT_TYPE_LABELS}>
               <SelectTrigger>
                 <SelectValue placeholder="Select account type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="bank">Bank Account</SelectItem>
-                <SelectItem value="ewallet">E-Wallet (GCash, Maya)</SelectItem>
-                <SelectItem value="digital_bank">Digital Bank (GoTyme, SeaBank)</SelectItem>
-                <SelectItem value="cash">Cash Reserves</SelectItem>
-                <SelectItem value="credit">Credit Line (Ledger Only)</SelectItem>
+                <SelectItem value="bank">{ACCOUNT_TYPE_LABELS.bank}</SelectItem>
+                <SelectItem value="ewallet">{ACCOUNT_TYPE_LABELS.ewallet}</SelectItem>
+                <SelectItem value="digital_bank">{ACCOUNT_TYPE_LABELS.digital_bank}</SelectItem>
+                <SelectItem value="cash">{ACCOUNT_TYPE_LABELS.cash}</SelectItem>
+                <SelectItem value="credit">{ACCOUNT_TYPE_LABELS.credit}</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-ink-faint">

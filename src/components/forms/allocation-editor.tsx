@@ -31,6 +31,11 @@ export function AllocationEditor({
   const remaining = paycheckAmount - totalAllocated;
   const percentage = paycheckAmount > 0 ? (totalAllocated / paycheckAmount) * 100 : 0;
 
+  // Base UI value -> label map, including the synthetic "none" option. Without
+  // it this Select prints the row's raw category UUID in the trigger.
+  // See expense-form.tsx for the full explanation.
+  const allocationLabels: Record<string, string> = { none: "No Category", ...Object.fromEntries(categories.map((c) => [c.id, c.name])) };
+
   function handleAdd() {
     onChange([
       ...allocations,
@@ -87,15 +92,16 @@ export function AllocationEditor({
             <Select
               value={item.category_id || "none"}
               onValueChange={(val) => handleUpdate(item.id, "category_id", (val === "none" || !val) ? undefined : val)}
+              items={allocationLabels}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No Category</SelectItem>
+                <SelectItem value="none">{allocationLabels.none}</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {allocationLabels[cat.id]}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -33,6 +33,10 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
     setAccountId(editEntry?.account_id || "");
   }, [editEntry, open]);
 
+  // Base UI needs the value -> label map up front. See expense-form.tsx for why
+  // a Select without it prints the raw UUID into the trigger.
+  const sourceLabels = Object.fromEntries(sources.map((s) => [s.id, s.name]));
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
@@ -90,14 +94,19 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
 
           <div className="space-y-2">
             <Label htmlFor="source_id">Source</Label>
-            <Select name="source_id" defaultValue={editEntry?.source_id || ""} required>
+            <Select
+              name="source_id"
+              items={sourceLabels}
+              defaultValue={editEntry?.source_id || ""}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select source" />
               </SelectTrigger>
               <SelectContent>
                 {sources.map((source) => (
                   <SelectItem key={source.id} value={source.id}>
-                    {source.name}
+                    {sourceLabels[source.id]}
                   </SelectItem>
                 ))}
               </SelectContent>

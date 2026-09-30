@@ -99,6 +99,11 @@ export function SavingsPageClient({
     c.name.toLowerCase().includes("emergency")
   ) || categories[0];
 
+  // Base UI's value -> label map, shared by the contribution, debt and payout
+  // Selects below. Without it each of those three prints its raw category UUID
+  // into the trigger once a category is chosen.
+  const categoryLabels = Object.fromEntries(categories.map((c) => [c.id, c.name]));
+
   function openNewGoalModal() {
     setSelectedGoal(null);
     setGoalName("");
@@ -749,14 +754,14 @@ export function SavingsPageClient({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="contrib-category">Expense Category <span className="text-rose-500">*</span></Label>
-              <Select value={contribCategory} onValueChange={(val) => setContribCategory(val || "")} required>
+              <Select value={contribCategory} onValueChange={(val) => setContribCategory(val || "")} items={categoryLabels} required>
                 <SelectTrigger id="contrib-category">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.name}
+                      {categoryLabels[c.id]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -827,14 +832,14 @@ export function SavingsPageClient({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="debt-category">Expense Category (Optional)</Label>
-              <Select value={debtCategory} onValueChange={(val) => setDebtCategory(val || "")}>
+              <Select value={debtCategory} onValueChange={(val) => setDebtCategory(val || "")} items={categoryLabels}>
                 <SelectTrigger id="debt-category">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.name}
+                      {categoryLabels[c.id]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -896,14 +901,14 @@ export function SavingsPageClient({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="pay-category">Expense Category <span className="text-rose-500">*</span></Label>
-              <Select value={payCategory} onValueChange={(val) => setPayCategory(val || "")} required>
+              <Select value={payCategory} onValueChange={(val) => setPayCategory(val || "")} items={categoryLabels} required>
                 <SelectTrigger id="pay-category">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.name}
+                      {categoryLabels[c.id]}
                     </SelectItem>
                   ))}
                 </SelectContent>

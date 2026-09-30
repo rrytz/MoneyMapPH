@@ -222,6 +222,11 @@
 }
 
 .dark {
+  /* Native controls follow the theme too. Without this, date picker icons,
+     checkboxes, select arrows, scrollbars and autofill render light-styled
+     on dark inputs - the calendar icon in expense/income date fields was
+     near-invisible. One declaration fixes every native control app-wide. */
+  color-scheme: dark;
   /* deep water, not cold slate. The chroma rule inverts: sulpot is brighter
      and more saturated, agosto stays dim and desaturated. */
   --paper: #0e1410;

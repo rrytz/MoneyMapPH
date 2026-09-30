@@ -230,7 +230,16 @@ export function SettingsClient({
       />
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="p-1 rounded-md">
+        {/* max-w-full + overflow-x-auto + justify-start: four labeled triggers
+            are 466px wide in a 360px column. Without containment the strip
+            forces the whole page to 466 and selecting the off-screen Backup tab
+            drags the entire page sideways (body clipped at the viewport edge).
+            The strip itself must be the scroller, so tabs scroll and the page
+            does not. justify-start, not center: a centered overflowing flex box
+            clips its start beyond scroll reach. The peeking tab is the swipe
+            affordance. Local to this strip: the 2- and 3-tab strips fit, and
+            the shared TabsList primitive is untouched. */}
+        <TabsList className="p-1 rounded-md max-w-full overflow-x-auto justify-start">
           <TabsTrigger value="profile" className="flex items-center gap-1.5 text-xs font-normal rounded-md">
             <User className="h-4 w-4" /> Profile Preferences
           </TabsTrigger>

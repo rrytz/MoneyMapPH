@@ -465,22 +465,33 @@ export function ExpensesPageClient({
                  were setting that, not the text - 15px of padding either side of
                  a 30px control. At py-2 the row is 46px, the same height the
                  dashboard's ledger and /transactions both land on, so three
-                 ledgers now share one row instead of three heights. */
+                 ledgers now share one row instead of three heights.
+
+                 Superseded below: rows are two-line now (~62px), because a
+                 46px single line rendered "9/29" as "9". Identity legibility
+                 outranks height uniformity, and /transactions rows were
+                 already two-line - so this converges on the comparison spec
+                 rather than diverging from it. */
               <div key={entry.id} className="flex items-center justify-between py-2 px-6 hover:bg-muted/50 transition-colors">
                 <div className="flex-1 min-w-0 pr-4">
+                  {/* Two lines, the transactions idiom: identity keeps line 1,
+                      metadata yields to line 2. The date used to sit on line 1
+                      as shrink-0 nowrap beside a badge capped at 45%, and at
+                      390px the three fixed claims left a 4-character title one
+                      character wide ("9/29" rendered "9"). The badge keeps its
+                      45% cap but is shrink-0 now: it sizes to content instead
+                      of claiming its maximum, so what truncates is a long
+                      category name, never the title. */}
                   <div className="flex items-center gap-2.5 mb-1 min-w-0">
                     <span className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{entry.title}</span>
-                    <Badge variant="expense" className="text-[10px] flex items-center gap-1 shrink max-w-[45%] overflow-hidden">
+                    <Badge variant="expense" className="text-[10px] flex items-center gap-1 shrink-0 max-w-[45%] overflow-hidden">
                       <CategoryIcon icon={entry.category?.icon} className="h-3 w-3 shrink-0" />
                       <span className="truncate min-w-0">{entry.category?.name || "Uncategorized"}</span>
                     </Badge>
-                    <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">
-                      {formatDate(entry.date, "MMM d, yyyy")}
-                    </span>
                   </div>
-                  {entry.notes && (
-                    <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
-                  )}
+                  <p className="text-xs text-muted-foreground truncate">
+                    {formatDate(entry.date, "MMM d, yyyy")}{entry.notes ? ` · ${entry.notes}` : ""}
+                  </p>
                   {/* The tagging control, inline, from `sm` up ONLY.
 
                       At 375 this was measured, not assumed: the compact select

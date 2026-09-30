@@ -92,6 +92,7 @@ try {
   const withServer = [
     ["gate:rules", ["run", "gate:rules"]],
     ["gate:types", ["run", "gate:types"]],
+  ["gate:select-items", ["run", "gate:select-items"]],
     ["test", ["test"]],
     ["gate:typography", ["run", "gate:typography"]],
     ["gate:nav", ["run", "gate:nav"]],
@@ -127,6 +128,7 @@ try {
   const EXPECTED = [
     "gate:rules",
     "gate:types",
+    "gate:select-items",
     "test",
     "gate:typography",
     "gate:nav",

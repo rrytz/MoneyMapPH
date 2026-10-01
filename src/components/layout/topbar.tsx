@@ -8,6 +8,7 @@ import { useTheme } from "@/providers/theme-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -189,25 +190,30 @@ export function Topbar({
               <span className="hidden max-w-28 truncate lg:inline">Accounts</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                Your accounts
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {accounts.map((a) => (
-                <DropdownMenuItem key={a.id} onSelect={() => router.push("/accounts")}>
-                  <span className="flex w-full items-center justify-between gap-3">
-                    <span className="truncate">{a.name}</span>
-                    <span
-                      className={cn(
-                        "tabular-nums",
-                        Number(a.current_balance) < 0 ? "text-rose" : "text-ink"
-                      )}
-                    >
-                      <CurrencyDisplay amount={a.current_balance} signed className="figure-inline" />
+              {/* Group wrapper is load-bearing, not semantic: GroupLabel
+                  throws MenuGroupContext-missing without an enclosing Group,
+                  which crashed the app on open. */}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Your accounts
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {accounts.map((a) => (
+                  <DropdownMenuItem key={a.id} onSelect={() => router.push("/accounts")}>
+                    <span className="flex w-full items-center justify-between gap-3">
+                      <span className="truncate">{a.name}</span>
+                      <span
+                        className={cn(
+                          "tabular-nums",
+                          Number(a.current_balance) < 0 ? "text-rose" : "text-ink"
+                        )}
+                      >
+                        <CurrencyDisplay amount={a.current_balance} signed className="figure-inline" />
+                      </span>
                     </span>
-                  </span>
-                </DropdownMenuItem>
-              ))}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -254,6 +260,8 @@ export function Topbar({
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {/* Group wrapper is load-bearing: see the accounts menu above. */}
+            <DropdownMenuGroup>
             <DropdownMenuLabel className="text-xs">{displayName}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push("/settings")}>
@@ -262,6 +270,7 @@ export function Topbar({
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" /> Sign out
             </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

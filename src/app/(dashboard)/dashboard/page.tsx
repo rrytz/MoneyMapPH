@@ -144,6 +144,16 @@ export default async function DashboardPage() {
           ledger-figure weight, putting two loud figures on one surface. */}
       <AttentionStrip safeToSpend={safeToSpend} />
 
+      {/* Recent activity sits above bills, in mobile flow - not inside the
+          desktop-only two-up row it used to share with Savings Goals. That row
+          is `hidden lg:grid`: on a phone the card did not exist at all, so the
+          first viewport read as summary-only. "Short is the goal" was measured
+          against a hypothesis the composition contradicts, so placement wins
+          over length here; if the page feels too long, fewer mobile rows - not
+          moving this back. Desktop renders it full-width in the stack (the
+          Goals card beside it goes half-width to full-width with the row). */}
+      <RecentTransactions transactions={transactions} hideDate />
+
       {/* Whether the card renders is "do I have bills or debts at all", NOT
           "is something due right now". Those are different predicates, and only
           the second one makes the empty state dead:
@@ -204,15 +214,13 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Goals and Recent Transactions share a two-up row on desktop, which is
-          the densest pair on the page - and on mobile that row is the single
-          largest remaining block (322px + 250px). Both have a screen of their
-          own, so the whole row goes rather than either half. */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
-        {/* Goals, whose rows are 2-up. Stacked, three rows cost 3 x 71px; side
-            by side they cost one row. The card is half width now anyway, so
-            two rows across it is the same density the full-width version was
-            reaching for with wasted space. */}
+      {/* Goals, whose rows are 2-up. Stacked, three rows cost 3 x 71px; side
+          by side they cost one row. The card used to share this row with
+          Recent Transactions (hidden lg:grid two-up); Recent moved above
+          UpcomingBillsCard into mobile flow, so Goals stands alone full-width
+          in the stack. */}
+        {/* Goals rows stay 2-up: the density the half-width version was
+            reaching for is kept, not the width. */}
         <FintechCard className="flex flex-col">
         <FintechCardHeader className="flex flex-row items-center justify-between pb-2">
           <div>
@@ -292,15 +300,6 @@ export default async function DashboardPage() {
           )}
         </FintechCardContent>
       </FintechCard>
-
-        {/* Recent Activity, sharing the row with Savings Goals. A two-up row
-            does not shorten a block, it takes the block out of the stack:
-            255 + 484 + a gap became one 418px row. Date is hidden because the
-            table is a real <table> in an overflow-x-auto and would otherwise
-            scroll sideways inside the card — see RecentTransactions' hideDate.
-            items-start keeps the shorter goals card from stretching. */}
-        <RecentTransactions transactions={transactions} hideDate />
-      </div>
     </div>
   );
 }

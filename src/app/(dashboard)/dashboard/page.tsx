@@ -54,13 +54,13 @@ export default async function DashboardPage() {
     getSavingsGoals(supabase, user.id),
     supabase
       .from("income_entries")
-      .select("id, amount, date, source:income_sources(name)")
+      .select("id, amount, date, created_at, source:income_sources(name), account:accounts(name)")
       .eq("user_id", user.id)
       .order("date", { ascending: false })
       .limit(5),
     supabase
       .from("expenses")
-      .select("id, title, amount, date, category:expense_categories(name)")
+      .select("id, title, amount, date, created_at, category:expense_categories(name), account:accounts(name)")
       .eq("user_id", user.id)
       .order("date", { ascending: false })
       .limit(5),
@@ -97,24 +97,28 @@ export default async function DashboardPage() {
 
   const transactions = [
     ...(recentIncome.data || []).map((e) => {
-      const item = e as unknown as { id: string; amount: number; date: string; source: { name: string } | null };
+      const item = e as unknown as { id: string; amount: number; date: string; created_at: string; source: { name: string } | null; account: { name: string } | null };
       return {
         id: item.id,
         type: "income" as const,
         title: item.source?.name || "Income",
         amount: Number(item.amount),
         date: item.date,
+        createdAt: item.created_at,
+        account: item.account?.name || null,
       };
     }),
     ...(recentExpenses.data || []).map((e) => {
-      const item = e as unknown as { id: string; title: string; amount: number; date: string; category: { name: string } | null };
+      const item = e as unknown as { id: string; title: string; amount: number; date: string; created_at: string; category: { name: string } | null; account: { name: string } | null };
       return {
         id: item.id,
         type: "expense" as const,
         title: item.title,
         amount: Number(item.amount),
         date: item.date,
+        createdAt: item.created_at,
         category: item.category?.name,
+        account: item.account?.name || null,
       };
     }),
   ]

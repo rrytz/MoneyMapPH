@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils/date";
+import { formatDate, formatRelativeTime } from "@/lib/utils/date";
 import { formatCurrency } from "@/lib/utils/currency";
 import { History, Coffee, Building2, Zap, ArrowRight, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,10 @@ interface Transaction {
   amount: number;
   date: string;
   category?: string;
+  /** Logging account, when the entry is tagged. Null renders nothing. */
+  account?: string | null;
+  /** Row creation time: the recency axis. Falls back to date when absent. */
+  createdAt?: string;
 }
 
 interface RecentTransactionsProps {
@@ -109,11 +113,20 @@ export function RecentTransactions({ transactions, hideDate = false }: RecentTra
                       31px of content; 46px is an ordinary table row and the
                       icon chip still sets the height. */}
                   <td className="py-2 px-5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="p-2 rounded-md bg-muted shrink-0">
                         {getIconForTitle(tx.title, tx.type)}
                       </div>
-                      <span className="font-semibold text-foreground text-xs">{tx.title}</span>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-foreground text-xs block truncate">{tx.title}</span>
+                        {/* Tertiary line: account when tagged, recency always.
+                            Truncates instead of widening - the table must not
+                            grow a column for metadata. Null account renders
+                            nothing, never an empty slot. */}
+                        <span className="text-[11px] text-muted-foreground block truncate">
+                          {[tx.account, formatRelativeTime(tx.createdAt || tx.date)].filter(Boolean).join(" · ")}
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td className="py-2 px-4">

@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sun, Moon, Monitor, LogOut, Wallet, Settings } from "lucide-react";
+import { Sun, Moon, Monitor, LogOut, Settings } from "lucide-react";
 import { NotificationsDrawer } from "@/components/dashboard/notifications-drawer";
 import { Logo } from "@/components/shared/logo";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
@@ -176,47 +176,10 @@ export function Topbar({
       />
 
       <div className="ml-auto flex items-center gap-2">
-        {/* Account switcher — accounts stay reachable without a page. */}
-        {accounts.length > 0 && (
-          <DropdownMenu>
-            {/* One trigger, two densities. The label is the whole cost on a
-                phone, so it is dropped below lg rather than the control being
-                duplicated - the dropdown and its items are identical either way. */}
-            <DropdownMenuTrigger
-              className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-border px-2.5 text-xs font-medium text-ink transition-colors hover:bg-inset lg:rounded-lg lg:px-3"
-              aria-label="Accounts"
-            >
-              <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="hidden max-w-28 truncate lg:inline">Accounts</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              {/* Group wrapper is load-bearing, not semantic: GroupLabel
-                  throws MenuGroupContext-missing without an enclosing Group,
-                  which crashed the app on open. */}
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                  Your accounts
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {accounts.map((a) => (
-                  <DropdownMenuItem key={a.id} onSelect={() => router.push("/accounts")}>
-                    <span className="flex w-full items-center justify-between gap-3">
-                      <span className="truncate">{a.name}</span>
-                      <span
-                        className={cn(
-                          "tabular-nums",
-                          Number(a.current_balance) < 0 ? "text-rose" : "text-ink"
-                        )}
-                      >
-                        <CurrencyDisplay amount={a.current_balance} signed className="figure-inline" />
-                      </span>
-                    </span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        {/* The wallet/accounts dropdown lived here. Removed: /accounts is a
+            primary tab in the mobile bottom nav AND in the desktop nav, so the
+            icon duplicated a first-class destination on every width. The
+            per-account balances it showed inline live on /accounts itself. */}
 
         {/* Search lived here as an uncontrolled input with no value, onChange,
             submit, form, or URL state - a non-feature, removed rather than

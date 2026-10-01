@@ -123,6 +123,7 @@ Every verifier in this series reproduced the class it was written to catch:
 | **a sweep that filed candidates as findings** | **7 items filed BROKEN; three falsified (B1 scroll-transient, B2 dev chrome, B6 capture animation), one reframed (B3 real, different mechanism), three held (B4, B5, B7). W2 moved from integrity to communication after the server audit. The pattern: a sweep produces candidates, not findings — a report is a claim, same as everything else in this table. Correct structure is sweep → verification → defect list, and severity filed before verification is itself a hypothesis** |
 | **two readers, one concept, no shared contract** | **the Impact card reads `is_emergency_fund`, the timeline reads `name`; neither lies, and the UI disagrees with itself. Related to the mutedOnBase row — an assumption that held until two consumers met at the same screen. The contract was implicit: three consumers agreed on flag-is-truth, but nothing said so where the fourth reader (the timeline, and the user) could see it** |
 | **sweep severity is a hypothesis, now with a rate** | **BROKEN: 3/7 falsified under measurement. W: 6/14 reframed or falsified. Roughly 45% of filed severities do not survive verification. Correct structure is sweep → verification → defect list, and any future sweep budgets the verification pass as part of the process, not as optional spot-check. New outcome category: "design question, not a bug" — W10 renders exactly as written and correctness is a product call. Distinct from reframed (real, smaller) and falsified (not real); these need a user decision, not a fix commit. Sub-case: verification can invert the filed direction, not just shrink it — W8 filed "DialogFooter ghost is wrong" while outline-Cancel leads 11:2, so the ghost modals were the outliers. Same shape as the correct `[&>div>div]` already sitting in budgets-page-client while the other sites carried `[&>div]`: the site you spot-check isn't the site that's wrong** |
+| **a test tool that silently converts destruction into a no-op** | **Playwright auto-dismisses native `confirm()` as Cancel. Delete-through-native-confirm appears to succeed; the row survives; a UI text search returns "not found" for a row that is still there. Same class as the empty-set pass and the CRLF-dead suppression — a verifier reporting success while doing nothing. Discipline: any test deleting through a native dialog either explicitly accepts it, or verifies cleanup at the storage layer. Not the UI** |
 
 The measurement-script row is the one that changes what the table means.
 
@@ -149,6 +150,12 @@ The discipline is unchanged and it is the only thing that travels: **identify
 elements semantically, and assert the count of what you selected before you
 trust anything measured through it.** Auxiliary tooling is where it will next
 happen, because auxiliary tooling is where review is thinnest.
+
+**Read the computed style, not the screenshot.** Third instance this arc — the
+eye reported the Wise accent wrong against ΔE, the sweep read a scroll position
+as an overlap defect, and the disabled button looked enabled at thumbnail scale
+while computing opacity 0.5. A screenshot is a hypothesis; getComputedStyle is
+a measurement. When they disagree, measurement wins.
 
 **And that generalises further than "tooling".** The class does not live in the
 gates; it lives in whatever tool is doing the verifying. Four instances in this

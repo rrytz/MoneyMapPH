@@ -33,6 +33,21 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
     setAccountId(editEntry?.account_id || "");
   }, [editEntry, open]);
 
+  // Mirrors, not control: inputs stay uncontrolled (defaultValue + FormData at
+  // submit) and these track emptiness for the submit-button state only. Same
+  // shape as income-form.tsx.
+  const [title, setTitle] = useState(editEntry?.title || "");
+  const [amount, setAmount] = useState(editEntry?.amount ? String(editEntry.amount) : "");
+  const [categoryId, setCategoryId] = useState(editEntry?.category_id || "");
+  const [date, setDate] = useState(editEntry?.date || toISODateString(new Date()));
+  useEffect(() => {
+    setTitle(editEntry?.title || "");
+    setAmount(editEntry?.amount ? String(editEntry.amount) : "");
+    setCategoryId(editEntry?.category_id || "");
+    setDate(editEntry?.date || toISODateString(new Date()));
+  }, [editEntry, open]);
+  const requiredEmpty = !title.trim() || !amount.trim() || !categoryId || !date;
+
   // Base UI needs the value -> label map up front; see the Category field below.
   // Built from `categories` rather than typed, so a new category cannot drift out
   // of the map and leak its UUID again.
@@ -91,18 +106,19 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Title <span className="text-rose-500">*</span></Label>
             <Input
               id="title"
               name="title"
               placeholder="What did you spend on?"
               defaultValue={editEntry?.title || ""}
+              onChange={(e) => setTitle(e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">Amount <span className="text-rose-500">*</span></Label>
             <Input
               id="amount"
               name="amount"
@@ -111,12 +127,13 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
               min="0.01"
               placeholder="0.00"
               defaultValue={editEntry?.amount || ""}
+              onChange={(e) => setAmount(e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category_id">Category</Label>
+            <Label htmlFor="category_id">Category <span className="text-rose-500">*</span></Label>
             {/* `items` is Base UI's value -> label map, and it is what makes the
                 trigger read as a LABEL rather than a database value.
 
@@ -133,6 +150,7 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
               name="category_id"
               items={categoryLabels}
               defaultValue={editEntry?.category_id || ""}
+              onValueChange={(v) => setCategoryId(v ?? "")}
               required
             >
               <SelectTrigger>
@@ -149,12 +167,13 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">Date <span className="text-rose-500">*</span></Label>
             <Input
               id="date"
               name="date"
               type="date"
               defaultValue={editEntry?.date || toISODateString(new Date())}
+              onChange={(e) => setDate(e.target.value)}
               required
             />
           </div>
@@ -182,7 +201,9 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
+            {/* Disabled on required-EMPTY, never on invalid - same rule as
+                income-form.tsx. */}
+            <Button type="submit" className="flex-1" disabled={loading || requiredEmpty}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? "Save changes" : "Add expense"}
             </Button>

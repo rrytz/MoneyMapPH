@@ -19,6 +19,11 @@ import {
 
 export function BackupCard() {
   const [exporting, setExporting] = useState(false);
+  // File-chosen mirror for the submit-button state only. The input's own
+  // "No file chosen" text is the visible hint here - there is no Label
+  // surface for the * marker pattern, and adding one to a heading would be
+  // consistency theater rather than consistency.
+  const [hasFile, setHasFile] = useState(false);
   const [state, formAction, pending] = useActionState<
     ImportBackupState,
     FormData
@@ -112,11 +117,13 @@ export function BackupCard() {
               accept="application/json,.json"
               required
               disabled={pending}
+              onChange={(e) => setHasFile((e.target.files?.length ?? 0) > 0)}
               className="block w-full min-w-0 text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-foreground cursor-pointer"
             />
+            {/* Disabled on required-EMPTY (no file chosen), never otherwise. */}
             <Button
               type="submit"
-              disabled={pending}
+              disabled={pending || !hasFile}
               className="shrink-0 rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer"
             >
               <Upload className="mr-1.5 h-4 w-4" />

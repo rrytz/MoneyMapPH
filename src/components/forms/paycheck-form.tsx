@@ -27,6 +27,12 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
   const [allocations, setAllocations] = useState<AllocationItem[]>([]);
   const [payDate, setPayDate] = useState<string>(toISODateString(new Date()));
   const [overridePeriodEnd, setOverridePeriodEnd] = useState<string | null>(null);
+  // Mirror for the uncontrolled name input: emptiness state for the submit
+  // button only. Amount stays out of the condition deliberately - it is a
+  // number state where empty and 0 are indistinguishable, and 0 must stay
+  // submittable so the min bubble teaches instead of a gray button hiding it.
+  const [name, setName] = useState("");
+  const requiredEmpty = !name.trim() || !payDate;
 
   const inferredPeriodEnd = toISODateString(estimatePeriodEndForPayout(parseISO(payDate)));
   const cutoff = overridePeriodEnd ?? inferredPeriodEnd;
@@ -73,17 +79,18 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Paycheck Name</Label>
+            <Label htmlFor="name">Paycheck Name <span className="text-rose-500">*</span></Label>
             <Input
               id="name"
               name="name"
               placeholder="e.g. July 15 Salary, Freelance Payment"
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Paycheck Amount</Label>
+            <Label htmlFor="amount">Paycheck Amount <span className="text-rose-500">*</span></Label>
             <Input
               id="amount"
               name="amount"
@@ -98,7 +105,7 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Date Received</Label>
+            <Label htmlFor="date">Date Received <span className="text-rose-500">*</span></Label>
             <Input
               id="date"
               name="date"
@@ -153,7 +160,9 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
+            {/* Disabled on required-EMPTY only - see the note on the name
+                mirror above for why amount is excluded. */}
+            <Button type="submit" className="flex-1" disabled={loading || requiredEmpty}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Paycheck Plan
             </Button>

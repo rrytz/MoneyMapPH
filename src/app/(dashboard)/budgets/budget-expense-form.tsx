@@ -27,6 +27,13 @@ export function BudgetExpenseForm({
 }: BudgetExpenseFormProps) {
   const [loading, setLoading] = useState(false);
 
+  // Mirrors, not control: inputs stay uncontrolled and these track emptiness
+  // for the submit-button state only. Same shape as income-form.tsx.
+  const [amount, setAmount] = useState("");
+  // Initialized from the prefilled default: the field shows a date on open,
+  // so the mirror must too, or the button starts wrongly disabled.
+  const [date, setDate] = useState(defaultDate);
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!category) return;
@@ -63,7 +70,7 @@ export function BudgetExpenseForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">Amount <span className="text-rose-500">*</span></Label>
             <Input
               id="amount"
               name="amount"
@@ -72,6 +79,7 @@ export function BudgetExpenseForm({
               min="0.01"
               placeholder="0.00"
               autoFocus
+              onChange={(e) => setAmount(e.target.value)}
               required
             />
           </div>
@@ -86,12 +94,13 @@ export function BudgetExpenseForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">Date <span className="text-rose-500">*</span></Label>
             <Input
               id="date"
               name="date"
               type="date"
               defaultValue={defaultDate}
+              onChange={(e) => setDate(e.target.value)}
               required
             />
             <p className="text-[11px] text-muted-foreground">
@@ -103,7 +112,8 @@ export function BudgetExpenseForm({
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
+            {/* Disabled on required-EMPTY, never on invalid. */}
+            <Button type="submit" className="flex-1" disabled={loading || !amount.trim() || !date}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Add expense
             </Button>

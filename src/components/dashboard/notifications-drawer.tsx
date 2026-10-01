@@ -252,7 +252,7 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
             </h3>
             <form onSubmit={handleAddReminder} className="space-y-3.5">
               <div className="space-y-1">
-                <Label htmlFor="rem-title" className="text-[10px] uppercase font-bold text-muted-foreground">Title *</Label>
+                <Label htmlFor="rem-title" className="text-[10px] uppercase font-bold text-muted-foreground">Title <span className="text-rose-500">*</span></Label>
                 <Input
                   id="rem-title"
                   placeholder="e.g. Credit Card Due Date"
@@ -264,7 +264,7 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label htmlFor="rem-date" className="text-[10px] uppercase font-bold text-muted-foreground">Due Date *</Label>
+                  <Label htmlFor="rem-date" className="text-[10px] uppercase font-bold text-muted-foreground">Due Date <span className="text-rose-500">*</span></Label>
                   <Input
                     id="rem-date"
                     type="date"
@@ -285,7 +285,8 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
                   />
                 </div>
               </div>
-              <Button type="submit" disabled={isPending} className="w-full h-8 text-xs mt-1">
+              {/* Disabled on required-EMPTY, never on invalid. */}
+              <Button type="submit" disabled={isPending || !reminderTitle.trim() || !reminderDate} className="w-full h-8 text-xs mt-1">
                 {isPending ? "Creating..." : "Save Reminder"}
               </Button>
             </form>

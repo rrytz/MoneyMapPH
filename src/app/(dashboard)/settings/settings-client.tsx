@@ -306,7 +306,9 @@ export function SettingsClient({
                   </div>
                 </div>
                 <div className="pt-3 border-t border-border flex justify-end">
-                  <Button type="submit" disabled={isPending} className="rounded-md bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer">
+                  {/* Disabled on required-EMPTY, never on invalid. Currency and
+                      theme prefill, so display name is the only emptyable. */}
+                  <Button type="submit" disabled={isPending || !displayName.trim()} className="rounded-md bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer">
                     {isPending ? "Saving..." : "Save Preferences"}
                   </Button>
                 </div>
@@ -500,7 +502,8 @@ export function SettingsClient({
               <Button type="button" variant="outline" onClick={() => setCategoryModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
+              {/* Disabled on required-EMPTY, never on invalid. */}
+              <Button type="submit" disabled={isPending || !categoryName.trim()} className="bg-primary hover:bg-primary/80 text-white">
                 {selectedCategory ? "Save Changes" : "Add Category"}
               </Button>
             </DialogFooter>
@@ -545,7 +548,8 @@ export function SettingsClient({
               <Button type="button" variant="outline" onClick={() => setSourceModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
+              {/* Disabled on required-EMPTY, never on invalid. */}
+              <Button type="submit" disabled={isPending || !sourceName.trim()} className="bg-primary hover:bg-primary/80 text-white">
                 {selectedSource ? "Save Changes" : "Add Source"}
               </Button>
             </DialogFooter>

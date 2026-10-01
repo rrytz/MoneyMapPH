@@ -715,7 +715,8 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setGoalModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
+              {/* Disabled on required-EMPTY, never on invalid. */}
+              <Button type="submit" disabled={isPending || !goalName.trim() || !goalTarget.trim()} className="bg-primary hover:bg-primary/80 text-white">
                 {selectedGoal ? "Save Changes" : "Create Goal"}
               </Button>
             </DialogFooter>
@@ -783,7 +784,8 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setContributionModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/80 text-white">
+              {/* Disabled on required-EMPTY, never on invalid. */}
+              <Button type="submit" disabled={isPending || !contribAmount.trim() || !contribDate || !contribCategory} className="bg-primary hover:bg-primary/80 text-white">
                 Record Contribution
               </Button>
             </DialogFooter>
@@ -862,7 +864,8 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setDebtModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              {/* Disabled on required-EMPTY, never on invalid. */}
+              <Button type="submit" disabled={isPending || !debtName.trim() || !debtTotal.trim() || !debtDueDate}>
                 {selectedDebt ? "Save Changes" : "Create Debt"}
               </Button>
             </DialogFooter>
@@ -930,7 +933,8 @@ export function SavingsPageClient({
               <Button type="button" variant="outline" onClick={() => setPayModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              {/* Disabled on required-EMPTY, never on invalid. */}
+              <Button type="submit" disabled={isPending || !payAmount.trim() || !payDate || !payCategory}>
                 Record Payment
               </Button>
             </DialogFooter>

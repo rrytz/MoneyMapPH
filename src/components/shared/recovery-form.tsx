@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,10 @@ export function RecoveryForm() {
     recoverAccess,
     {}
   );
+  // Mirrors for the submit-button state only; the action still reads FormData.
+  const [email, setEmail] = useState("");
+  const [passphrase, setPassphrase] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <div className="w-full">
@@ -56,7 +60,7 @@ export function RecoveryForm() {
 
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-[13px] text-muted-foreground">
-                Email
+                Email <span className="text-rose-500">*</span>
               </Label>
               <Input
                 id="email"
@@ -65,13 +69,14 @@ export function RecoveryForm() {
                 autoComplete="email"
                 required
                 disabled={pending}
+                onChange={(e) => setEmail(e.target.value)}
                 className="h-11 rounded-xl px-3.5"
               />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="passphrase" className="text-[13px] text-muted-foreground">
-                Recovery passphrase
+                Recovery passphrase <span className="text-rose-500">*</span>
               </Label>
               <Input
                 id="passphrase"
@@ -81,6 +86,7 @@ export function RecoveryForm() {
                 placeholder="••••••••••••••••"
                 required
                 disabled={pending}
+                onChange={(e) => setPassphrase(e.target.value)}
                 className="h-11 rounded-xl px-3.5"
               />
               <p className="text-[11.5px] text-muted-foreground">
@@ -91,7 +97,7 @@ export function RecoveryForm() {
 
             <div className="space-y-1.5">
               <Label htmlFor="password" className="text-[13px] text-muted-foreground">
-                New password
+                New password <span className="text-rose-500">*</span>
               </Label>
               <Input
                 id="password"
@@ -101,15 +107,18 @@ export function RecoveryForm() {
                 placeholder="••••••••"
                 required
                 disabled={pending}
+                onChange={(e) => setPassword(e.target.value)}
                 minLength={6}
                 className="h-11 rounded-xl px-3.5"
               />
             </div>
 
+            {/* Disabled on required-EMPTY, never on invalid: a short password
+                stays submittable so the schema message teaches the minimum. */}
             <Button
               type="submit"
               className="h-11 w-full rounded-xl text-[15px] font-semibold"
-              disabled={pending}
+              disabled={pending || !email.trim() || !passphrase || !password}
             >
               {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Reset password

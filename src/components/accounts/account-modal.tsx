@@ -81,7 +81,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="account-name">Account Name</Label>
+            <Label htmlFor="account-name">Account Name <span className="text-rose-500">*</span></Label>
             <Input
               id="account-name"
               placeholder="e.g. UnionBank Savings, GCash"
@@ -92,7 +92,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="account-type">Account Type</Label>
+            <Label htmlFor="account-type">Account Type <span className="text-rose-500">*</span></Label>
             <Select value={type} onValueChange={(val) => setType(val as AccountType)} items={ACCOUNT_TYPE_LABELS}>
               <SelectTrigger>
                 <SelectValue placeholder="Select account type" />
@@ -111,7 +111,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="initial-balance">Starting Balance (₱)</Label>
+            <Label htmlFor="initial-balance">Starting Balance (₱) <span className="text-rose-500">*</span></Label>
             <Input
               id="initial-balance"
               type="number"
@@ -128,7 +128,9 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            {/* Disabled on required-EMPTY: "0" stays submittable (a zero
+                starting balance is legitimate, min="0"), empty does not. */}
+            <Button type="submit" disabled={loading || !name.trim() || !initialBalance.trim()}>
               {loading ? "Saving..." : isEditing ? "Update Account" : "Create Account"}
             </Button>
           </DialogFooter>

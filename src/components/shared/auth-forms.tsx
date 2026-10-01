@@ -210,7 +210,7 @@ export function AuthForm() {
 
                 <div className={`${entrance} space-y-1.5`} style={anim(0.08)}>
                   <Label htmlFor="email" className="text-[13px] text-muted-foreground">
-                    Email
+                    Email <span className="text-rose-500">*</span>
                   </Label>
                   <Input
                     id="email"
@@ -226,7 +226,7 @@ export function AuthForm() {
 
                 <div className={`${entrance} space-y-1.5`} style={anim(0.12)}>
                   <Label htmlFor="password" className="text-[13px] text-muted-foreground">
-                    Password
+                    Password <span className="text-rose-500">*</span>
                   </Label>
                   <Input
                     id="password"
@@ -245,7 +245,7 @@ export function AuthForm() {
                 {!isSignin && (
                   <div className={`${entrance} auth-animate-fade space-y-1.5`} style={anim(0.16)}>
                     <Label htmlFor="confirm" className="text-[13px] text-muted-foreground">
-                      Confirm password
+                      Confirm password <span className="text-rose-500">*</span>
                     </Label>
                     <Input
                       id="confirm"
@@ -262,11 +262,14 @@ export function AuthForm() {
                   </div>
                 )}
 
+                {/* Disabled on required-EMPTY, never on invalid: a short or
+                    mismatched password stays submittable so the error alert
+                    teaches instead of a gray button hiding it. */}
                 <Button
                   type="submit"
                   className={`${entrance} h-11 w-full rounded-xl text-[15px] font-semibold`}
                   style={anim(0.2)}
-                  disabled={loading}
+                  disabled={loading || !email.trim() || !password || (!isSignin && !confirmPassword)}
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isSignin ? "Sign in" : "Create account"}

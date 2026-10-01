@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sun, Moon, Monitor, LogOut, Search, Wallet, Settings } from "lucide-react";
+import { Sun, Moon, Monitor, LogOut, Wallet, Settings } from "lucide-react";
 import { NotificationsDrawer } from "@/components/dashboard/notifications-drawer";
 import { Logo } from "@/components/shared/logo";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
@@ -218,16 +218,9 @@ export function Topbar({
           </DropdownMenu>
         )}
 
-        <div className="relative hidden md:flex items-center">
-          <Search className="absolute left-3 h-3.5 w-3.5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search data..."
-            aria-label="Search"
-            className="h-9 w-48 rounded-full border border-border bg-inset pl-9 pr-4 text-xs text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-sulpot lg:w-64"
-          />
-        </div>
-
+        {/* Search lived here as an uncontrolled input with no value, onChange,
+            submit, form, or URL state - a non-feature, removed rather than
+            wired. The right cluster is ml-auto anchored, so nothing shifts. */}
         <NotificationsDrawer notifications={notifications} />
 
         <DropdownMenu>

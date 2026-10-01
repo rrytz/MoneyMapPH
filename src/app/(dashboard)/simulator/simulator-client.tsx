@@ -224,7 +224,11 @@ export function SimulatorClient({
                   rows={2}
                 />
               </div>
-              <Button type="submit" disabled={isPending} className="w-full rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9.5 shadow-xs cursor-pointer">
+              {/* Disabled on required-EMPTY, never on invalid: an empty name or
+                  amount teaches nothing ("fill it in"), while a filled-but-bad
+                  amount (0) stays submittable so the numeric guard's toast can
+                  teach what is wrong. The * markers above name the required set. */}
+              <Button type="submit" disabled={isPending || !purchaseName.trim() || !purchaseAmount.trim()} className="w-full rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9.5 shadow-xs cursor-pointer">
                 Save Simulation
               </Button>
             </FintechCardContent>

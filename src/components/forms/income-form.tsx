@@ -33,6 +33,19 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
     setAccountId(editEntry?.account_id || "");
   }, [editEntry, open]);
 
+  // Mirrors, not control: the inputs stay uncontrolled (defaultValue + FormData
+  // at submit) and these track emptiness for the submit-button state only.
+  // Synced the same way on open/change, so edit mode starts enabled.
+  const [amount, setAmount] = useState(editEntry?.amount ? String(editEntry.amount) : "");
+  const [sourceId, setSourceId] = useState(editEntry?.source_id || "");
+  const [date, setDate] = useState(editEntry?.date || toISODateString(new Date()));
+  useEffect(() => {
+    setAmount(editEntry?.amount ? String(editEntry.amount) : "");
+    setSourceId(editEntry?.source_id || "");
+    setDate(editEntry?.date || toISODateString(new Date()));
+  }, [editEntry, open]);
+  const requiredEmpty = !amount.trim() || !sourceId || !date;
+
   // Base UI needs the value -> label map up front. See expense-form.tsx for why
   // a Select without it prints the raw UUID into the trigger.
   const sourceLabels = Object.fromEntries(sources.map((s) => [s.id, s.name]));
@@ -79,7 +92,7 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">Amount <span className="text-rose-500">*</span></Label>
             <Input
               id="amount"
               name="amount"
@@ -88,16 +101,18 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
               min="0.01"
               placeholder="0.00"
               defaultValue={editEntry?.amount || ""}
+              onChange={(e) => setAmount(e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="source_id">Source</Label>
+            <Label htmlFor="source_id">Source <span className="text-rose-500">*</span></Label>
             <Select
               name="source_id"
               items={sourceLabels}
               defaultValue={editEntry?.source_id || ""}
+              onValueChange={(v) => setSourceId(v ?? "")}
               required
             >
               <SelectTrigger>
@@ -114,12 +129,13 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">Date <span className="text-rose-500">*</span></Label>
             <Input
               id="date"
               name="date"
               type="date"
               defaultValue={editEntry?.date || toISODateString(new Date())}
+              onChange={(e) => setDate(e.target.value)}
               required
             />
           </div>
@@ -153,7 +169,10 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
+            {/* Disabled on required-EMPTY, never on invalid: an empty field
+                teaches nothing, while a filled-but-bad amount (0) must stay
+                submittable so the native-min bubble teaches what is wrong. */}
+            <Button type="submit" className="flex-1" disabled={loading || requiredEmpty}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? "Save changes" : "Add income"}
             </Button>

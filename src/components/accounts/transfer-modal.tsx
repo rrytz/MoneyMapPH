@@ -114,7 +114,7 @@ export function TransferModal({
 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label>From Account (Source)</Label>
+            <Label>From Account (Source) <span className="text-rose-500">*</span></Label>
             <Select value={fromAccountId} onValueChange={(v) => setFromAccountId(v ?? "")} items={accountLabels}>
               <SelectTrigger>
                 <SelectValue placeholder="Select source account" />
@@ -130,7 +130,7 @@ export function TransferModal({
           </div>
 
           <div className="space-y-2">
-            <Label>To Account (Destination)</Label>
+            <Label>To Account (Destination) <span className="text-rose-500">*</span></Label>
             <Select value={toAccountId} onValueChange={(v) => setToAccountId(v ?? "")} items={accountLabels}>
               <SelectTrigger>
                 <SelectValue placeholder="Select destination account" />
@@ -149,7 +149,7 @@ export function TransferModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="amount">Transfer Amount (₱)</Label>
+              <Label htmlFor="amount">Transfer Amount (₱) <span className="text-rose-500">*</span></Label>
               <Input
                 id="amount"
                 type="number"
@@ -210,7 +210,7 @@ export function TransferModal({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">Date <span className="text-rose-500">*</span></Label>
             <Input
               id="date"
               type="date"
@@ -234,7 +234,11 @@ export function TransferModal({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            {/* Disabled on required-EMPTY, never on invalid: an empty amount
+                teaches nothing ("fill it in"), while a filled-but-bad one
+                (0, negative) must stay submittable so the-native-min bubble
+                or the handler guard can teach what is wrong. */}
+            <Button type="submit" disabled={loading || !amount.trim() || !fromAccountId || !toAccountId || !date}>
               {loading ? "Processing..." : isEditing ? "Update Transfer" : "Confirm Transfer"}
             </Button>
           </DialogFooter>

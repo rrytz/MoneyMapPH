@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogPortal,
@@ -9,11 +9,29 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { getAccountQrUrl } from "@/app/(dashboard)/accounts/actions";
+import { getQrBlob, putQrBlob } from "@/lib/qr-cache";
 
 interface QrDisplayModalProps {
   account: { id: string; name: string } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+/**
+ * Network leg of the load, shared by initial open, online-retry and manual
+ * Retry: mint a signed URL, download the bytes, cache them. Throws on any
+ * failure so all three callers share one error path instead of three copies.
+ */
+async function fetchAndCacheQr(accountId: string): Promise<Blob> {
+  const res = await getAccountQrUrl(accountId);
+  if (!res.success || !("url" in res) || !res.url) {
+    throw new Error("signed URL failed");
+  }
+  const fetched = await fetch(res.url);
+  if (!fetched.ok) throw new Error("download failed");
+  const blob = await fetched.blob();
+  await putQrBlob(accountId, blob);
+  return blob;
 }
 
 /**
@@ -28,22 +46,71 @@ interface QrDisplayModalProps {
  */
 export function QrDisplayModal({ account, open, onOpenChange }: QrDisplayModalProps) {
   const [url, setUrl] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
+  // null = loading, "offline" = cached-miss without connectivity, "fetch" = failed fetch.
+  const [loadError, setLoadError] = useState<null | "offline" | "fetch">(null);
+  const objectUrlRef = useRef<string | null>(null);
 
+  // Cache-first load. Hit renders instantly with no fetch; miss downloads and
+  // stores. Offline + miss is its own named state, not the generic error.
   useEffect(() => {
     if (!open || !account) return;
     let live = true;
     setUrl(null);
-    setFailed(false);
-    getAccountQrUrl(account.id).then((res) => {
+    setLoadError(null);
+    const revoke = () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+    };
+    const showBlob = (blob: Blob) => {
       if (!live) return;
-      if (res.success) setUrl(res.url);
-      else setFailed(true);
-    });
+      revoke();
+      objectUrlRef.current = URL.createObjectURL(blob);
+      setUrl(objectUrlRef.current);
+    };
+    (async () => {
+      const cached = await getQrBlob(account.id);
+      if (!live) return;
+      if (cached) {
+        showBlob(cached);
+        return;
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        setLoadError("offline");
+        return;
+      }
+      try {
+        showBlob(await fetchAndCacheQr(account.id));
+      } catch {
+        if (live) setLoadError("fetch");
+      }
+    })();
     return () => {
       live = false;
+      revoke();
     };
   }, [open, account]);
+
+  // While open in the offline-error state, re-attempt when connectivity
+  // returns. Browsers without the online event keep the manual Retry.
+  useEffect(() => {
+    if (!open || loadError !== "offline" || !account) return;
+    const retry = () => {
+      if (navigator.onLine) {
+        setLoadError(null);
+        fetchAndCacheQr(account.id)
+          .then((blob) => {
+            if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+            objectUrlRef.current = URL.createObjectURL(blob);
+            setUrl(objectUrlRef.current);
+          })
+          .catch(() => setLoadError("fetch"));
+      }
+    };
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, [open, loadError, account]);
 
   useEffect(() => {
     if (!open) return;
@@ -104,24 +171,46 @@ export function QrDisplayModal({ account, open, onOpenChange }: QrDisplayModalPr
                 shrink-to-fit, capping the image at its intrinsic width no
                 matter what min() computes. */}
             <div className="flex w-full flex-1 items-center justify-center p-[10%]">
-              {!url && !failed && (
+              {!url && !loadError && (
                 <Loader2 className="h-8 w-8 animate-spin text-neutral-400" aria-label="Loading QR code" />
               )}
-              {failed && (
+              {loadError && (
                 <div className="space-y-3 text-center">
                   <p className="text-sm text-neutral-600">
-                    Couldn&apos;t load the QR code right now.
+                    {loadError === "offline"
+                      ? "No cached QR. Connect to the internet to view."
+                      : "Couldn't load the QR code right now."}
                   </p>
                   <button
                     type="button"
                     onClick={() => {
-                      setFailed(false);
-                      if (account) {
-                        getAccountQrUrl(account.id).then((res) => {
-                          if (res.success) setUrl(res.url);
-                          else setFailed(true);
-                        });
-                      }
+                      // Re-run the full load: cache, then network. A retry that
+                      // skipped the cache could show stale bytes by construction.
+                      setLoadError(null);
+                      setUrl(null);
+                      if (!account) return;
+                      const id = account.id;
+                      (async () => {
+                        const cached = await getQrBlob(id);
+                        if (cached) {
+                          if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+                          objectUrlRef.current = URL.createObjectURL(cached);
+                          setUrl(objectUrlRef.current);
+                          return;
+                        }
+                        if (typeof navigator !== "undefined" && !navigator.onLine) {
+                          setLoadError("offline");
+                          return;
+                        }
+                        try {
+                          const blob = await fetchAndCacheQr(id);
+                          if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+                          objectUrlRef.current = URL.createObjectURL(blob);
+                          setUrl(objectUrlRef.current);
+                        } catch {
+                          setLoadError("fetch");
+                        }
+                      })();
                     }}
                     className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800"
                   >

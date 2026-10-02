@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { addAccount, editAccount, uploadAccountQr, removeAccountQr, getAccountQrUrl } from "@/app/(dashboard)/accounts/actions";
+import { putQrBlob, deleteQrBlob } from "@/lib/qr-cache";
 import type { AccountWithBalance, AccountType } from "@/lib/types";
 
 interface AccountModalProps {
@@ -113,6 +114,9 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
         setQrError(res.error || "Unable to save the QR code. Please try again.");
         return;
       }
+      // Cache the bytes we already hold: the next display open must not pay
+      // a download for bytes that just passed through here.
+      await putQrBlob(editAccountData.id, blob);
       setQrPath(res.path);
       setQrUrl(null);
     } catch {
@@ -132,6 +136,9 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
       setQrError(res.error);
       return;
     }
+    // Clear the cache entry with the column: a removed QR must read as a
+    // miss (offline error), never as stale bytes.
+    await deleteQrBlob(editAccountData.id);
     setQrPath(null);
     setQrUrl(null);
   }

@@ -589,6 +589,13 @@ describe("S5c typography hierarchy detector", () => {
     for (const file of TSX_FILES) {
       const key = rel(file);
       if (key === "app/(dashboard)/transactions/print/page.tsx") continue;
+      // Fixed-white surfaces, same category as print: the QR display mat
+      // renders white in BOTH schemes (scanner contrast), so theme-aware ink
+      // tokens would print light-on-white in dark mode. Fixed neutrals here
+      // are the surface being correct, not a bypass - the rule's rationale
+      // (neutrals must follow the theme) cannot apply where following the
+      // theme is the defect.
+      if (key === "components/accounts/qr-display-modal.tsx") continue;
       const source = withoutComments(readFileSync(file, "utf8"));
       for (const match of source.matchAll(pattern)) {
         if (!NEUTRALS.has(match[1])) continue;

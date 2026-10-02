@@ -3,7 +3,7 @@
 import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
-import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw } from "lucide-react";
+import { Wallet, Landmark, CreditCard, DollarSign, Smartphone, AlertTriangle, MoreVertical, Edit2, Archive, RotateCcw, QrCode } from "lucide-react";
 import { accountBrand, getAccountBrandPalette, brandHairline, withAlpha } from "@/lib/utils/account-brand";
 import { LOGO_HEIGHT_PX, resolveBrandLogo } from "@/lib/utils/brand-logos";
 import { CHIP_MARK_RATIO, CHIP_SIZE_PX } from "@/lib/utils/account-brand";
@@ -21,9 +21,10 @@ interface AccountCardProps {
   onEdit: (account: AccountWithBalance) => void;
   onArchive: (account: AccountWithBalance) => void;
   onTransfer: (account: AccountWithBalance) => void;
+  onShowQr: (account: AccountWithBalance) => void;
 }
 
-export function AccountCard({ account, onEdit, onArchive, onTransfer }: AccountCardProps) {
+export function AccountCard({ account, onEdit, onArchive, onTransfer, onShowQr }: AccountCardProps) {
   const getIcon = () => {
     switch (account.type) {
       case "bank":
@@ -270,6 +271,13 @@ const isBrandSurface = !account.is_negative;
                   <Wallet className="h-4 w-4 mr-2" />
                   Transfer From/To
                 </DropdownMenuItem>
+                {/* Only when a QR is on file - no fallback, per the locked rule. */}
+                {account.qr_image_path && (
+                  <DropdownMenuItem data-account-action="show-qr" onClick={() => onShowQr(account)}>
+                    <QrCode className="h-4 w-4 mr-2" />
+                    Show QR
+                  </DropdownMenuItem>
+                )}
               </>
             )}
             <DropdownMenuItem data-account-action={account.is_archived ? "unarchive" : "archive"} onClick={() => onArchive(account)}>

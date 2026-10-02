@@ -5,6 +5,7 @@ import type { AccountWithBalance, AccountTransfer, UnassignedTotals } from "@/li
 import { AccountCard } from "@/components/accounts/account-card";
 import { AccountModal } from "@/components/accounts/account-modal";
 import { TransferModal } from "@/components/accounts/transfer-modal";
+import { QrDisplayModal } from "@/components/accounts/qr-display-modal";
 import { TransferList } from "@/components/accounts/transfer-list";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { FilterPills } from "@/components/shared/filter-pills";
@@ -77,6 +78,10 @@ export function AccountsClient({
     setEditingAccount(acc);
     setAccountModalOpen(true);
   }
+
+  // QR display selection doubles as the open flag (null = closed), same shape
+  // as the editing states above.
+  const [qrAccount, setQrAccount] = useState<AccountWithBalance | null>(null);
 
   async function handleArchiveToggle(acc: AccountWithBalance) {
     const res = await toggleArchiveAccount(acc.id, !acc.is_archived);
@@ -298,6 +303,7 @@ export function AccountsClient({
                         onEdit={handleEditAccount}
                         onArchive={handleArchiveToggle}
                         onTransfer={handleOpenTransfer}
+                        onShowQr={setQrAccount}
                       />
                     ))}
                   </div>
@@ -342,6 +348,12 @@ export function AccountsClient({
         accounts={initialAccounts}
         editTransferData={editingTransfer}
         defaultSourceAccountId={defaultSourceAccId}
+      />
+
+      <QrDisplayModal
+        account={qrAccount}
+        open={qrAccount !== null}
+        onOpenChange={(open) => { if (!open) setQrAccount(null); }}
       />
     </div>
   );

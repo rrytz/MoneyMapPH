@@ -9,6 +9,7 @@ import { cachedGetDebts as getDebts, cachedGetBillsDueBy as getBillsDueBy } from
 import { cachedGetAccountsWithBalances as getAccounts } from "@/lib/cache/shared-queries";
 import { getCurrentMonthYear, getManilaNow, toISODateString } from "@/lib/utils/date";
 import { getBillsDueWindow } from "@/lib/utils/bills";
+import { getCutoffPeriodForDate } from "@/lib/utils/pay-period";
 import { BalanceBlock } from "@/components/dashboard/balance-block";
 import { AttentionStrip } from "@/components/dashboard/attention-strip";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
@@ -33,6 +34,12 @@ export default async function DashboardPage() {
   const now = getManilaNow();
   const todayIso = toISODateString(now);
   const { fromISO, toISO } = getBillsDueWindow(now);
+  // Previous cutoff: one day before the current window starts always lands in
+  // the previous window (anchors are contiguous: 29->13->28->29). The service
+  // already takes `now`, so no new query code - one more call, same shape.
+  const prevDate = new Date(
+    getCutoffPeriodForDate(now).periodStart.getTime() - 86400000
+  );
 
   const [
     summary,
@@ -44,6 +51,7 @@ export default async function DashboardPage() {
     budgetStatuses,
     paychecks,
     safeToSpend,
+    prevSafeToSpend,
     debtView,
     accountsView,
     billsDueBy,
@@ -67,6 +75,7 @@ export default async function DashboardPage() {
     getBudgetStatuses(supabase, user.id, month, year),
     getPaychecks(supabase, user.id, month, year),
     getSafeToSpend(supabase, user.id),
+    getSafeToSpend(supabase, user.id, prevDate),
     getDebts(supabase, user.id),
     getAccounts(supabase, user.id, false),
     getBillsDueBy(supabase, user.id, fromISO, toISO),
@@ -137,6 +146,7 @@ export default async function DashboardPage() {
         hasAnyAccount={accountsView.accounts.length > 0}
         monthIncome={summary.totalIncome}
         monthExpenses={summary.totalExpenses}
+        prevSafeToSpend={prevSafeToSpend}
       />
 
       {/* Attention — urgency only, and only when something is actually due.

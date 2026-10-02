@@ -21,6 +21,65 @@ import type { SafeToSpendStatus } from "@/lib/types";
  * account, and the character otherwise stays silent.
  */
 
+/**
+ * Whether a previous-cutoff status carries anything to compare against. A
+ * predecessor of all zeros is not "a quiet fortnight" the UI can distinguish
+ * from "no history" - and rendering zeros would state "spent nothing last
+ * period", the same lie class as an unmeasured gauge. So both read as first
+ * cutoff. Exported for unit tests.
+ */
+export function hasPredecessorData(
+  prev: SafeToSpendStatus | null | undefined
+): boolean {
+  if (!prev) return false;
+  return (
+    (Number(prev.coreIncome) || 0) +
+      (Number(prev.incentiveIncomeLogged) || 0) +
+      (Number(prev.spentThisPeriod) || 0) >
+    0
+  );
+}
+
+/**
+ * One text row under the metric strip: this cutoff vs the last. Not a card,
+ * not a fourth cell - the strip keeps its three cells. Direction-colored on
+ * spent (less is good); the safe pair is plain figures. Empty predecessor
+ * renders first-cutoff copy, never zeros.
+ */
+function CutoffDeltaLine({
+  safeToSpend,
+  prevSafeToSpend,
+}: {
+  safeToSpend: SafeToSpendStatus | null;
+  prevSafeToSpend: SafeToSpendStatus | null;
+}) {
+  if (!safeToSpend?.hasPaychecks || !hasPredecessorData(prevSafeToSpend)) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        First cutoff — nothing to compare yet.
+      </p>
+    );
+  }
+  const prev = prevSafeToSpend!;
+  const spentDelta =
+    (Number(safeToSpend.spentThisPeriod) || 0) - (Number(prev.spentThisPeriod) || 0);
+  const safeNow = Number(safeToSpend.safeToSpend) || 0;
+  const safePrev = Number(prev.safeToSpend) || 0;
+  const direction = spentDelta < 0 ? "less" : spentDelta > 0 ? "more" : "same";
+  return (
+    <p className="text-xs text-muted-foreground tabular-nums">
+      <span className={cn("font-semibold", direction === "more" ? "text-rose-600 dark:text-rose-400" : "text-sulpot-deep dark:text-sulpot-bright")}>
+        {direction === "same"
+          ? "Same spending as last cutoff"
+          : `₱${Math.abs(Math.round(spentDelta)).toLocaleString()} ${direction} spent than last cutoff`}
+      </span>{" "}
+      <span aria-hidden="true">·</span> Safe to spend{" "}
+      <span className="font-semibold text-foreground">₱{Math.round(safeNow).toLocaleString()}</span>{" "}
+      vs <span className="font-semibold text-foreground">₱{Math.round(safePrev).toLocaleString()}</span>
+    </p>
+  );
+}
+
 export interface BalanceBlockProps {
   totalBalance: number;
   safeToSpend: SafeToSpendStatus | null;
@@ -28,6 +87,7 @@ export interface BalanceBlockProps {
   monthIncome?: number;
   monthExpenses?: number;
   className?: string;
+  prevSafeToSpend?: SafeToSpendStatus | null;
 }
 
 export function BalanceBlock({
@@ -37,6 +97,7 @@ export function BalanceBlock({
   monthIncome = 0,
   monthExpenses = 0,
   className,
+  prevSafeToSpend = null,
 }: BalanceBlockProps) {
   const negative = totalBalance < 0;
   const net = (Number(monthIncome) || 0) - (Number(monthExpenses) || 0);
@@ -188,6 +249,7 @@ export function BalanceBlock({
               </p>
             </div>
           </div>
+          <CutoffDeltaLine safeToSpend={safeToSpend} prevSafeToSpend={prevSafeToSpend} />
         </div>
       ) : (
         /* First-run: the balance block IS the invitation. The character speaks

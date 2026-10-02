@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { addAccount, editAccount } from "@/app/(dashboard)/accounts/actions";
+import { addAccount, editAccount, uploadAccountQr, removeAccountQr, getAccountQrUrl } from "@/app/(dashboard)/accounts/actions";
 import type { AccountWithBalance, AccountType } from "@/lib/types";
 
 interface AccountModalProps {
@@ -35,18 +35,106 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
   const [type, setType] = useState<AccountType>("bank");
   const [initialBalance, setInitialBalance] = useState("");
   const isEditing = !!editAccountData;
+  // Receive-QR state (edit mode only - a QR belongs to a saved account).
+  // qrPath mirrors the DB column; qrUrl is a short-lived signed read.
+  const [qrPath, setQrPath] = useState<string | null>(null);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrBusy, setQrBusy] = useState(false);
+  const [qrError, setQrError] = useState<string | null>(null);
 
   useEffect(() => {
     if (editAccountData) {
       setName(editAccountData.name);
       setType(editAccountData.type);
       setInitialBalance(editAccountData.initial_balance.toString());
+      setQrPath(editAccountData.qr_image_path || null);
     } else {
       setName("");
       setType("bank");
       setInitialBalance("0");
+      setQrPath(null);
     }
+    setQrUrl(null);
+    setQrError(null);
   }, [editAccountData, open]);
+
+  // Signed read URL for the thumbnail. Minted when the modal opens with a QR
+  // on file - never cached, never public.
+  useEffect(() => {
+    if (!open || !qrPath || !editAccountData) return;
+    let live = true;
+    getAccountQrUrl(editAccountData.id).then((res) => {
+      if (live && res.success) setQrUrl(res.url);
+    });
+    return () => { live = false; };
+  }, [open, qrPath, editAccountData]);
+
+  // Client pipeline: MIME + size pre-check, decode, downscale to 512px JPEG.
+  // No HEIC converter dependency: screenshots (the realistic QR source) are
+  // always PNG, and the decode failure below names HEIC explicitly - that
+  // error firing in practice is the evidence that would justify a converter.
+  async function handleQrFile(file: File | undefined) {
+    setQrError(null);
+    if (!file || !editAccountData) return;
+    const allowed = ["image/png", "image/jpeg", "image/webp"];
+    if (file.type && !allowed.includes(file.type)) {
+      setQrError("Please choose a PNG or JPEG image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setQrError("That image is too large (max 5 MB).");
+      return;
+    }
+    setQrBusy(true);
+    try {
+      let bitmap: ImageBitmap;
+      try {
+        bitmap = await createImageBitmap(file);
+      } catch {
+        setQrError("Couldn't read this image. If it was saved as HEIC, re-save it as PNG and try again.");
+        return;
+      }
+      const scale = Math.min(1, 512 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const ctx2d = canvas.getContext("2d");
+      if (!ctx2d) throw new Error("canvas unavailable");
+      ctx2d.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const blob: Blob | null = await new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85)
+      );
+      if (!blob) throw new Error("encode failed");
+      const formData = new FormData();
+      formData.append("file", new File([blob], "qr.jpg", { type: "image/jpeg" }));
+      const res = await uploadAccountQr(editAccountData.id, formData);
+      if (res.error || !res.success || !("path" in res) || !res.path) {
+        setQrError(res.error || "Unable to save the QR code. Please try again.");
+        return;
+      }
+      setQrPath(res.path);
+      setQrUrl(null);
+    } catch {
+      setQrError("Unable to process that image. Please try again.");
+    } finally {
+      setQrBusy(false);
+    }
+  }
+
+  async function handleQrRemove() {
+    if (!editAccountData) return;
+    setQrError(null);
+    setQrBusy(true);
+    const res = await removeAccountQr(editAccountData.id);
+    setQrBusy(false);
+    if (res.error) {
+      setQrError(res.error);
+      return;
+    }
+    setQrPath(null);
+    setQrUrl(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -123,6 +211,50 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
               required
             />
           </div>
+
+          {isEditing && (
+            <div className="space-y-2">
+              <Label htmlFor="account-qr">Receive QR</Label>
+              {qrPath ? (
+                <div className="flex items-center gap-3">
+                  {qrUrl ? (
+                    <img src={qrUrl} alt="Receive QR code on file" className="h-16 w-16 rounded-lg border border-border object-contain bg-white" />
+                  ) : (
+                    <div className="h-16 w-16 rounded-lg border border-border bg-muted animate-pulse" aria-hidden="true" />
+                  )}
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <p className="text-xs text-muted-foreground truncate">QR code on file</p>
+                    <div className="flex gap-2">
+                      <Button type="button" variant="outline" size="sm" disabled={qrBusy} onClick={() => document.getElementById("account-qr")?.click()}>
+                        Replace
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" disabled={qrBusy} onClick={handleQrRemove} className="text-rose-500">
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  No QR code yet. Upload the receive QR from the bank or e-wallet app.
+                </p>
+              )}
+              <Input
+                id="account-qr"
+                type="file"
+                accept="image/*"
+                disabled={qrBusy}
+                onChange={(e) => {
+                  handleQrFile(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+                className="block w-full min-w-0 text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-foreground cursor-pointer"
+              />
+              {qrError && (
+                <p role="alert" className="text-xs text-rose-500">{qrError}</p>
+              )}
+            </div>
+          )}
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

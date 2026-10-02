@@ -16,6 +16,7 @@ describe("Accounts UI Helper & State Logic", () => {
     total_transfer_fees: 0,
     color: null,
     icon: null,
+    qr_image_path: null,
     is_archived: false,
     is_negative: false,
     sort_order: 0,

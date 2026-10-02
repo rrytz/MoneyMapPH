@@ -451,6 +451,8 @@ export interface Account {
   initial_balance: number;
   color: string | null;
   icon: string | null;
+  /** Storage key of the receive-QR image (`{user_id}/{account_id}.jpg`), or null. */
+  qr_image_path: string | null;
   is_archived: boolean;
   sort_order: number;
   created_at: string;

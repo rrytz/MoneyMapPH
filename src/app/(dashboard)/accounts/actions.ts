@@ -146,6 +146,138 @@ export async function editTransfer(
   }
 }
 
+const QR_BUCKET = "account-qrs";
+const QR_MAX_BYTES = 5 * 1024 * 1024;
+
+// Magic numbers, not MIME types: file.type is client-asserted and iOS Safari
+// omits it entirely on some picks. PNG, JPEG, WebP only - the client pipeline
+// normalizes everything to JPEG, so anything else arriving here bypassed it.
+function sniffImageKind(bytes: Uint8Array): "png" | "jpeg" | "webp" | null {
+  if (bytes.length >= 8 &&
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "png";
+  if (bytes.length >= 3 &&
+    bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpeg";
+  if (bytes.length >= 12 &&
+    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+    bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return "webp";
+  return null;
+}
+
+/**
+ * Receive-QR upload. Upsert order is the rollback story: upload the new bytes
+ * first (upsert onto the fixed per-account key), write qr_image_path only once
+ * the bytes land. A failed upload leaves the old QR - or no QR - exactly as it
+ * was, never a column pointing at missing storage. Re-uploads overwrite the
+ * same key, so there is no old object to delete.
+ */
+export async function uploadAccountQr(accountId: string, formData: FormData) {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Choose an image file first." };
+  }
+  if (file.size > QR_MAX_BYTES) {
+    return { error: "That image is too large (max 5 MB)." };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data: account, error: lookupError } = await supabase
+    .from("accounts")
+    .select("id,qr_image_path")
+    .eq("id", accountId)
+    .eq("user_id", user.id)
+    .single();
+  // PGRST116 is "no row" (absent or foreign). Any other lookup failure is
+  // infrastructure, and must not misreport as "not found" - that reading sent
+  // a schema-cache stall down the wrong path once already.
+  if (lookupError && lookupError.code !== "PGRST116") {
+    console.error("Failed to verify account for QR upload:", lookupError);
+    return { error: "Unable to verify the account. Please try again." };
+  }
+  if (!account) return { error: "Account not found." };
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (!sniffImageKind(bytes)) {
+    return { error: "That file is not a PNG, JPEG, or WebP image." };
+  }
+
+  const path = `${user.id}/${accountId}.jpg`;
+  try {
+    const { error: uploadError } = await supabase.storage
+      .from(QR_BUCKET)
+      .upload(path, bytes, { contentType: "image/jpeg", upsert: true });
+    if (uploadError) throw uploadError;
+
+    const { error: writeError } = await supabase
+      .from("accounts")
+      .update({ qr_image_path: path })
+      .eq("id", accountId)
+      .eq("user_id", user.id);
+    if (writeError) throw writeError;
+
+    revalidatePath("/accounts");
+    revalidateUserFinancialCache(user.id);
+    return { success: true, path };
+  } catch (err: any) {
+    console.error("Failed to upload account QR:", err);
+    return { success: false, error: err?.message || "Unable to save the QR code. Please try again." };
+  }
+}
+
+/**
+ * Receive-QR removal. Column first, object second: if the storage delete
+ * fails the column is already null, leaving an invisible orphan rather than
+ * a path pointing at nothing.
+ */
+export async function removeAccountQr(accountId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const path = `${user.id}/${accountId}.jpg`;
+  try {
+    await supabase
+      .from("accounts")
+      .update({ qr_image_path: null })
+      .eq("id", accountId)
+      .eq("user_id", user.id);
+    await supabase.storage.from(QR_BUCKET).remove([path]);
+    revalidatePath("/accounts");
+    revalidateUserFinancialCache(user.id);
+    return { success: true };
+  } catch (err: any) {
+    console.error("Failed to remove account QR:", err);
+    return { success: false, error: err?.message || "Unable to remove the QR code. Please try again." };
+  }
+}
+
+/**
+ * Short-lived read URL for the QR display surfaces (modal thumbnail now,
+ * fullscreen display in the next commit). Minted per open so expiry never
+ * strands a stale screen; never a public URL.
+ */
+export async function getAccountQrUrl(accountId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data: account, error: lookupError } = await supabase
+    .from("accounts")
+    .select("id,qr_image_path")
+    .eq("id", accountId)
+    .eq("user_id", user.id)
+    .single();
+  if (lookupError || !account?.qr_image_path) return { error: "No QR code on file for this account." };
+
+  const { data, error } = await supabase.storage
+    .from(QR_BUCKET)
+    .createSignedUrl(account.qr_image_path, 300);
+  if (error || !data?.signedUrl) return { error: "Unable to load the QR code right now." };
+  return { success: true, url: data.signedUrl };
+}
+
 export async function removeTransfer(transferId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,17 @@ interface AccountCardProps {
 }
 
 export function AccountCard({ account, onEdit, onArchive, onTransfer, onShowQr }: AccountCardProps) {
+  // Card-body tap opens the same menu as the 3-dot trigger (programmatic,
+  // not a wrapped trigger: nesting the trigger inside a clickable card would
+  // put a button inside a button). Clicks originating IN the trigger are
+  // ignored here so the trigger keeps its own toggle semantics - otherwise a
+  // trigger-click while open would bubble back open and the menu could never
+  // close from its own button. The menu anchors at the trigger (Base UI
+  // default), not at the tap point - no anchor customization exists for this.
+  // Keyboard: deliberately NOT on the card. A tab stop per card would balloon
+  // the tab order; the 3-dot remains the keyboard path. This spends the tap
+  // gesture - a future drag-to-reorder needs disambiguation from day one.
+  const [menuOpen, setMenuOpen] = useState(false);
   const getIcon = () => {
     switch (account.type) {
       case "bank":
@@ -83,7 +95,11 @@ const isBrandSurface = !account.is_negative;
       // archived-false-pass defect a third time over. The label is copy; this
       // is the fact.
       data-account-archived={account.is_archived || undefined}
-      className={`relative rounded-2xl border p-4 transition-all [border-color:var(--brand-line)] ${
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('[data-slot="dropdown-menu-trigger"]')) return;
+        setMenuOpen(true);
+      }}
+      className={`relative rounded-2xl border p-4 transition-all cursor-pointer [border-color:var(--brand-line)] ${
         account.is_negative
           ? "border-rose-500/50 bg-rose-500/10 dark:bg-rose-950/20"
           : account.is_archived
@@ -249,7 +265,7 @@ const isBrandSurface = !account.is_negative;
           )}
         </div>
 
-        <DropdownMenu>
+        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           {/* Theme tokens here were the live leak: `text-muted-foreground`
               resolved to rgb(102,112,99) in light mode - 2.86:1 on GCash's
               base - and `hover:text-foreground` went to near-black on a dark

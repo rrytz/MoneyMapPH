@@ -1,6 +1,7 @@
 "use client";
 
 import { ReceiptText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { formatDate } from "@/lib/utils/date";
@@ -10,21 +11,21 @@ import type { SummaryVerdict } from "@/lib/types";
 
 const VERDICT: Record<
   SummaryVerdict,
-  { label: string; pill: string; color: string }
+  { label: string; variant: "income" | "warning" | "expense"; color: string }
 > = {
   covered: {
     label: "Covered",
-    pill: "text-sulpot-deep dark:text-sulpot-bright bg-sulpot-tint dark:bg-sulpot-tint dark:text-sulpot-bright border-sulpot/30",
+    variant: "income",
     color: "text-sulpot-deep dark:text-sulpot-bright",
   },
   tight: {
     label: "Tight this cutoff",
-    pill: "text-amber-700 bg-muted/60 dark:text-amber-400 border-amber-200/50",
+    variant: "warning",
     color: "text-amber-500",
   },
   short: {
     label: "Short this cutoff",
-    pill: "text-rose-700 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200/50",
+    variant: "expense",
     color: "text-rose-500",
   },
 };
@@ -60,9 +61,12 @@ export function BillsSummaryCard({
               Due through {formatDate(horizonDate, "MMM d")} · paid {formatDate(payoutDate, "MMM d")}
             </p>
           </div>
-          <span className={cn("text-[11px] font-semibold px-2.5 py-0.5 rounded-full border", v.pill)}>
+          <Badge
+            variant={v.variant}
+            className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5"
+          >
             {v.label}
-          </span>
+          </Badge>
         </div>
 
         <div className="grid grid-cols-3 gap-3">

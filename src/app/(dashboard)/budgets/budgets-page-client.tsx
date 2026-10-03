@@ -197,7 +197,7 @@ export function BudgetsPageClient({
                   <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                     <Wallet className="h-5 w-5" />
                   </div>
-                  <Badge variant="income">Allowance</Badge>
+                  <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Allowance</Badge>
                 </div>
                 <span className="mt-6 block text-xs font-medium text-muted-foreground">Total budgeted</span>
                 <CurrencyDisplay
@@ -210,7 +210,7 @@ export function BudgetsPageClient({
                   <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
                     <TrendingDown className="h-5 w-5" />
                   </div>
-                  <Badge variant="expense">Spent</Badge>
+                  <Badge variant="expense" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Spent</Badge>
                 </div>
                 <span className="mt-6 block text-xs font-medium text-muted-foreground">Calendar month spending</span>
                 <CurrencyDisplay
@@ -321,7 +321,7 @@ export function BudgetsPageClient({
                             you can still judge "how much is this" at a glance. */}
                       </div>
                     </div>
-                    <Badge variant={statusVariant} className="text-[10px] uppercase font-bold tracking-wider">
+                    <Badge variant={statusVariant} className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">
                       {statusLabel}
                     </Badge>
                   </div>
@@ -486,7 +486,7 @@ export function BudgetsPageClient({
                           configured" line under the name both say it, so the badge
                           is a third statement of a fact already on screen. It
                           returns from `sm`, where the cards are full width. */}
-                      <Badge variant="outline" className="hidden sm:inline-flex text-[10px] uppercase font-bold tracking-wider">Unbudgeted</Badge>
+                      <Badge variant="outline" className="hidden sm:inline-flex text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Unbudgeted</Badge>
                     </div>
 
                     <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:items-center text-xs pt-1 border-t border-border/50">

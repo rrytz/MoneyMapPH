@@ -354,7 +354,7 @@ export function TransactionsClient({
                       badge={
                         <Badge
                           variant={isIncome ? "income" : "expense"}
-                          className="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase"
+                          className="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
                         >
                           {tx.type}
                         </Badge>
@@ -413,7 +413,7 @@ export function TransactionsClient({
                         {formatDate(tx.date, "MMM dd, yyyy")}
                       </td>
                       <td className="py-2 px-4">
-                        <Badge variant={isIncome ? "income" : "expense"} className="text-[10px] uppercase font-bold px-2 py-0.5">
+                        <Badge variant={isIncome ? "income" : "expense"} className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">
                           {tx.type}
                         </Badge>
                       </td>

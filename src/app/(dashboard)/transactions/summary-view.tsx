@@ -88,7 +88,7 @@ export function SummaryView({
               <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                 <TrendingUp className="h-5 w-5" />
               </div>
-              <Badge variant="income">Net Surplus</Badge>
+              <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Net Surplus</Badge>
             </div>
             <div>
               {/* Names the viewed month rather than saying "calendar month", which
@@ -250,11 +250,11 @@ export function SummaryView({
                       primary={recordPrimaryLabel({ categoryName: b.categoryName })}
                       badge={
                         b.status === "under" ? (
-                          <Badge variant="income" className="shrink-0 text-[10px]">On Track</Badge>
+                          <Badge variant="income" className="shrink-0 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">On Track</Badge>
                         ) : b.status === "near" ? (
-                          <Badge variant="warning" className="shrink-0 text-[10px]">Watch</Badge>
+                          <Badge variant="warning" className="shrink-0 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Watch</Badge>
                         ) : (
-                          <Badge variant="expense" className="shrink-0 text-[10px]">Over Budget</Badge>
+                          <Badge variant="expense" className="shrink-0 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Over Budget</Badge>
                         )
                       }
                       secondary={
@@ -307,11 +307,11 @@ export function SummaryView({
                       </td>
                       <td className="py-3.5 px-5 text-right font-semibold">
                         {b.status === "under" ? (
-                          <Badge variant="income" className="text-[10px]">On Track</Badge>
+                          <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">On Track</Badge>
                         ) : b.status === "near" ? (
-                          <Badge variant="warning" className="text-[10px]">Watch</Badge>
+                          <Badge variant="warning" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Watch</Badge>
                         ) : (
-                          <Badge variant="expense" className="text-[10px]">Over Budget</Badge>
+                          <Badge variant="expense" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Over Budget</Badge>
                         )}
                       </td>
                     </tr>

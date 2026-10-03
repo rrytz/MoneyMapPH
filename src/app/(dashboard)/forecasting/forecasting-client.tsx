@@ -197,7 +197,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sm text-foreground">{goal.name}</span>
                       {goal.is_emergency_fund && (
-                        <Badge variant="income" className="text-[10px]">Emergency Fund</Badge>
+                        <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">Emergency Fund</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">

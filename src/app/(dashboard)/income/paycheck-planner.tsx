@@ -60,7 +60,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
               <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                 <Wallet className="h-5 w-5" />
               </div>
-              <Badge variant="income">Planned</Badge>
+              <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Planned</Badge>
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Total Paycheck Income</span>
@@ -75,7 +75,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
               <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
                 <Calendar className="h-5 w-5" />
               </div>
-              <Badge variant="secondary">Scheduled</Badge>
+              <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Scheduled</Badge>
             </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Paychecks Recorded</span>
@@ -106,7 +106,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
                     <div>
                       <div className="flex items-center gap-2">
                         <FintechCardTitle>{paycheck.name}</FintechCardTitle>
-                        <Badge variant="income" className="text-[10px] flex items-center gap-1 font-semibold">
+                        <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5 flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {formatDate(paycheck.date, "MMM d, yyyy")}
                         </Badge>

@@ -201,7 +201,7 @@ export function IncomePageClient({
                     <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                       <DollarSign className="h-5 w-5" />
                     </div>
-                    <Badge variant="income">Calendar month</Badge>
+                    <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">Calendar month</Badge>
                   </div>
                   <div className="mt-6">
                     <span className="text-xs font-medium text-muted-foreground block">Calendar month earnings</span>
@@ -295,7 +295,7 @@ export function IncomePageClient({
                         <span className="font-semibold text-sm text-foreground">
                           {entry.source?.name || "Income"}
                         </span>
-                        <Badge variant="income" className="text-[10px]">
+                        <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">
                           {formatDate(entry.date, "MMM d, yyyy")}
                         </Badge>
                       </div>

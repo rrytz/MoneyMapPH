@@ -259,7 +259,7 @@ export function SimulatorClient({
                       <span className="type-measurement text-xl font-bold text-foreground tabular-nums block mt-0.5">
                         {impact.emergencyFundImpact.beforeMonthsCovered} Months
                       </span>
-                      <Badge variant="income" className="mt-1 text-[9px] uppercase font-bold">
+                      <Badge variant="income" className="mt-1 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">
                         {impact.emergencyFundImpact.beforeStatus}
                       </Badge>
                     </div>
@@ -270,7 +270,7 @@ export function SimulatorClient({
                       </span>
                       <Badge
                         variant={impact.emergencyFundImpact.afterStatus === "critical" ? "expense" : "income"}
-                        className="mt-1 text-[9px] uppercase font-bold"
+                        className="mt-1 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5"
                       >
                         {impact.emergencyFundImpact.afterStatus}
                       </Badge>
@@ -326,9 +326,9 @@ export function SimulatorClient({
                       </div>
                       <div className="shrink-0 text-right">
                         {item.delayMonths === 0 ? (
-                          <Badge variant="income" className="text-[10px]">No Impact</Badge>
+                          <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">No Impact</Badge>
                         ) : item.delayMonths === "infinite" ? (
-                          <Badge variant="expense" className="text-[10px]">Delayed indefinitely</Badge>
+                          <Badge variant="expense" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Delayed indefinitely</Badge>
                         ) : (
                           <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
                             +{item.delayMonths} mo delay

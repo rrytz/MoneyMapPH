@@ -6,6 +6,8 @@ import type { LeanStatus } from "@/lib/types";
 
 export function LeanStatusChip({ status }: { status: LeanStatus }) {
   if (status.phase === "insufficient") {
+    // Sentence-length content keeps the base size deliberately: the status
+    // rule (10px uppercase bold) would shout a 60-character explanation.
     return (
       <Badge
         variant="outline"
@@ -22,7 +24,8 @@ export function LeanStatusChip({ status }: { status: LeanStatus }) {
   if (status.phase === "lean") {
     return (
       <Badge
-        className="bg-rose-100 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/50 dark:text-rose-300"
+        variant="expense"
+        className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5"
         title={`Paycheck income only. Based on ${status.periodsUsed} logged cutoffs. Ratio vs median: ${Math.round((ratio ?? 0) * 100)}%.`}
       >
         Lean cutoff · <CurrencyDisplay amount={targetIncome} className="figure-inline" /> vs typical{" "}
@@ -34,6 +37,7 @@ export function LeanStatusChip({ status }: { status: LeanStatus }) {
   return (
     <Badge
       variant="income"
+      className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5"
       title={`Paycheck income only. Based on ${status.periodsUsed} logged cutoffs.`}
     >
       On track · <CurrencyDisplay amount={targetIncome} className="figure-inline" /> vs typical{" "}

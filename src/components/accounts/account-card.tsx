@@ -9,6 +9,7 @@ import { accountBrand, getAccountBrandPalette, brandHairline, withAlpha } from "
 import { LOGO_HEIGHT_PX, resolveBrandLogo } from "@/lib/utils/brand-logos";
 import { CHIP_MARK_RATIO, CHIP_SIZE_PX } from "@/lib/utils/account-brand";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -332,9 +333,11 @@ const isBrandSurface = !account.is_negative;
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className="flex items-center gap-1 text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 cursor-help">
-                    <AlertTriangle className="h-3 w-3" />
-                    Negative Balance
+                  <div className="flex items-center gap-1 cursor-help">
+                    <Badge variant="expense" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Negative Balance
+                    </Badge>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs text-xs p-3">

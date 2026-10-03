@@ -20,12 +20,15 @@ import { createBillAction, updateBillAction, deleteBillAction } from "./bills/ac
 import type { Bill, BillPayment, ExpenseCategory } from "@/lib/types";
 
 const STATUS_STYLE: Record<string, string> = {
-  Incomplete: "bg-muted/60 text-amber-700 border-amber-200/60 dark:text-amber-400",
-  Paused: "bg-muted text-muted-foreground border-border/60",
+  Incomplete:
+    "bg-muted/60 text-amber-700 border-amber-200/60 dark:text-amber-400 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5",
+  Paused:
+    "bg-muted text-muted-foreground border-border/60 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5",
   // Outline and dashed, to match the calendar chip. A one-time bill is a
   // DIFFERENT KIND of obligation, and the distinction is only useful if it is
   // visible where the bill is listed - not just where it falls on a calendar.
-  "One-time": "border-dashed text-muted-foreground",
+  "One-time":
+    "border-dashed text-muted-foreground text-[10px] font-medium px-2 py-0.5",
 };
 
 /**

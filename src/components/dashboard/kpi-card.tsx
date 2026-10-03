@@ -59,7 +59,7 @@ export function KpiCard({
             <Icon className="h-4.5 w-4.5" />
           </div>
           {badge && (
-            <span className="text-[11px] font-semibold text-sulpot-deep dark:text-sulpot-bright bg-sulpot-tint dark:bg-sulpot-tint dark:text-sulpot-bright px-2.5 py-0.5 rounded-full border border-sulpot/30">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-sulpot-deep dark:text-sulpot-bright bg-sulpot-tint dark:bg-sulpot-tint dark:text-sulpot-bright px-2.5 py-0.5 rounded-full border border-sulpot/30">
               {badge}
             </span>
           )}

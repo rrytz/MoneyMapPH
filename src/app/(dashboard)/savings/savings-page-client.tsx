@@ -340,7 +340,7 @@ export function SavingsPageClient({
                 <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
                   <PiggyBank className="h-5 w-5" />
                 </div>
-                <Badge variant="income">Accumulated</Badge>
+                <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Accumulated</Badge>
               </div>
               <span className="mt-6 block text-xs font-medium text-muted-foreground">Total saved balance</span>
               <CurrencyDisplay
@@ -392,7 +392,7 @@ export function SavingsPageClient({
                     ? "warning"
                     : "expense"
                 }
-                className="uppercase tracking-wider font-bold text-[10px]"
+                className="uppercase tracking-wider font-bold text-[10px] px-2 py-0.5"
               >
                 {emergencyStatus.status === "adequate"
                   ? "Adequate Reserve"
@@ -452,7 +452,7 @@ export function SavingsPageClient({
                       <div className="flex items-center gap-2">
                         <h4 className="text-base font-bold text-foreground truncate max-w-[200px]">{goal.name}</h4>
                         {isEmergencyGoal && (
-                          <Badge variant="income" className="text-[10px]">
+                          <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">
                             <Shield className="h-2.5 w-2.5 mr-0.5" /> Emergency Fund
                           </Badge>
                         )}
@@ -463,7 +463,7 @@ export function SavingsPageClient({
                             `income`. Two achievements in two colours read as
                             two categories rather than one kind of badge. */}
                         {isCompleted && (
-                          <Badge variant="income" className="text-[10px]">
+                          <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">
                             <Sparkles className="h-2.5 w-2.5 mr-0.5" /> Fully Funded
                           </Badge>
                         )}
@@ -564,12 +564,12 @@ export function SavingsPageClient({
                               achievement is positive, so it wears `income`.
                               "Overdue" beside it is the `expense` opposite. */}
                           {paidOff && (
-                            <Badge variant="income" className="text-[10px]">
+                            <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">
                               <Sparkles className="h-2.5 w-2.5 mr-0.5" /> Paid Off
                             </Badge>
                           )}
                           {overdue && (
-                            <Badge variant="expense" className="text-[10px]">
+                            <Badge variant="expense" className="text-[10px] font-medium px-2 py-0.5">
                               <Calendar className="h-2.5 w-2.5 mr-0.5" /> Overdue
                             </Badge>
                           )}

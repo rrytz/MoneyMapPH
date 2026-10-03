@@ -484,7 +484,7 @@ export function ExpensesPageClient({
                       category name, never the title. */}
                   <div className="flex items-center gap-2.5 mb-1 min-w-0">
                     <span className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{entry.title}</span>
-                    <Badge variant="expense" className="text-[10px] flex items-center gap-1 shrink-0 max-w-[45%] overflow-hidden">
+                    <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 bg-muted/60 text-muted-foreground flex items-center gap-1 shrink-0 max-w-[45%] overflow-hidden">
                       <CategoryIcon icon={entry.category?.icon} className="h-3 w-3 shrink-0" />
                       <span className="truncate min-w-0">{entry.category?.name || "Uncategorized"}</span>
                     </Badge>

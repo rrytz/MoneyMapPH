@@ -16,6 +16,7 @@ import { CategoryIcon } from "@/components/shared/category-icon";
 import { ICON_CHOICES, resolveCategoryIcon, FALLBACK_ICON_KEY } from "@/lib/categories/icon-map";
 import { CATEGORY_COLOR_PALETTE, PALETTE_KEYS, PALETTE_LABELS, resolveCategoryColor } from "@/lib/categories/color-map";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -343,9 +344,9 @@ export function SettingsClient({
                       <div>
                         <span className="text-xs font-bold text-foreground block">{cat.name}</span>
                         {cat.is_default && (
-                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-muted text-[9px] font-normal text-muted-foreground">
+                          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 bg-muted/60 text-muted-foreground">
                             Default Category
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -388,14 +389,14 @@ export function SettingsClient({
                       <div>
                         <span className="text-xs font-bold text-foreground block">{src.name}</span>
                         {src.is_default && (
-                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-muted text-[9px] font-normal text-muted-foreground">
+                          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 bg-muted/60 text-muted-foreground">
                             Default Source
-                          </span>
+                          </Badge>
                         )}
                         {src.type === "incentive" && (
-                          <span className="inline-flex px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/40 text-[9px] font-bold text-violet-700 dark:text-violet-300">
+                          <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 bg-violet-100 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border-violet-200/50">
                             Incentive
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>

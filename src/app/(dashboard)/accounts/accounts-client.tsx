@@ -189,7 +189,7 @@ export function AccountsClient({
         <div className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="type-section-label text-muted-foreground">Accounts</span>
-            <span className="text-xs font-bold text-sulpot-deep bg-sulpot-tint px-2.5 py-1 rounded-full">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-sulpot-deep bg-sulpot-tint px-2.5 py-0.5 rounded-full border border-sulpot/30">
               {initialAccounts.length} active
             </span>
           </div>

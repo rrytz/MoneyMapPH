@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TrendingUp, Sparkles, Info, Calendar, Goal, Zap, Wallet } from "lucide-react";
+import { Sparkles, Info, Calendar, Goal } from "lucide-react";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/shared/page-header";
@@ -61,10 +61,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
         <FintechCardContent className="p-0">
           <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-between gap-3">
-                <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-                  <Wallet className="h-5 w-5" />
-                </div>
+              <div className="flex items-center justify-end gap-3">
                 <span className="text-[11px] font-semibold text-ink-muted">12-month target</span>
               </div>
               <span className="mt-6 block text-xs font-medium text-muted-foreground">1-year projected balance</span>
@@ -75,17 +72,11 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
             </div>
             <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
               <div className="p-6">
-                <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-                  <Zap className="h-5 w-5" />
-                </div>
-                <span className="mt-4 block text-xs text-muted-foreground">Projected monthly savings pace</span>
+                <span className="block text-xs text-muted-foreground">Projected monthly savings pace</span>
                 <CurrencyDisplay amount={projectedMonthlyGrowth} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright" />
               </div>
               <div className="border-l border-border p-6">
-                <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-                <span className="mt-4 block text-xs text-muted-foreground">Projected monthly growth rate</span>
+                <span className="block text-xs text-muted-foreground">Projected monthly growth rate</span>
                 <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright">
                   +{projectedMonthlyGrowth > 0 && startBalance > 0 ? Math.round((projectedMonthlyGrowth / startBalance) * 100) : 0}%
                 </p>

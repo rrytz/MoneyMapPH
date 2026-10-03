@@ -3,7 +3,7 @@
 import { useState, useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MonthYearPicker } from "@/components/shared/month-year-picker";
-import { Plus, Pencil, Trash2, TrendingDown, Search, Filter, PieChart, Calendar } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingDown, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AccountSelect } from "@/components/forms/account-select";
 import { FilterPills } from "@/components/shared/filter-pills";
@@ -334,10 +334,7 @@ export function ExpensesPageClient({
               content at 1280px is the three-column grid stretching all cards to
               the tallest - a design call, deliberately not addressed. */}
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-md bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
-                <TrendingDown className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <Badge variant="expense">Total Outflow</Badge>
             </div>
             <div>
@@ -353,10 +350,7 @@ export function ExpensesPageClient({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
-                <PieChart className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <span className="type-section-label">Highest Spend</span>
             </div>
             <div>
@@ -369,10 +363,7 @@ export function ExpensesPageClient({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-md bg-muted text-muted-foreground">
-                <Calendar className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <span className="type-section-label">Logged Items</span>
             </div>
             <div>

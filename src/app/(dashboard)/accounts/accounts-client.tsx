@@ -12,7 +12,7 @@ import { FilterPills } from "@/components/shared/filter-pills";
 import { gridTracksFor, gridTracksClass } from "@/lib/utils/grid-tracks";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, ArrowLeftRight, Wallet, Info, ArrowRight } from "lucide-react";
+import { Plus, ArrowLeftRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { toggleArchiveAccount, removeTransfer } from "@/app/(dashboard)/accounts/actions";
 import { toast } from "sonner";
@@ -144,9 +144,6 @@ export function AccountsClient({
         <div className="rounded-2xl border border-border bg-card p-6 space-y-2">
           <div className="flex items-center justify-between">
             <span className="type-section-label text-muted-foreground">Unassigned Transactions</span>
-            <div className="p-2 rounded-md bg-muted text-muted-foreground">
-              <Info className="h-4 w-4" />
-            </div>
           </div>
           <div className="text-sm font-semibold text-foreground">
             Untagged: ₱{(unassigned.unassignedIncome - unassigned.unassignedExpenses).toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -230,9 +227,6 @@ export function AccountsClient({
         <h2 className="text-lg font-semibold text-foreground">Your Wallets & Accounts</h2>
         {displayedAccounts.length === 0 ? (
           <div className="rounded-2xl border border-border bg-card/60 p-12 text-center space-y-4">
-            <div className="mx-auto w-12 h-12 rounded-2xl bg-sulpot/10 text-sulpot-deep dark:text-sulpot-bright flex items-center justify-center">
-              <Wallet className="h-6 w-6" />
-            </div>
             <div>
               <h3 className="text-base font-semibold text-foreground">No accounts created yet</h3>
               <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">

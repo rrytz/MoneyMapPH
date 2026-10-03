@@ -56,10 +56,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-                <Wallet className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Planned</Badge>
             </div>
             <div>
@@ -71,10 +68,7 @@ export function PaycheckPlanner({ initialPaychecks, categories }: PaycheckPlanne
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                <Calendar className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Scheduled</Badge>
             </div>
             <div>

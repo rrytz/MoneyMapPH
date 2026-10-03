@@ -1,6 +1,5 @@
 "use client";
 
-import { CalendarRange } from "lucide-react";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { formatDate } from "@/lib/utils/date";
@@ -21,9 +20,6 @@ export function PeriodSafeToSpendCard({ status }: { status: SafeToSpendStatus })
     <FintechCard>
       <FintechCardHeader className="pb-2">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-            <CalendarRange className="h-4 w-4" />
-          </div>
           <div>
             <FintechCardTitle>This cutoff</FintechCardTitle>
             <p className="text-xs text-muted-foreground">

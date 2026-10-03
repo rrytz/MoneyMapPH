@@ -1,12 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  TrendingUp,
-  TrendingDown,
-  PieChart,
-  BarChart3,
-} from "lucide-react";
 import { FintechCard, FintechCardHeader, FintechCardTitle, FintechCardContent } from "@/components/ui/fintech-card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -84,10 +78,7 @@ export function SummaryView({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-                <TrendingUp className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Net Surplus</Badge>
             </div>
             <div>
@@ -101,10 +92,7 @@ export function SummaryView({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                <TrendingDown className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <span className="text-[11px] font-semibold text-ink-muted">Utilization Rate</span>
             </div>
             <div>
@@ -119,10 +107,7 @@ export function SummaryView({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-2xl bg-muted text-muted-foreground">
-                <PieChart className="h-5 w-5" />
-              </div>
+            <div className="flex items-center justify-end">
               <span className="text-[11px] font-semibold text-ink-muted">Combined Limit</span>
             </div>
             <div>
@@ -137,9 +122,6 @@ export function SummaryView({
       <FintechCard className="flex flex-col">
         <FintechCardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-              <BarChart3 className="h-4 w-4" />
-            </div>
             <FintechCardTitle>Cash Flow History</FintechCardTitle>
           </div>
           <p className="text-xs text-muted-foreground">Income vs Expense across the last 12 months. This chart is context and does not follow the month selector — the figures above it are {getMonthName(month)} {year}.</p>

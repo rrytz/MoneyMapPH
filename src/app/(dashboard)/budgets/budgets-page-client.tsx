@@ -3,7 +3,7 @@
 import { useState, useOptimistic, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Copy, PieChart, Wallet, Target, TrendingDown, Calculator } from "lucide-react";
+import { Plus, Copy, PieChart, Target, Calculator } from "lucide-react";
 import { CategoryIcon } from "@/components/shared/category-icon";
 import { resolveCategoryColor } from "@/lib/categories/color-map";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -193,10 +193,7 @@ export function BudgetsPageClient({
           <FintechCardContent className="p-0">
             <div className="grid sm:grid-cols-2">
               <div className="p-6 sm:p-8">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-                    <Wallet className="h-5 w-5" />
-                  </div>
+                <div className="flex items-center justify-end gap-3">
                   <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Allowance</Badge>
                 </div>
                 <span className="mt-6 block text-xs font-medium text-muted-foreground">Total budgeted</span>
@@ -206,10 +203,7 @@ export function BudgetsPageClient({
                 />
               </div>
               <div className="border-t border-border p-6 sm:border-l sm:border-t-0 sm:p-8">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
-                    <TrendingDown className="h-5 w-5" />
-                  </div>
+                <div className="flex items-center justify-end gap-3">
                   <Badge variant="expense" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Spent</Badge>
                 </div>
                 <span className="mt-6 block text-xs font-medium text-muted-foreground">Calendar month spending</span>
@@ -423,13 +417,13 @@ export function BudgetsPageClient({
           <div className="grid gap-3 rounded-2xl border border-border bg-muted/30 px-5 py-4">
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                <PieChart className="h-4 w-4" /> Targeted spending
+                Targeted spending
               </span>
               <CurrencyDisplay amount={totalBudgetedSpent} className="type-ledger text-lg font-semibold tabular-nums text-foreground" />
             </div>
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Target className="h-4 w-4" /> No target
+                No target
               </span>
               <CurrencyDisplay amount={totalUnbudgetedSpent} className="type-ledger text-lg font-semibold tabular-nums text-foreground" />
             </div>
@@ -524,9 +518,6 @@ export function BudgetsPageClient({
       <FintechCard className="hidden lg:block">
         <FintechCardHeader className="pb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-              <Calculator className="h-4 w-4" />
-            </div>
             <div>
               <FintechCardTitle>Can I Afford This?</FintechCardTitle>
               <p className="text-xs text-muted-foreground">Check a planned purchase against your budget before committing</p>

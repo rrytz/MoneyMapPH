@@ -3,7 +3,7 @@
 import { useState, useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, TrendingUp, DollarSign, Wallet, Layers, CalendarRange, Receipt } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingUp, CalendarRange, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FintechCard, FintechCardContent } from "@/components/ui/fintech-card";
 import { Badge } from "@/components/ui/badge";
@@ -197,10 +197,7 @@ export function IncomePageClient({
             <FintechCardContent className="p-0">
               <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
                 <div className="p-6 sm:p-8">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="p-2.5 rounded-xl bg-sulpot-tint text-sulpot-deep dark:bg-sulpot-tint dark:text-sulpot-bright">
-                      <DollarSign className="h-5 w-5" />
-                    </div>
+                  <div className="flex items-center justify-end gap-3">
                     <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">Calendar month</Badge>
                   </div>
                   <div className="mt-6">
@@ -213,19 +210,13 @@ export function IncomePageClient({
                 </div>
                 <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
                   <div className="p-6">
-                    <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
-                      <Wallet className="h-5 w-5" />
-                    </div>
-                    <span className="mt-4 block text-xs text-muted-foreground">Logged entries</span>
+                    <span className="block text-xs text-muted-foreground">Logged entries</span>
                     <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                       {optimisticMonthEntries.length}
                     </p>
                   </div>
                   <div className="border-l border-border p-6">
-                    <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
-                      <Layers className="h-5 w-5" />
-                    </div>
-                    <span className="mt-4 block text-xs text-muted-foreground">Income channels</span>
+                    <span className="block text-xs text-muted-foreground">Income channels</span>
                     <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                       {Object.keys(sourceTotals).length}
                     </p>

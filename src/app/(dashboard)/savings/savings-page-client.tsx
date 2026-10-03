@@ -322,8 +322,7 @@ export function SavingsPageClient({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Goals Dashboard"
-        description="Set goals, track emergency adequacy, and build long-term wealth"
+        title="Savings"
       >
         <Button onClick={openNewGoalModal} className="rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs px-4 h-9 cursor-pointer">
           <Plus className="mr-1.5 h-4 w-4" /> Create Goal
@@ -662,7 +661,7 @@ export function SavingsPageClient({
               <Label htmlFor="goal-name">Goal Name <span className="text-rose-500">*</span></Label>
               <Input
                 id="goal-name"
-                placeholder="e.g. Travel, Emergency Reserves"
+                placeholder="Travel"
                 value={goalName}
                 onChange={(e) => setGoalName(e.target.value)}
                 required
@@ -775,7 +774,7 @@ export function SavingsPageClient({
               <Label htmlFor="contrib-notes">Notes (Optional)</Label>
               <Input
                 id="contrib-notes"
-                placeholder="e.g. Monthly transfer"
+                placeholder="Monthly transfer"
                 value={contribNotes}
                 onChange={(e) => setContribNotes(e.target.value)}
               />
@@ -807,7 +806,7 @@ export function SavingsPageClient({
               <Label htmlFor="debt-name">Debt Name <span className="text-rose-500">*</span></Label>
               <Input
                 id="debt-name"
-                placeholder="e.g. Motorcycle Loan, Credit Card"
+                placeholder="Motorcycle Loan"
                 value={debtName}
                 onChange={(e) => setDebtName(e.target.value)}
                 required
@@ -924,7 +923,7 @@ export function SavingsPageClient({
               <Label htmlFor="pay-notes">Notes (Optional)</Label>
               <Input
                 id="pay-notes"
-                placeholder="e.g. Monthly amortization"
+                placeholder="Monthly amortization"
                 value={payNotes}
                 onChange={(e) => setPayNotes(e.target.value)}
               />

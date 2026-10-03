@@ -302,7 +302,7 @@ export function ExpensesPageClient({
         isMonthPending && "opacity-55 pointer-events-none"
       )}
     >
-      <PageHeader title="Spending Intelligence" description="Monitor expenses, category allocations, and daily outflow">
+      <PageHeader title="Expenses">
         <div className="flex flex-wrap items-center gap-3">
           {/* The period control. The query was already month-scoped but pinned to
               the current month, so this log could not be moved off it. The key on

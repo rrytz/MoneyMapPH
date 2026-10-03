@@ -205,7 +205,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
             <Label htmlFor="account-name">Account Name <span className="text-rose-500">*</span></Label>
             <Input
               id="account-name"
-              placeholder="e.g. UnionBank Savings, GCash"
+              placeholder="UnionBank Savings"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required

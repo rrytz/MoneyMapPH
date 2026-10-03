@@ -227,7 +227,7 @@ export function SettingsClient({
     <div className="space-y-6">
       <PageHeader
         title="Account Settings"
-        description="Configure account profile, localization preferences, expense categories, income sources, and backup"
+        description="Profile, categories, income sources, and backup"
       />
 
       <Tabs defaultValue="profile" className="space-y-6">
@@ -323,7 +323,7 @@ export function SettingsClient({
           <div className="flex justify-between items-center">
             <div>
               <h3 className="section-head text-foreground">Expense Categories</h3>
-              <p className="text-xs text-muted-foreground">Manage your custom spending category mappings</p>
+              <p className="text-xs text-muted-foreground">Manage your custom spending categories</p>
             </div>
             <Button onClick={openNewCategoryModal} className="rounded-md bg-primary hover:bg-primary/80 text-white font-medium text-xs h-9 px-4 cursor-pointer">
               <Plus className="mr-1.5 h-4 w-4" /> Add Category
@@ -428,14 +428,14 @@ export function SettingsClient({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{selectedCategory ? "Edit Category" : "Add Category"}</DialogTitle>
-            <DialogDescription>Create custom categories to optimize budgets tracking.</DialogDescription>
+            <DialogDescription>Create custom categories for budget tracking.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCategorySubmit} className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label htmlFor="cat-name">Category Name <span className="text-rose-500">*</span></Label>
               <Input
                 id="cat-name"
-                placeholder="e.g. Subscriptions, Gym"
+                placeholder="Subscriptions"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
                 required
@@ -524,7 +524,7 @@ export function SettingsClient({
               <Label htmlFor="src-name">Source Name <span className="text-rose-500">*</span></Label>
               <Input
                 id="src-name"
-                placeholder="e.g. Freelancing, Store Profits"
+                placeholder="Freelancing"
                 value={sourceName}
                 onChange={(e) => setSourceName(e.target.value)}
                 required

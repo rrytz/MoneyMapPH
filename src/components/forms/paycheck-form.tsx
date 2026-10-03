@@ -83,7 +83,7 @@ export function PaycheckForm({ open, onOpenChange, categories }: PaycheckFormPro
             <Input
               id="name"
               name="name"
-              placeholder="e.g. July 15 Salary, Freelance Payment"
+              placeholder="July 15 Salary"
               onChange={(e) => setName(e.target.value)}
               required
             />

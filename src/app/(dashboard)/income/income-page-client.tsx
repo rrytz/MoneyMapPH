@@ -149,7 +149,7 @@ export function IncomePageClient({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Income Command Center" description="Track salary, night differential, overtime, incentives, and variable earnings">
+      <PageHeader title="Income">
         <Button onClick={handleAdd} className="rounded-xl bg-primary hover:bg-primary/80 text-white font-medium text-xs px-4 h-9 cursor-pointer">
           <Plus className="mr-1.5 h-4 w-4" /> Add Income
         </Button>

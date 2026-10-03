@@ -165,7 +165,7 @@ export function SimulatorClient({
     <div className="space-y-6">
       <PageHeader
         title="Can I Afford This?"
-        description="Simulate large purchases and evaluate real-time impact on emergency reserves and savings timelines"
+        description="What a big purchase does to your safety net"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -186,7 +186,7 @@ export function SimulatorClient({
                 <Label htmlFor="sim-name">Purchase Name <span className="text-rose-500">*</span></Label>
                 <Input
                   id="sim-name"
-                  placeholder="e.g. Electric Scooter, Gaming Laptop"
+                  placeholder="Electric Scooter"
                   value={purchaseName}
                   onChange={(e) => setPurchaseName(e.target.value)}
                   required
@@ -353,7 +353,7 @@ export function SimulatorClient({
         <FintechCardContent>
           {simulations.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-6">
-              No saved purchase simulations. Create and save one using the form above.
+              No saved purchase simulations.
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

@@ -255,7 +255,7 @@ export function NotificationsDrawer({ notifications }: NotificationsDrawerProps)
                 <Label htmlFor="rem-title" className="text-[10px] uppercase font-bold text-muted-foreground">Title <span className="text-rose-500">*</span></Label>
                 <Input
                   id="rem-title"
-                  placeholder="e.g. Credit Card Due Date"
+                  placeholder="Credit Card Due Date"
                   value={reminderTitle}
                   onChange={(e) => setReminderTitle(e.target.value)}
                   className="h-8 text-xs"

@@ -122,9 +122,6 @@ export function AccountsClient({
           <h1 className="type-page-title text-foreground">
             Accounts & Wallets
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track money across your bank accounts, e-wallets, and cash reserves.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">

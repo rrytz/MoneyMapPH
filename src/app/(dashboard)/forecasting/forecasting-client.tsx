@@ -51,8 +51,8 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Financial Future"
-        description="Predict net savings trajectory and goal completion rates based on historical data"
+        title="Forecasting"
+        description="Where your savings are heading"
       />
 
       {/* The page's answer is the one-year position. Pace and growth rate are
@@ -172,7 +172,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
           <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground bg-muted/30 p-3 rounded-xl border border-border">
             <Info className="h-4 w-4 text-sulpot-deep shrink-0" />
             <span>
-              <strong>How it works:</strong> The engine aggregates income, expenses, and budgets to establish a monthly net savings speed. Future projections assume a constant savings speed.
+              <strong>How this is calculated:</strong> Your average monthly savings, projected forward at the same pace.
             </span>
           </div>
         </FintechCardContent>

@@ -84,7 +84,7 @@ export function AllocationEditor({
         {allocations.map((item) => (
           <div key={item.id} className="flex items-center gap-2">
             <Input
-              placeholder="Label (e.g. Rent, Savings)"
+              placeholder="Rent"
               value={item.label}
               onChange={(e) => handleUpdate(item.id, "label", e.target.value)}
               className="flex-1"

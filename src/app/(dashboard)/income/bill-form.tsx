@@ -58,7 +58,7 @@ export function BillForm({
       <Input
         value={draft.name}
         onChange={(e) => set({ name: e.target.value })}
-        placeholder="Name (e.g. Electricity)"
+        placeholder="Electricity"
         aria-label="Bill name"
         required
         // eslint-disable-next-line jsx-a11y/no-autofocus -- the Sheet opened

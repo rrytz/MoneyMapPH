@@ -171,7 +171,7 @@ export function TransactionsClient({
     >
       <PageHeader
         title="Transaction History"
-        description="Unified historical logs of all financial movements, allocations, and expenditures"
+        description="Every transaction, newest first"
       >
         <div className="flex flex-wrap items-center gap-3">
           {/* The period control. Before this the screen carried three periods at
@@ -326,7 +326,6 @@ export function TransactionsClient({
             ask. */}
         <FintechCardHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between">
           <FintechCardTitle>Filtered Results ({totalItems})</FintechCardTitle>
-          <span className="text-xs text-muted-foreground">Showing logs based on filter criteria</span>
         </FintechCardHeader>
         <FintechCardContent className="p-0">
           {paginated.length === 0 ? (

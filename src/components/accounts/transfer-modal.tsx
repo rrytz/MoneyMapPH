@@ -224,7 +224,7 @@ export function TransferModal({
             <Label htmlFor="notes">Notes (Optional)</Label>
             <Input
               id="notes"
-              placeholder="e.g., Cash-in fee, wallet transfer"
+              placeholder="Cash-in fee"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />

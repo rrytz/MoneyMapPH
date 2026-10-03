@@ -6,6 +6,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Install dependencies deterministically with `npm ci` (the lockfile is the source of truth — never `npm install` for setup).
+
+Supply-chain note: `npm audit` currently reports 17 high/critical advisories (mostly transitive dev-tooling; one critical on `next` itself). No audit gate is enforced because it would fail every build with no owner; Bun-style minimum-release-age protection has no npm equivalent and is accepted as missing. Revisit when the advisories have owners.
+
 First, run the development server:
 
 ```bash

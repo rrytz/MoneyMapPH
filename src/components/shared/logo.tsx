@@ -41,17 +41,14 @@ export function Logo({
     <div
       className={cn("inline-flex select-none items-center gap-2.5", className)}
       role="img"
-      aria-label="MoneyMap PH"
+      aria-label="Agos"
     >
       <TideMark className={cn("shrink-0", iconSizeMap[size], markTone)} />
 
       {!iconOnly && (
         <div className={cn("type-identity flex items-baseline leading-none", titleSizeMap[size])}>
-          <span className={wordmarkBase}>Money</span>
-          <span className={accentBase}>Map</span>
-          <span className={cn("ml-0.5 align-super text-[0.55em] font-semibold tracking-wider", accentBase)}>
-            PH
-          </span>
+          <span className={wordmarkBase}>Ago</span>
+          <span className={accentBase}>s</span>
         </div>
       )}
     </div>

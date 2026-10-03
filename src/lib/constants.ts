@@ -1,4 +1,4 @@
-export const APP_NAME = "MoneyMap PH";
+export const APP_NAME = "Agos";
 
 export const BUDGET_THRESHOLDS = {
   UNDER: 75,

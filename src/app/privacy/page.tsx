@@ -3,13 +3,13 @@ import Link from "next/link";
 import { Logo } from "@/components/shared/logo";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · MoneyMap PH",
+  title: "Privacy Policy · Agos",
 };
 
 const sections = [
   {
     title: "Information we collect",
-    body: "When you sign in with Google or email, we receive only the basics needed to identify your account: your name and email address. The financial data you enter (expenses, budgets, income, savings goals) lives in your own MoneyMap account and is never sold or shared.",
+    body: "When you sign in with Google or email, we receive only the basics needed to identify your account: your name and email address. The financial data you enter (expenses, budgets, income, savings goals) lives in your own Agos account and is never sold or shared.",
   },
   {
     title: "How your data is used",
@@ -17,7 +17,7 @@ const sections = [
   },
   {
     title: "Security",
-    body: "All traffic to and from MoneyMap is encrypted with HTTPS. Passwords are never stored by our app — sign-in is handled entirely by Supabase Auth using industry-standard OAuth and password hashing. Your session is short-lived and refreshed automatically.",
+    body: "All traffic to and from Agos is encrypted with HTTPS. Passwords are never stored by our app — sign-in is handled entirely by Supabase Auth using industry-standard OAuth and password hashing. Your session is short-lived and refreshed automatically.",
   },
   {
     title: "Your choices",

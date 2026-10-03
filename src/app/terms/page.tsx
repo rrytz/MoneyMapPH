@@ -3,13 +3,13 @@ import Link from "next/link";
 import { Logo } from "@/components/shared/logo";
 
 export const metadata: Metadata = {
-  title: "Terms of Service · MoneyMap PH",
+  title: "Terms of Service · Agos",
 };
 
 const sections = [
   {
     title: "The service",
-    body: "MoneyMap PH is a personal finance tool for tracking expenses, budgets, income, and savings goals. Your data is yours; we don't use it for advertising and we don't share it with third parties outside the providers that operate the service.",
+    body: "Agos is a personal finance tool for tracking expenses, budgets, income, and savings goals. Your data is yours; we don't use it for advertising and we don't share it with third parties outside the providers that operate the service.",
   },
   {
     title: "Your account",
@@ -17,7 +17,7 @@ const sections = [
   },
   {
     title: "Acceptable use",
-    body: "Use MoneyMap for legitimate personal bookkeeping. Don't attempt to disrupt the service, access other users' data, or use it for anything unlawful.",
+    body: "Use Agos for legitimate personal bookkeeping. Don't attempt to disrupt the service, access other users' data, or use it for anything unlawful.",
   },
   {
     title: "No warranty",

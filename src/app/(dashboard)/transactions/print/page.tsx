@@ -130,7 +130,7 @@ export default async function PrintTransactionsPage(props: {
 
       {/* Disclaimer / Footer */}
       <div className="text-center pt-8 border-t border-slate-200 text-[10px] text-slate-400">
-        <p>This statement is generated automatically by MoneyMap PH. Keep for personal budget reviews only.</p>
+        <p>This statement is generated automatically by Agos. Keep for personal budget reviews only.</p>
       </div>
     </div>
   );

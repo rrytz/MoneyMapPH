@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 // Next.js serves this at /manifest.json (App Router file convention).
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "MoneyMapPH",
-    short_name: "MoneyMapPH",
+    name: "Agos",
+    short_name: "Agos",
     description:
       "Personal finance management for Filipinos — track expenses, budgets, income, and savings goals.",
     lang: "en",

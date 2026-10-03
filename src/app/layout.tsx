@@ -25,13 +25,13 @@ const martianMono = Martian_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MoneyMap PH",
+  title: "Agos",
   description: "Personal finance management for Filipinos",
-  applicationName: "MoneyMapPH",
+  applicationName: "Agos",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "MoneyMapPH",
+    title: "Agos",
     // One PNG per notch-era portrait canvas. iOS picks by media query; an
     // unmatched device falls back to the manifest background, not black.
     startupImage: [

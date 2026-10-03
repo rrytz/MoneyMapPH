@@ -68,7 +68,7 @@ export async function importBackup(
   try {
     raw = JSON.parse(await file.text());
   } catch {
-    return { error: "This doesn't look like a MoneyMap backup file." };
+    return { error: "This doesn't look like an Agos backup file." };
   }
 
   const validated = validateBackupFile(raw);

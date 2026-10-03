@@ -106,7 +106,7 @@ export function validateBackupFile(raw: unknown): BackupValidation {
   if (!parsed.success) {
     return {
       ok: false,
-      error: "This doesn't look like a MoneyMap backup file.",
+      error: "This doesn't look like an Agos backup file.",
     };
   }
 
@@ -148,7 +148,7 @@ export function enforceBackupOwnership(
 const IMPORT_ERROR_MESSAGES: Record<string, string> = {
   backup_not_authorized: "This backup belongs to a different account.",
   backup_owner_required: "Sign-in is required to restore a backup.",
-  backup_invalid_format: "This doesn't look like a MoneyMap backup file.",
+  backup_invalid_format: "This doesn't look like an Agos backup file.",
   backup_unsupported_version:
     "This backup was made by a newer app version. Update the app and try again.",
   backup_missing_tables: "Backup file is missing its tables.",

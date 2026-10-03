@@ -5,7 +5,7 @@ import { getTransfers } from "@/lib/services/transfer.service";
 import { AccountsClient } from "./accounts-client";
 
 export const metadata = {
-  title: "Accounts & Wallets | MoneyMapPH",
+  title: "Accounts & Wallets | Agos",
   description: "Track money allocation across your bank accounts, e-wallets, and cash reserves.",
 };
 

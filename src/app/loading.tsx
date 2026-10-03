@@ -16,7 +16,7 @@ export default function Loading() {
   return (
     <div
       className="launch-surface flex h-dvh items-center justify-center"
-      aria-label="Loading MoneyMap"
+      aria-label="Loading Agos"
       role="status"
     >
       <svg

@@ -28,6 +28,16 @@ import type { SafeToSpendStatus } from "@/lib/types";
  * period", the same lie class as an unmeasured gauge. So both read as first
  * cutoff. Exported for unit tests.
  */
+const MON = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Split "YYYY-MM-DD" without Date parsing (no timezone drift on day edges). */
+function parseISODay(iso: string | undefined): { y: number; m: number; d: number } | null {
+  if (!iso) return null;
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return { y, m, d };
+}
+
 export function hasPredecessorData(
   prev: SafeToSpendStatus | null | undefined
 ): boolean {
@@ -129,10 +139,19 @@ export function BalanceBlock({
   const phase: TidePhase =
     state !== "measured" ? "agosto" : remainingRatio > 0.5 ? "sulpot" : "rising";
 
-  const phaseLine: Record<TidePhase, string> = {
-    agosto: "Agosto hanggang nextang sulpot.",
-    rising: "Babang na ang tubig.",
-    sulpot: "Sulpot na.",
+  // The tagline slot shows the cutoff range, not the phase voice. Phase copy
+  // ("Agosto hanggang nextang sulpot" et al.) was characterful but told the
+  // user nothing actionable; the dates come from the same status object as
+  // the Cutoff figure, so they cannot disagree with it.
+  const cutoffRangeLine = (s: SafeToSpendStatus | null): string => {
+    const start = parseISODay(s?.periodStart);
+    const end = parseISODay(s?.periodEnd);
+    if (!start || !end) return "";
+    const sameMonth = start.m === end.m && start.y === end.y;
+    const range = sameMonth
+      ? `${MON[start.m]} ${start.d} – ${end.d}`
+      : `${MON[start.m]} ${start.d} – ${MON[end.m]} ${end.d}`;
+    return `This cutoff: ${range}`;
   };
 
   return (
@@ -179,7 +198,7 @@ export function BalanceBlock({
               <CurrencyDisplay amount={totalBalance} signed className="type-ledger text-4xl sm:text-5xl" />
             </p>
             {state !== "unmeasured" && (
-              <p className="type-character text-foreground">{phaseLine[phase]}</p>
+              <p className="type-character text-foreground">{cutoffRangeLine(safeToSpend)}</p>
             )}
           </div>
 

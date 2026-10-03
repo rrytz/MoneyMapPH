@@ -155,7 +155,7 @@ export function Topbar({
     // 390px, the labelled Accounts button alone spent 95px - a quarter of the
     // viewport - to say one word. Desktop is untouched.
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-4 border-b border-border bg-paper/90 px-4 backdrop-blur-md sm:px-6 lg:h-16">
-      <Link href="/dashboard" className="shrink-0" aria-label="MoneyMap PH home">
+      <Link href="/dashboard" className="shrink-0" aria-label="Agos home">
         {/* The one brand mark. It was rendering twice - this Logo, and a second
             TideMark inside the balance readout - at 24px and 16px, from the same
             commit. The mark now carries the readout's loaded tone instead, so a

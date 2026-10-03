@@ -70,14 +70,32 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
     return () => { live = false; };
   }, [open, qrPath, editAccountData]);
 
-  // Client pipeline: MIME + size pre-check, decode, downscale to 512px JPEG.
-  // No HEIC converter dependency: screenshots (the realistic QR source) are
-  // always PNG, and the decode failure below names HEIC explicitly - that
-  // error firing in practice is the evidence that would justify a converter.
+  // Client pipeline: bytes-preserving by default. PNG/JPEG/WebP at or under
+  // 2MB go up EXACTLY as received - no decode, no resize, no re-encode, so a
+  // lossless source stays lossless (a 1024px QR PNG is typically smaller than
+  // the 512px JPEG the old pipeline produced from the same source). Only
+  // oversized input takes the processing path (decode, 1024px max, PNG out,
+  // smoothing explicitly off - QR edges must not be interpolated). No HEIC
+  // converter dependency: screenshots (the realistic QR source) are always
+  // PNG, and the decode failure below names HEIC explicitly - that error
+  // firing in practice is the evidence that would justify a converter.
+  // Small sources stay small: a 400px upload stores 400px, and display
+  // upscales. Deliberate - the source is the source, not an oversight.
+  const QR_PASSTHROUGH_BYTES = 2 * 1024 * 1024;
   async function handleQrFile(file: File | undefined) {
     setQrError(null);
     if (!file || !editAccountData) return;
     const allowed = ["image/png", "image/jpeg", "image/webp"];
+    // HEIC is named before anything else: it fails decode AND magic bytes,
+    // so without this it would fall through to the generic reject.
+    if (
+      file.type === "image/heic" ||
+      file.type === "image/heif" ||
+      /\.heicf?$/i.test(file.name)
+    ) {
+      setQrError("Couldn't read this image. If it was saved as HEIC, re-save it as PNG and try again.");
+      return;
+    }
     if (file.type && !allowed.includes(file.type)) {
       setQrError("Please choose a PNG or JPEG image.");
       return;
@@ -88,27 +106,35 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
     }
     setQrBusy(true);
     try {
-      let bitmap: ImageBitmap;
-      try {
-        bitmap = await createImageBitmap(file);
-      } catch {
-        setQrError("Couldn't read this image. If it was saved as HEIC, re-save it as PNG and try again.");
-        return;
+      let payload: File;
+      if (file.size <= QR_PASSTHROUGH_BYTES) {
+        payload = file;
+      } else {
+        let bitmap: ImageBitmap;
+        try {
+          bitmap = await createImageBitmap(file);
+        } catch {
+          setQrError("Couldn't read this image. If it was saved as HEIC, re-save it as PNG and try again.");
+          return;
+        }
+        const scale = Math.min(1, 1024 / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const ctx2d = canvas.getContext("2d");
+        if (!ctx2d) throw new Error("canvas unavailable");
+        // Bilinear default blurs module edges; QR content is binary.
+        ctx2d.imageSmoothingEnabled = false;
+        ctx2d.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        bitmap.close();
+        const blob: Blob | null = await new Promise((resolve) =>
+          canvas.toBlob((b) => resolve(b), "image/png")
+        );
+        if (!blob) throw new Error("encode failed");
+        payload = new File([blob], "qr.png", { type: "image/png" });
       }
-      const scale = Math.min(1, 512 / Math.max(bitmap.width, bitmap.height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-      const ctx2d = canvas.getContext("2d");
-      if (!ctx2d) throw new Error("canvas unavailable");
-      ctx2d.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      bitmap.close();
-      const blob: Blob | null = await new Promise((resolve) =>
-        canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85)
-      );
-      if (!blob) throw new Error("encode failed");
       const formData = new FormData();
-      formData.append("file", new File([blob], "qr.jpg", { type: "image/jpeg" }));
+      formData.append("file", payload);
       const res = await uploadAccountQr(editAccountData.id, formData);
       if (res.error || !res.success || !("path" in res) || !res.path) {
         setQrError(res.error || "Unable to save the QR code. Please try again.");
@@ -116,7 +142,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
       }
       // Cache the bytes we already hold: the next display open must not pay
       // a download for bytes that just passed through here.
-      await putQrBlob(editAccountData.id, blob);
+      await putQrBlob(editAccountData.id, payload);
       setQrPath(res.path);
       setQrUrl(null);
     } catch {

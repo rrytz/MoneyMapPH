@@ -199,15 +199,26 @@ export async function uploadAccountQr(accountId: string, formData: FormData) {
   if (!account) return { error: "Account not found." };
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  if (!sniffImageKind(bytes)) {
+  // Content kind comes from magic bytes, never the extension or the
+  // client-asserted MIME - both lie (iOS omits the type; extensions rename).
+  // Unidentified input is rejected, not guessed.
+  const kind = sniffImageKind(bytes);
+  if (!kind) {
     return { error: "That file is not a PNG, JPEG, or WebP image." };
   }
+  const contentType =
+    kind === "png" ? "image/png" : kind === "webp" ? "image/webp" : "image/jpeg";
+  const ext = kind === "png" ? "png" : kind === "webp" ? "webp" : "jpg";
 
-  const path = `${user.id}/${accountId}.jpg`;
+  const path = `${user.id}/${accountId}.${ext}`;
+  // Previous key, if any: a kind change moves the object (png now, jpg
+  // before), so the old key must go AFTER the new write lands. Same-key
+  // re-uploads overwrite in place and skip this.
+  const previousPath = account.qr_image_path || null;
   try {
     const { error: uploadError } = await supabase.storage
       .from(QR_BUCKET)
-      .upload(path, bytes, { contentType: "image/jpeg", upsert: true });
+      .upload(path, bytes, { contentType, upsert: true });
     if (uploadError) throw uploadError;
 
     const { error: writeError } = await supabase
@@ -216,6 +227,10 @@ export async function uploadAccountQr(accountId: string, formData: FormData) {
       .eq("id", accountId)
       .eq("user_id", user.id);
     if (writeError) throw writeError;
+
+    if (previousPath && previousPath !== path) {
+      await supabase.storage.from(QR_BUCKET).remove([previousPath]);
+    }
 
     revalidatePath("/accounts");
     revalidateUserFinancialCache(user.id);
@@ -236,14 +251,23 @@ export async function removeAccountQr(accountId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  const path = `${user.id}/${accountId}.jpg`;
+  // The stored key, not a reconstructed one: keys now carry their true
+  // extension, so rebuilding `{id}.jpg` would miss png-keyed objects.
+  const { data: row } = await supabase
+    .from("accounts")
+    .select("qr_image_path")
+    .eq("id", accountId)
+    .eq("user_id", user.id)
+    .single();
   try {
     await supabase
       .from("accounts")
       .update({ qr_image_path: null })
       .eq("id", accountId)
       .eq("user_id", user.id);
-    await supabase.storage.from(QR_BUCKET).remove([path]);
+    if (row?.qr_image_path) {
+      await supabase.storage.from(QR_BUCKET).remove([row.qr_image_path]);
+    }
     revalidatePath("/accounts");
     revalidateUserFinancialCache(user.id);
     return { success: true };

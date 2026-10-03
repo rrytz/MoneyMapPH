@@ -228,7 +228,11 @@ export function QrDisplayModal({ account, open, onOpenChange }: QrDisplayModalPr
                   key={url}
                   src={url}
                   alt={`Receive QR code for ${account?.name ?? "account"}`}
-                  className="h-auto w-[min(80vmin,100%)] min-w-[260px] rounded-lg"
+                  // pixelated, not smoothed: QR modules are binary edges, and
+                  // smoothing invents gray between them. Nearest-neighbor keeps
+                  // edges crisp at any upscale. Cosmetic for photos, load-bearing
+                  // for codes.
+                  className="h-auto w-[min(80vmin,100%)] min-w-[260px] rounded-lg [image-rendering:pixelated]"
                 />
               )}
             </div>

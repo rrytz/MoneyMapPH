@@ -7,11 +7,12 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs"
-import { extname, isAbsolute, join, relative, resolve } from "node:path"
+import { extname, isAbsolute, join, resolve } from "node:path"
 import {
   DEFAULT_MODEL,
   type InputImage,
   NanoBananaError,
+  containsPath,
   extensionFor,
   generateImage,
   slugify,
@@ -26,32 +27,12 @@ const INPUT_MIME: Record<string, string> = {
   ".webp": "image/webp",
 }
 
-// Containment for `inputImage`: is `target` inside `root`?
-//
-// `..` traversal and absolute paths reach anywhere on the machine, and whatever
-// they reach is base64-encoded and POSTED to a third-party API. Measured before
-// this guard: a file outside the project directory was read in full and sent.
-// The tool's scope is the project it runs in; outside it is a refusal.
-//
-// Comparison is on RESOLVED paths via path.relative, never a string prefix:
-// `C:\proj-evil\x.png` startsWith `C:\proj`, so a naive prefix test would
-// accept a sibling directory that shares a name with the project. path.relative
-// compares whole segments.
-//
-// Deliberately NOT a bare `rel.startsWith("..")` either: a file the project
-// legitimately contains can be named `..data\x.png` and that is not an escape.
-// Only a leading `..` SEGMENT is one.
-function containsPath(root: string, target: string): boolean {
-  const rel = relative(root, target)
-  // Empty means target === root. Inside by definition; the is-a-file check
-  // downstream rejects it on its own merits.
-  if (rel === "") return true
-  // relative() returns an absolute path when the two are on different drives,
-  // or one is UNC. That is never "inside" a local root.
-  if (isAbsolute(rel)) return false
-  const [firstSegment] = rel.split(/[\\/]/)
-  return firstSegment !== ".."
-}
+// Containment for `inputImage` lives in the client library, as `containsPath`.
+// It is a filesystem-boundary control, not tool behaviour: it has a committed
+// test suite (`nano-banana-containment.test.ts`) and it cannot be imported from
+// HERE at all -- this file resolves `../plugins/lib/nano-banana-client.ts`,
+// which is the deployment layout, so nothing in this repository can execute it.
+// A control that cannot be executed by a test is a control that cannot be.
 
 // Windows device names, matched against the WHOLE stem.
 //
@@ -145,20 +126,34 @@ function writeOutput(file: string, bytes: Uint8Array): number {
   // The constraint is "never leave a zero-byte image on disk", and throwing a
   // message that tells the caller to delete it leaves the file exactly where
   // it is. Remove it here, then fail.
+  //
+  // `unlinkSync` is allowed to fail -- a file held open by another process, a
+  // scanner with it locked, a read-only directory -- and the previous wording
+  // said "the file was deleted rather than left behind" unconditionally, so
+  // that failure produced a message asserting the opposite of what was on
+  // disk. The cleanup logic was right; only the claim was wrong. So the
+  // deletion is recorded as a fact and the message reports that fact, in both
+  // directions.
   if (written === 0) {
+    let deleted = false
     try {
       unlinkSync(file)
+      deleted = true
     } catch {
-      /* the file is already the problem; the message below names the path */
+      /* stays false: the file is still on disk, and the message says so */
     }
+
+    const cleanup = deleted
+      ? `The file was deleted rather than left behind; nothing usable was produced.`
+      : `The file could NOT be deleted and is STILL ON DISK at ${file} ` +
+        `(0 bytes) -- delete it by hand. Nothing usable was produced.`
+
     throw new NanoBananaError(
       "empty-image",
       statReadBack
-        ? `Wrote ${file} and it is 0 bytes on disk. The file was deleted ` +
-            `rather than left behind; nothing usable was produced.`
+        ? `Wrote ${file} and it is 0 bytes on disk. ${cleanup}`
         : `Wrote ${file} but it could not be read back from disk at all, so ` +
-            `there is no image to report. The file was deleted rather than ` +
-            `left behind; nothing usable was produced.`
+          `there is no image to report. ${cleanup}`
     )
   }
 

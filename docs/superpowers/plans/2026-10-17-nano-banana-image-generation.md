@@ -26,26 +26,41 @@
 
 ## File Structure
 
-| Path | Responsibility |
-|---|---|
-| `~/.config/opencode/plugins/lib/nano-banana-client.ts` | Pure logic: request building, response parsing, error classification, filename slugging. No OpenCode imports, no filesystem, no `process`. |
-| `~/.config/opencode/plugins/lib/nano-banana-client.test.ts` | Unit tests, stubbed `fetch`, no network. |
-| `~/.config/opencode/tools/nano-banana.ts` | OpenCode wiring: arg schema, reading the input image, writing the output file. |
-| `~/.config/opencode/commands/nanobanana.md` | Slash command that invokes the tool. |
-| `~/.config/opencode/opencode.json` | One added line: the permission gate. |
+> **AMENDED (pre-flight, user-approved).** This plan originally targeted
+> `~/.config/opencode/` directly. Those paths are **not in a git repository**, so
+> per-task commits and review diffs were impossible and Task 5's backup would
+> have been the only versioned artifact. **Authoring now happens in this repo**
+> under `docs/harness/nano-banana/`; the files are then **copied** to
+> `~/.config/opencode/` in Task 5. The tool still runs globally — only the
+> authoring location moved.
 
-`~/.config/opencode/` is **not a git repository** and is **managed by ECC** (`ecc-install-state.json` tracks every file in `tools/` and `plugins/lib/` as installed from `ecc-universal`). Consequences, handled in Task 5:
+| Author here (versioned) | Deploy to (unversioned) | Responsibility |
+|---|---|---|
+| `docs/harness/nano-banana/nano-banana-client.ts` | `~/.config/opencode/plugins/lib/` | Pure logic: request building, response parsing, error classification, filename slugging. No OpenCode imports, no filesystem, no `process`. |
+| `docs/harness/nano-banana/nano-banana-client.test.ts` | `~/.config/opencode/plugins/lib/` | Unit tests, stubbed `fetch`, no network. |
+| `docs/harness/nano-banana/nano-banana.ts` | `~/.config/opencode/tools/` | OpenCode wiring: arg schema, reading the input image, writing the output file. |
+| `docs/harness/nano-banana/nanobanana.md` | `~/.config/opencode/commands/` | Slash command that invokes the tool. |
+| — (not authored) | `~/.config/opencode/opencode.json` | One added line: the permission gate. Edited in place by Task 3. |
+| `docs/harness/nano-banana/README.md` | — | Restore instructions. |
 
-- No commit steps are possible for these files. Do not invent them.
-- An `ecc repair` or ECC update may overwrite or remove the new files. Task 5 copies them into the money-manager repo as a backup of record.
+Tasks 1, 2 and 4 author into `docs/harness/nano-banana/` and are committed here.
+Task 3 edits the live global config directly and **cannot** be committed — take
+the `.bak-nanobanana` backup it mandates. Task 5 copies Tasks 1/2/4 into place
+and adds the README.
+
+`~/.config/opencode/` remains **ECC-managed** (`ecc-install-state.json` tracks
+every file in `tools/` and `plugins/lib/` as installed from `ecc-universal`), so
+the in-repo copy is also the recovery path after an `ecc repair`.
 
 ---
 
 ### Task 1: Client library
 
 **Files:**
-- Create: `~/.config/opencode/plugins/lib/nano-banana-client.ts`
-- Test: `~/.config/opencode/plugins/lib/nano-banana-client.test.ts`
+- Create: `docs/harness/nano-banana/nano-banana-client.ts`
+- Test: `docs/harness/nano-banana/nano-banana-client.test.ts`
+
+Both land side by side, so the test's `./nano-banana-client.ts` import resolves in-repo. This task does **not** touch `~/.config/opencode/`.
 
 **Interfaces:**
 - Consumes: nothing. This is the base unit.
@@ -484,7 +499,15 @@ Expected: `# pass 18`, `# fail 0`. If any fail, read the failure text before cha
 ### Task 2: Tool wiring
 
 **Files:**
-- Create: `~/.config/opencode/tools/nano-banana.ts`
+- Create: `docs/harness/nano-banana/nano-banana.ts`
+
+**Import-path caveat (consequence of authoring in-repo):** the tool imports the
+lib as `../plugins/lib/nano-banana-client.ts`, which is correct **after** the
+Task 5 copy into `~/.config/opencode/tools/`. In the repo it does not resolve,
+and it is not meant to — the repo copy is a backup, deployed verbatim. Therefore
+**Step 2 below cannot run in-repo**; it is deferred to Task 5, where the file is
+in its real location. Do not "fix" the import to `./nano-banana-client.ts` —
+that would break the deployed copy.
 
 **Interfaces:**
 - Consumes: `generateImage`, `extensionFor`, `slugify`, `NanoBananaError`, `InputImage` from `../plugins/lib/nano-banana-client.ts`.
@@ -619,17 +642,21 @@ export default tool({
 })
 ```
 
-- [ ] **Step 2: Verify the tool file loads**
+- [ ] **Step 2: Verify the tool file parses (syntax only, no imports resolved)**
 
-Run:
+The tool's import of the lib does not resolve in-repo (see the caveat above), so
+verify syntax without executing the import graph:
 
 ```powershell
-node --experimental-strip-types -e "import('file:///C:/Users/RITZ/.config/opencode/tools/nano-banana.ts').then(m=>console.log('loaded, default export:', typeof m.default)).catch(e=>{console.error('LOAD FAILED:', e.message); process.exit(1)})"
+cd C:\xampp\htdocs\money-manager
+node --experimental-strip-types --check docs\harness\nano-banana\nano-banana.ts
 ```
 
-Expected: `loaded, default export: object`
+Expected: no output, exit code 0.
 
-If it fails with a module-resolution error for `@opencode-ai/plugin/tool`, that package is only resolvable from inside the OpenCode runtime. In that case skip this step and rely on the Task 5 smoke test — **but say so explicitly in the handoff**, rather than reporting the tool as verified.
+This does **not** prove the tool loads inside OpenCode — that requires the
+deployed location and is deferred to Task 5 Step 3.5. Say so in the report
+rather than claiming the tool is verified.
 
 - [ ] **Step 3: Confirm no barrel edit is needed**
 
@@ -696,7 +723,9 @@ If no prompt appears, the gate is not firing. Do not proceed — an ungated tool
 ### Task 4: Slash command
 
 **Files:**
-- Create: `~/.config/opencode/commands/nanobanana.md`
+- Create: `docs/harness/nano-banana/nanobanana.md`
+
+Authored in-repo; copied to `~/.config/opencode/commands/` in Task 5.
 
 **Interfaces:**
 - Consumes: the `nano-banana` tool from Task 2.

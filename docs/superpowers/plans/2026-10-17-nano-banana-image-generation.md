@@ -24,6 +24,30 @@
 
 ---
 
+## Plan Corrections Log
+
+Implementation and review found real defects **in this plan's own code and verification steps**. The shipped code is authoritative; this plan documents intent. Where they differ, the shipped code governs.
+
+Recorded so a future reader does not "restore" a broken assertion:
+
+| # | Defect in this plan | Resolution | Shipped at |
+|---|---|---|---|
+| P1 | Task 1's test asserted `extensionFor("image/webp") === ".png"` while its implementation mapped webp to `.webp`. The task could never go green. | Kept the implementation (deleting the mapping would write WebP bytes with a `.png` extension). Re-probed the fallback with `image/gif`, since webp was not an *unknown* mime type. | `4a8e7f4` |
+| P2 | Task 1's `empty-image` test passed `data: ""`, rejected earlier as `no-image-in-response`. The named branch was **structurally unreachable** and the two-member `.includes()` could not distinguish the outcomes. | Split into two strict tests; the `empty-image` case uses whitespace, which is non-empty but decodes to 0 bytes. | `4a8e7f4` |
+| P3 | **Task 2 Step 2's verification command was vacuous.** `node --experimental-strip-types --check <file>.ts` parses as CommonJS; any file containing `import`/`export` is diverted to ESM detection and the check silently no-ops. Reproduced: it exits 0 on `export const y: number = 1 &&& ***`. A no-import control *does* fail, so the command looks alive. | **Task 2 Step 2 is deleted.** It manufactured a green run — a verifier reporting "fine" while doing nothing. Task 5 verifies by importing the module in its deployed location. | `05eacdb` |
+| P4 | Task 1 Steps 1/3/4 name `~/.config/opencode/...` paths and Step 5 says "do not run `git add` here" — all stale after the pre-flight amendment, and mutually exclusive with the amended File Structure. | Superseded by the amendment. Authoring is in-repo. | `86fac70` |
+| P5 | The plan prescribed two unguarded awaits (`doFetch`, `response.json()`) plus a silent `.catch(() => "")`, none satisfying the Global Constraint "errors must report what was actually found" — the constraint this same document imposes. | Wrapped both; error-body reads report their own failure. | `a61f9dc`, `a2ed820` |
+| P6 | The zero-byte guard said "Delete it and report the failure" — leaving the 0-byte file on disk, so it did not satisfy the constraint it enforced. | Tool now `unlinkSync`s before throwing. | `05eacdb` |
+| P7 | `args.name` is unbounded; `prompt.slice(0, 60)` bounds only the default stem. A 256-char stem threw a misleading `ENOENT`. | `safeStem()` truncates post-slug, before the reserved-name check. | `05eacdb` |
+| P8 | The plan asserted `writeFileSync` throws on Windows reserved names. **Measurement says otherwise** — it wrote `con.png`, `nul.png`, `com1.png` without error. | Guard kept but labelled **speculative insurance**, not a fix. It prevents no observable failure. | `05eacdb` |
+
+### Task 5 dependencies discovered during implementation
+
+- **Task 2 Step 3's conclusion rests on an unverified premise.** `tools/index.ts` is an *explicit export list*, not a glob, and does not include `nano-banana.ts`. "No barrel edit needed" holds **only if** OpenCode auto-discovers files in `tools/`. Task 5 must verify the tool actually registers. If it does not, the tool silently never appears.
+- **`MODULE_TYPELESS_PACKAGE_JSON` warning** fires on every OpenCode load once these files are deployed, because the nearest `package.json` sets no `"type": "module"`. Benign; expect it as known noise rather than a surprise.
+
+---
+
 ## File Structure
 
 > **AMENDED (pre-flight, user-approved).** This plan originally targeted
@@ -38,6 +62,8 @@
 |---|---|---|
 | `docs/harness/nano-banana/nano-banana-client.ts` | `~/.config/opencode/plugins/lib/` | Pure logic: request building, response parsing, error classification, filename slugging. No OpenCode imports, no filesystem, no `process`. |
 | `docs/harness/nano-banana/nano-banana-client.test.ts` | `~/.config/opencode/plugins/lib/` | Unit tests, stubbed `fetch`, no network. |
+| `docs/harness/nano-banana/path-containment.ts` | `~/.config/opencode/plugins/lib/` | **Added in implementation.** `containsPath`, both-sided `realpathSync` containment. Own module so the client library stays filesystem-free. |
+| `docs/harness/nano-banana/nano-banana-containment.test.ts` | `~/.config/opencode/plugins/lib/` | **Added in implementation.** Committed tests for the containment control — a security control with no durable tests is not shippable. |
 | `docs/harness/nano-banana/nano-banana.ts` | `~/.config/opencode/tools/` | OpenCode wiring: arg schema, reading the input image, writing the output file. |
 | `docs/harness/nano-banana/nanobanana.md` | `~/.config/opencode/commands/` | Slash command that invokes the tool. |
 | — (not authored) | `~/.config/opencode/opencode.json` | One added line: the permission gate. Edited in place by Task 3. |

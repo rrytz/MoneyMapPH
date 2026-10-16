@@ -91,7 +91,7 @@ silently never fires, which is worse than no rule because it reads as coverage.
 
 ## Output location
 
-`assets/generated/` at project root.
+`assets/generated/` at project root. **Confirmed by the user.**
 
 Not `public/`. `public/` holds PWA icons and splash screens that ship to users
 and get bundled by Next.js; generated drafts have no business being web-served.
@@ -144,9 +144,16 @@ real call can, and only the user can authorise spending on it.
 Batching, upscaling, style presets, automatic git commit of results, image
 metadata editing, and non-Google providers.
 
-## Open questions for the user
+## Fallback if the tool cannot be gated (decided)
 
-None blocking. If the V1 permission investigation (above) shows custom tools
-cannot be gated, the fallback is to expose the tool to the command only and have
-the agent shell out to the command — at the cost of the agent being able to invoke
-it without approval, which is the outcome to avoid.
+The user has decided: **if 1.18.29 cannot gate a custom tool behind approval, the
+capability ships as the command only, and agent access is dropped entirely.**
+
+The agent therefore loses the ability to generate images itself. That is the
+accepted cost. An ungated tool would spend paid API quota without consent, which
+is the outcome the gate exists to prevent — and shipping a gate that silently
+never fires would be worse still, because it reads as protection.
+
+Implementation consequence: if the V1 investigation comes back negative, omit
+`tools/nano-banana.ts` and its `tools/index.ts` export entirely. The command
+invokes the lib directly. Do not ship both forms.

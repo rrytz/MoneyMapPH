@@ -119,6 +119,19 @@ export function slugify(name: string): string {
   return slug.length > 0 ? slug : "image"
 }
 
+// A swallowed read produces a failure message that names nothing -- and
+// "the body was empty" and "the body could not be read" are different facts,
+// so this reports which one happened instead of collapsing both to "".
+async function readErrorBody(response: Response): Promise<string> {
+  try {
+    return await response.text()
+  } catch (err) {
+    return `(error body could not be read: ${
+      err instanceof Error ? err.message : String(err)
+    })`
+  }
+}
+
 export async function generateImage(
   opts: GenerateOptions
 ): Promise<GeneratedImage> {
@@ -133,17 +146,29 @@ export async function generateImage(
 
   const model = opts.model ?? DEFAULT_MODEL
   const doFetch = opts.fetchImpl ?? fetch
-  const response = await doFetch(ENDPOINT, {
-    method: "POST",
-    headers: {
-      "x-goog-api-key": opts.apiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(buildRequestBody({ ...opts, model })),
-  })
+  let response: Response
+  try {
+    response = await doFetch(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": opts.apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(buildRequestBody({ ...opts, model })),
+    })
+  } catch (err) {
+    // DNS failure, TLS error, offline machine: fetch rejects before any
+    // response exists, so there is no status to report -- only the transport.
+    throw new NanoBananaError(
+      "http-error",
+      `No response from ${ENDPOINT}: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    )
+  }
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "")
+    const body = await readErrorBody(response)
     if (response.status === 429) {
       const retryAfter = response.headers.get("retry-after")
       throw new NanoBananaError(
@@ -159,9 +184,27 @@ export async function generateImage(
     )
   }
 
-  const json = await response.json()
+  // A 200 with a non-JSON body is a real possibility -- a corporate proxy
+  // interstitial or a WAF challenge page -- and response.json() would surface
+  // it as a bare SyntaxError with no kind and no hint what was actually found.
+  const text = await response.text()
+  let json: unknown
+  try {
+    json = JSON.parse(text)
+  } catch {
+    throw new NanoBananaError(
+      "http-error",
+      `Gemini returned ${response.status} with a body that is not JSON ` +
+        `(content-type: ${response.headers.get("content-type") ?? "(none)"}). ` +
+        `First 500 chars: ${text.slice(0, 500) || "(empty body)"}`
+    )
+  }
+
   const parsed = parseInteraction(json)
-  const bytes = new Uint8Array(Buffer.from(parsed.data, "base64"))
+  // Buffer is already a Uint8Array; wrapping it copied the whole image for
+  // nothing. A hand-rolled base64 decoder was rejected instead -- it throws
+  // InvalidCharacterError on invalid input, a third untyped failure path.
+  const bytes = Buffer.from(parsed.data, "base64")
 
   if (bytes.length === 0) {
     throw new NanoBananaError(

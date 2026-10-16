@@ -43,6 +43,44 @@ describe("buildRequestBody", () => {
     })
   })
 
+  test("emits response_format when any of the image options is supplied", () => {
+    const body = buildRequestBody({
+      prompt: "a red cube",
+      apiKey: "k",
+      mimeType: "image/webp",
+      aspectRatio: "16:9",
+      imageSize: "2K",
+    })
+    assert.deepEqual(body.response_format, {
+      type: "image",
+      mime_type: "image/webp",
+      aspect_ratio: "16:9",
+      image_size: "2K",
+    })
+  })
+
+  test("response_format carries only the options that were supplied", () => {
+    const body = buildRequestBody({
+      prompt: "a red cube",
+      apiKey: "k",
+      aspectRatio: "1:1",
+    })
+    assert.deepEqual(body.response_format, {
+      type: "image",
+      aspect_ratio: "1:1",
+    })
+    assert.ok(!("mime_type" in (body.response_format as object)))
+    assert.ok(!("image_size" in (body.response_format as object)))
+  })
+
+  // An absent key and a key present but empty are different facts, so this
+  // asserts the key is missing rather than merely falsy.
+  test("omits response_format entirely when no image option is supplied", () => {
+    const body = buildRequestBody({ prompt: "a red cube", apiKey: "k" })
+    assert.ok(!("response_format" in body), "response_format was present")
+    assert.deepEqual(Object.keys(body).sort(), ["input", "model"])
+  })
+
   test("text part comes first so it is read before the image", () => {
     const body = buildRequestBody({
       prompt: "make it blue",
@@ -141,6 +179,111 @@ describe("generateImage", () => {
     await generateImage({ prompt: "a red cube", apiKey: "secret", fetchImpl })
     assert.equal(seenUrl, ENDPOINT)
     assert.equal(seenKey, "secret")
+  })
+
+  // Every other stub in this file returns a canned response and ignores the
+  // request entirely, so a regression that dropped the prompt from the wire
+  // body -- or sent the wrong shape -- would leave all of them green.
+  test("serializes the prompt into the request body it puts on the wire", async () => {
+    let seenBody: unknown = undefined
+    const fetchImpl = (async (_url: string, init: RequestInit) => {
+      assert.equal(typeof init.body, "string", "init.body was not a string")
+      seenBody = JSON.parse(init.body as string)
+      return jsonResponse({
+        output_image: { data: PNG_B64, mime_type: "image/png" },
+      })
+    }) as unknown as typeof fetch
+
+    await generateImage({
+      prompt: "a red cube on grass",
+      apiKey: "k",
+      fetchImpl,
+    })
+
+    assert.ok(seenBody !== undefined, "the stub never observed init.body")
+    const body = seenBody as Record<string, unknown>
+    assert.deepEqual(body.input, [
+      { type: "text", text: "a red cube on grass" },
+    ])
+    assert.equal(body.model, DEFAULT_MODEL)
+  })
+
+  test("an explicit model reaches the wire body and the returned result", async () => {
+    let seenBody: unknown = undefined
+    const fetchImpl = (async (_url: string, init: RequestInit) => {
+      seenBody = JSON.parse(init.body as string)
+      return jsonResponse({
+        output_image: { data: PNG_B64, mime_type: "image/png" },
+      })
+    }) as unknown as typeof fetch
+
+    const result = await generateImage({
+      prompt: "x",
+      apiKey: "k",
+      model: "gemini-nano-banana-2.5",
+      fetchImpl,
+    })
+
+    assert.equal((seenBody as Record<string, unknown>).model, "gemini-nano-banana-2.5")
+    assert.equal(result.model, "gemini-nano-banana-2.5")
+  })
+
+  // The catch here could not fail if the read succeeded, so it is asserted
+  // rather than assumed: a helper that swallows its own failure is the defect
+  // it was written to replace.
+  test("says the error body could not be read instead of reporting it empty", async () => {
+    const fetchImpl = (async () =>
+      ({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+        headers: new Headers(),
+        text: async () => {
+          throw new Error("stream closed before the body finished")
+        },
+      }) as unknown as Response) as unknown as typeof fetch
+
+    await assert.rejects(
+      generateImage({ prompt: "x", apiKey: "k", fetchImpl }),
+      (err: unknown) => {
+        assert.ok(err instanceof NanoBananaError)
+        assert.equal(err.kind, "http-error")
+        assert.match(err.message, /could not be read/)
+        assert.match(err.message, /stream closed before the body finished/)
+        return true
+      }
+    )
+  })
+
+  test("200 with a non-JSON body is classified, not a raw SyntaxError", async () => {
+    const fetchImpl = (async () =>
+      new Response("<html>proxy interstitial</html>", {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      })) as unknown as typeof fetch
+
+    await assert.rejects(
+      generateImage({ prompt: "x", apiKey: "k", fetchImpl }),
+      (err: unknown) => {
+        assert.ok(err instanceof NanoBananaError)
+        assert.equal(err.kind, "http-error")
+        assert.match(err.message, /text\/html/)
+        assert.match(err.message, /proxy interstitial/)
+        return true
+      }
+    )
+  })
+
+  test("a transport failure is classified, not a raw TypeError", async () => {
+    const fetchImpl = (async () => {
+      throw new TypeError("fetch failed")
+    }) as unknown as typeof fetch
+
+    await assert.rejects(
+      generateImage({ prompt: "x", apiKey: "k", fetchImpl }),
+      (err: unknown) =>
+        err instanceof NanoBananaError && err.kind === "http-error"
+    )
   })
 
   test("returns decoded bytes on success", async () => {

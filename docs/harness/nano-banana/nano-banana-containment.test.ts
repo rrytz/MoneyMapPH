@@ -14,7 +14,7 @@ import {
 } from "node:fs"
 import { join, parse } from "node:path"
 import { tmpdir } from "node:os"
-import { containsPath } from "./nano-banana-client.ts"
+import { containsPath } from "./path-containment.ts"
 
 // `containsPath` is the containment control: whatever it accepts is read in full
 // and POSTed to a third-party API. It is therefore tested against real

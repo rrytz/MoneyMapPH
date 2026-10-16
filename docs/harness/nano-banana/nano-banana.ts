@@ -12,11 +12,11 @@ import {
   DEFAULT_MODEL,
   type InputImage,
   NanoBananaError,
-  containsPath,
   extensionFor,
   generateImage,
   slugify,
 } from "../plugins/lib/nano-banana-client.ts"
+import { containsPath } from "../plugins/lib/path-containment.ts"
 
 const OUTPUT_DIR = "assets/generated"
 
@@ -27,12 +27,20 @@ const INPUT_MIME: Record<string, string> = {
   ".webp": "image/webp",
 }
 
-// Containment for `inputImage` lives in the client library, as `containsPath`.
-// It is a filesystem-boundary control, not tool behaviour: it has a committed
-// test suite (`nano-banana-containment.test.ts`) and it cannot be imported from
-// HERE at all -- this file resolves `../plugins/lib/nano-banana-client.ts`,
-// which is the deployment layout, so nothing in this repository can execute it.
-// A control that cannot be executed by a test is a control that cannot be.
+// Containment for `inputImage` is its own module, `containsPath` in
+// `../plugins/lib/path-containment.ts`, NOT the client library. It is a
+// filesystem-boundary control -- it calls `realpathSync` -- and the client
+// library is specified pure (no OpenCode imports, no filesystem, no `process`)
+// so that its tests run as pure unit tests with a stubbed `fetch` and no
+// filesystem fixture. It has a committed suite
+// (`nano-banana-containment.test.ts`, 19 tests against real directories, real
+// files and real Windows junctions).
+//
+// Both modules sit in `plugins/lib/` after deployment, so both are reached
+// with `../plugins/lib/...` from `tools/`. Neither is importable from HERE at
+// all -- these paths are the deployment layout, so nothing in this repository
+// can execute them. A control that cannot be executed by a test is a control
+// that cannot be.
 
 // Windows device names, matched against the WHOLE stem.
 //

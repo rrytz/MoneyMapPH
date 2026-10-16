@@ -1,4 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "google/gemini-3.8-flash",
   "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"]
 }

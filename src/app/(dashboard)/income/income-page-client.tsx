@@ -193,10 +193,9 @@ export function IncomePageClient({
         <TabsContent value="income" className="space-y-6">
           {/* The answer first: calendar-month earnings. Counts support the
               figure instead of competing with it as peer cards. */}
-          <FintechCard>
-            <FintechCardContent className="p-0">
-              <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
-                <div className="p-6 sm:p-8">
+          <section className="border-t border-b border-border">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="py-4 pl-0 pr-4 border-b border-border lg:border-b-0 lg:border-r">
                   <div>
                     <span className="text-xs font-medium text-muted-foreground block">Calendar month earnings</span>
                     <CurrencyDisplay
@@ -205,14 +204,14 @@ export function IncomePageClient({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
-                  <div className="p-6">
+                <div className="grid grid-cols-2">
+                  <div className="py-4 px-4">
                     <span className="block text-xs text-muted-foreground">Logged entries</span>
                     <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                       {optimisticMonthEntries.length}
                     </p>
                   </div>
-                  <div className="border-l border-border p-6">
+                  <div className="py-4 px-4 pr-0 border-l border-border">
                     <span className="block text-xs text-muted-foreground">Income channels</span>
                     <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                       {Object.keys(sourceTotals).length}
@@ -220,8 +219,7 @@ export function IncomePageClient({
                   </div>
                 </div>
               </div>
-            </FintechCardContent>
-          </FintechCard>
+          </section>
 
           {/* Income List Section */}
           <FintechCard className="p-0 overflow-hidden">
@@ -280,7 +278,7 @@ export function IncomePageClient({
                       ledgers, one row height. */}
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-foreground">
+                        <span className="font-medium text-[15px] text-foreground">
                           {entry.source?.name || "Income"}
                         </span>
                         <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">
@@ -288,11 +286,11 @@ export function IncomePageClient({
                         </Badge>
                       </div>
                       {entry.notes && (
-                        <p className="text-xs text-muted-foreground truncate">{entry.notes}</p>
+                        <p className="text-[11px] font-normal text-muted-foreground truncate">{entry.notes}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-4">
-                      <CurrencyDisplay amount={Number(entry.amount)} className="figure-inline text-sm font-bold text-sulpot-deep dark:text-sulpot-bright" />
+                      <CurrencyDisplay amount={Number(entry.amount)} className="figure-inline text-[15px] font-medium text-sulpot-deep dark:text-sulpot-bright" />
                       <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-ink-muted hover:text-foreground" onClick={() => handleEdit(entry)}>
                           <Pencil className="h-3.5 w-3.5" />

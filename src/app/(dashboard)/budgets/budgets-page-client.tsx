@@ -189,17 +189,16 @@ export function BudgetsPageClient({
           surface; targeted and untargeted spending support that comparison
           instead of reading as four unrelated KPI cards. */}
       {statuses.length > 0 && (
-        <FintechCard>
-          <FintechCardContent className="p-0">
-            <div className="grid sm:grid-cols-2">
-              <div className="p-6 sm:p-8">
+        <section className="border-t border-b border-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2">
+            <div className="py-4 pl-0 pr-4 border-b border-border sm:border-b-0 sm:border-r">
                 <span className="block text-xs font-medium text-muted-foreground">Total budgeted</span>
                 <CurrencyDisplay
                   amount={totalBudgeted}
                   className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
                 />
               </div>
-              <div className="border-t border-border p-6 sm:border-l sm:border-t-0 sm:p-8">
+              <div className="py-4 px-4 pr-0">
                 <span className="block text-xs font-medium text-muted-foreground">Calendar month spending</span>
                 <CurrencyDisplay
                   amount={actualTotal}
@@ -207,8 +206,7 @@ export function BudgetsPageClient({
                 />
               </div>
             </div>
-          </FintechCardContent>
-        </FintechCard>
+        </section>
       )}
 
       {/* Main Budget Grid */}

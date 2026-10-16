@@ -118,7 +118,7 @@ export function RecentTransactions({ transactions, hideDate = false }: RecentTra
                         {getIconForTitle(tx.title, tx.type)}
                       </div>
                       <div className="min-w-0">
-                        <span className="font-semibold text-foreground text-xs block truncate">{tx.title}</span>
+                        <span className="font-medium text-[15px] text-foreground block truncate">{tx.title}</span>
                         {/* Tertiary line: account when tagged, recency always.
                             Truncates instead of widening - the table must not
                             grow a column for metadata. Null account renders
@@ -138,7 +138,7 @@ export function RecentTransactions({ transactions, hideDate = false }: RecentTra
                     </Badge>
                   </td>
                   {!hideDate && (
-                    <td className="py-2 px-4 text-muted-foreground font-medium">
+                    <td className="py-2 px-4 text-muted-foreground text-[11px] font-normal">
                       {formatDate(tx.date, "MMM d, yyyy")}
                     </td>
                   )}
@@ -147,7 +147,7 @@ export function RecentTransactions({ transactions, hideDate = false }: RecentTra
                       with a bare formatCurrency, so it carried no role at all. */}
                   <td
                     className={cn(
-                      "py-2 px-5 text-right font-bold tabular-nums text-xs figure-inline",
+                      "py-2 px-5 text-right font-medium tabular-nums text-[15px] figure-inline",
                       isIncome ? "text-sulpot-deep dark:text-sulpot-bright" : "text-rose-600 dark:text-rose-400"
                     )}
                   >

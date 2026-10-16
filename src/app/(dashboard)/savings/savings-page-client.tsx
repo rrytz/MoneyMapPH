@@ -329,31 +329,29 @@ export function SavingsPageClient({
 
       {/* The page's answer first: accumulated savings. Completion and target
           context sit beside it as supporting readouts, not peer cards. */}
-      <FintechCard>
-        <FintechCardContent className="p-0">
-          <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="p-6 sm:p-8">
+      <section className="border-t border-b border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="py-4 pl-0 pr-4 border-b border-border lg:border-b-0 lg:border-r">
               <span className="block text-xs font-medium text-muted-foreground">Total saved balance</span>
               <CurrencyDisplay
                 amount={totalSaved}
                 className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-sulpot-deep dark:text-sulpot-bright"
               />
             </div>
-            <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
-              <div className="p-6">
+            <div className="grid grid-cols-2">
+              <div className="py-4 px-4">
                 <span className="block text-xs text-muted-foreground">Overall completion</span>
                 <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
                   {Math.round(overallProgress)}%
                 </p>
               </div>
-              <div className="border-l border-border p-6">
+              <div className="py-4 px-4 pr-0 border-l border-border">
                 <span className="block text-xs text-muted-foreground">Combined goal targets</span>
                 <CurrencyDisplay amount={totalTarget} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-foreground" />
               </div>
             </div>
           </div>
-        </FintechCardContent>
-      </FintechCard>
+      </section>
 
       {/* Emergency Adequacy Alert Card */}
       {emergencyStatus.hasFund && (

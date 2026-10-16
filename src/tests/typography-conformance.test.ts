@@ -59,7 +59,7 @@ const FIGURE_MARKERS = ["type-ledger", "type-measurement", "figure-inline"] as c
  *
  * A single marker is the normal case. The exception is a genuine either/or,
  * where each branch of a ternary names one role and no branch is undecided —
- * e.g. KpiCard renders a percentage as type-measurement and an amount as
+ * e.g. a card rendering a percentage as type-measurement and an amount as
  * type-ledger. Two markers inside one string literal, or a marker plus an
  * undecided branch, is a contradiction and fails.
  */
@@ -80,7 +80,6 @@ const ROLE_CONTRACTS = [
   // Identity is the character voice only on this surface — the hero is the
   // largest ledger figure, so currency stays in Instrument.
   ["components/dashboard/balance-block.tsx", ["type-ledger", "type-character"]],
-  ["components/dashboard/kpi-card.tsx", ["type-section-label", "type-ledger"]],
   ["components/shared/page-header.tsx", ["type-page-title"]],
   ["components/layout/desktop-nav.tsx", ["type-nav", "type-nav-group"]],
   ["components/shared/tide-gauge.tsx", ["type-measurement"]],

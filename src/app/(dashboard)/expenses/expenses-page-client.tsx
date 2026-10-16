@@ -315,55 +315,29 @@ export function ExpensesPageClient({
         </div>
       </PageHeader>
 
-      {/* Top KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <FintechCard>
-          {/* No `p-6` here, and that is the whole fix. `FintechCard` already
-              applies `p-6`; this content applied it a second time, so every card
-              carried 22.5px of padding twice - 45px of whitespace per side, plus
-              the 2px border, which is the 47px band measured above the header row.
-
-              The header row lives INSIDE this content, so the content's padding
-              was never structural: `FintechCardContent` defaults to `pt-0` for a
-              body that butts up against a real `FintechCardHeader`, and there is
-              no such header here. Same reasoning and same local fix as
-              budgets-page-client.tsx:275-291.
-
-              Measured: card height 196px -> 151px at 1280px and 188px -> 143px at
-              390px, identical in both schemes. The residual dead space below the
-              content at 1280px is the three-column grid stretching all cards to
-              the tallest - a design call, deliberately not addressed. */}
-          <FintechCardContent className="space-y-3">
-            <div>
-              {/* Names the viewed month, not "calendar month". With a navigator
+      {/* Summary strip: one ruled section, not three cards. Label + value
+          per cell; hairlines separate, chrome removed. */}
+      <section className="border-t border-b border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-3">
+          <div className="py-4 pl-0 pr-4 border-b border-border sm:border-b-0 sm:border-r">
+            {/* Names the viewed month, not "calendar month". With a navigator
                   in the header the old label became actively wrong: paging back
                   to August left a card reading "Calendar month spend" beside a
                   picker saying August. The label states what it is showing. */}
               <span className="type-section-label block">{getMonthName(currentMonth)} {currentYear} spend</span>
-              <CurrencyDisplay amount={total} className="type-ledger tabular-nums font-semibold text-rose-600 dark:text-rose-400" />
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-
-        <FintechCard>
-          <FintechCardContent className="space-y-3">
-            <div>
+              <CurrencyDisplay amount={total} className="type-ledger mt-1 block text-[28px] font-semibold tabular-nums text-rose-600 dark:text-rose-400" />
+          </div>
+          <div className="py-4 px-4 border-b border-border sm:border-b-0 sm:border-r">
               <span className="type-section-label block">Top Category</span>
-              <p className="text-xl font-bold tracking-tight text-foreground truncate">{topCategory.name}</p>
+              <p className="mt-1 block text-[28px] font-semibold tracking-tight text-foreground truncate">{topCategory.name}</p>
               <p className="text-xs text-muted-foreground tabular-nums">₱{topCategory.amount.toLocaleString()}</p>
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-
-        <FintechCard>
-          <FintechCardContent className="space-y-3">
-            <div>
+          </div>
+          <div className="py-4 px-4 pr-0">
               <span className="type-section-label block">Items logged</span>
-              <p className="type-ledger font-semibold tabular-nums text-foreground">{count}</p>
-            </div>
-          </FintechCardContent>
-        </FintechCard>
-      </div>
+              <p className="type-ledger mt-1 block text-[28px] font-semibold tabular-nums text-foreground">{count}</p>
+          </div>
+        </div>
+      </section>
 
       {/* Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -465,13 +439,13 @@ export function ExpensesPageClient({
                       of claiming its maximum, so what truncates is a long
                       category name, never the title. */}
                   <div className="flex items-center gap-2.5 mb-1 min-w-0">
-                    <span className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{entry.title}</span>
+                    <span className="font-medium text-[15px] text-foreground truncate min-w-0 flex-1">{entry.title}</span>
                     <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 bg-muted/60 text-muted-foreground flex items-center gap-1 shrink-0 max-w-[45%] overflow-hidden">
                       <CategoryIcon icon={entry.category?.icon} className="h-3 w-3 shrink-0" />
                       <span className="truncate min-w-0">{entry.category?.name || "Uncategorized"}</span>
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-[11px] font-normal text-muted-foreground truncate">
                     {formatDate(entry.date, "MMM d, yyyy")}{entry.notes ? ` · ${entry.notes}` : ""}
                   </p>
                   {/* The tagging control, inline, from `sm` up ONLY.
@@ -510,7 +484,7 @@ export function ExpensesPageClient({
                   )}
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
-                  <CurrencyDisplay amount={Number(entry.amount)} className="figure-inline text-sm font-bold text-rose-600 dark:text-rose-400" />
+                  <CurrencyDisplay amount={Number(entry.amount)} className="figure-inline text-[15px] font-medium text-rose-600 dark:text-rose-400" />
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-ink-muted hover:text-foreground" onClick={() => handleEdit(entry)}>
                       <Pencil className="h-3.5 w-3.5" />

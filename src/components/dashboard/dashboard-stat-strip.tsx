@@ -1,6 +1,5 @@
 import type { DashboardStats } from "@/lib/services/dashboard-stats";
-import { KpiCard } from "@/components/dashboard/kpi-card";
-import { PiggyBank, BadgeDollarSign, TrendingDown } from "lucide-react";
+import { CurrencyDisplay } from "@/components/shared/currency-display";
 
 export function DashboardStatStrip({ stats }: { stats: DashboardStats }) {
   // "Total Accounts Balance" is GONE, and it was not a styling problem.
@@ -21,32 +20,24 @@ export function DashboardStatStrip({ stats }: { stats: DashboardStats }) {
   // across and one spanning is 384px, against 576px for 1-up and 768px for the
   // four it replaced.
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-      <KpiCard
-        title="Savings"
-        value={stats.savingsBalance}
-        icon={PiggyBank}
-        iconBgClass="bg-muted text-muted-foreground"
-      />
-      <KpiCard
-        title="Total Debt"
-        value={stats.debtRemaining}
-        icon={BadgeDollarSign}
-        changePercent={stats.debtDeltaPercent}
-        badge={stats.debtDeltaPercent !== null ? "est." : undefined}
-        iconBgClass="bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400"
-      />
-      {/* Spans the pair on the narrow grid, where an odd third would otherwise
-          leave a hole. Back to one column at lg, where the three sit in a row. */}
-      <KpiCard
-        title="Calendar month spending"
-        value={stats.monthlySpending}
-        icon={TrendingDown}
-        changePercent={stats.spendingDeltaPercent}
-        favorableWhenDown={true}
-        className="col-span-2 lg:col-span-1"
-        iconBgClass="bg-muted text-rose-600 dark:text-rose-400"
-      />
-    </div>
+    <section className="border-t border-b border-border">
+      <div className="grid grid-cols-1 sm:grid-cols-3">
+        <div className="py-4 pl-0 pr-4 border-b border-border sm:border-b-0 sm:border-r">
+          <span className="type-section-label block">Savings</span>
+          <CurrencyDisplay amount={stats.savingsBalance} className="type-ledger mt-1 block text-[28px] font-semibold tabular-nums text-foreground" />
+        </div>
+        <div className="py-4 px-4 border-b border-border sm:border-b-0 sm:border-r">
+          <span className="type-section-label block">Total Debt</span>
+          <CurrencyDisplay amount={stats.debtRemaining} className="type-ledger mt-1 block text-[28px] font-semibold tabular-nums text-foreground" />
+          {stats.debtDeltaPercent !== null && (
+            <span className="mt-1 block text-xs text-muted-foreground">est.</span>
+          )}
+        </div>
+        <div className="py-4 px-4 pr-0">
+          <span className="type-section-label block">Calendar month spending</span>
+          <CurrencyDisplay amount={stats.monthlySpending} className="type-ledger mt-1 block text-[28px] font-semibold tabular-nums text-foreground" />
+        </div>
+      </div>
+    </section>
   );
 }

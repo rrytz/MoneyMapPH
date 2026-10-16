@@ -57,22 +57,21 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
 
       {/* The page's answer is the one-year position. Pace and growth rate are
           supporting measures of how that answer is reached. */}
-      <FintechCard>
-        <FintechCardContent className="p-0">
-          <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="p-6 sm:p-8">
+      <section className="border-t border-b border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="py-4 pl-0 pr-4 border-b border-border lg:border-b-0 lg:border-r">
               <span className="block text-xs font-medium text-muted-foreground">1-year projected balance</span>
               <CurrencyDisplay
                 amount={endBalance}
                 className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
               />
             </div>
-            <div className="grid grid-cols-2 border-t border-border lg:border-t-0 lg:border-l">
-              <div className="p-6">
+            <div className="grid grid-cols-2">
+              <div className="py-4 px-4">
                 <span className="block text-xs text-muted-foreground">Projected monthly savings pace</span>
                 <CurrencyDisplay amount={projectedMonthlyGrowth} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright" />
               </div>
-              <div className="border-l border-border p-6">
+              <div className="py-4 px-4 pr-0 border-l border-border">
                 <span className="block text-xs text-muted-foreground">Projected monthly growth rate</span>
                 <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright">
                   +{projectedMonthlyGrowth > 0 && startBalance > 0 ? Math.round((projectedMonthlyGrowth / startBalance) * 100) : 0}%
@@ -80,8 +79,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
               </div>
             </div>
           </div>
-        </FintechCardContent>
-      </FintechCard>
+      </section>
 
       {/* Forecast Line Area Chart */}
       <FintechCard className="flex flex-col">
@@ -183,12 +181,12 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                 <div key={goal.id} className="p-4 px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/50 transition-colors">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-foreground">{goal.name}</span>
+                      <span className="font-medium text-[15px] text-foreground">{goal.name}</span>
                       {goal.is_emergency_fund && (
                         <Badge variant="income" className="text-[10px] font-medium px-2 py-0.5">Emergency Fund</Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-3 text-[11px] font-normal text-muted-foreground">
                       <span>Target: ₱{Number(goal.target_amount).toLocaleString()}</span>
                       <span>•</span>
                       <span>Remaining: ₱{goal.remaining.toLocaleString()}</span>
@@ -197,7 +195,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
                   
                   <div className="flex items-center gap-2 shrink-0">
                     <Goal className="h-4 w-4 text-sulpot-deep" />
-                    <span className="type-measurement text-sm font-bold text-foreground">
+                    <span className="type-measurement text-[15px] font-medium text-foreground">
                       {goal.monthsToReach === 0 ? (
                         <span className="text-sulpot-deep dark:text-sulpot-bright flex items-center gap-0.5"><Sparkles className="h-3.5 w-3.5" /> Achieved</span>
                       ) : goal.monthsToReach === "infinite" ? (

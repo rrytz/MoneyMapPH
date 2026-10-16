@@ -6,6 +6,7 @@ import { revalidateUserFinancialCache } from "@/lib/cache/tags";
 import { createAccount, updateAccount, archiveAccount } from "@/lib/services/account.service";
 import { createTransfer, updateTransfer, deleteTransfer } from "@/lib/services/transfer.service";
 import { accountSchema, accountTransferSchema } from "@/lib/utils/validators";
+import { sniffImageKind } from "@/lib/utils/image-kind";
 
 export async function addAccount(formData: {
   name: string;
@@ -148,20 +149,6 @@ export async function editTransfer(
 
 const QR_BUCKET = "account-qrs";
 const QR_MAX_BYTES = 5 * 1024 * 1024;
-
-// Magic numbers, not MIME types: file.type is client-asserted and iOS Safari
-// omits it entirely on some picks. PNG, JPEG, WebP only - the client pipeline
-// normalizes everything to JPEG, so anything else arriving here bypassed it.
-function sniffImageKind(bytes: Uint8Array): "png" | "jpeg" | "webp" | null {
-  if (bytes.length >= 8 &&
-    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "png";
-  if (bytes.length >= 3 &&
-    bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpeg";
-  if (bytes.length >= 12 &&
-    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
-    bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return "webp";
-  return null;
-}
 
 /**
  * Receive-QR upload. Upsert order is the rollback story: upload the new bytes

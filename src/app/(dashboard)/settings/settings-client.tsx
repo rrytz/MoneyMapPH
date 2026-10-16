@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import {
   User,
   Sliders,
@@ -27,9 +27,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageHeader } from "@/components/shared/page-header";
 import { BackupCard } from "@/components/shared/backup-card";
 import { toast } from "sonner";
+import { invalidateChrome } from "@/components/dashboard/dashboard-shell";
 import { useTheme } from "@/providers/theme-provider";
 import {
   updateProfileSettings,
+  uploadAvatar,
+  removeAvatar,
+  getAvatarUrl,
   addExpenseCategorySetting,
   editExpenseCategorySetting,
   removeExpenseCategorySetting,
@@ -91,6 +95,96 @@ export function SettingsClient({
   const [sourceDeleting, setSourceDeleting] = useState(false);
 
   const [isPending, startTransition] = useTransition();
+
+  // Profile picture state. avatarPath mirrors profiles.avatar_path;
+  // avatarUrl is a short-lived signed read, minted when a path is set.
+  const [avatarPath, setAvatarPath] = useState<string | null>(profile?.avatar_path || null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!avatarPath) {
+      setAvatarUrl(null);
+      return;
+    }
+    let cancelled = false;
+    getAvatarUrl().then((res) => {
+      if (!cancelled && res.success) setAvatarUrl(res.url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [avatarPath]);
+
+  // Center-square crop, max 256px, WebP out. Smoothing stays ON (faces are
+  // continuous tone - the QR pipeline's smoothing-off + PNG-only exists for
+  // binary module edges and does not apply here). No interactive crop for
+  // v1: at 32-40px display the center square is the whole decision.
+  const AVATAR_MAX_PX = 256;
+  async function normalizeAvatar(file: File): Promise<File> {
+    const bitmap = await createImageBitmap(file);
+    const side = Math.min(bitmap.width, bitmap.height);
+    const scale = Math.min(1, AVATAR_MAX_PX / side);
+    const out = Math.max(1, Math.round(side * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = out;
+    canvas.height = out;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("canvas unavailable");
+    ctx.drawImage(
+      bitmap,
+      (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side,
+      0, 0, out, out
+    );
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/webp", 0.9)
+    );
+    if (!blob) throw new Error("image encoding failed");
+    return new File([blob], "avatar.webp", { type: "image/webp" });
+  }
+
+  async function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setAvatarBusy(true);
+    setAvatarError(null);
+    try {
+      const payload = await normalizeAvatar(file);
+      const formData = new FormData();
+      formData.append("file", payload);
+      const res = await uploadAvatar(formData);
+      if (res.error || !res.success || !("path" in res) || !res.path) {
+        setAvatarError(res.error || "Unable to save the profile picture. Please try again.");
+        return;
+      }
+      setAvatarPath(res.path);
+      invalidateChrome();
+      toast.success("Profile picture updated");
+    } catch {
+      setAvatarError("That file could not be read as an image. Please try another.");
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
+  async function handleAvatarRemove() {
+    setAvatarBusy(true);
+    setAvatarError(null);
+    const res = await removeAvatar();
+    setAvatarBusy(false);
+    if (!res.success) {
+      setAvatarError(res.error || "Unable to remove the profile picture. Please try again.");
+      return;
+    }
+    // Fallback is the provider image (or initials), never a blank:
+    // avatar_path nulls while avatar_url is untouched.
+    setAvatarPath(null);
+    invalidateChrome();
+    toast.success("Profile picture removed");
+  }
 
   async function handleProfileSave(e: React.FormEvent) {
     e.preventDefault();
@@ -269,6 +363,47 @@ export function SettingsClient({
             </FintechCardHeader>
             <form onSubmit={handleProfileSave}>
               <FintechCardContent className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>Profile Picture</Label>
+                  {avatarPath ? (
+                    <div className="flex items-center gap-3">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="Profile picture on file" className="h-16 w-16 rounded-full border border-border object-cover" />
+                      ) : (
+                        <div className="h-16 w-16 rounded-full border border-border bg-muted animate-pulse" aria-hidden />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">Profile picture on file</p>
+                        <div className="flex gap-2 mt-1.5">
+                          <Button type="button" variant="outline" size="sm" disabled={avatarBusy} onClick={() => avatarFileRef.current?.click()}>
+                            Replace
+                          </Button>
+                          <Button type="button" variant="ghost" size="sm" disabled={avatarBusy} onClick={handleAvatarRemove} className="text-rose-500">
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-xs text-muted-foreground">No profile picture yet. Upload a square photo — it shows in the topbar avatar.</p>
+                      <Button type="button" variant="outline" size="sm" disabled={avatarBusy} onClick={() => avatarFileRef.current?.click()} className="mt-2">
+                        Upload
+                      </Button>
+                    </div>
+                  )}
+                  <input
+                    ref={avatarFileRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    disabled={avatarBusy}
+                    onChange={handleAvatarPick}
+                  />
+                  {avatarError && (
+                    <p role="alert" className="text-xs text-rose-500">{avatarError}</p>
+                  )}
+                </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="prof-name">Display Name <span className="text-rose-500">*</span></Label>
                   <Input

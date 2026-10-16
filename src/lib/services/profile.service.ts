@@ -21,7 +21,7 @@ export async function getProfile(
 export async function updateProfile(
   supabase: SupabaseClient,
   userId: string,
-  data: Partial<Pick<Profile, "display_name" | "currency" | "theme" | "avatar_url">>
+  data: Partial<Pick<Profile, "display_name" | "currency" | "theme" | "avatar_url" | "avatar_path">>
 ): Promise<Profile> {
   const { data: profile, error } = await supabase
     .from("profiles")

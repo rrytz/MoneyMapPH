@@ -38,6 +38,7 @@ import type { NotificationItem } from "@/lib/services/notification.service";
  */
 interface TopbarProps {
   profile: Profile | null;
+  avatarUrl?: string | null;
   notifications?: NotificationItem[];
   totalBalance: number;
   safeToSpend: SafeToSpendStatus | null;
@@ -119,6 +120,7 @@ export function BalanceReadout({
 
 export function Topbar({
   profile,
+  avatarUrl = null,
   notifications = [],
   totalBalance,
   safeToSpend,
@@ -136,6 +138,12 @@ export function Topbar({
     router.push("/login");
     router.refresh();
   }
+
+  // Display precedence, deliberate and documented: an explicitly uploaded
+  // avatar (avatar_path, minted below) beats the provider default
+  // (avatar_url, e.g. Google), which beats initials. Removing the upload
+  // falls back to the provider image, never straight to initials.
+  const avatarSrc = avatarUrl || profile?.avatar_url || undefined;
 
   const displayName = profile?.display_name || "";
   const initials =
@@ -209,7 +217,7 @@ export function Topbar({
         <DropdownMenu>
           <DropdownMenuTrigger className="shrink-0 rounded-full" aria-label="Account menu">
             <Avatar className="h-9 w-9 border border-border">
-              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="" />}
+              {avatarSrc && <AvatarImage src={avatarSrc} alt="" />}
               <AvatarFallback className="bg-sulpot-tint text-xs font-semibold text-sulpot-deep">
                 {initials}
               </AvatarFallback>

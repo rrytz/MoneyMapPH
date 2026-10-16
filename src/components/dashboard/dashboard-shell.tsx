@@ -28,6 +28,9 @@ const CHROME_TTL_MS = 60_000;
 
 interface ChromeData {
   profile: Profile | null;
+  /** Long-lived signed read for profiles.avatar_path. Minted during chrome
+      refresh (never per render); null when no upload is on file. */
+  avatarUrl: string | null;
   notifications: NotificationItem[];
   budgetUtilization: number;
   /** S5b shell anchor: the glanceable answer, present on every page. */
@@ -82,8 +85,20 @@ function updateChrome(key: string, data: ChromeData) {
   chromeListeners.forEach((listener) => listener());
 }
 
+/**
+ * Drop the chrome cache so the next render refetches (profile included).
+ * Called after avatar upload/remove: the topbar would otherwise keep the
+ * old avatar URL until the 60s TTL lapses. An in-flight refresh is left
+ * alone - it completes with fresh data on its own.
+ */
+export function invalidateChrome() {
+  chromeCache = null;
+  chromeListeners.forEach((listener) => listener());
+}
+
 const DEFAULT_CHROME: ChromeData = {
   profile: null,
+  avatarUrl: null,
   notifications: [],
   budgetUtilization: 0,
   totalBalance: 0,
@@ -124,8 +139,26 @@ async function refreshChrome(cacheKey: string, month: number, year: number) {
         getIncomeSources(supabase, user.id).catch(() => []),
       ]);
 
+      const profile = profileResult.data as Profile | null;
+      // Signed read for the topbar avatar. Minted here (7-day TTL), never
+      // per render: the QR pattern mints per open, but the topbar paints on
+      // every navigation, so per-render minting would be a storage call per
+      // page. A failed mint reads as no avatar, never a broken image.
+      let avatarUrl: string | null = null;
+      if (profile?.avatar_path) {
+        try {
+          const { data } = await supabase.storage
+            .from("avatars")
+            .createSignedUrl(profile.avatar_path, 7 * 24 * 3600);
+          avatarUrl = data?.signedUrl ?? null;
+        } catch {
+          avatarUrl = null;
+        }
+      }
+
       updateChrome(cacheKey, {
-        profile: profileResult.data as Profile | null,
+        profile,
+        avatarUrl,
         notifications,
         budgetUtilization: summary?.budgetUtilization ?? 0,
         totalBalance: wallet?.totalLiquidity ?? 0,
@@ -170,6 +203,7 @@ function useChromeData(): ChromeData {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const {
     profile,
+    avatarUrl,
     notifications,
     budgetUtilization,
     totalBalance,
@@ -186,6 +220,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="flex h-dvh flex-col overflow-hidden">
         <Topbar
           profile={profile}
+          avatarUrl={avatarUrl}
           notifications={notifications}
           totalBalance={totalBalance}
           safeToSpend={safeToSpend}

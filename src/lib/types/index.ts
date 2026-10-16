@@ -4,6 +4,7 @@ export interface Profile {
   currency: string;
   theme: "light" | "dark" | "system";
   avatar_url: string | null;
+  avatar_path: string | null;
   created_at: string;
   updated_at: string;
 }

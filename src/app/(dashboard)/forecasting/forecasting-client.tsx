@@ -61,10 +61,7 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
         <FintechCardContent className="p-0">
           <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-end gap-3">
-                <span className="text-[11px] font-semibold text-ink-muted">12-month target</span>
-              </div>
-              <span className="mt-6 block text-xs font-medium text-muted-foreground">1-year projected balance</span>
+              <span className="block text-xs font-medium text-muted-foreground">1-year projected balance</span>
               <CurrencyDisplay
                 amount={endBalance}
                 className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"

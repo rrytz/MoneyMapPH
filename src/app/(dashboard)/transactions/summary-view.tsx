@@ -78,9 +78,6 @@ export function SummaryView({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-end">
-              <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Net Surplus</Badge>
-            </div>
             <div>
               {/* Names the viewed month rather than saying "calendar month", which
             became wrong the moment the navigator could move off the current one. */}
@@ -92,9 +89,6 @@ export function SummaryView({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-end">
-              <span className="text-[11px] font-semibold text-ink-muted">Utilization Rate</span>
-            </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Budget Used</span>
               <div className="flex items-center gap-3">
@@ -107,9 +101,6 @@ export function SummaryView({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-end">
-              <span className="text-[11px] font-semibold text-ink-muted">Combined Limit</span>
-            </div>
             <div>
               <span className="text-xs font-medium text-muted-foreground block">Active Budget Ceilings</span>
               <CurrencyDisplay amount={summary.totalBudget} className="type-ledger text-3xl sm:text-4xl font-bold tracking-tight text-foreground" />

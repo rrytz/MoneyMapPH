@@ -333,10 +333,7 @@ export function SavingsPageClient({
         <FintechCardContent className="p-0">
           <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-end gap-3">
-                <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Accumulated</Badge>
-              </div>
-              <span className="mt-6 block text-xs font-medium text-muted-foreground">Total saved balance</span>
+              <span className="block text-xs font-medium text-muted-foreground">Total saved balance</span>
               <CurrencyDisplay
                 amount={totalSaved}
                 className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-sulpot-deep dark:text-sulpot-bright"

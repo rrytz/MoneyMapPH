@@ -193,20 +193,14 @@ export function BudgetsPageClient({
           <FintechCardContent className="p-0">
             <div className="grid sm:grid-cols-2">
               <div className="p-6 sm:p-8">
-                <div className="flex items-center justify-end gap-3">
-                  <Badge variant="income" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Allowance</Badge>
-                </div>
-                <span className="mt-6 block text-xs font-medium text-muted-foreground">Total budgeted</span>
+                <span className="block text-xs font-medium text-muted-foreground">Total budgeted</span>
                 <CurrencyDisplay
                   amount={totalBudgeted}
                   className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
                 />
               </div>
               <div className="border-t border-border p-6 sm:border-l sm:border-t-0 sm:p-8">
-                <div className="flex items-center justify-end gap-3">
-                  <Badge variant="expense" className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5">Spent</Badge>
-                </div>
-                <span className="mt-6 block text-xs font-medium text-muted-foreground">Calendar month spending</span>
+                <span className="block text-xs font-medium text-muted-foreground">Calendar month spending</span>
                 <CurrencyDisplay
                   amount={actualTotal}
                   className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"

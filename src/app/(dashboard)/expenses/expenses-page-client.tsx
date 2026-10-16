@@ -334,9 +334,6 @@ export function ExpensesPageClient({
               content at 1280px is the three-column grid stretching all cards to
               the tallest - a design call, deliberately not addressed. */}
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-end">
-              <Badge variant="expense">Total Outflow</Badge>
-            </div>
             <div>
               {/* Names the viewed month, not "calendar month". With a navigator
                   in the header the old label became actively wrong: paging back
@@ -350,9 +347,6 @@ export function ExpensesPageClient({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-end">
-              <span className="type-section-label">Highest Spend</span>
-            </div>
             <div>
               <span className="type-section-label block">Top Category</span>
               <p className="text-xl font-bold tracking-tight text-foreground truncate">{topCategory.name}</p>
@@ -363,12 +357,9 @@ export function ExpensesPageClient({
 
         <FintechCard>
           <FintechCardContent className="space-y-3">
-            <div className="flex items-center justify-end">
-              <span className="type-section-label">Logged Items</span>
-            </div>
             <div>
-              <span className="type-section-label block">Total Expenses</span>
-              <p className="type-measurement tabular-nums text-foreground">{count}</p>
+              <span className="type-section-label block">Items logged</span>
+              <p className="type-ledger font-semibold tabular-nums text-foreground">{count}</p>
             </div>
           </FintechCardContent>
         </FintechCard>

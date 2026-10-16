@@ -119,17 +119,33 @@ export function slugify(name: string): string {
   return slug.length > 0 ? slug : "image"
 }
 
+// Both body reads need this, not just the error path: a 200 whose transfer is
+// cut short mid-image (a multi-megabyte base64 payload) makes response.text()
+// reject with a bare TypeError carrying no kind, and the caller that branches
+// on err.kind would see undefined -- the exact outcome this library exists to
+// prevent. The error path degrades the text into its message; the success path
+// has no message left to show, so it throws.
+type BodyRead =
+  | { ok: true; text: string }
+  | { ok: false; reason: string }
+
+async function readBody(response: Response): Promise<BodyRead> {
+  try {
+    return { ok: true, text: await response.text() }
+  } catch (err) {
+    return {
+      ok: false,
+      reason: err instanceof Error ? err.message : String(err),
+    }
+  }
+}
+
 // A swallowed read produces a failure message that names nothing -- and
 // "the body was empty" and "the body could not be read" are different facts,
 // so this reports which one happened instead of collapsing both to "".
 async function readErrorBody(response: Response): Promise<string> {
-  try {
-    return await response.text()
-  } catch (err) {
-    return `(error body could not be read: ${
-      err instanceof Error ? err.message : String(err)
-    })`
-  }
+  const read = await readBody(response)
+  return read.ok ? read.text : `(error body could not be read: ${read.reason})`
 }
 
 export async function generateImage(
@@ -187,7 +203,19 @@ export async function generateImage(
   // A 200 with a non-JSON body is a real possibility -- a corporate proxy
   // interstitial or a WAF challenge page -- and response.json() would surface
   // it as a bare SyntaxError with no kind and no hint what was actually found.
-  const text = await response.text()
+  // The read itself can also fail (truncated transfer), which is the same
+  // failure to a caller: nothing readable and no kind.
+  const read = await readBody(response)
+  if (!read.ok) {
+    throw new NanoBananaError(
+      "http-error",
+      `Gemini returned ${response.status} but the body could not be read ` +
+        `(content-type: ${
+          response.headers.get("content-type") ?? "(none)"
+        }). ${read.reason}`
+    )
+  }
+  const text = read.text
   let json: unknown
   try {
     json = JSON.parse(text)
@@ -204,6 +232,9 @@ export async function generateImage(
   // Buffer is already a Uint8Array; wrapping it copied the whole image for
   // nothing. A hand-rolled base64 decoder was rejected instead -- it throws
   // InvalidCharacterError on invalid input, a third untyped failure path.
+  // Note: for inputs under Buffer.poolSize>>>1 this is a view onto Node's
+  // shared pool, so .buffer spans more than these bytes -- honour byteOffset
+  // and byteLength rather than the whole .buffer.
   const bytes = Buffer.from(parsed.data, "base64")
 
   if (bytes.length === 0) {

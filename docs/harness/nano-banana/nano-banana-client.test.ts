@@ -286,6 +286,37 @@ describe("generateImage", () => {
     )
   })
 
+  // The error path guards its body read and this one did not: a 200 whose
+  // transfer is cut mid-image makes text() reject with a bare TypeError that
+  // carries no kind, so err.kind was undefined for the caller to branch on.
+  test("a truncated 200 body read is classified, not a raw TypeError", async () => {
+    const fetchImpl = (async () =>
+      ({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: new Headers({ "content-type": "application/json" }),
+        text: async () => {
+          throw new TypeError("terminated")
+        },
+      }) as unknown as Response) as unknown as typeof fetch
+
+    await assert.rejects(
+      generateImage({ prompt: "x", apiKey: "k", fetchImpl }),
+      (err: unknown) => {
+        assert.ok(
+          err instanceof NanoBananaError,
+          `expected NanoBananaError, got ${err?.constructor?.name}: ${err}`
+        )
+        assert.equal(err.kind, "http-error")
+        assert.match(err.message, /200/)
+        assert.match(err.message, /application\/json/)
+        assert.match(err.message, /terminated/)
+        return true
+      }
+    )
+  })
+
   test("returns decoded bytes on success", async () => {
     const fetchImpl = (async () =>
       jsonResponse({

@@ -7,7 +7,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs"
-import { extname, isAbsolute, join, resolve } from "node:path"
+import { extname, isAbsolute, join, relative, resolve } from "node:path"
 import {
   DEFAULT_MODEL,
   type InputImage,
@@ -24,6 +24,33 @@ const INPUT_MIME: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
+}
+
+// Containment for `inputImage`: is `target` inside `root`?
+//
+// `..` traversal and absolute paths reach anywhere on the machine, and whatever
+// they reach is base64-encoded and POSTED to a third-party API. Measured before
+// this guard: a file outside the project directory was read in full and sent.
+// The tool's scope is the project it runs in; outside it is a refusal.
+//
+// Comparison is on RESOLVED paths via path.relative, never a string prefix:
+// `C:\proj-evil\x.png` startsWith `C:\proj`, so a naive prefix test would
+// accept a sibling directory that shares a name with the project. path.relative
+// compares whole segments.
+//
+// Deliberately NOT a bare `rel.startsWith("..")` either: a file the project
+// legitimately contains can be named `..data\x.png` and that is not an escape.
+// Only a leading `..` SEGMENT is one.
+function containsPath(root: string, target: string): boolean {
+  const rel = relative(root, target)
+  // Empty means target === root. Inside by definition; the is-a-file check
+  // downstream rejects it on its own merits.
+  if (rel === "") return true
+  // relative() returns an absolute path when the two are on different drives,
+  // or one is UNC. That is never "inside" a local root.
+  if (isAbsolute(rel)) return false
+  const [firstSegment] = rel.split(/[\\/]/)
+  return firstSegment !== ".."
 }
 
 // Windows device names, matched against the WHOLE stem.
@@ -95,7 +122,25 @@ function writeOutput(file: string, bytes: Uint8Array): number {
   // payload, so the only way to get 0 here is a write that did not land -- and
   // a statSync is the only thing that can tell that. Reporting the buffer
   // length instead would restate what the library already proved.
-  const written = statSync(file).size
+  //
+  // The stat is guarded, and it has to be: it is precisely the call that
+  // detects "the write did not land", so a bare `statSync(file)` turns the
+  // detection into its own unguarded crash. Measured by stubbing writeFileSync
+  // to a no-op: the guard's own evidence escaped as a raw ENOENT. A stat that
+  // throws means the same thing a 0-byte file means -- nothing usable is on
+  // disk -- so it takes the same branch, below.
+  //
+  // `statReadBack` distinguishes "0 bytes" from "cannot be read at all", so the
+  // message reports what was actually found. Collapsing them into one number
+  // would make the message wrong in one of the two cases, and a message that is
+  // sometimes false is worse than one that is vague.
+  let written = 0
+  let statReadBack = true
+  try {
+    written = statSync(file).size
+  } catch {
+    statReadBack = false
+  }
 
   // The constraint is "never leave a zero-byte image on disk", and throwing a
   // message that tells the caller to delete it leaves the file exactly where
@@ -108,8 +153,12 @@ function writeOutput(file: string, bytes: Uint8Array): number {
     }
     throw new NanoBananaError(
       "empty-image",
-      `Wrote ${file} and it is 0 bytes on disk. The file was deleted rather ` +
-        `than left behind; nothing usable was produced.`
+      statReadBack
+        ? `Wrote ${file} and it is 0 bytes on disk. The file was deleted ` +
+            `rather than left behind; nothing usable was produced.`
+        : `Wrote ${file} but it could not be read back from disk at all, so ` +
+            `there is no image to report. The file was deleted rather than ` +
+            `left behind; nothing usable was produced.`
     )
   }
 
@@ -161,14 +210,40 @@ export default tool({
 
     let inputImage: InputImage | undefined
     if (args.inputImage) {
+      const root = resolve(context.directory)
+
+      // Absolute-but-inside is ACCEPTED. The root is the boundary, not the
+      // string form: a caller holding an absolute path to a file inside the
+      // project has not done anything wrong, and refusing it would only push
+      // callers back to relative paths. Absolute-outside falls out of the same
+      // test, because `relative()` returns an absolute path across drives.
       const resolved = isAbsolute(args.inputImage)
         ? args.inputImage
-        : resolve(context.directory, args.inputImage)
+        : resolve(root, args.inputImage)
+
+      if (!containsPath(root, resolved)) {
+        return (
+          `inputImage must stay inside the project directory. ` +
+          `${args.inputImage} resolves to ${resolved}, which is outside ` +
+          `${root}. Pass a path inside the project -- relative to it, or ` +
+          `absolute but within it.`
+        )
+      }
 
       if (!existsSync(resolved)) {
         return `inputImage not found: ${resolved}. It does not exist.`
       }
-      if (!statSync(resolved).isFile()) {
+      // existsSync then statSync is two calls against a moving target. A file
+      // deleted in between -- by whatever else runs on this machine, or by the
+      // user -- left a bare ENOENT escaping execute (measured, via fault
+      // injection). Report the same not-found answer instead of a raw errno.
+      let stats: ReturnType<typeof statSync>
+      try {
+        stats = statSync(resolved)
+      } catch {
+        return `inputImage not found: ${resolved}. It does not exist.`
+      }
+      if (!stats.isFile()) {
         return `inputImage is not a file: ${resolved}`
       }
 

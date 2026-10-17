@@ -79,7 +79,12 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="mt-3 flex items-end justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[2rem] font-bold leading-none tracking-tight tabular-nums text-white">
+                  {/* Instrument Sans has no ₱ (U+20B1) glyph, so the sign falls
+                      back to a 400-weight system face. `font-synthesis: none`
+                      stops the browser faux-bolding that face to 700, which
+                      smeared the sign's thin double-bar into a muddy blob. The
+                      digits are real Instrument Sans bold and are unaffected. */}
+                  <p className="text-[2rem] font-bold leading-none tracking-tight tabular-nums text-white [font-synthesis:none]">
                     ₱8,903.00
                   </p>
                   <div className="mt-2.5 flex items-center gap-2">

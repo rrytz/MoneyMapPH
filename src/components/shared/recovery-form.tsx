@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/shared/logo";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { recoverAccess, type RecoverAccessState } from "@/app/(auth)/recover/actions";
 
 export function RecoveryForm() {
@@ -29,7 +29,7 @@ export function RecoveryForm() {
 
         {state.success ? (
           <div className="mt-7 text-center">
-            <h1 className="type-page-title text-foreground">
+            <h1 className="type-page-title text-3xl text-foreground">
               Password reset
             </h1>
             <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -44,10 +44,10 @@ export function RecoveryForm() {
           </div>
         ) : (
           <>
-            <h1 className="type-page-title mt-7 text-foreground">
+            <h1 className="type-page-title mt-7 text-center text-3xl text-foreground">
               Recover access
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-center text-sm text-muted-foreground">
               Reset your password without email — you&apos;ll only need your
               recovery passphrase.
             </p>
@@ -121,7 +121,7 @@ export function RecoveryForm() {
                   stays submittable so the schema message teaches the minimum. */}
               <Button
                 type="submit"
-                className="h-11 w-full rounded-xl text-[15px] font-semibold"
+                className="h-11 w-full rounded-xl bg-gradient-to-r from-sulpot-deep to-sulpot text-[15px] font-semibold text-white shadow-lg shadow-sulpot/20 hover:from-sulpot-deep hover:to-sulpot-bright"
                 disabled={pending || !email.trim() || !passphrase || !password}
               >
                 {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -141,6 +141,11 @@ export function RecoveryForm() {
           </>
         )}
       </div>
+
+      <p className="mt-8 flex items-center justify-center gap-1.5 text-xs text-white/40">
+        <Lock className="h-3 w-3" />
+        Your information is secure and encrypted
+      </p>
     </div>
   );
 }

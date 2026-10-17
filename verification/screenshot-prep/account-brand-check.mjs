@@ -53,17 +53,11 @@ export const KILL_MOTION =
   "* { transition: none !important; animation: none !important; }";
 
 export async function loadAuthCookies() {
-  const cookieText = fs.readFileSync(
-    path.join(os.tmpdir(), "mm-capture-cookie.txt"),
-    "utf8"
-  );
-  return cookieText
-    .split("; ")
-    .map((p) => {
-      const i = p.indexOf("=");
-      return { name: p.slice(0, i), value: decodeURIComponent(p.slice(i + 1)) };
-    })
-    .filter((c) => c.name && c.value);
+  // Auth via dedicated gate user (password auth, RLS-preserving).
+  // Replaces the static cookie jar which expired every hour.
+  // See gate-auth.mjs for the implementation.
+  const { getGateCookies } = await import("./gate-auth.mjs");
+  return getGateCookies();
 }
 
 /** Open the accounts page in a real browser with motion killed and a settled DOM. */

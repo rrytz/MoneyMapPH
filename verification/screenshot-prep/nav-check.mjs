@@ -36,14 +36,10 @@ const REACHABILITY_WIDTHS = [1440, 1280, 1100, 1024, 900];
 const MOBILE_WIDTHS = [375, 390];
 const VISIBILITY_WIDTHS = [320, 360, 375, 390, 414, 430, 540, 768, 900, 1023, 1024, 1280];
 
-const cookieText = fs.readFileSync(path.join(os.tmpdir(), "mm-capture-cookie.txt"), "utf8");
-const pairs = cookieText
-  .split("; ")
-  .map((p) => {
-    const i = p.indexOf("=");
-    return { name: p.slice(0, i), value: p.slice(i + 1) };
-  })
-  .filter((c) => c.name && c.value);
+const pairs = await (async () => {
+  const { getGateCookies } = await import("./gate-auth.mjs");
+  return getGateCookies();
+})();
 
 const browser = await chromium.launch({ headless: true });
 let failures = 0;

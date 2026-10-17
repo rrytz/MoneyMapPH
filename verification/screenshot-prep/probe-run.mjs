@@ -16,7 +16,7 @@ import os from "node:os";
 import path from "node:path";
 
 const HERE = import.meta.dirname;
-const COOKIE_FILE = path.join(os.tmpdir(), "mm-capture-cookie.txt");
+const { getGateCookies } = await import("./gate-auth.mjs");
 const OUT_DIR = path.join(HERE, "..", "evidence", "probes");
 const PAGES = ["/dashboard", "/expenses", "/accounts", "/settings"];
 const BASE = "http://localhost:3000";
@@ -26,11 +26,12 @@ const VIEWPORTS = [
   { name: "mobile", width: 390, height: 844 },
 ];
 
-if (!fs.existsSync(COOKIE_FILE)) {
-  console.error("NO_COOKIE_FILE");
-  process.exit(1);
-}
-const cookieText = fs.readFileSync(COOKIE_FILE, "utf8");
+const _gc = await getGateCookies();
+const cookieText = _gc.map(c => c.name + "=" + encodeURIComponent(c.value)).join("; ");
+const cookiePairs = cookieText.split("; ").map((p) => {
+  const i = p.indexOf("=");
+  return { name: p.slice(0, i), value: p.slice(i + 1) };
+}).filter((c) => c.name && c.value);
 const cookiePairs = cookieText.split("; ").map((p) => {
   const i = p.indexOf("=");
   return { name: p.slice(0, i), value: p.slice(i + 1) };

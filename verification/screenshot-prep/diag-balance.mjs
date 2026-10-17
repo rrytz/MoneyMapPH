@@ -4,7 +4,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const cookieText = fs.readFileSync(path.join(os.tmpdir(), "mm-capture-cookie.txt"), "utf8");
+const { getGateCookies } = await import("./gate-auth.mjs");
+const _gc = await getGateCookies();
+const cookieText = _gc.map(c => c.name + "=" + encodeURIComponent(c.value)).join("; ");
 const pairs = cookieText
   .split("; ")
   .map((p) => {

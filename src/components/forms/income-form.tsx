@@ -21,17 +21,20 @@ interface IncomeFormProps {
   accounts?: Account[];
   editEntry?: IncomeEntry | null;
   onAdd?: (data: { amount: number; source_id: string; date: string; notes?: string; account_id?: string }) => void;
+  /** Deposit-from-account prefill: selects this account on open when no editEntry is present. */
+  initialAccountId?: string;
 }
 
-export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, onAdd }: IncomeFormProps) {
+export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, onAdd, initialAccountId }: IncomeFormProps) {
   const [loading, setLoading] = useState(false);
   const [accountId, setAccountId] = useState("");
   const isEditing = !!editEntry;
 
-  // Sync accountId from editEntry when modal opens/changes
+  // Sync accountId from editEntry when modal opens/changes; otherwise from
+  // the Deposit prefill. Edit wins: it names a specific row.
   useEffect(() => {
-    setAccountId(editEntry?.account_id || "");
-  }, [editEntry, open]);
+    setAccountId(editEntry?.account_id || initialAccountId || "");
+  }, [editEntry, initialAccountId, open]);
 
   // Mirrors, not control: the inputs stay uncontrolled (defaultValue + FormData
   // at submit) and these track emptiness for the submit-button state only.

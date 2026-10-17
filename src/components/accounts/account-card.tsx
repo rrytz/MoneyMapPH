@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AccountWithBalance } from "@/lib/types";
 import { CurrencyDisplay } from "@/components/shared/currency-display";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ export function AccountCard({ account, onEdit, onArchive, onTransfer, onShowQr }
   // the tab order; the 3-dot remains the keyboard path. This spends the tap
   // gesture - a future drag-to-reorder needs disambiguation from day one.
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
   const getIcon = () => {
     switch (account.type) {
       case "bank":
@@ -97,8 +99,20 @@ const isBrandSurface = !account.is_negative;
       // is the fact.
       data-account-archived={account.is_archived || undefined}
       onClick={(e) => {
-        if ((e.target as HTMLElement).closest('[data-slot="dropdown-menu-trigger"]')) return;
-        setMenuOpen(true);
+        const t = e.target as HTMLElement;
+        // Menu interactions are never card taps. Two guards because the two
+        // trees disagree: the trigger is an ancestor in BOTH the DOM and the
+        // React tree, but menu content is portalled in the DOM (it bubbles to
+        // <body>) while staying a child of the card in the React tree - which
+        // is the tree React's synthetic events actually bubble through. A
+        // closest() check alone can only see the DOM tree, so without the
+        // content guard every menu-item click would also navigate to detail.
+        if (t.closest('[data-slot="dropdown-menu-trigger"]')) return;
+        if (t.closest('[data-slot="dropdown-menu-content"]')) return;
+        // Tap navigates to the detail screen. The 3-dot trigger opens the
+        // menu independently and is excluded above, so one tap cannot do
+        // both.
+        router.push(`/accounts/${account.id}`);
       }}
       className={`relative rounded-2xl border p-4 transition-all cursor-pointer [border-color:var(--brand-line)] ${
         account.is_negative

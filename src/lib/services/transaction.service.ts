@@ -18,6 +18,8 @@ export interface UnifiedTransactionOptions {
   endDate?: string;
   type?: "income" | "expense";
   search?: string;
+  /** Scope both tables to one account. Untagged rows never match. */
+  accountId?: string;
   /** Server-side page size. Defaults to 100 (all) for backward-compat with print page. */
   limit?: number;
   /** Server-side offset for cursor-based pagination. Defaults to 0. */
@@ -51,6 +53,11 @@ export async function getUnifiedTransactions(
     .select("*, category:expense_categories(*)", { count: "exact" })
     .eq("user_id", userId)
     .order("date", { ascending: false });
+
+  if (options?.accountId) {
+    incomeQuery = incomeQuery.eq("account_id", options.accountId);
+    expenseQuery = expenseQuery.eq("account_id", options.accountId);
+  }
 
   if (options?.startDate) {
     incomeQuery = incomeQuery.gte("date", options.startDate);

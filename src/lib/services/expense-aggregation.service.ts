@@ -56,6 +56,34 @@ export function buildUnbudgetedCategoryViews(
     .sort((a, b) => b.spent - a.spent);
 }
 
+/**
+ * Per-account category totals for the detail insights donut. Same shape as
+ * the monthly aggregation's byCategory map, scoped to BOTH the account and
+ * the current month: the donut component's copy ("calendar month total")
+ * and empty state are month-framed, so unscoped data would mislabel.
+ */
+export async function getAccountCategorySpending(
+  supabase: SupabaseClient,
+  userId: string,
+  accountId: string,
+  month: number,
+  year: number
+): Promise<Record<string, number>> {
+  const { start, end } = getMonthDateRange(month, year);
+  const { data: expenses, error } = await supabase
+    .from("expenses")
+    .select("amount, category_id")
+    .eq("user_id", userId)
+    .eq("account_id", accountId)
+    .gte("date", start)
+    .lte("date", end);
+
+  if (error) throw error;
+  return groupExpensesByCategory(
+    (expenses || []) as Array<{ amount: number; category_id: string }>
+  );
+}
+
 export async function getMonthlyExpenseAggregation(
   supabase: SupabaseClient,
   userId: string,

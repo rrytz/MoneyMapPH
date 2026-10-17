@@ -293,6 +293,17 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* Peso-glyph fidelity, app-wide. Instrument Sans has no ₱ (U+20B1), so the
+       sign falls back to a 400-weight system face; any heavier request
+       faux-bolds it and smears the sign's thin double-bar. CurrencyDisplay
+       carries its own [font-synthesis:none], but several places call
+       formatCurrency directly (donut tooltips, recent-transactions, chart-axis
+       formatters) and bypass it — a per-site patch is the miss-prone partial
+       fix, so this base rule guarantees the sign is never synthesized anywhere.
+       Deliberately font-synthesis-WEIGHT (not the `font-synthesis` shorthand):
+       it kills faux-bold only and preserves faux-italic, which ~10 empty-state
+       messages rely on (next/font loads no italic face). */
+    font-synthesis-weight: none;
   }
   html,
   body {

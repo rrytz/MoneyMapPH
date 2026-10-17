@@ -1,75 +1,34 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient, getAuthRedirectTo } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Logo } from "@/components/shared/logo";
+import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 
-type Mode = "signin" | "signup";
-
+/* Mode is derived from the route: /login renders sign-in, /signup renders the
+   create-account form. Switching happens through the footer links (a soft
+   navigation), so there is no tab pill and no client-side mode state — the
+   entrance animation simply replays on mount. */
 export function AuthForm() {
-  const router = useRouter();
   const pathname = usePathname();
-  const [display, setDisplay] = useState<Mode>(() =>
-    pathname === "/signup" ? "signup" : "signin",
-  );
-  const mode = display;
+  const isSignin = pathname !== "/signup";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [pendingDir, setPendingDir] = useState<"up" | "down" | null>(null);
-  const [height, setHeight] = useState("auto");
-
   const supabase = createClient();
 
-  const isSignin = mode === "signin";
-
-  // Switching tabs slides the incoming content: going to Create account drops
-  // it in from above, going back to Sign in lets it rise up from below.
-  const entrance =
-    pendingDir === "down" ? "auth-animate-rise-down" : "auth-animate-rise";
-
   const anim = (delay: number) => ({ animationDelay: `${delay}s` });
-
-  // Morph the column height when the active mode (or success state) changes.
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    const content = contentRef.current;
-    if (!wrap || !content) return;
-    const from = wrap.offsetHeight;
-    setHeight(`${from}px`);
-    const raf = requestAnimationFrame(() => setHeight(`${content.scrollHeight}px`));
-    return () => cancelAnimationFrame(raf);
-  }, [mode, success]);
-
-  // Keep the height in sync with any other content changes (errors, wrapping).
-  useEffect(() => {
-    const content = contentRef.current;
-    if (!content) return;
-    const ro = new ResizeObserver(() => setHeight(`${content.scrollHeight}px`));
-    ro.observe(content);
-    return () => ro.disconnect();
-  }, []);
-
-  function switchMode(next: Mode) {
-    setDisplay(next);
-    setPendingDir(next === "signup" ? "down" : "up");
-    window.history.replaceState(null, "", next === "signin" ? "/login" : "/signup");
-    setError("");
-    setSuccess(false);
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,17 +52,14 @@ export function AuthForm() {
         setLoading(false);
         return;
       }
-      router.push("/dashboard");
-      router.refresh();
+      window.location.href = "/dashboard";
       return;
     }
 
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: getAuthRedirectTo(),
-      },
+      options: { emailRedirectTo: getAuthRedirectTo() },
     });
 
     setLoading(false);
@@ -119,9 +75,7 @@ export function AuthForm() {
     setError("");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: getAuthRedirectTo(),
-      },
+      options: { redirectTo: getAuthRedirectTo() },
     });
     if (error) {
       setError(error.message);
@@ -130,247 +84,220 @@ export function AuthForm() {
   }
 
   return (
-    <div className="w-full">
-      {/* Sliding tab pill */}
-      <div
-        className="relative mb-7 grid w-full grid-cols-2 rounded-xl border border-border bg-muted p-1"
-        role="tablist"
-        aria-label="Authentication mode"
-      >
-        <span
-          aria-hidden
-          className={`pointer-events-none absolute inset-y-1 w-[calc(50%-4px)] rounded-lg bg-primary shadow-sm transition-[left,background-color] duration-300 ease-out dark:bg-sulpot ${
-            mode === "signup" ? "left-1/2" : "left-1"
-          }`}
-        />
-        {(["signin", "signup"] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            role="tab"
-            aria-selected={mode === m}
-            onClick={() => switchMode(m)}
-            className={`relative z-10 whitespace-nowrap rounded-lg py-2 text-center text-[13px] font-semibold transition-colors duration-200 ${
-              mode === m
-                ? /* The indicator is a solid sulpot fill in BOTH themes
-                     (bg-primary, dark:bg-sulpot), so the active label stays
-                     white in both. A dark: override put dark green on bright
-                     green — caught as low contrast in the auth screenshot. */
-                  "text-white"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {m === "signin" ? "Sign in" : "Create account"}
-          </button>
-        ))}
-      </div>
+    <div className="w-full max-w-md">
+      <div className="rounded-2xl border border-border/50 bg-card/40 p-8 backdrop-blur-xl">
+        {/* Mark */}
+        <div className="flex justify-center auth-animate-rise">
+          <Logo size="md" />
+        </div>
 
-      {/* Height-morphing content */}
-      <div
-        ref={wrapRef}
-        className="w-full overflow-hidden transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-        style={{ height }}
-      >
-        <div ref={contentRef} key={mode + (success ? "-ok" : "")}>
-          {success ? (
-            <div key="success" className={`${entrance} text-center`} style={anim(0.04)}>
-              <h1 className="type-page-title text-foreground">Check your email</h1>
-              <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-                We sent a confirmation link to <strong className="text-foreground">{email}</strong>.
-                Click it to activate your account.
-              </p>
-              <button
-                type="button"
-                onClick={() => switchMode("signin")}
-                className="mt-6 text-sm font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
-              >
-                Back to sign in
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className={`${entrance} mb-7`} style={anim(0.04)}>
-                <h1 className="type-page-title text-foreground">
-                  {isSignin ? "Welcome back" : "Create your account"}
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {isSignin ? "Pick up where you left off." : "Two minutes a day is all it takes."}
-                </p>
+        {success ? (
+          <div className="mt-7 text-center auth-animate-rise">
+            <h1 className="type-page-title text-3xl text-white">Check your email</h1>
+            <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-white/60">
+              We sent a confirmation link to{" "}
+              <strong className="text-white">{email}</strong>. Click it to activate
+              your account.
+            </p>
+            <Link
+              href="/login"
+              className="mt-6 inline-block text-sm font-semibold text-sulpot-bright hover:underline"
+            >
+              Back to sign in
+            </Link>
+          </div>
+        ) : (
+          <>
+            <h1
+              className="type-page-title mt-7 text-center text-3xl text-white auth-animate-rise"
+              style={anim(0.05)}
+            >
+              {isSignin ? "Welcome back" : "Create your account"}
+            </h1>
+
+            <form onSubmit={handleSubmit} className="mt-7 space-y-3.5">
+              {error && (
+                <div
+                  role="alert"
+                  className="auth-animate-fade rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+                >
+                  {error}
+                </div>
+              )}
+
+              {/* Email */}
+              <div className="relative auth-animate-rise" style={anim(0.09)}>
+                <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/40 focus-visible:border-sulpot-bright/60 focus-visible:ring-sulpot-bright/20"
+                />
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div
-                    role="alert"
-                    className="auth-animate-fade rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-                  >
-                    {error}
-                  </div>
-                )}
+              {/* Password */}
+              <div className="relative auth-animate-rise" style={anim(0.13)}>
+                <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={isSignin ? "current-password" : "new-password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  minLength={6}
+                  className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus-visible:border-sulpot-bright/60 focus-visible:ring-sulpot-bright/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors hover:text-white/70"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
 
-                <div className={`${entrance} space-y-1.5`} style={anim(0.08)}>
-                  <Label htmlFor="email" className="text-[13px] text-muted-foreground">
-                    Email <span className="text-rose-500">*</span>
-                  </Label>
+              {/* Confirm password (create-account only) */}
+              {!isSignin && (
+                <div className="relative auth-animate-rise" style={anim(0.17)}>
+                  <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                   <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={loading}
-                    className="h-11 rounded-xl px-3.5"
-                  />
-                </div>
-
-                <div className={`${entrance} space-y-1.5`} style={anim(0.12)}>
-                  <Label htmlFor="password" className="text-[13px] text-muted-foreground">
-                    Password <span className="text-rose-500">*</span>
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete={isSignin ? "current-password" : "new-password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    id="confirm"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    placeholder="Confirm password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     disabled={loading}
                     minLength={6}
-                    className="h-11 rounded-xl px-3.5"
+                    className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus-visible:border-sulpot-bright/60 focus-visible:ring-sulpot-bright/20"
                   />
                 </div>
+              )}
 
-                {!isSignin && (
-                  <div className={`${entrance} auth-animate-fade space-y-1.5`} style={anim(0.16)}>
-                    <Label htmlFor="confirm" className="text-[13px] text-muted-foreground">
-                      Confirm password <span className="text-rose-500">*</span>
-                    </Label>
-                    <Input
-                      id="confirm"
-                      type="password"
-                      autoComplete="new-password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      minLength={6}
-                      className="h-11 rounded-xl px-3.5"
-                    />
-                  </div>
-                )}
-
-                {/* Disabled on required-EMPTY, never on invalid: a short or
-                    mismatched password stays submittable so the error alert
-                    teaches instead of a gray button hiding it. */}
-                <Button
-                  type="submit"
-                  className={`${entrance} h-11 w-full rounded-xl text-[15px] font-semibold`}
+              {/* Forgot password (sign-in only) */}
+              {isSignin && (
+                <div
+                  className="auth-animate-rise pt-0.5 text-right"
                   style={anim(0.2)}
-                  disabled={loading || !email.trim() || !password || (!isSignin && !confirmPassword)}
                 >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isSignin ? "Sign in" : "Create account"}
-                </Button>
+                  <Link
+                    href="/recover"
+                    className="text-sm text-white/50 transition-colors hover:text-white/80"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
 
-                {isSignin && (
-                  <div className={`${entrance} -mt-1 pt-1 text-center`} style={anim(0.22)}>
-                    <Link
-                      href="/recover"
-                      className="text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      Forgot your password? Recover access
-                    </Link>
-                  </div>
-                )}
-              </form>
-
-              <div
-                className={`${entrance} my-6 flex items-center gap-3 text-xs text-muted-foreground`}
-                style={anim(0.24)}
-                aria-hidden
-              >
-                <span className="h-px flex-1 bg-border" />
-                or continue with
-                <span className="h-px flex-1 bg-border" />
-              </div>
-
+              {/* Disabled on required-EMPTY, never on invalid: a short or
+                  mismatched password stays submittable so the error alert
+                  teaches instead of a gray button hiding it. */}
               <Button
-                variant="outline"
-                className={`${entrance} h-11 w-full rounded-xl text-sm font-semibold`}
-                style={anim(0.27)}
-                onClick={handleGoogle}
-                disabled={googleLoading}
+                type="submit"
+                className="auth-animate-rise h-12 w-full rounded-xl bg-gradient-to-r from-sulpot-deep to-sulpot text-[15px] font-semibold text-white shadow-lg shadow-sulpot/20 hover:from-sulpot-deep hover:to-sulpot-bright"
+                style={anim(0.24)}
+                disabled={loading || !email.trim() || !password || (!isSignin && !confirmPassword)}
               >
-                {googleLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <svg className="mr-2 h-[18px] w-[18px]" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
-                  </svg>
-                )}
-                Google
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSignin ? "Sign in" : "Create account"}
+                {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
               </Button>
+            </form>
 
-              <p className={`${entrance} mt-6 text-center text-sm text-muted-foreground`} style={anim(0.31)}>
-                {isSignin ? (
-                  <>
-                    Don&apos;t have an account?{" "}
-                    <Link
-                      href="/signup"
-                      className="font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
-                    >
-                      Sign up
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    Already have an account?{" "}
-                    <Link
-                      href="/login"
-                      className="font-semibold text-sulpot-deep hover:underline dark:text-sulpot-bright"
-                    >
-                      Sign in
-                    </Link>
-                  </>
-                )}
-              </p>
+            {/* Divider */}
+            <div
+              className="my-6 flex items-center gap-3 text-xs text-white/40 auth-animate-rise"
+              style={anim(0.28)}
+              aria-hidden
+            >
+              <span className="h-px flex-1 bg-white/10" />
+              or continue with
+              <span className="h-px flex-1 bg-white/10" />
+            </div>
 
-              <p
-                className={`${entrance} mt-7 text-center text-[11.5px] leading-relaxed text-muted-foreground`}
-                style={anim(0.35)}
-              >
-                By continuing you agree to our{" "}
-                <Link href="/terms" className="underline underline-offset-2 hover:text-foreground">
-                  Terms
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">
-                  Privacy Policy
-                </Link>
-                . Your data is encrypted and never sold.
-              </p>
-            </>
-          )}
-        </div>
+            {/* Google */}
+            <Button
+              variant="outline"
+              className="auth-animate-rise h-12 w-full rounded-xl border-white/10 bg-white/5 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
+              style={anim(0.32)}
+              onClick={handleGoogle}
+              disabled={googleLoading}
+            >
+              {googleLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <svg className="mr-2 h-[18px] w-[18px]" viewBox="0 0 24 24">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
+                </svg>
+              )}
+              Continue with Google
+            </Button>
+
+            {/* Mode switch */}
+            <p
+              className="mt-6 text-center text-sm text-white/50 auth-animate-rise"
+              style={anim(0.36)}
+            >
+              {isSignin ? (
+                <>
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/signup"
+                    className="font-semibold text-sulpot-bright hover:underline"
+                  >
+                    Create one
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <Link
+                    href="/login"
+                    className="font-semibold text-sulpot-bright hover:underline"
+                  >
+                    Sign in
+                  </Link>
+                </>
+              )}
+            </p>
+          </>
+        )}
       </div>
+
+      {/* Security note */}
+      <p
+        className="mt-8 flex items-center justify-center gap-1.5 text-xs text-white/40 auth-animate-rise"
+        style={anim(0.4)}
+      >
+        <Lock className="h-3 w-3" />
+        Your information is secure and encrypted
+      </p>
     </div>
   );
 }

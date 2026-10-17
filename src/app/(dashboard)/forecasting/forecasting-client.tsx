@@ -60,20 +60,20 @@ export function ForecastingClient({ forecastData, goals }: ForecastingClientProp
       <section className="border-t border-b border-border">
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="py-4 pl-0 pr-4 border-b border-border lg:border-b-0 lg:border-r">
-              <span className="block text-xs font-medium text-muted-foreground">1-year projected balance</span>
+              <span className="type-section-label block">1-year projected balance</span>
               <CurrencyDisplay
                 amount={endBalance}
-                className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-foreground"
+                className="type-ledger text-[28px] font-semibold tabular-nums text-foreground"
               />
             </div>
             <div className="grid grid-cols-2">
               <div className="py-4 px-4">
-                <span className="block text-xs text-muted-foreground">Projected monthly savings pace</span>
-                <CurrencyDisplay amount={projectedMonthlyGrowth} className="type-ledger mt-1 block text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright" />
+                <span className="type-section-label block">Projected monthly savings pace</span>
+                <CurrencyDisplay amount={projectedMonthlyGrowth} className="type-ledger mt-1 block text-[28px] font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright" />
               </div>
               <div className="py-4 px-4 pr-0 border-l border-border">
-                <span className="block text-xs text-muted-foreground">Projected monthly growth rate</span>
-                <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright">
+                <span className="type-section-label block">Projected monthly growth rate</span>
+                <p className="type-ledger mt-1 text-[28px] font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright">
                   +{projectedMonthlyGrowth > 0 && startBalance > 0 ? Math.round((projectedMonthlyGrowth / startBalance) * 100) : 0}%
                 </p>
               </div>

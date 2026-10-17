@@ -324,12 +324,12 @@ export function ExpensesPageClient({
                   in the header the old label became actively wrong: paging back
                   to August left a card reading "Calendar month spend" beside a
                   picker saying August. The label states what it is showing. */}
-              <span className="type-section-label block">{getMonthName(currentMonth)} {currentYear} spend</span>
+              <span className="type-section-label block">Spent</span>
               <CurrencyDisplay amount={total} className="type-ledger mt-1 block text-[28px] font-semibold tabular-nums text-rose-600 dark:text-rose-400" />
           </div>
           <div className="py-4 px-4 border-b border-border sm:border-b-0 sm:border-r">
               <span className="type-section-label block">Top Category</span>
-              <p className="mt-1 block text-[28px] font-semibold tracking-tight text-foreground truncate">{topCategory.name}</p>
+              <p className="type-ledger mt-1 block text-[28px] font-semibold tracking-tight text-foreground truncate">{topCategory.name}</p>
               <p className="text-xs text-muted-foreground tabular-nums">₱{topCategory.amount.toLocaleString()}</p>
           </div>
           <div className="py-4 px-4 pr-0">

@@ -197,23 +197,23 @@ export function IncomePageClient({
             <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
               <div className="py-4 pl-0 pr-4 border-b border-border lg:border-b-0 lg:border-r">
                   <div>
-                    <span className="text-xs font-medium text-muted-foreground block">Calendar month earnings</span>
+                    <span className="type-section-label block">Calendar month earnings</span>
                     <CurrencyDisplay
                       amount={totalThisMonth}
-                      className="type-ledger text-4xl sm:text-5xl font-semibold tracking-tight text-sulpot-deep dark:text-sulpot-bright"
+                      className="type-ledger text-[28px] font-semibold tabular-nums text-sulpot-deep dark:text-sulpot-bright"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2">
                   <div className="py-4 px-4">
-                    <span className="block text-xs text-muted-foreground">Logged entries</span>
-                    <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    <span className="type-section-label block">Logged entries</span>
+                    <p className="type-ledger mt-1 text-[28px] font-semibold tabular-nums text-foreground">
                       {optimisticMonthEntries.length}
                     </p>
                   </div>
                   <div className="py-4 px-4 pr-0 border-l border-border">
-                    <span className="block text-xs text-muted-foreground">Income channels</span>
-                    <p className="type-measurement mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    <span className="type-section-label block">Income channels</span>
+                    <p className="type-ledger mt-1 text-[28px] font-semibold tabular-nums text-foreground">
                       {Object.keys(sourceTotals).length}
                     </p>
                   </div>

@@ -235,7 +235,7 @@ export function BalanceBlock({
               <p className="type-section-label text-muted-foreground">Safe to spend</p>
               <p
                 className={cn(
-                  "type-ledger mt-1 text-lg font-semibold tabular-nums",
+                  "type-ledger mt-1 text-[28px] font-semibold tabular-nums",
                   remaining < 0 ? "text-rose" : "text-ink"
                 )}
               >
@@ -251,7 +251,7 @@ export function BalanceBlock({
             </div>
             <div className="rounded-lg bg-muted/50 p-2.5 border border-border/50">
               <p className="type-section-label text-muted-foreground">Spent this period</p>
-              <p className="mt-1 text-lg font-semibold tabular-nums text-ink">
+              <p className="mt-1 text-[28px] font-semibold tabular-nums text-ink">
                 <CurrencyDisplay amount={spent} className="figure-inline" />
               </p>
             </div>
@@ -259,7 +259,7 @@ export function BalanceBlock({
               <p className="type-section-label text-muted-foreground">Calendar month net</p>
               <p
                 className={cn(
-                  "mt-1 text-lg font-semibold tabular-nums",
+                  "mt-1 text-[28px] font-semibold tabular-nums",
                   net >= 0 ? "text-sulpot" : "text-rose"
                 )}
               >

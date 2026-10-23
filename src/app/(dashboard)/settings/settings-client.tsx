@@ -417,7 +417,7 @@ export function SettingsClient({
                   <div className="space-y-1.5">
                     <Label htmlFor="prof-curr">Currency Preference <span className="text-rose-500">*</span></Label>
                     <Select value={currency} onValueChange={(val) => setCurrency(val || "PHP")} items={CURRENCY_LABELS}>
-                      <SelectTrigger id="prof-curr">
+                      <SelectTrigger id="prof-curr" className="w-full">
                         <SelectValue placeholder="Select Currency" />
                       </SelectTrigger>
                       <SelectContent>
@@ -430,7 +430,7 @@ export function SettingsClient({
                   <div className="space-y-1.5">
                     <Label htmlFor="prof-theme">Theme Preference <span className="text-rose-500">*</span></Label>
                     <Select value={themeSetting} onValueChange={(val) => setThemeSetting((val || "system") as "light" | "dark" | "system")} items={THEME_LABELS}>
-                      <SelectTrigger id="prof-theme">
+                      <SelectTrigger id="prof-theme" className="w-full">
                         <SelectValue placeholder="Select Theme" />
                       </SelectTrigger>
                       <SelectContent>
@@ -668,7 +668,7 @@ export function SettingsClient({
             <div className="space-y-1.5">
               <Label htmlFor="src-type">Source Type</Label>
               <Select value={sourceType} onValueChange={(v) => setSourceType((v || "core") as IncomeSourceType)} items={SOURCE_TYPE_LABELS}>
-                <SelectTrigger id="src-type">
+                <SelectTrigger id="src-type" className="w-full">
                   <SelectValue placeholder="Select source type" />
                 </SelectTrigger>
                 <SelectContent>

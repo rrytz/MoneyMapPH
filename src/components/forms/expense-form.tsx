@@ -153,7 +153,7 @@ export function ExpenseForm({ open, onOpenChange, categories, accounts, editEntr
               onValueChange={(v) => setCategoryId(v ?? "")}
               required
             >
-              <SelectTrigger>
+              <SelectTrigger id="category_id" className="w-full">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>

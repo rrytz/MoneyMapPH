@@ -118,7 +118,7 @@ export function IncomeForm({ open, onOpenChange, sources, accounts, editEntry, o
               onValueChange={(v) => setSourceId(v ?? "")}
               required
             >
-              <SelectTrigger>
+              <SelectTrigger id="source_id" className="w-full">
                 <SelectValue placeholder="Select source" />
               </SelectTrigger>
               <SelectContent>

@@ -736,7 +736,7 @@ export function SavingsPageClient({
             <div className="space-y-1.5">
               <Label htmlFor="contrib-category">Expense Category <span className="text-rose-500">*</span></Label>
               <Select value={contribCategory} onValueChange={(val) => setContribCategory(val || "")} items={categoryLabels} required>
-                <SelectTrigger id="contrib-category">
+                <SelectTrigger id="contrib-category" className="w-full">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -815,7 +815,7 @@ export function SavingsPageClient({
             <div className="space-y-1.5">
               <Label htmlFor="debt-category">Expense Category (Optional)</Label>
               <Select value={debtCategory} onValueChange={(val) => setDebtCategory(val || "")} items={categoryLabels}>
-                <SelectTrigger id="debt-category">
+                <SelectTrigger id="debt-category" className="w-full">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -885,7 +885,7 @@ export function SavingsPageClient({
             <div className="space-y-1.5">
               <Label htmlFor="pay-category">Expense Category <span className="text-rose-500">*</span></Label>
               <Select value={payCategory} onValueChange={(val) => setPayCategory(val || "")} items={categoryLabels} required>
-                <SelectTrigger id="pay-category">
+                <SelectTrigger id="pay-category" className="w-full">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>

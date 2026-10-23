@@ -215,7 +215,7 @@ export function AccountModal({ open, onOpenChange, editAccountData }: AccountMod
           <div className="space-y-2">
             <Label htmlFor="account-type">Account Type <span className="text-rose-500">*</span></Label>
             <Select value={type} onValueChange={(val) => setType(val as AccountType)} items={ACCOUNT_TYPE_LABELS}>
-              <SelectTrigger>
+              <SelectTrigger id="account-type" className="w-full">
                 <SelectValue placeholder="Select account type" />
               </SelectTrigger>
               <SelectContent>

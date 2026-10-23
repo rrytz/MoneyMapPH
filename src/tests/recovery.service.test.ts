@@ -16,11 +16,11 @@ import {
   type RecoveryDeps,
   type RecoveryResult,
 } from "@/lib/services/recovery.service";
-import { recoverySchema } from "@/lib/utils/validators";
+import { recoverySchema, signupSchema } from "@/lib/utils/validators";
 
 const GOOD_EMAIL = "owner@example.com";
 const GOOD_PASSPHRASE = "Zx9!kQ4#mP7@wV2$rT8&bN3^cJ5*Ld6";
-const NEW_PASSWORD = "brand-new-password-42";
+const NEW_PASSWORD = "Brand-new-password-42"; // ≥8, has uppercase (B) + symbol (-)
 
 interface DepsWithCalls extends RecoveryDeps {
   calls: {
@@ -288,12 +288,52 @@ describe("recoverySchema — input validation", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("rejects a password shorter than 6 characters", () => {
+  it("rejects a password shorter than 8 characters", () => {
     const parsed = recoverySchema.safeParse({
       email: GOOD_EMAIL,
       passphrase: GOOD_PASSPHRASE,
       password: "12345",
     });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects a password with no uppercase letter", () => {
+    const parsed = recoverySchema.safeParse({
+      email: GOOD_EMAIL,
+      passphrase: GOOD_PASSPHRASE,
+      password: "brand-new-password-42", // lowercase only
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects a password with no symbol", () => {
+    const parsed = recoverySchema.safeParse({
+      email: GOOD_EMAIL,
+      passphrase: GOOD_PASSPHRASE,
+      password: "Brandnewpassword42", // uppercase, but no symbol
+    });
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("signupSchema — new-password policy (login is not covered)", () => {
+  it("accepts a password meeting the 8+/uppercase/symbol policy", () => {
+    const parsed = signupSchema.safeParse({ email: GOOD_EMAIL, password: "Password1!" });
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects a lowercase-only password", () => {
+    const parsed = signupSchema.safeParse({ email: GOOD_EMAIL, password: "passwordonly" });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects a password with no symbol", () => {
+    const parsed = signupSchema.safeParse({ email: GOOD_EMAIL, password: "Password12" });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects a password shorter than 8 characters", () => {
+    const parsed = signupSchema.safeParse({ email: GOOD_EMAIL, password: "Ab!xy" });
     expect(parsed.success).toBe(false);
   });
 });

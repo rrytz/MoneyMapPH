@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient, getAuthRedirectTo } from "@/lib/supabase/client";
+import { signup } from "@/app/(auth)/signup/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/shared/logo";
@@ -38,13 +39,26 @@ export function AuthForm() {
       setError("Passwords do not match");
       return;
     }
-    if (!isSignin && password.length < 6) {
-      setError("Password must be at least 6 characters");
+    // New-password policy (mirrors the signup server action for instant UX).
+    // Guarded by !isSignin — login checks nothing, so existing accounts with
+    // older, simpler passwords still authenticate.
+    if (!isSignin && password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+    if (!isSignin && !/[A-Z]/.test(password)) {
+      setError("Password must contain an uppercase letter");
+      return;
+    }
+    if (!isSignin && !/[^a-zA-Z0-9]/.test(password)) {
+      setError("Password must contain a symbol");
       return;
     }
 
     setLoading(true);
 
+    // Login stays on the browser client — no policy, no server action, so
+    // pre-policy passwords keep working.
     if (isSignin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
@@ -56,15 +70,17 @@ export function AuthForm() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: getAuthRedirectTo() },
-    });
+    // Signup goes through the server action, which re-enforces the same policy
+    // server-side (the checks above are UX only and bypassable).
+    const formData = new FormData();
+    formData.set("email", email);
+    formData.set("password", password);
+    formData.set("redirectTo", getAuthRedirectTo());
+    const { error } = await signup(formData);
 
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(error);
       return;
     }
     setSuccess(true);
@@ -153,7 +169,7 @@ export function AuthForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  minLength={6}
+                  minLength={isSignin ? undefined : 8}
                   className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus-visible:border-sulpot-bright/60 focus-visible:ring-sulpot-bright/20"
                 />
                 <button
@@ -165,6 +181,17 @@ export function AuthForm() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+
+              {/* New-password requirement (create-account only) — quiet helper
+                  under the field; a failed check surfaces in the error alert. */}
+              {!isSignin && (
+                <p
+                  className="auth-animate-rise text-[11.5px] text-white/40"
+                  style={anim(0.15)}
+                >
+                  Requires 8+ characters, 1 uppercase letter, and 1 symbol.
+                </p>
+              )}
 
               {/* Confirm password (create-account only) */}
               {!isSignin && (
@@ -179,7 +206,7 @@ export function AuthForm() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     disabled={loading}
-                    minLength={6}
+                    minLength={8}
                     className="h-12 rounded-xl border-white/10 bg-white/5 pl-10 pr-10 text-white placeholder:text-white/40 focus-visible:border-sulpot-bright/60 focus-visible:ring-sulpot-bright/20"
                   />
                 </div>

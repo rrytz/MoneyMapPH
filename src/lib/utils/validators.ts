@@ -233,10 +233,31 @@ export type UnpayDebtSchemaType = z.infer<typeof unpayDebtSchema>;
 export const recoverySchema = z.object({
   email: z.string().trim().email("Enter a valid email address"),
   passphrase: z.string().trim().min(8, "Recovery passphrase is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain an uppercase letter")
+    .regex(/[^a-zA-Z0-9]/, "Must contain a symbol"),
 });
 
 export type RecoverySchemaType = z.infer<typeof recoverySchema>;
+
+// New-password policy, shared by signup and recovery. Login is deliberately
+// NOT covered by either schema: existing accounts created before this policy
+// must still authenticate, so login performs no password-policy validation.
+export const signupSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Enter a valid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain an uppercase letter")
+    .regex(/[^a-zA-Z0-9]/, "Must contain a symbol"),
+});
+
+export type SignupSchemaType = z.infer<typeof signupSchema>;
 
 
 

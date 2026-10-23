@@ -112,9 +112,12 @@ export function RecoveryForm() {
                   required
                   disabled={pending}
                   onChange={(e) => setPassword(e.target.value)}
-                  minLength={6}
+                  minLength={8}
                   className="h-11 rounded-xl px-3.5"
                 />
+                <p className="text-[11.5px] text-muted-foreground">
+                  Requires 8+ characters, 1 uppercase letter, and 1 symbol.
+                </p>
               </div>
 
               {/* Disabled on required-EMPTY, never on invalid: a short password
